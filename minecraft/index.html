@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foxy Launcher – Glutwerk</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Gleiche Farben wie die Spieleseite, plus Launcher-Lila */
+:root{
+  --bg:#0b0d12;
+  --bg2:#12151d;
+  --card:#161a24;
+  --card-hover:#1c2130;
+  --line:#252b3a;
+  --text:#e8ebf2;
+  --muted:#8a93a8;
+  --accent:#ff6a2b;
+  --accent2:#ffb347;
+  --purple:#b26bff;
+  --purple2:#e08cff;
+  --green:#3ddc97;
+  --download:#5aa9ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 70% 45% at 75% -5%, rgba(178,107,255,.18), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 10% 0%, rgba(255,106,43,.1), transparent 70%),
+    linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
+  background-size:auto,auto,40px 40px,40px 40px;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ---------- Kopfleiste ---------- */
+header{
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:24px;
+  padding:14px 32px;background:rgba(11,13,18,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.logo{display:flex;align-items:center;gap:10px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase}
+.logo-mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;box-shadow:0 0 20px rgba(255,106,43,.5)}
+.logo-mark svg{width:20px;height:20px}
+.logo span{color:var(--accent)}
+.nav{display:flex;gap:4px}
+.nav a{padding:8px 14px;border-radius:7px;font-weight:600;font-size:14px;color:var(--muted);white-space:nowrap;transition:color .15s,background .15s}
+.nav a:hover{color:var(--text)}
+.nav a.active{color:var(--text);background:var(--card);box-shadow:inset 0 -2px 0 var(--purple)}
+
+main{max-width:1100px;margin:0 auto;padding:32px}
+section{margin-bottom:52px}
+h2{font-family:Rajdhani,sans-serif;font-size:30px;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+h2::before{content:"";width:6px;height:24px;border-radius:3px;background:linear-gradient(var(--purple2),var(--purple))}
+
+/* ---------- Kopf ---------- */
+.hero{
+  display:grid;grid-template-columns:220px 1fr;gap:40px;align-items:center;
+  background:var(--card);border:1px solid var(--line);border-radius:18px;padding:36px;position:relative;overflow:hidden;
+}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 50%, rgba(178,107,255,.2), transparent 45%)}
+.hero-icon{position:relative;width:220px;height:220px;filter:drop-shadow(0 0 30px rgba(178,107,255,.45))}
+.hero-icon img{width:100%;height:100%;object-fit:contain}
+.hero-text{position:relative}
+.kicker{font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:3px;font-size:13px;text-transform:uppercase;color:var(--purple2);margin-bottom:6px}
+.hero h1{font-family:Rajdhani,sans-serif;font-size:clamp(42px,7vw,68px);line-height:.95;text-transform:uppercase;letter-spacing:1px}
+.tagline{color:#c3c9d6;font-size:17px;line-height:1.5;margin:12px 0 22px;max-width:520px}
+.dl-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:10px;
+  font-family:Rajdhani,sans-serif;font-weight:700;font-size:19px;letter-spacing:1px;text-transform:uppercase;
+  transition:transform .15s, box-shadow .15s;
+}
+.btn svg{width:20px;height:20px}
+.btn-dl{background:linear-gradient(135deg,var(--purple),var(--purple2));color:#16061f;box-shadow:0 4px 24px rgba(178,107,255,.45)}
+.btn-dl:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(178,107,255,.65)}
+.btn-ghost{background:var(--bg2);border:1px solid var(--line);color:var(--muted);font-size:16px;padding:12px 18px}
+.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
+.dl-meta{font-size:13px;color:var(--muted);line-height:1.6}
+.dl-meta b{color:var(--text)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.5px;padding:4px 10px;border-radius:6px;background:rgba(61,220,151,.12);color:var(--green);margin-bottom:14px}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+.req{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.req span{font-size:12px;font-weight:600;padding:4px 9px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--muted)}
+
+/* ---------- Funktionen ---------- */
+.features{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.feature{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;transition:transform .2s,border-color .2s}
+.feature:hover{transform:translateY(-3px);border-color:rgba(178,107,255,.5)}
+.feature .ic{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;margin-bottom:12px;background:rgba(178,107,255,.14);color:var(--purple2)}
+.feature .ic svg{width:22px;height:22px}
+.feature h3{font-family:Rajdhani,sans-serif;font-size:21px;text-transform:uppercase;margin-bottom:6px}
+.feature p{font-size:14px;color:#c3c9d6;line-height:1.5}
+
+/* ---------- Was ist neu ---------- */
+.releases{display:flex;flex-direction:column;gap:12px}
+.release{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.release.latest{border-color:rgba(178,107,255,.55);box-shadow:0 0 40px rgba(178,107,255,.08)}
+.release-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.release-head h3{font-family:Rajdhani,sans-serif;font-size:24px;text-transform:uppercase}
+.release-head .date{font-size:13px;color:var(--muted)}
+.release-head .new{font-size:11px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:5px;background:var(--purple);color:#16061f}
+.release ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.release li{font-size:14px;line-height:1.5;color:#c3c9d6;padding-left:18px;position:relative}
+.release li::before{content:"";position:absolute;left:2px;top:8px;width:6px;height:6px;border-radius:2px;background:var(--purple2)}
+.release details summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:8px}
+.loading{color:var(--muted);font-size:14px}
+
+/* ---------- Download-Hinweis ---------- */
+.modal-wrap{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.75);display:none;place-items:center;padding:16px}
+.modal-wrap.open{display:grid}
+.modal{background:var(--bg2);border:1px solid var(--line);border-radius:16px;max-width:520px;width:100%;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.6);max-height:92vh;overflow:auto}
+.modal h3{font-family:Rajdhani,sans-serif;font-size:26px;text-transform:uppercase;margin-bottom:6px}
+.modal > p{color:var(--muted);font-size:14px;margin-bottom:20px;line-height:1.5}
+.steps{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step-num{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--purple);color:#16061f;font-weight:700;display:grid;place-items:center;font-size:14px}
+.step-text{font-size:14px;line-height:1.5;padding-top:4px}
+.fake-win{margin-top:8px;background:#1f5fa8;border-radius:6px;padding:10px 12px;font-size:12px;color:#fff;font-family:"Segoe UI",sans-serif}
+.fake-win .row{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.fake-win .wbtn{border:1px solid #fff;padding:3px 10px;border-radius:3px;font-size:11px}
+.fake-win .wbtn.hl{background:#fff;color:#1f5fa8;font-weight:700;box-shadow:0 0 0 3px var(--accent2)}
+.fake-win u{font-weight:700;text-decoration-color:var(--accent2);text-decoration-thickness:2px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.modal-actions .btn{font-size:16px;padding:11px 18px}
+
+footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;border-top:1px solid var(--line)}
+footer a{color:var(--purple2)}
+
+@media (max-width:760px){
+  header{padding:10px 12px;gap:8px}
+  .logo>div:last-child{display:none}
+  .logo-mark{width:30px;height:30px}
+  .nav{gap:2px}
+  .nav a{font-size:13px;padding:7px 8px}
+  main{padding:20px 16px}
+  .hero{grid-template-columns:1fr;padding:24px;gap:20px;text-align:center}
+  .hero-icon{width:150px;height:150px;margin:0 auto}
+  .tagline{margin-left:auto;margin-right:auto}
+  .dl-row,.req{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="../">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="#140800"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>
+    </div>
+    <div>Glut<span>werk</span></div>
+  </a>
+  <nav class="nav">
+    <a href="../">Spiele</a>
+    <a href="./" class="active">Minecraft</a>
+    <a href="../thyrvenna/">Foxys Welt</a>
+  </nav>
+</header>
+
+<main>
+  <!-- ===== Kopf mit Download ===== -->
+  <section class="hero">
+    <div class="hero-icon"><img src="foxy-launcher.png" alt="Foxy Launcher"></div>
+    <div class="hero-text">
+      <div class="badge" id="versionBadge">Neueste Version wird geladen…</div>
+      <div class="kicker">Minecraft-Launcher</div>
+      <h1>Foxy Launcher</h1>
+      <p class="tagline">Mein eigener Minecraft-Launcher: Mods, Shader, Resourcepacks und Modpacks mit einem Klick installieren, mit Freunden online sein und Profile teilen.</p>
+      <div class="dl-row">
+        <button class="btn btn-dl" id="dlBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>
+          Download
+        </button>
+        <div class="dl-meta" id="dlMeta">Für Windows (64 Bit)</div>
+      </div>
+      <div class="req">
+        <span>Windows 10 / 11</span>
+        <span>Minecraft Java Edition</span>
+        <span>Microsoft-Konto</span>
+        <span>Updates automatisch</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Funktionen ===== -->
+  <section>
+    <h2>Was er kann</h2>
+    <div class="features">
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+        <h3>Mods & Shader</h3>
+        <p>Mods, Shader und Resourcepacks von Modrinth und CurseForge suchen und installieren. Abhängigkeiten werden automatisch mitgeladen.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8l9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg></div>
+        <h3>Modpacks</h3>
+        <p>Ganze Modpacks von Modrinth und CurseForge mit einem Klick als eigenes Profil installieren.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+        <h3>Alle Loader</h3>
+        <p>Vanilla, Fabric, Forge und NeoForge mit genau der Version, die du brauchst. Versionen wechseln geht jederzeit.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+        <h3>Dein Konto</h3>
+        <p>Mit deinem Microsoft-Konto direkt im Launcher anmelden, mit deinem echten Skin als Profilbild.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.8"/><path d="M2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5M16 14.6c3 .2 6 1.8 6 5.4"/></svg></div>
+        <h3>Freunde</h3>
+        <p>Freunde hinzufügen, sehen wer gerade online ist oder Minecraft spielt, und Profile miteinander teilen.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></div>
+        <h3>Immer aktuell</h3>
+        <p>Der Launcher aktualisiert sich selbst. Einmal installieren, Updates kommen automatisch.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Was ist neu (wird live von GitHub geladen) ===== -->
+  <section>
+    <h2>Was ist neu</h2>
+    <div class="releases" id="releases"><div class="loading">Neuigkeiten werden geladen…</div></div>
+  </section>
+</main>
+
+<footer>
+  Foxy Launcher ist ein Fanprojekt und nicht offiziell mit Mojang oder Microsoft verbunden. ·
+  <a href="https://github.com/foxy0561/Foxy-Launcher-Releases/releases" target="_blank" rel="noopener">Alle Versionen auf GitHub</a>
+</footer>
+
+<!-- Download-Hinweis -->
+<div class="modal-wrap" id="dlModal">
+  <div class="modal">
+    <h3>Foxy Launcher installieren</h3>
+    <p>Windows zeigt bei kleinen Hobby-Programmen eine Warnung an, das ist normal. So installierst du den Launcher trotzdem:</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text">Lade die Datei herunter und starte sie mit Doppelklick.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Wenn ein blaues Fenster kommt, klicke auf <b>„Weitere Informationen“</b>.
+        <div class="fake-win">Der Computer wurde durch Windows geschützt<br><u>Weitere Informationen</u></div>
+      </div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">Dann auf <b>„Trotzdem ausführen“</b> klicken und der Installation folgen. Das musst du nur einmal machen, Updates kommen danach von allein.
+        <div class="fake-win">App: Foxy Launcher Setup<div class="row"><span class="wbtn hl">Trotzdem ausführen</span><span class="wbtn">Nicht ausführen</span></div></div>
+      </div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="dlCancel">Abbrechen</button>
+      <a class="btn btn-dl" id="dlGo" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>
+        Jetzt downloaden
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Hier liegen die Releases. Neue Version auf GitHub veröffentlichen,
+   dann zeigt die Seite sie automatisch an – sonst nichts ändern.
+   ========================================================= */
+const REPO = "foxy0561/Foxy-Launcher-Releases";
+const RELEASES_PAGE = `https://github.com/${REPO}/releases/latest`;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const fmtDate = iso => new Date(iso).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+const fmtSize = b => (b / 1048576).toFixed(1).replace(".", ",") + " MB";
+
+let downloadUrl = RELEASES_PAGE;   // Rückfall: Release-Seite, falls GitHub nicht antwortet
+
+/* Release-Text in Stichpunkte zerlegen (funktioniert mit Zeilen oder " - ") */
+function bullets(body) {
+  if (!body) return [];
+  const lines = body.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  let items = lines.filter(l => /^[-*•]\s+/.test(l)).map(l => l.replace(/^[-*•]\s+/, ""));
+  if (!items.length) items = body.split(/\s+-\s+/).slice(1);
+  return items.map(t => t.replace(/\*\*/g, "").trim()).filter(Boolean);
+}
+
+function renderReleases(list) {
+  if (!list.length) {
+    $("releases").innerHTML = `<div class="loading">Noch keine Versionen veröffentlicht.</div>`;
+    return;
+  }
+  $("releases").innerHTML = list.map((r, i) => {
+    const items = bullets(r.body);
+    const shown = items.slice(0, i === 0 ? 12 : 4);
+    const rest = items.slice(shown.length);
+    return `
+      <article class="release${i === 0 ? " latest" : ""}">
+        <div class="release-head">
+          <h3>${esc(r.tag_name || r.name)}</h3>
+          ${i === 0 ? `<span class="new">AKTUELL</span>` : ""}
+          <span class="date">${fmtDate(r.published_at)}</span>
+        </div>
+        <ul>${shown.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+        ${rest.length ? `<details><summary>${rest.length} ${rest.length === 1 ? "weitere Änderung" : "weitere Änderungen"}</summary><ul style="margin-top:8px">${rest.map(t => `<li>${esc(t)}</li>`).join("")}</ul></details>` : ""}
+      </article>`;
+  }).join("");
+}
+
+async function loadReleases() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=5`, { headers: { Accept: "application/vnd.github+json" } });
+    if (!res.ok) throw new Error(res.status);
+    const all = (await res.json()).filter(r => !r.draft && !r.prerelease);
+    renderReleases(all);
+
+    const latest = all[0];
+    if (!latest) return;
+    const exe = (latest.assets || []).find(a => /setup\.exe$/i.test(a.name)) || (latest.assets || []).find(a => /\.(exe|msi)$/i.test(a.name));
+    if (exe) {
+      downloadUrl = exe.browser_download_url;
+      $("dlMeta").innerHTML = `<b>${esc(latest.tag_name)}</b> · ${fmtSize(exe.size)} · ${fmtDate(latest.published_at)}<br>Für Windows (64 Bit)`;
+    }
+    $("versionBadge").textContent = `Version ${String(latest.tag_name).replace(/^v/i, "")} verfügbar`;
+  } catch (e) {
+    $("versionBadge").textContent = "Neueste Version auf GitHub";
+    $("releases").innerHTML = `<div class="loading">Neuigkeiten konnten gerade nicht geladen werden. <a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener" style="color:var(--purple2)">Auf GitHub ansehen →</a></div>`;
+  }
+}
+
+/* Download-Fenster */
+$("dlBtn").onclick = () => { $("dlGo").href = downloadUrl; $("dlModal").classList.add("open"); };
+$("dlCancel").onclick = () => $("dlModal").classList.remove("open");
+$("dlModal").addEventListener("click", e => { if (e.target === $("dlModal")) $("dlModal").classList.remove("open"); });
+$("dlGo").addEventListener("click", () => setTimeout(() => $("dlModal").classList.remove("open"), 300));
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("dlModal").classList.remove("open"); });
+
+loadReleases();
+</script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shardfall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===================== SPIELANSICHT ===================== -->
+  <header id="hud">
+    <div class="brand">SHARD<span>FALL</span></div>
+    <div class="stats">
+      <div class="stat gold" title="Gold"><i>◆</i><b id="hudGold">0</b></div>
+      <div class="stat lives" title="Leben"><i>♥</i><b id="hudLives">0</b></div>
+      <div class="stat wave" title="Welle"><i>≋</i><b id="hudWave">0</b></div>
+      <div class="stat score" title="Punkte"><i>★</i><b id="hudScore">0</b></div>
+      <div class="stat testrun" id="hudTest" hidden title="Admin-Befehle benutzt: keine Online-Scores, keine Erfolge">TEST-RUN</div>
+    </div>
+    <div class="hud-buttons">
+      <button id="btnReport" class="hud-btn" title="Bug / Vorschlag melden">🐞</button>
+      <button id="btnSpeed" class="hud-btn" title="Tempo (F)">1×</button>
+      <button id="btnPause" class="hud-btn" title="Pause (P)">❚❚</button>
+      <button id="btnMenu" class="hud-btn" title="Menü (Esc)">☰</button>
+    </div>
+  </header>
+
+  <main id="game">
+    <div id="canvasWrap">
+      <canvas id="canvas"></canvas>
+      <div id="banner" class="banner"></div>
+    </div>
+
+    <aside id="side">
+      <section class="panel">
+        <h3>Türme</h3>
+        <div id="buildList" class="build-list"></div>
+        <div class="build-hint"><kbd>⇧ Shift</kbd> halten = mehrere platzieren · <kbd>Rechtsklick</kbd> = abbrechen</div>
+      </section>
+
+      <section class="panel" id="selPanel" hidden>
+        <div class="sel-head">
+          <div id="selIcon"></div>
+          <div>
+            <div id="selName" class="sel-name"></div>
+            <div id="selLevel" class="sel-level"></div>
+          </div>
+          <button id="selClose" class="icon-btn" title="Schließen">✕</button>
+        </div>
+        <div id="selStats" class="sel-stats"></div>
+        <div id="selUpgrade"></div>
+        <div class="sel-row">
+          <button id="selTarget" class="btn small ghost" title="Zielwahl (Tab)">Ziel: Vorderster</button>
+          <button id="selSell" class="btn small danger" title="Verkaufen (S)">Verkaufen</button>
+        </div>
+      </section>
+
+      <section class="panel wave-panel">
+        <h3>Nächste Welle <span id="nextWaveNo"></span></h3>
+        <div id="wavePreview" class="wave-preview"></div>
+        <button id="btnWave" class="btn primary wide">Welle starten <kbd>Leertaste</kbd></button>
+        <label class="check"><input type="checkbox" id="autoWave"> Automatisch nächste Welle</label>
+      </section>
+    </aside>
+  </main>
+
+  <div id="toasts"></div>
+
+  <!-- ===================== HAUPTMENÜ ===================== -->
+  <div id="menu" class="overlay menu">
+    <div class="menu-bg"></div>
+    <div class="menu-inner">
+      <div class="title-block">
+        <div class="logo">SHARD<span>FALL</span></div>
+        <div class="tagline">Halte die Kristallkerne. Welle um Welle.</div>
+      </div>
+
+      <div class="menu-grid">
+        <div class="card">
+          <div class="profile-chip">
+            <div class="pc-level"><small>Stufe</small><b data-xp-level>1</b></div>
+            <div class="pc-xp"><div class="pc-xp-bar"><i data-xp-bar></i></div><small data-xp-text>0 / 150 XP</small></div>
+          </div>
+          <label class="field">
+            <span>Spielername</span>
+            <input id="menuName" maxlength="16" placeholder="Dein Name" autocomplete="off">
+          </label>
+
+          <div class="field-label">Karte</div>
+          <div id="mapList" class="map-list"></div>
+
+          <div class="field-label">Schwierigkeit</div>
+          <div id="diffList" class="diff-list"></div>
+
+          <button id="btnPlay" class="btn primary big wide">Spielen</button>
+          <button class="btn gallery-btn wide" data-open="gallery">🃏 Galerie &amp; Sammelkarten <span class="gal-count" data-card-count>0 / 36</span><span class="pack-badge" data-packs hidden>0</span></button>
+          <button class="btn shop-btn wide" data-open="shop">💎 Kristall-Shop <span class="shop-bal">✦ <b id="menuCrystals">0</b></span></button>
+        </div>
+
+        <div class="card side-card">
+          <div class="field-label">Bestenliste <span id="lbMode" class="pill"></span></div>
+          <div class="lb-tabs" id="lbTabs"></div>
+          <ol id="lbList" class="lb-list"></ol>
+          <div class="menu-links">
+            <button class="btn lex-btn" data-open="lexicon">📖 Lexikon &amp; Erfolge <span id="achCount" class="pill"></span></button>
+            <button class="btn ghost" data-open="help">Anleitung</button>
+            <button class="btn ghost" data-open="settings">Einstellungen</button>
+            <button class="btn ghost" data-open="feedback">🐞 Bug / Vorschlag</button>
+            <button class="btn ghost" id="btnQuit" hidden>Beenden</button>
+          </div>
+        </div>
+      </div>
+      <div class="menu-foot"><span id="versionLabel"></span> · von foxy0561 · Schwesterprojekt von Riftward Defense</div>
+    </div>
+  </div>
+
+  <!-- ===================== PAUSE ===================== -->
+  <div id="pause" class="overlay modal-wrap" hidden>
+    <div class="modal">
+      <h2>Pause</h2>
+      <button class="btn primary wide" id="btnResume">Weiterspielen</button>
+      <button class="btn ghost wide" data-open="settings">Einstellungen</button>
+      <button class="btn ghost wide" data-open="lexicon">Lexikon &amp; Erfolge</button>
+      <button class="btn ghost wide" data-open="feedback">🐞 Bug / Vorschlag melden</button>
+      <button class="btn ghost wide" data-open="help">Anleitung</button>
+      <button class="btn danger wide" id="btnAbandon">Aufgeben &amp; Hauptmenü</button>
+    </div>
+  </div>
+
+  <!-- ===================== ENDE ===================== -->
+  <div id="end" class="overlay modal-wrap" hidden>
+    <div class="modal end-modal">
+      <h2 id="endTitle">Niederlage</h2>
+      <div id="endText" class="muted"></div>
+      <div id="endStats" class="end-stats"></div>
+      <div id="endXp" class="end-xp" hidden></div>
+      <div id="endCrystals" class="end-crystals" hidden></div>
+      <div id="endOnline" class="muted small"></div>
+      <button class="btn primary wide" id="btnEndless" hidden>Endlos weiterspielen</button>
+      <button class="btn primary wide" id="btnRetry">Nochmal</button>
+      <button class="btn ghost wide" id="btnToMenu">Hauptmenü</button>
+    </div>
+  </div>
+
+  <!-- ===================== EINSTELLUNGEN ===================== -->
+  <div id="settings" class="overlay modal-wrap" hidden>
+    <div class="modal">
+      <h2>Einstellungen</h2>
+      <label class="field"><span>Lautstärke</span><input type="range" id="setVolume" min="0" max="1" step="0.05"></label>
+      <label class="check"><input type="checkbox" id="setDmg"> Schadenszahlen anzeigen</label>
+      <label class="check"><input type="checkbox" id="setShake"> Bildschirmwackeln</label>
+      <label class="check"><input type="checkbox" id="setAuto"> Wellen automatisch starten</label>
+      <button class="btn primary wide" data-close>Fertig</button>
+    </div>
+  </div>
+
+  <!-- ===================== FEEDBACK ===================== -->
+  <div id="feedback" class="overlay modal-wrap" hidden>
+    <div class="modal">
+      <h2>Bug / Vorschlag</h2>
+      <div class="seg" id="fbKind">
+        <button data-kind="bug" class="active">Bug melden</button>
+        <button data-kind="idea">Vorschlag</button>
+      </div>
+      <textarea id="fbText" maxlength="1400" rows="6" placeholder="Was ist passiert / was wünschst du dir?"></textarea>
+      <label class="check" id="fbCtxWrap"><input type="checkbox" id="fbCtx" checked> Spielinfos anhängen (Karte, Welle, Version)</label>
+      <div id="fbStatus" class="muted small"></div>
+      <button class="btn primary wide" id="fbSend">Senden</button>
+      <button class="btn ghost wide" data-close>Schließen</button>
+    </div>
+  </div>
+
+  <!-- ===================== LEXIKON ===================== -->
+  <div id="lexicon" class="overlay modal-wrap" hidden>
+    <div class="modal lex-modal">
+      <div class="lex-top">
+        <h2>Lexikon</h2>
+        <div class="seg" id="lexTabs">
+          <button data-tab="towers" class="active">Türme</button>
+          <button data-tab="enemies">Gegner</button>
+          <button data-tab="achievements">Erfolge</button>
+        </div>
+        <button class="icon-btn lex-close" data-close title="Schließen (Esc)">✕</button>
+      </div>
+      <div class="lex-body">
+        <div id="lexList" class="lex-list"></div>
+        <div id="lexDetail" class="lex-detail"></div>
+      </div>
+      <div id="lexSummary" class="lex-summary"></div>
+    </div>
+  </div>
+
+  <!-- ===================== GALERIE ===================== -->
+  <div id="gallery" class="overlay modal-wrap" hidden>
+    <div class="modal gal-modal">
+      <div class="lex-top">
+        <h2>Galerie</h2>
+        <div class="gal-level">Stufe <b data-xp-level>1</b><div class="pc-xp-bar"><i data-xp-bar></i></div><small data-xp-text></small></div>
+        <button class="btn primary gal-pack-btn" id="galOpenPack">🃏 Pack öffnen <span class="pack-badge" data-packs>0</span></button>
+        <button class="icon-btn lex-close" data-close title="Schließen (Esc)">✕</button>
+      </div>
+      <div class="gal-bar">
+        <div class="shop-tabs" id="galTabs">
+          <button data-f="all" class="active">Alle</button>
+          <button data-f="tower">Türme</button>
+          <button data-f="spec">Spezialisierungen</button>
+          <button data-f="enemy">Gegner</button>
+          <button data-f="special">★ Sonder</button>
+          <button data-f="shiny">✦ Glanz</button>
+        </div>
+        <div class="gal-progress"><span id="galProgress"></span><div class="pc-xp-bar"><i id="galProgressBar"></i></div></div>
+      </div>
+      <div class="muted small">Neue Stufe = neues Kartenpack (jede 5. Stufe ein Bonuspack). 5 Kopien derselben Karte schalten ihre ✦ Glanz-Version frei. Die 4 Sonderkarten ★ Foxy sind die seltensten Karten im Spiel. Fahr mit der Maus über eine Karte oder klick sie an.</div>
+      <div id="galGrid" class="gal-grid"></div>
+    </div>
+  </div>
+
+  <!-- Karten-Großansicht -->
+  <div id="cardView" class="overlay modal-wrap cv-wrap" hidden>
+    <button class="icon-btn cv-close" data-close title="Schließen (Esc)">✕</button>
+    <div class="cv-stage" id="cvStage"></div>
+    <div class="cv-controls">
+      <button class="btn ghost" id="cvPrev">◀</button>
+      <button class="btn primary" id="cvFlip">↻ Umdrehen</button>
+      <button class="btn ghost" id="cvSpin">⟳ Drehen</button>
+      <button class="btn ghost" id="cvNext">▶</button>
+    </div>
+    <div class="cv-info muted small" id="cvInfo"></div>
+  </div>
+
+  <!-- Pack öffnen -->
+  <div id="packOpen" class="overlay modal-wrap pack-wrap" hidden>
+    <div class="pack-title">Kartenpack <small>noch <b id="packLeft">0</b> übrig</small></div>
+    <div id="packStage" class="pack-stage"></div>
+    <div class="pack-actions" id="packActions" hidden>
+      <button class="btn ghost" id="packAll">Alle aufdecken</button>
+      <button class="btn primary" id="packNext">Nächstes Pack öffnen</button>
+      <button class="btn ghost" id="packDone">Fertig</button>
+    </div>
+  </div>
+
+  <!-- ===================== KRISTALL-SHOP ===================== -->
+  <div id="shop" class="overlay modal-wrap" hidden>
+    <div class="modal shop-modal">
+      <div class="lex-top">
+        <h2>Kristall-Shop</h2>
+        <div class="shop-balance">✦ <b id="shopBalance">0</b> <small>Riftkristalle</small></div>
+        <button class="icon-btn lex-close" data-close title="Schließen (Esc)">✕</button>
+      </div>
+      <div class="shop-body">
+        <div class="shop-side">
+          <div class="field-label">Live-Vorschau</div>
+          <div class="shop-live"><canvas id="shopLive"></canvas></div>
+          <div id="shopPreviewBar" class="shop-preview-bar" hidden></div>
+          <div class="field-label">Tagesangebot</div>
+          <div id="shopOffer"></div>
+          <div class="shop-earn">
+            <b>So verdienst du Riftkristalle</b>
+            <ul>
+              <li>Rissläufer besiegen: <b>+1</b></li>
+              <li>Riftkoloss besiegen: <b>35 %</b> Chance auf +1</li>
+              <li>Jeder Gegner: winzige Chance (0,08 %)</li>
+              <li>Lange Runden: <b>+1</b> pro 15 / 10 / 6 Wellen (Entspannt / Normal / Albtraum)</li>
+              <li>Sieg: <b>+1 / +2 / +4</b> (je nach Schwierigkeit)</li>
+              <li>Erfolg: <b>+1</b> (schwere: <b>+3</b>)</li>
+            </ul>
+            <small>Alles im Shop ist rein kosmetisch – die Bestenliste bleibt fair.</small>
+          </div>
+        </div>
+        <div class="shop-main">
+          <div class="shop-tabs" id="shopTabs"></div>
+          <div class="muted small" id="shopCatDesc"></div>
+          <div id="shopGrid" class="shop-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ADMIN (Strg+Shift+L) ===================== -->
+  <div id="admin" class="overlay modal-wrap" hidden>
+    <div class="modal adm-modal">
+      <div class="lex-top">
+        <h2>Admin</h2>
+        <button class="icon-btn lex-close" data-close title="Schließen (Strg+Shift+L)">✕</button>
+      </div>
+      <div id="admLogin" class="adm-login">
+        <label class="field"><span>Admin-Passwort</span><input type="password" id="admPw" autocomplete="off"></label>
+        <button class="btn primary wide" id="admLoginBtn">Anmelden</button>
+        <div id="admLoginStatus" class="muted small"></div>
+      </div>
+      <div id="admMain" hidden>
+        <div class="adm-bar">
+          <div class="seg" id="admTabs"><button data-tab="feedback" class="active">Feedback</button><button data-tab="console">Konsole</button></div>
+          <button class="btn small ghost" id="admLogout">Abmelden</button>
+        </div>
+        <div id="admFeedback">
+          <div class="adm-bar">
+            <div class="seg small" id="admGame"><button data-v="shardfall" class="active">Shardfall</button><button data-v="riftward">Riftward</button><button data-v="all">Alle</button></div>
+            <div class="seg small" id="admKind"><button data-v="all" class="active">Alles</button><button data-v="bug">🐞 <span id="admCountBug">0</span></button><button data-v="idea">💡 <span id="admCountIdea">0</span></button></div>
+            <button class="btn small ghost" id="admRefresh">↻ Neu laden</button>
+          </div>
+          <div id="admFbList" class="adm-list"></div>
+        </div>
+        <div id="admConsole" hidden>
+          <div id="admConsoleOut" class="adm-console"></div>
+          <div class="adm-cmdline">
+            <div id="admSuggest" class="adm-suggest" hidden></div>
+            <div class="adm-input-wrap">
+              <div id="admGhost" class="adm-ghost"></div>
+              <input id="admConsoleIn" class="adm-input" placeholder="/befehl …" autocomplete="off" spellcheck="false">
+            </div>
+            <div id="admHint" class="adm-hint"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ANLEITUNG ===================== -->
+  <div id="help" class="overlay modal-wrap" hidden>
+    <div class="modal wide-modal">
+      <h2>So spielst du</h2>
+      <div class="help-grid">
+        <div>
+          <h4>Grundlagen</h4>
+          <p>Gegner laufen aus dem Portal zum Kristallkern. Jeder, der durchkommt, kostet Leben. Baue Türme neben den Pfad, verdiene Gold mit Kills und Wellen und überlebe <b>30 Wellen</b>.</p>
+          <p>Jede <b>10. Welle</b> kommt ein Riftkoloss.</p>
+          <h4>Türme</h4>
+          <p>Jeder Turm hat 3 Stufen. Auf Stufe 3 wählst du eine von <b>zwei Spezialisierungen</b> – die Entscheidung ist endgültig.</p>
+          <p>Das <b>Leuchtfeuer</b> verstärkt Türme in Reichweite und macht <b>Phantome</b> sichtbar. Ohne Leuchtfeuer (oder Scharfschütze) kann niemand sie treffen.</p>
+          <h4>Gold-Tipps</h4>
+          <p>Wellen früh rufen gibt Bonusgold. Eine Welle ohne Lebensverlust gibt +10 Gold. Verkaufen gibt 70 % zurück – direkt nach dem Bauen in der Pause sogar 100 %.</p>
+        </div>
+        <div>
+          <h4>Tastatur</h4>
+          <table class="keys">
+            <tr><td><kbd>1</kbd>–<kbd>7</kbd></td><td>Turm wählen</td></tr>
+            <tr><td><kbd>Leertaste</kbd></td><td>Nächste Welle</td></tr>
+            <tr><td><kbd>U</kbd></td><td>Ausgewählten Turm verbessern</td></tr>
+            <tr><td><kbd>S</kbd></td><td>Verkaufen</td></tr>
+            <tr><td><kbd>Tab</kbd></td><td>Zielwahl wechseln</td></tr>
+            <tr><td><kbd>F</kbd></td><td>Tempo 1× / 2× / 3×</td></tr>
+            <tr><td><kbd>P</kbd></td><td>Pause</td></tr>
+            <tr><td><kbd>Esc</kbd> / Rechtsklick</td><td>Abbrechen / Menü</td></tr>
+            <tr><td><kbd>Shift</kbd> + Klick</td><td>Mehrere Türme hintereinander bauen</td></tr>
+          </table>
+          <h4>Wellen-Ereignisse</h4>
+          <p>Ab Welle 5 kann eine Welle ein Ereignis haben – du siehst es vorher in der Wellenvorschau: <b>Großer Ansturm</b> (+25 % Gegner), <b>Gepanzert</b> (+20 % Leben), <b>Eiltempo</b> (+15 % Tempo), <b>Goldregen</b> (+50 % Gold) oder <b>Rissaktivität</b> (garantierter Rissläufer).</p>
+          <h4>Riftkristalle &amp; Shop</h4>
+          <p>Seltene <b>Riftkristalle ✦</b> sind selten: Rissläufer, manchmal Bosse, Erfolge, Siege und lange Runden bringen welche. Im <b>Kristall-Shop</b> gibt es dafür Farbthemen, Turm-Muster, Gelände-Stile und Effekte.</p>
+          <h4>Der Rissläufer</h4>
+          <p>Selten ab Welle 10. Nach etwa einem Viertel seines Weges reißt er eine <b>Abkürzung</b> durchs Gelände. Türme auf der Risslinie werden <b>zerstört</b>. Alle Bodengegner nutzen den Riss, bis er sich nach 2 Wellen schließt.</p>
+          <h4>Gegner</h4>
+          <div id="enemyGuide" class="enemy-guide"></div>
+        </div>
+      </div>
+      <button class="btn primary wide" data-close>Verstanden</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/online.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/render.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/lexicon.js"></script>
+<script src="img/foxy-data.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

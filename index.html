@@ -153,6 +153,19 @@ main{max-width:1240px;margin:0 auto;padding:32px}
 .card-body h3{font-family:Rajdhani,sans-serif;font-size:22px;text-transform:uppercase;letter-spacing:.5px}
 .card-body p{color:var(--muted);font-size:14px;line-height:1.5;flex:1}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
+.compat{display:flex;flex-wrap:wrap;gap:6px}
+.cp{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 8px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--text)}
+.cp svg{width:14px;height:14px;flex-shrink:0}
+.cp.pc svg,.cp.mobile svg{color:var(--download)}
+.cp.single svg{color:var(--accent2)}
+.cp.multi svg{color:var(--browser)}
+.cp.off{color:var(--muted);opacity:.55;text-decoration:line-through}
+.cp.off svg{color:var(--muted)}
+.toolbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip-filter{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:600;color:var(--muted);background:var(--bg2);border:1px solid var(--line)}
+.chip-filter svg{width:15px;height:15px}
+.chip-filter:hover{color:var(--text)}
+.chip-filter.on{color:var(--text);border-color:var(--accent);background:rgba(255,106,43,.1)}
 .tag{font-size:11px;font-weight:600;color:var(--muted);background:var(--bg2);border:1px solid var(--line);padding:3px 8px;border-radius:5px}
 .card-actions{display:flex;gap:8px;margin-top:4px}
 .card-actions .btn{flex:1;justify-content:center;padding:10px 14px;font-size:15px}
@@ -299,10 +312,14 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 
   <div class="toolbar">
     <h2>Alle Spiele <small id="count"></small></h2>
-    <div class="tabs">
-      <button class="tab active" data-filter="all">Alle</button>
-      <button class="tab" data-filter="browser">Im Browser</button>
-      <button class="tab" data-filter="download">Download</button>
+    <div class="toolbar-right">
+      <div class="tabs">
+        <button class="tab active" data-filter="all">Alle</button>
+        <button class="tab" data-filter="browser">Im Browser</button>
+        <button class="tab" data-filter="download">Download</button>
+      </div>
+      <button class="chip-filter" data-only="mobile"><span class="ico-mobile"></span>Handy</button>
+      <button class="chip-filter" data-only="multi"><span class="ico-multi"></span>Mehrspieler</button>
     </div>
   </div>
 
@@ -388,6 +405,9 @@ const GITHUB_PROFILE = "https://github.com/foxy0561";
   - featured: true → wird oben groß angezeigt (nur bei einem Spiel setzen)
   - added: "JJJJ-MM-TT"   → seit wann das Spiel auf Glutwerk ist (zeigt "NEU")
   - updated: "JJJJ-MM-TT" → letztes Update (zeigt "UPDATE" bei allen, die es seitdem nicht gespielt haben)
+  - platforms: auf welchen Geräten es läuft: ["pc"] oder ["pc", "mobile"]
+  - modes: ["single"] = Einzelspieler, ["multi"] = Mehrspieler, oder beides
+  - multi: kurze Info zum Mehrspieler, z.B. "lokal bis 4 · online"
   - news: Neuigkeiten, neueste zuerst: [{ date: "JJJJ-MM-TT", text: "Was neu ist" }]
 
   Tipp für ein Update: "updated" auf das heutige Datum setzen und bei "news" ganz vorne eine Zeile dazuschreiben.
@@ -405,6 +425,9 @@ const NAME_KEYS = ["glutwerk-name", "kiko-name"];
 const GAMES = [
   {
     title: "Kiko Hüpft",
+    platforms: ["pc", "mobile"],
+    modes: ["single", "multi"],
+    multi: "bis 4 lokal · online",
     type: "browser",
     url: "https://foxy0561.github.io/Kiko-H-pft/",
     desc: "Retro-Jump'n'Run mit 3 Welten und 15 Leveln. Allein, zu viert an einem Gerät oder online mit Freunden.",
@@ -416,6 +439,8 @@ const GAMES = [
   },
   {
     title: "Wildlinge",
+    platforms: ["pc"],
+    modes: ["single"],
     type: "browser",
     url: "",
     desc: "Wähle deinen Starter, erkunde die Welt und kämpfe in Rundenkämpfen.",
@@ -424,6 +449,8 @@ const GAMES = [
   },
   {
     title: "Kammerwerk",
+    platforms: ["pc"],
+    modes: ["single"],
     type: "browser",
     url: "kammerwerk/",
     desc: "Physik-Rätsel mit nahtlosen Portalen und Schwung durch Testkammern.",
@@ -434,6 +461,8 @@ const GAMES = [
   },
   {
     title: "Riftward Defense",
+    platforms: ["pc"],
+    modes: ["single"],
     type: "browser",
     url: "",
     desc: "Tower Defense mit Online-Funktionen. Halte die Risse auf!",
@@ -442,6 +471,8 @@ const GAMES = [
   },
   {
     title: "Ameisenbau",
+    platforms: ["pc", "mobile"],
+    modes: ["single"],
     type: "browser",
     url: "ameisenbau/",
     desc: "Baue deine eigene Ameisenkolonie unter der Erde. Auf PC und Handy.",
@@ -452,6 +483,9 @@ const GAMES = [
   },
   {
     title: "Reiche der Asche",
+    platforms: ["pc"],
+    modes: ["single", "multi"],
+    multi: "geplant",
     type: "soon",
     url: "",
     desc: "Echtzeit-Strategie im Fantasy-Mittelalter mit Fraktionen und Basisbau.",
@@ -460,6 +494,8 @@ const GAMES = [
   },
   {
     title: "Drako",
+    platforms: ["pc"],
+    modes: ["single"],
     type: "download",
     url: "",
     desc: "3D-Abenteuer mit einem kleinen Drachen. Für Windows.",
@@ -528,6 +564,25 @@ function renderNews() {
       </div>`).join("") + `</div>`;
 }
 
+/* ---- Geräte & Spielmodus ---- */
+const ICONS = {
+  pc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  mobile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+  single: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  multi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.8"/><path d="M2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5M16 14.6c3 .2 6 1.8 6 5.4"/></svg>',
+};
+function compatHTML(g) {
+  const pl = g.platforms || ["pc"], md = g.modes || ["single"];
+  const chip = (cls, on, label) => `<span class="cp ${cls}${on ? "" : " off"}">${ICONS[cls]}${label}</span>`;
+  return `<div class="compat">
+    ${chip("pc", pl.includes("pc"), "PC")}
+    ${chip("mobile", pl.includes("mobile"), "Handy")}
+    ${md.includes("single") ? chip("single", true, "Einzelspieler") : ""}
+    ${md.includes("multi") ? chip("multi", true, "Mehrspieler" + (g.multi ? " · " + esc(g.multi) : "")) : ""}
+  </div>`;
+}
+const only = { mobile: false, multi: false };
+
 function coverHTML(g) {
   if (g.cover) return `<img src="${esc(g.cover)}" alt="">`;
   return `<div class="cover-title">${esc(g.title)}</div>`;
@@ -564,6 +619,8 @@ function renderHero() {
 function renderGrid() {
   const list = GAMES.filter(g =>
     (filter === "all" || g.type === filter) &&
+    (!only.mobile || (g.platforms || []).includes("mobile")) &&
+    (!only.multi || (g.modes || []).includes("multi")) &&
     (g.title + " " + (g.tags || []).join(" ")).toLowerCase().includes(query)
   );
   $("count").textContent = `(${list.length})`;
@@ -582,6 +639,7 @@ function renderGrid() {
         <h3>${esc(g.title)}</h3>
         <p>${esc(g.desc)}</p>
         ${status(g) && g.news && g.news[0] ? `<div class="card-news">${esc(g.news[0].text)}</div>` : ""}
+        ${compatHTML(g)}
         <div class="tags">${(g.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
         ${!g.url && g.type !== "soon" ? `<div class="missing">⚠ Link fehlt noch</div>` : ""}
         <div class="card-actions">${actionHTML(g)}</div>
@@ -629,6 +687,10 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape") { closePlayer(); closeDownload(); closeName(); }
 });
 
+document.querySelectorAll("[data-only]").forEach(b => {
+  b.querySelector("span").outerHTML = ICONS[b.dataset.only];
+  b.onclick = () => { only[b.dataset.only] = !only[b.dataset.only]; b.classList.toggle("on", only[b.dataset.only]); renderGrid(); };
+});
 document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
   document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
   t.classList.add("active");

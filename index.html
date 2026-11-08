@@ -864,6 +864,19 @@ renderGrid = function () {
   if (cycleObserver) document.querySelectorAll(".card").forEach(c => cycleObserver.observe(c));
 };
 
+/* Beim Öffnen: gespeicherten Glutwerk-Namen in alle Spiele übertragen,
+   die noch keinen Namen haben (z.B. neu dazugekommene Spiele) */
+(function syncName() {
+  const n = getName();
+  if (!n) return;
+  NAME_KEYS.forEach(k => { if (!cleanName(store(k))) store(k, n); });
+  NAME_JSON_KEYS.forEach(([k, field, max]) => {
+    let data = {};
+    try { data = JSON.parse(store(k) || "{}") || {}; } catch (e) { data = {}; }
+    if (!String(data[field] || "").trim()) { data[field] = n.slice(0, max); store(k, JSON.stringify(data)); }
+  });
+})();
+
 renderName();
 renderHero();
 renderNews();

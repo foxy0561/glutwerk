@@ -506,6 +506,11 @@ for(let i=0;i<20;i++){const a=R()*6.283,r=10+R()*25,x=HBX+Math.cos(a)*r,z=HBZ+Ma
  add(new T.CylinderGeometry(.3,.45,3),mat(0x7a4a2a),0,1.5,0,g);add(new T.ConeGeometry(2,3.2,8),mat(0x37b24d),0,4,0,g);add(new T.ConeGeometry(1.5,2.6,8),mat(0x51cf66),0,5.8,0,g);sc.add(g);solids.push({x,z,r:.45*sc2+.05,h:7.2*sc2})}
 for(let i=0;i<18;i++){const a=R()*6.283,r=6+R()*30;crystal(HBX+Math.cos(a)*r,HTOP+1.2,HBZ+Math.sin(a)*r)}
 for(let i=0;i<4;i++){const a=i*1.57+.7,x=HBX+Math.cos(a)*22,z=HBZ+Math.sin(a)*22;plat(x,HTOP+5+i*1.5,z,2.5,2.5,0x9b87f5);crystal(x,HTOP+6.5+i*1.5,z)}
+// Rueckweg-Portal ins Tal (vorher steckte man in der Hauptwelt fest)
+const hubPortal=new T.Group();hubPortal.position.set(HBX,HTOP+3.4,HBZ+34);sc.add(hubPortal);
+for(let i=0;i<12;i++){const a=i*Math.PI/6;add(new T.DodecahedronGeometry(.6),mat(0x9be7a0),Math.sin(a)*2.8,Math.cos(a)*2.8,0,hubPortal)}
+const hubDisc=add(new T.CircleGeometry(2.4,32),new T.MeshBasicMaterial({color:0x6fe28a,transparent:true,opacity:.75,side:T.DoubleSide}),0,0,0,hubPortal);
+makeSign(HBX,HTOP+8,HBZ+34,6,2.2).set(['🏞️ Zurück ins Kristalltal',''],0x6fe28a);
 makeSign(HBX,HTOP+9,HBZ-4,10,4.6).set(['🌍 Neue Hauptwelt','Kapitel 1 geschafft – der Lavafürst ist besiegt!','Hier geht das Abenteuer im nächsten Kapitel weiter'],0xffd166);
 
 const hubObjs=sc.children.slice(_n1).filter(o=>!cry.some(q=>q.m===o));
@@ -1681,6 +1686,7 @@ if(realm===4)arenaUpd(dt,ramF,firing&&beNow==='fire',fw);
 if(realm===6)trialUpd(dt,fw);
 if(brDirty&&t-brSaveT>5){brSaveT=t;saveBR()}
 saveT+=dt;if(saveT>3){saveT=0;saveGame()}
+if(realm===5){hubDisc.rotation.z+=dt*.5;if(Math.hypot(p.x-HBX,p.z-(HBZ+34))<2.6&&Math.abs(p.y-HTOP)<4){leaveOcean();return}}
 if(realm===4&&ab.state==='done'&&Math.hypot(p.x-AX,p.z-AZ)<3.1&&Math.abs(p.y-(ATOP+4))<5){enterHub();return}
 // Portal
 // Das bisherige Nordportal ist durch das Steinportal ersetzt; es gibt nur einen Welteneingang.
@@ -1783,7 +1789,7 @@ function pu(dt){let any=false;for(let i=0;i<PN;i++){const q=P[i];if(q.l<=0){if(p
 // Kleiner Test-/Debug-Zugang (z.B. fuer spaetere Multiplayer-Tests): __drako.info()
 window.__drako={info:()=>({calls:rd.info.render.calls,tris:rd.info.render.triangles,geos:rd.info.memory.geometries,st,realm,cnt,freed,hp:pl.hp,fps:Math.round(1/Math.max(.001,fpsA)),pos:[+pl.p.x.toFixed(1),+pl.p.y.toFixed(1),+pl.p.z.toFixed(1)]}),
  playNoLock:()=>{audioInit();st='play';['menu','pause'].forEach(i=>$(i).classList.add('hidden'));$('hud').classList.remove('hidden');$('bbar').classList.remove('hidden');hud()},
- tp:(x,z)=>{pl.p.set(x,H(x,z)+.5,z);pl.vx=pl.vz=pl.vy=0},save:()=>saveGame(),look:(y,pch)=>{cy=y;cp=pch}};
+ valley:()=>{realm=0;showRealm();setLook(0)},tp:(x,z)=>{pl.p.set(x,H(x,z)+.5,z);pl.vx=pl.vz=pl.vy=0},save:()=>saveGame(),look:(y,pch)=>{cy=y;cp=pch}};
 let fpsA=.016,fpsT=0,last=performance.now();
 (function loop(){requestAnimationFrame(loop);const n=performance.now(),dt=Math.min(.05,(n-last)/1e3);last=n;padPoll(dt);if(cfg.fps){fpsA+=(dt-fpsA)*.05;fpsT+=dt;if(fpsT>.4){fpsT=0;$('fps').textContent=Math.round(1/Math.max(.001,fpsA))+' FPS'}}
 if(st==='play'){upd(dt);late(dt)}else if(st==='menu'){t+=dt;if(editing){const p=pl.p;dr.position.set(p.x,p.y+.12,p.z);dr.rotation.y=t*.7;dr.visible=true;torso.position.y=Math.sin(t*2)*.03;sun.position.set(p.x+30,p.y+50,p.z+20);sun.target.position.copy(p);cam.position.set(p.x+1,p.y+2.1,p.z+6.2);cam.lookAt(p.x-1.5,p.y+1.2,p.z)}else{cam.position.set(Math.sin(t*.2)*26,13,Math.cos(t*.2)*26);cam.lookAt(0,3,0)}cry.forEach((q,i)=>{q.m.rotation.y=t*2})}

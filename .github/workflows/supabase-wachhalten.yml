@@ -1,0 +1,31 @@
+# Hält das Supabase-Projekt "All" wach.
+# Free-Projekte werden nach 7 Tagen ohne Datenbank-Aktivität pausiert.
+# Diese Action fragt einmal am Tag kurz die Bestenliste ab, damit das nicht passiert.
+# Läuft automatisch, kann aber auch unter "Actions" per Hand gestartet werden.
+
+name: Supabase wachhalten
+
+on:
+  schedule:
+    - cron: "17 6 * * *"   # täglich um 06:17 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Datenbank anfragen
+        env:
+          # Öffentlicher Schlüssel (steht auch in Riftward), kein Geheimnis
+          SUPABASE_URL: https://fqidanxjcwdpjdtngimu.supabase.co
+          SUPABASE_KEY: sb_publishable_BSiWVUEtRP2hE6RL77pI8Q_J57eHlaj
+        run: |
+          status=$(curl -s -o response.json -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/scores?select=id&limit=1" \
+            -H "apikey: $SUPABASE_KEY")
+          echo "Antwort: HTTP $status"
+          cat response.json; echo
+          if [ "$status" != "200" ]; then
+            echo "::error::Supabase hat nicht mit 200 geantwortet. Ist das Projekt pausiert?"
+            exit 1
+          fi

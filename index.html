@@ -133,6 +133,15 @@ main{max-width:1240px;margin:0 auto;padding:32px}
 .cover-art{position:absolute;inset:0;display:grid;place-items:center;transition:transform .4s}
 .card:hover .cover-art{transform:scale(1.06)}
 .cover-art img{width:100%;height:100%;object-fit:cover}
+/* Screenshots: übereinander, weich überblenden */
+.shots{position:absolute;inset:0}
+.shots img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s ease}
+.shots img.on{opacity:1}
+.shot-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2;opacity:0;transition:opacity .3s}
+.card:hover .shot-dots,.card.cycling .shot-dots{opacity:1}
+.shot-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45);transition:background .3s,transform .3s}
+.shot-dots i.on{background:#fff;transform:scale(1.3)}
+.hero-bg img{width:100%;height:100%;object-fit:cover;opacity:.85}
 .cover-title{
   font-family:Rajdhani,sans-serif;font-weight:700;font-size:30px;
   text-transform:uppercase;letter-spacing:2px;text-align:center;
@@ -445,6 +454,7 @@ const GITHUB_PROFILE = "https://github.com/foxy0561";
   - platforms: auf welchen Geräten es läuft: ["pc"] oder ["pc", "mobile"]
   - modes: ["single"] = Einzelspieler, ["multi"] = Mehrspieler, oder beides
   - multi: kurze Info zum Mehrspieler, z.B. "lokal bis 4 · online"
+  - shots: Screenshots, z.B. ["shots/kiko-1.jpg", "shots/kiko-2.jpg"] – wechseln beim Drüberfahren
   - news: Neuigkeiten, neueste zuerst: [{ date: "JJJJ-MM-TT", text: "Was neu ist" }]
 
   Tipp für ein Update: "updated" auf das heutige Datum setzen und bei "news" ganz vorne eine Zeile dazuschreiben.
@@ -458,7 +468,7 @@ const NEW_DAYS = 30;
   Glutwerk schreibt den Namen in jeden dieser Schlüssel. Hat ein neues Spiel ein Namensfeld,
   einfach seinen Speicher-Schlüssel hier eintragen (oder im Spiel "glutwerk-name" auslesen).
 */
-const NAME_KEYS = ["glutwerk-name", "kiko-name"];
+const NAME_KEYS = ["glutwerk-name", "kiko-name", "td_playerName"];
 
 /*
   Desktop-Launcher: Solange hier nichts steht, zeigt der Button "BALD".
@@ -469,6 +479,7 @@ const LAUNCHER_URL = "";
 const GAMES = [
   {
     title: "Kiko Hüpft",
+    shots: ["shots/kiko-1.jpg", "shots/kiko-2.jpg", "shots/kiko-3.jpg"],
     platforms: ["pc", "mobile"],
     modes: ["single", "multi"],
     multi: "bis 4 lokal · online",
@@ -505,16 +516,21 @@ const GAMES = [
   },
   {
     title: "Riftward Defense",
-    platforms: ["pc"],
-    modes: ["single"],
+    shots: ["shots/riftward-2.jpg", "shots/riftward-3.jpg", "shots/riftward-1.jpg"],
+    platforms: ["pc", "mobile"],
+    modes: ["single", "multi"],
+    multi: "geplant",
     type: "browser",
-    url: "",
-    desc: "Tower Defense mit Online-Funktionen. Halte die Risse auf!",
-    tags: ["Tower Defense", "Online"],
+    url: "riftward/",
+    desc: "Tower Defense mit Online-Bestenliste, Kristallen und Erfolgen. Halte die Risse auf!",
+    tags: ["Tower Defense", "Bestenliste"],
     colors: ["#6a3093", "#a044ff"],
+    added: "2026-11-08",
+    news: [{ date: "2026-11-08", text: "Neu auf Glutwerk: Version 1.2.27 mit Online-Bestenliste." }],
   },
   {
     title: "Ameisenbau",
+    shots: ["shots/ameisenbau-1.jpg", "shots/ameisenbau-2.jpg", "shots/ameisenbau-3.jpg"],
     platforms: ["pc", "mobile"],
     modes: ["single"],
     type: "browser",
@@ -628,6 +644,10 @@ function compatHTML(g) {
 const only = { mobile: false, multi: false };
 
 function coverHTML(g) {
+  if (g.shots && g.shots.length) {
+    return `<div class="shots">${g.shots.map((src, i) => `<img src="${esc(src)}" alt="" loading="lazy" class="${i === 0 ? "on" : ""}">`).join("")}</div>` +
+      (g.shots.length > 1 ? `<div class="shot-dots">${g.shots.map((_, i) => `<i class="${i === 0 ? "on" : ""}"></i>`).join("")}</div>` : "");
+  }
   if (g.cover) return `<img src="${esc(g.cover)}" alt="">`;
   return `<div class="cover-title">${esc(g.title)}</div>`;
 }
@@ -651,7 +671,7 @@ function renderHero() {
   const g = GAMES.find(x => x.featured) || GAMES[0];
   if (!g) { $("hero").style.display = "none"; return; }
   $("hero").innerHTML = `
-    <div class="hero-bg" style="${coverStyle(g)}">${g.cover ? coverHTML(g) : ""}</div>
+    <div class="hero-bg" style="${coverStyle(g)}">${g.shots && g.shots[0] ? `<img src="${esc(g.shots[g.shots.length > 1 ? 1 : 0])}" alt="">` : g.cover ? coverHTML(g) : ""}</div>
     <div class="hero-content">
       <div class="hero-label">★ Empfohlen</div>
       <h1>${esc(g.title)}</h1>
@@ -774,6 +794,45 @@ $("nameModal").addEventListener("click", e => { if (e.target === $("nameModal"))
     btn.onmouseleave = () => btn.classList.remove("show-tip");
   }
 })();
+
+/* ---- Screenshots beim Drüberfahren überblenden ---- */
+const canHover = window.matchMedia("(hover: hover)").matches;
+function showShot(card, i) {
+  const imgs = card.querySelectorAll(".shots img"), dots = card.querySelectorAll(".shot-dots i");
+  imgs.forEach((im, n) => im.classList.toggle("on", n === i));
+  dots.forEach((d, n) => d.classList.toggle("on", n === i));
+  card._shot = i;
+}
+function startCycle(card) {
+  const n = card.querySelectorAll(".shots img").length;
+  if (n < 2 || card._timer) return;
+  card.classList.add("cycling");
+  card._timer = setInterval(() => showShot(card, ((card._shot || 0) + 1) % n), canHover ? 1700 : 3200);
+  if (canHover) showShot(card, 1 % n);
+}
+function stopCycle(card) {
+  clearInterval(card._timer); card._timer = null;
+  card.classList.remove("cycling");
+  showShot(card, 0);
+}
+document.addEventListener("mouseover", e => {
+  const card = e.target.closest(".card");
+  if (card && canHover) startCycle(card);
+});
+document.addEventListener("mouseout", e => {
+  const card = e.target.closest(".card");
+  if (card && canHover && !card.contains(e.relatedTarget)) stopCycle(card);
+});
+/* Handy (kein Drüberfahren): Karten im Bild wechseln langsam von selbst */
+const cycleObserver = !canHover && "IntersectionObserver" in window
+  ? new IntersectionObserver(es => es.forEach(en => en.isIntersecting ? startCycle(en.target) : stopCycle(en.target)), { threshold: 0.6 })
+  : null;
+const _renderGrid = renderGrid;
+renderGrid = function () {
+  document.querySelectorAll(".card").forEach(c => { clearInterval(c._timer); cycleObserver && cycleObserver.unobserve(c); });
+  _renderGrid();
+  if (cycleObserver) document.querySelectorAll(".card").forEach(c => cycleObserver.observe(c));
+};
 
 renderName();
 renderHero();

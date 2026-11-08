@@ -144,7 +144,8 @@ const stars=(()=>{const n=500,a=new Float32Array(n*3);for(let i=0;i<n;i++){const
 const FF=140,ffGeo=new T.BufferGeometry(),ffPos=new Float32Array(FF*3),ffW=[];
 for(let i=0;i<FF;i++)ffW.push({x:(R()-.5)*60,z:6+(R()-.5)*60,o:R()*12,sp:.2+R()*.5,ph:R()*6});
 ffGeo.setAttribute('position',new T.BufferAttribute(ffPos,3));
-const ffMat=new T.PointsMaterial({color:0xfff2a8,size:.38,transparent:true,opacity:.85,blending:T.AdditiveBlending,depthWrite:false}),ffPts=new T.Points(ffGeo,ffMat);ffPts.frustumCulled=false;sc.add(ffPts);
+const glowTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext&&c.getContext('2d');if(g){const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.35,'rgba(255,255,255,.6)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64)}return new T.CanvasTexture(c)})();
+const ffMat=new T.PointsMaterial({color:0xfff2a8,size:.6,map:glowTex,transparent:true,opacity:.9,blending:T.AdditiveBlending,depthWrite:false}),ffPts=new T.Points(ffGeo,ffMat);ffPts.frustumCulled=false;sc.add(ffPts);
 const LOOKS=[{sky:'day',bg:0x9bdcff,sun:0xfff3b0,halo:0xffe9a0,ff:0xfff2a8,st:false},{sky:'night',bg:0x3a2a78,sun:0xdfe6ff,halo:0xa6b4ff,ff:0xb9a7ff,st:true},{sky:'lava',bg:0x6b2410,sun:0xffb36b,halo:0xff7a2a,ff:0xffb347,st:false},{sky:'star',bg:0x0d1450,sun:0xfff5c2,halo:0xc7b8ff,ff:0xffe08a,st:true},{sky:'day',bg:0x7fd6ff,sun:0xfff3b0,halo:0xffe9a0,ff:0xfff2a8,st:false}];
 function setLook(n){const k=LOOKS[n|0];paintSky(k.sky);stars.visible=k.st;sunDisc.material.color.setHex(k.sun);sunHalo.material.color.setHex(k.halo);ffMat.color.setHex(k.ff);sc.background.setHex(k.bg);sc.fog.color.setHex(k.bg)}
 function ambient(dt){const p=pl.p;

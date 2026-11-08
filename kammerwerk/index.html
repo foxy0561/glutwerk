@@ -1,0 +1,801 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kammerwerk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  /* Layout: Vollbild-3D-Kammer, HUD an den Rändern, Karten zentriert über der Szene */
+  --ink:#0c0f12; --panel:rgba(14,18,22,.9); --line:#2c343b; --text:#e9eef1; --dim:#93a1ab;
+  --blue:#3aa8ff; --orange:#ff8c2b; --ok:#86e3b0;
+  --display:"Saira Condensed","Arial Narrow",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--text);font:13px/1.5 var(--mono);overflow:hidden}
+#view{position:fixed;inset:0}
+#view canvas{display:block;width:100%;height:100%;cursor:crosshair}
+#ui{position:fixed;inset:0;pointer-events:none;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));
+  display:grid;grid-template-rows:auto 1fr auto}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.sign{display:flex;gap:12px;align-items:stretch;background:var(--panel);border:1px solid var(--line);padding:8px 12px 8px 8px}
+.sign .num{font:800 44px/0.9 var(--display);color:#0c0f12;background:var(--text);padding:6px 8px 2px;font-variant-numeric:tabular-nums}
+.sign .meta{display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0}
+.sign .of{font-size:11px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+.sign .name{font:700 22px/1 var(--display);letter-spacing:.02em}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chips span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);padding:1px 6px;color:var(--dim)}
+.keys{background:var(--panel);border:1px solid var(--line);padding:8px 10px;font-size:11px;color:var(--dim);display:grid;grid-template-columns:auto auto;gap:2px 12px}
+.keys b{color:var(--text);font-weight:500}
+.bottom{display:flex;justify-content:center}
+#sub{max-width:min(720px,100%);background:var(--panel);border-left:3px solid var(--text);padding:10px 14px;font-size:14px;line-height:1.55}
+#sub small{display:block;font-size:10px;letter-spacing:.16em;color:var(--dim);margin-bottom:2px}
+#ch{position:fixed;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;pointer-events:none}
+#ch i{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;opacity:.35;transition:opacity .15s}
+#ch i.b{border-left-color:var(--blue);transform:rotate(20deg)}
+#ch i.o{border-right-color:var(--orange);transform:rotate(20deg)}
+#ch i.on{opacity:1}
+#ch::after{content:"";position:absolute;left:12px;top:12px;width:2px;height:2px;background:#fff}
+.layer{position:fixed;inset:0;display:grid;place-items:center;pointer-events:auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px;
+  background:radial-gradient(ellipse at center,rgba(12,15,18,.55),rgba(12,15,18,.92))}
+.card{width:min(600px,100%);background:var(--panel);border:1px solid var(--line);padding:24px;display:grid;gap:16px;max-height:100%;overflow:auto;box-sizing:border-box}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+h1{margin:0;font:800 clamp(48px,11vw,84px)/.85 var(--display);letter-spacing:.01em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--blue)} h1 span{color:var(--orange)}
+.card p{margin:0;color:var(--dim);max-width:62ch}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 16px;font-size:12px}
+.ctl div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:3px 0}
+.ctl b{font-weight:500;color:var(--text)}
+.pick{display:flex;gap:8px;flex-wrap:wrap}
+button{font:600 15px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--text);background:transparent;border:1px solid var(--line);padding:10px 14px;cursor:pointer}
+button:hover{border-color:var(--text)}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button.sel{border-color:var(--orange);color:var(--orange)}
+button.go{background:var(--text);color:var(--ink);border-color:var(--text);font-size:20px;padding:14px 20px}
+.note{font-size:12px;color:var(--orange)}
+h2{margin:0;font:800 clamp(34px,7vw,52px)/.95 var(--display);letter-spacing:.01em;text-wrap:balance}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.mode{border:1px solid var(--line);padding:14px;display:grid;gap:10px;align-content:start;min-width:0}
+.mode .pick button{font-size:13px;padding:7px 9px}
+.log{border-left:3px solid var(--orange)}
+.logtext{display:grid;gap:10px;font-size:14px;line-height:1.65;max-width:62ch}
+.logtext p{color:var(--text)}
+.logtext p.scrawl{font:700 22px/1.2 var(--display);letter-spacing:.06em;color:var(--orange)}
+.quiet{pointer-events:none;background:transparent}
+.sfoot{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase}
+.sbar{flex:1;height:2px;background:var(--line)}.sbar i{display:block;height:100%;width:0;background:var(--orange)}
+#hurt{position:fixed;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(190,30,20,0) 40%,rgba(190,30,20,.8))}
+#fade.slow{transition:opacity 1.8s ease-in}
+#fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .45s}
+#fade.on{opacity:1}
+#card{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;transition:opacity .6s}
+#card .k{font:800 clamp(56px,14vw,120px)/.85 var(--display);letter-spacing:.02em}
+#card .n{font:700 24px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+@media (max-width:640px){.keys{display:none}.sign .num{font-size:34px}}
+@media (prefers-reduced-motion:reduce){#fade,#card,#ch i{transition:none}}
+</style>
+
+<div id="view"></div>
+<div id="ui">
+  <div class="top">
+    <div class="sign"><div class="num" id="hNum">01</div>
+      <div class="meta"><div class="of" id="hOf">Testkammer 01 von 03</div><div class="name" id="hName">Erste Schritte</div><div class="chips" id="hChips"></div></div></div>
+    <div class="keys"><b>Linksklick</b><span>Blaues Portal</span><b>Rechtsklick</b><span>Oranges Portal</span><b>E</b><span>Würfel greifen</span><b>R</b><span>Kammer neu</span></div>
+  </div>
+  <div></div>
+  <div class="bottom"><div id="sub" hidden><small>LEITSTELLE</small><span id="subtext"></span></div></div>
+</div>
+<div id="ch"><i class="b"></i><i class="o"></i></div>
+<div id="card" style="opacity:0"><div class="k" id="cK">KAMMER 01</div><div class="n" id="cN">Erste Schritte</div></div>
+<div id="hurt"></div>
+<div id="fade"></div>
+
+<div class="layer" id="start">
+  <div class="card">
+    <div class="eyebrow">Testreihe 7-K · Portalphysik · Freigabe Stufe 1</div>
+    <h1><em>KAMMER</em><span>WERK</span></h1>
+    <p>Zehn Testkammern, ein Gerät mit zwei verbundenen Öffnungen. Was hineinfällt, kommt mit gleichem Schwung wieder heraus. Portale haften nur auf weißen Paneelen.</p>
+    <div class="ctl">
+      <div><span>Umsehen</span><b>Maus</b></div><div><span>Laufen</span><b>W A S D</b></div>
+      <div><span>Springen</span><b>Leertaste</b></div><div><span>Würfel greifen / ablegen</span><b>E</b></div>
+      <div><span>Blaues Portal</span><b>Linksklick</b></div><div><span>Oranges Portal</span><b>Rechtsklick</b></div>
+      <div><span>Kammer neu starten</span><b>R</b></div><div><span>Pause</span><b>Esc</b></div>
+    </div>
+    <div class="modes">
+      <div class="mode"><div class="eyebrow">Story</div><p>Testperson 7 wacht in einer verlassenen Anlage auf. Zwischen den Kammern findest du Protokolle und Zettel einer Vorgängerin.</p>
+        <div><button class="go" id="storyBtn">Story starten</button></div></div>
+      <div class="mode"><div class="eyebrow">Kammer wählen</div><div class="pick" id="pick"></div>
+        <div><button id="go">Kammer spielen</button></div></div>
+    </div>
+    <div class="note" id="touchnote" hidden>Dieses Spiel braucht Maus und Tastatur. Am Handy lässt es sich nicht steuern.</div>
+  </div>
+</div>
+<div class="layer" id="pause" hidden>
+  <div class="card"><div class="eyebrow">Pausiert</div><p>Klicke hier, um weiterzuspielen. Die Maus wird dabei wieder eingefangen.</p>
+    <div class="pick"><button class="go" id="resume">Weiter</button><button id="restartBtn">Kammer neu starten</button><button id="menuBtn">Zum Menü</button></div></div>
+</div>
+<div class="layer quiet" id="storyL" hidden>
+  <div class="card log"><div class="eyebrow" id="sEye">Protokoll</div><h2 id="sTitle"></h2><div class="logtext" id="sText"></div>
+    <div class="sfoot"><div class="sbar"><i id="sBar"></i></div><span>Leertaste: weiter</span></div></div>
+</div>
+<div class="layer" id="done" hidden>
+  <div class="card"><div class="eyebrow">Ergebnis</div><h1><em>BESTAN</em><span>DEN</span></h1>
+    <p>Testreihe abgeschlossen. Ihre Ergebnisse wurden gespeichert und werden nun sorgfältig ignoriert.</p>
+    <div><button class="go" id="again">Nochmal von vorn</button></div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+'use strict';
+const V3=THREE.Vector3, $=s=>document.querySelector(s), AX=['x','y','z'];
+const G=18, EYE=.72;
+
+// ---------- Renderer ----------
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+renderer.setSize(innerWidth,innerHeight);
+$('#view').appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0a0d10);
+scene.fog=new THREE.Fog(0x0a0d10,40,90);
+const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.04,200);
+camera.rotation.order='YXZ'; scene.add(camera);
+const virt=new THREE.PerspectiveCamera(); virt.matrixAutoUpdate=false;
+scene.add(new THREE.HemisphereLight(0xe6eef4,0x343a40,0.85));
+const sun=new THREE.DirectionalLight(0xffffff,0.5); sun.position.set(.5,1,.35); scene.add(sun);
+scene.add(new THREE.AmbientLight(0xffffff,0.14));
+
+// ---------- Textures ----------
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function ctex(size,draw,rep=1){const c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d');draw(g,size);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t;}
+function speckle(g,s,n,a){for(let i=0;i<n;i++){g.fillStyle=`rgba(0,0,0,${rnd(.01,a)})`;g.fillRect(rnd(0,s),rnd(0,s),2,2);}}
+const TEX={
+  white:ctex(256,(g,s)=>{g.fillStyle='#e6e9eb';g.fillRect(0,0,s,s);speckle(g,s,900,.05);
+    g.strokeStyle='#a9b2b8';g.lineWidth=4;g.strokeRect(2,2,s-4,s-4);g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=2;g.strokeRect(7,7,s-14,s-14);}),
+  metal:ctex(256,(g,s)=>{g.fillStyle='#353b41';g.fillRect(0,0,s,s);speckle(g,s,2500,.25);
+    g.fillStyle='#23282c';for(const k of [0,s/2]){g.fillRect(k,0,4,s);g.fillRect(0,k,s,4);}
+    g.fillStyle='#4b535b';for(const x of [14,s/2+14,s/2-14,s-14])for(const y of [14,s/2+14,s/2-14,s-14]){g.beginPath();g.arc(x,y,3,0,7);g.fill();}},.5),
+  door:ctex(256,(g,s)=>{g.fillStyle='#596168';g.fillRect(0,0,s,s);speckle(g,s,1500,.2);g.fillStyle='#ff8c2b';
+    for(let i=-s;i<s*2;i+=48){g.beginPath();g.moveTo(i,s*.42);g.lineTo(i+24,s*.42);g.lineTo(i+48,s*.58);g.lineTo(i+24,s*.58);g.fill();}
+    g.fillStyle='#2b3035';g.fillRect(0,0,s,8);g.fillRect(0,s-8,s,8);},.5),
+  cube:ctex(256,(g,s)=>{g.fillStyle='#c8ced2';g.fillRect(0,0,s,s);speckle(g,s,800,.08);g.fillStyle='#3a4146';g.fillRect(0,0,s,22);g.fillRect(0,s-22,s,22);g.fillRect(0,0,22,s);g.fillRect(s-22,0,22,s);
+    g.fillStyle='#ff8c2b';for(const [x,y] of [[0,0],[s-46,0],[0,s-46],[s-46,s-46]])g.fillRect(x,y,46,46);
+    g.strokeStyle='#3aa8ff';g.lineWidth=12;g.beginPath();g.arc(s/2,s/2,46,0,7);g.stroke();g.fillStyle='#3a4146';g.beginPath();g.arc(s/2,s/2,18,0,7);g.fill();}),
+  plate:ctex(256,(g,s)=>{g.fillStyle='#2a3035';g.fillRect(0,0,s,s);g.fillStyle='#ffc642';
+    for(let k=0;k<3;k++){const y=60+k*60;g.beginPath();g.moveTo(s/2-60,y+30);g.lineTo(s/2,y-6);g.lineTo(s/2+60,y+30);g.lineTo(s/2+60,y+46);g.lineTo(s/2,y+10);g.lineTo(s/2-60,y+46);g.fill();}
+    g.strokeStyle='#ffc642';g.lineWidth=6;g.strokeRect(10,10,s-20,s-20);}),
+  gel:ctex(256,(g,s)=>{g.clearRect(0,0,s,s);for(let i=0;i<40;i++){g.fillStyle=`rgba(${40+rnd(0,30)},${140+rnd(0,40)},255,.9)`;g.beginPath();g.arc(rnd(30,s-30),rnd(30,s-30),rnd(14,40),0,7);g.fill();}
+    g.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<25;i++){g.beginPath();g.arc(rnd(30,s-30),rnd(30,s-30),rnd(2,6),0,7);g.fill();}})
+};
+TEX.plate.repeat.set(1,1);
+const MAT={
+  w:new THREE.MeshLambertMaterial({map:TEX.white}),
+  m:new THREE.MeshLambertMaterial({map:TEX.metal}),
+  g:new THREE.MeshLambertMaterial({color:0x9fd8ff,transparent:true,opacity:.2,depthWrite:false}),
+  door:new THREE.MeshLambertMaterial({map:TEX.door}),
+  cube:new THREE.MeshLambertMaterial({map:TEX.cube}),
+  goo:new THREE.MeshLambertMaterial({color:0x6b8a2a,emissive:0x2c4210}),
+  fizz:new THREE.MeshBasicMaterial({color:0x7cc8ff,transparent:true,opacity:.16,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}),
+  emit:new THREE.MeshLambertMaterial({color:0x2a3035,emissive:0x1b4a6e}),
+  plate:new THREE.MeshLambertMaterial({map:TEX.plate,emissive:0x221a05}),
+  gel:new THREE.MeshLambertMaterial({map:TEX.gel,transparent:true,polygonOffset:true,polygonOffsetFactor:-2,emissive:0x0a2a55}),
+  exit:new THREE.MeshBasicMaterial({color:0x86e3b0,transparent:true,opacity:.18,depthWrite:false,side:THREE.DoubleSide}),
+  ring:new THREE.MeshBasicMaterial({color:0x86e3b0}),
+  dark:new THREE.MeshLambertMaterial({color:0x2a3035})
+};
+
+// ---------- Geometry helpers ----------
+function mkBox(a){const b={min:new V3(Math.min(a[0],a[3]),Math.min(a[1],a[4]),Math.min(a[2],a[5])),max:new V3(Math.max(a[0],a[3]),Math.max(a[1],a[4]),Math.max(a[2],a[5]))};b.mat=a[6]||'m';return b;}
+function boxMesh(b,mat){const s=new V3().subVectors(b.max,b.min);const geo=new THREE.BoxGeometry(s.x,s.y,s.z);
+  const uv=geo.attributes.uv,d=[[s.z,s.y],[s.z,s.y],[s.x,s.z],[s.x,s.z],[s.x,s.y],[s.x,s.y]];
+  for(let f=0;f<6;f++)for(let v=0;v<4;v++){const i=f*4+v;uv.setXY(i,uv.getX(i)*d[f][0],uv.getY(i)*d[f][1]);}
+  const m=new THREE.Mesh(geo,mat);m.position.addVectors(b.min,b.max).multiplyScalar(.5);return m;}
+function entOver(e,b){return e.pos.x-e.half.x<b.max.x&&e.pos.x+e.half.x>b.min.x&&e.pos.y-e.half.y<b.max.y&&e.pos.y+e.half.y>b.min.y&&e.pos.z-e.half.z<b.max.z&&e.pos.z+e.half.z>b.min.z;}
+function ptIn(p,b){return p.x>b.min.x&&p.x<b.max.x&&p.y>b.min.y&&p.y<b.max.y&&p.z>b.min.z&&p.z<b.max.z;}
+function entBox(e){return{min:e.pos.clone().sub(e.half),max:e.pos.clone().add(e.half),ent:e};}
+function rayBox(o,d,b){let tmin=-Infinity,tmax=Infinity,ax=null,sg=0;
+  for(const a of AX){if(Math.abs(d[a])<1e-9){if(o[a]<b.min[a]||o[a]>b.max[a])return null;continue;}
+    let t1=(b.min[a]-o[a])/d[a],t2=(b.max[a]-o[a])/d[a],s=-1;if(t1>t2){const k=t1;t1=t2;t2=k;s=1;}
+    if(t1>tmin){tmin=t1;ax=a;sg=s;}if(t2<tmax)tmax=t2;if(tmin>tmax)return null;}
+  if(tmin<0||ax===null)return null;return{t:tmin,ax,sign:sg,box:b};}
+
+// ---------- Portals ----------
+const VS=`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
+const FS=`uniform sampler2D map;uniform vec3 col;uniform float open,t,grow;uniform vec2 res;varying vec2 vUv;
+void main(){vec2 p=(vUv*2.-1.)/max(grow,.001);float d=length(p);if(d>1.)discard;float a=atan(p.y,p.x);
+ float w=.03*sin(a*7.+t*4.)+.02*sin(a*13.-t*6.);float rim=smoothstep(.80+w,.94+w*.5,d);vec3 inner;
+ if(open>.5){inner=texture2D(map,gl_FragCoord.xy/res).rgb;}
+ else{float s=.5+.5*sin(a*3.+t*2.5-d*10.);inner=mix(col*.1,col*.6,s*smoothstep(0.,1.,d));}
+ vec3 glow=col*1.15+vec3(.18)*smoothstep(.9,1.,d);gl_FragColor=vec4(mix(inner,glow,rim),1.);}`;
+const _t=new V3();let portalVer=0;
+class Portal{
+  constructor(i){this.i=i;this.on=false;this.hw=.6;this.hh=1;this.p=new V3();this.n=new V3();this.u=new V3();this.r=new V3();this.frame=new THREE.Matrix4();
+    this.mat=new THREE.ShaderMaterial({uniforms:{map:{value:null},col:{value:new THREE.Color(i?0xff8c2b:0x3aa8ff)},open:{value:0},res:{value:new THREE.Vector2(1,1)},t:{value:0},grow:{value:0}},vertexShader:VS,fragmentShader:FS});
+    this.mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.2,2),this.mat);this.mesh.matrixAutoUpdate=false;this.mesh.visible=false;scene.add(this.mesh);
+    this.rt=new THREE.WebGLRenderTarget(4,4);
+    // Tiefen-Tunnel hinter der Portalfläche: hält das Bild stabil, wenn die Kamera die Ebene streift
+    this.tubeMat=new THREE.ShaderMaterial({uniforms:{map:this.mat.uniforms.map,res:this.mat.uniforms.res},side:THREE.DoubleSide,vertexShader:VS,
+      fragmentShader:`uniform sampler2D map;uniform vec2 res;void main(){gl_FragColor=vec4(texture2D(map,gl_FragCoord.xy/res).rgb,1.);}`});
+    this.tube=new THREE.Group();this.tube.matrixAutoUpdate=false;this.tube.visible=false;
+    const cyl=new THREE.Mesh(new THREE.CylinderGeometry(1,1,.34,40,1,true),this.tubeMat);cyl.rotation.x=Math.PI/2;cyl.position.z=-.17;cyl.scale.set(.6,1,.98);
+    const cap=new THREE.Mesh(new THREE.CircleGeometry(1,40),this.tubeMat);cap.position.z=-.34;cap.scale.set(.6,.98,1);
+    this.tube.add(cyl,cap);scene.add(this.tube);}
+  set(p,n,u,box){this.p.copy(p);this.n.copy(n);this.u.copy(u);this.r.crossVectors(u,n);this.box=box;
+    this.frame.makeBasis(this.r,this.u,this.n).setPosition(this.p);
+    this.mesh.matrix.copy(this.frame).setPosition(p.clone().addScaledVector(n,.012));this.mesh.matrixWorldNeedsUpdate=true;
+    this.tube.matrix.copy(this.frame);this.tube.matrixWorldNeedsUpdate=true;
+    this.mesh.visible=true;this.on=true;this.mat.uniforms.grow.value=.05;portalVer++;}
+  clear(){if(this.on)portalVer++;this.on=false;this.mesh.visible=false;this.tube.visible=false;this.box=null;}
+  local(v){_t.subVectors(v,this.p);return new V3(_t.dot(this.r),_t.dot(this.u),_t.dot(this.n));}
+  world(l){return this.p.clone().addScaledVector(this.r,l.x).addScaledVector(this.u,l.y).addScaledVector(this.n,l.z);}
+  dirLocal(d){return new V3(d.dot(this.r),d.dot(this.u),d.dot(this.n));}
+  dirWorld(l){return new V3().addScaledVector(this.r,l.x).addScaledVector(this.u,l.y).addScaledVector(this.n,l.z);}
+}
+const PT=[new Portal(0),new Portal(1)];
+const linked=()=>PT[0].on&&PT[1].on;
+function xPoint(A,B,v){const l=A.local(v);l.x=-l.x;l.z=-l.z;return B.world(l);}
+function xDir(A,B,d){const l=A.dirLocal(d);l.x=-l.x;l.z=-l.z;return B.dirWorld(l);}
+const _qm=new THREE.Matrix4(),_qi=new THREE.Matrix4();
+function xQuat(A,B){_qi.copy(A.frame).invert();_qm.copy(B.frame).multiply(new THREE.Matrix4().makeRotationY(Math.PI)).multiply(_qi);return new THREE.Quaternion().setFromRotationMatrix(_qm);}
+
+const _q=new THREE.Vector4(),_cp=new THREE.Vector4(),_pl=new THREE.Plane(),_fr=new THREE.Frustum(),_pm=new THREE.Matrix4(),
+  _flip=new THREE.Matrix4().makeRotationY(Math.PI),_T=new THREE.Matrix4(),_inv=new THREE.Matrix4(),_cw=new V3();
+function renderThrough(A,B){
+  _inv.copy(A.frame).invert();_T.copy(B.frame).multiply(_flip).multiply(_inv);
+  virt.projectionMatrix.copy(camera.projectionMatrix);
+  virt.matrix.copy(_T).multiply(camera.matrixWorld);virt.matrixWorld.copy(virt.matrix);virt.matrixWorldInverse.copy(virt.matrix).invert();
+  if(A.local(_cw).z>.02){
+    _pl.setFromNormalAndCoplanarPoint(B.n,_t.copy(B.p).addScaledVector(B.n,.006));_pl.applyMatrix4(virt.matrixWorldInverse);
+    _cp.set(_pl.normal.x,_pl.normal.y,_pl.normal.z,_pl.constant);const e=virt.projectionMatrix.elements;
+    _q.set((Math.sign(_cp.x)+e[8])/e[0],(Math.sign(_cp.y)+e[9])/e[5],-1,(1+e[10])/e[14]);
+    _cp.multiplyScalar(2/_cp.dot(_q));e[2]=_cp.x;e[6]=_cp.y;e[10]=_cp.z+1;e[14]=_cp.w;}
+  virt.projectionMatrixInverse.copy(virt.projectionMatrix).invert();
+  A.mat.uniforms.open.value=0;A.mat.uniforms.map.value=null;B.mesh.visible=false;
+  renderer.setRenderTarget(A.rt);renderer.render(scene,virt);renderer.setRenderTarget(null);
+  B.mesh.visible=true;A.mat.uniforms.map.value=A.rt.texture;A.mat.uniforms.open.value=1;
+}
+function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+  const v=new THREE.Vector2();renderer.getDrawingBufferSize(v);for(const p of PT){p.rt.setSize(v.x,v.y);p.mat.uniforms.res.value.copy(v);}}
+addEventListener('resize',resize);resize();
+
+// ---------- Viewmodel ----------
+const vm=new THREE.Group();camera.add(vm);vm.position.set(.3,-.27,-.55);
+function vmPart(geo,mat,ro){mat.depthTest=false;const m=new THREE.Mesh(geo,mat);m.renderOrder=900+ro;vm.add(m);return m;}
+vmPart(new THREE.BoxGeometry(.13,.13,.4),new THREE.MeshLambertMaterial({color:0xe9ecee}),0);
+const vmBar=vmPart(new THREE.CylinderGeometry(.04,.05,.2,14),new THREE.MeshLambertMaterial({color:0x2c3237}),1);vmBar.rotation.x=Math.PI/2;vmBar.position.z=-.28;
+for(let k=0;k<3;k++){const f=vmPart(new THREE.BoxGeometry(.018,.07,.12),new THREE.MeshLambertMaterial({color:0x50585f}),2);const a=k*2.094;f.position.set(Math.cos(a)*.06,Math.sin(a)*.06,-.3);f.rotation.z=a+Math.PI/2;}
+const tipMat=new THREE.MeshBasicMaterial({color:0x3aa8ff});const vmTip=vmPart(new THREE.SphereGeometry(.032,12,8),tipMat,3);vmTip.position.z=-.39;
+
+// ---------- Sound ----------
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function tone(f0,f1,dur,type,vol,delay=0){const a=ac();if(!a)return;const t0=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;
+  o.frequency.setValueAtTime(f0,t0);o.frequency.exponentialRampToValueAtTime(Math.max(f1,20),t0+dur);g.gain.setValueAtTime(vol,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+dur);
+  o.connect(g).connect(a.destination);o.start(t0);o.stop(t0+dur+.02);}
+const SND={p0:()=>tone(950,320,.18,'sawtooth',.05),p1:()=>tone(620,210,.18,'sawtooth',.05),deny:()=>tone(170,110,.16,'square',.05),
+  warp:()=>tone(220,780,.25,'triangle',.08),btn:()=>tone(440,660,.12,'square',.05),btnUp:()=>tone(660,330,.12,'square',.04),
+  grab:()=>tone(300,520,.08,'sine',.08),fizz:()=>tone(1300,90,.45,'sawtooth',.04),launch:()=>tone(110,620,.4,'square',.07),
+  boing:()=>tone(280,920,.22,'sine',.1),die:()=>tone(320,50,.7,'sawtooth',.07),win:()=>{tone(523,523,.18,'triangle',.1);tone(784,784,.4,'triangle',.1,.16);}};
+
+// ---------- Levels (units: metres) ----------
+const LEVELS=[
+ {name:'Erste Schritte',spawn:[3,0,5],yaw:-Math.PI/2,chips:['Portale','Würfel','Sperrfeld'],
+  boxes:[[0,-.4,0,11,0,10,'w'],[11,-.4,0,16,0,10,'m'],[0,8,0,16,8.4,10,'m'],
+   [-.4,0,0,0,8,10,'w'],[16,0,0,16.4,8,10,'m'],
+   [0,0,-.4,11,8,0,'w'],[11,0,-.4,16,4,0,'m'],[11,4,-.4,14,8,0,'w'],[14,4,-.4,16,8,0,'m'],
+   [0,0,10,11,8,10.4,'w'],[11,0,10,16,4,10.4,'m'],[11,4,10,14,8,10.4,'w'],[14,4,10,16,8,10.4,'m'],
+   [11,0,0,16,4,10,'m']],
+  doors:[{b:[14,4,0,14.3,8,10],btn:[0]}],buttons:[[6,0,7]],cubes:[[6,.25,3]],
+  fizz:[[13,4,0,13.15,8,10]],exit:[14.5,4,1,16,6.5,9],
+  lines:[[1.2,'Willkommen in Kammer 01. Ihr Gerät öffnet zwei verbundene Durchgänge: linke Maustaste blau, rechte Maustaste orange.'],
+   [9,'Portale haften nur auf weißen Paneelen. Das dunkle Metall hat sich ausdrücklich dagegen ausgesprochen.'],
+   [17,'Der Würfel gehört auf den Schalter. Mit E heben Sie ihn auf. Bitte bauen Sie keine emotionale Bindung auf.'],
+   [27,'Die Kante ist vier Meter hoch. Springen wird nicht reichen. Ein Portal auf den Boden, eins hoch an die Wand über der Kante.']]},
+ {name:'Schwung',spawn:[3,12,5],yaw:-Math.PI/2,chips:['Fallen','Impuls','Säure'],
+  boxes:[[0,-2.4,0,6,12,10,'w'],[6,-2.4,0,12,0,10,'w'],[12,-2.8,0,20,-2.4,10,'m'],[20,-2.4,0,30,1,10,'m'],
+   [0,16,0,30,16.4,10,'m'],[-.4,-2.8,0,0,16,10,'m'],[30,-2.8,0,30.4,16,10,'m'],[0,-2.8,-.4,30,16,0,'m'],[0,-2.8,10,30,16,10.4,'m']],
+  goo:[[12,-2.4,0,20,-.7,10]],exit:[26,1,1,30,4,9],
+  lines:[[1.2,'Kammer 02 prüft Ihr Verständnis von Impuls.'],
+   [8,'Was schnell hineinfällt, kommt schnell wieder heraus. Das ist Physik, kein Versprechen.'],
+   [18,'Hinweis: ein Portal unten auf den weißen Boden, das andere hoch an die Stirnseite Ihrer Plattform. Dann springen.']]},
+ {name:'Katapult',spawn:[4,0,7],yaw:-Math.PI/2,chips:['Katapult','Gel','Würfel'],
+  boxes:[[0,-.4,0,24,0,12,'m'],[0,14,0,24,14.4,12,'m'],
+   [-.4,0,0,0,14,3.2,'m'],[-.4,0,3.2,0,14,12,'w'],[24,0,0,24.4,14,12,'m'],
+   [0,0,-.4,6,14,0,'m'],[6,0,-.4,10,14,0,'w'],[10,0,-.4,24,14,0,'m'],
+   [0,0,12,10,14,12.4,'w'],[10,0,12,24,14,12.4,'m'],
+   [16,0,0,24,7,12,'m'],[0,4,0,3.2,4.2,3.2,'m'],
+   [5.8,0,3,12.2,3.5,3.2,'g'],[5.8,0,0,6,3.5,3,'g'],[12,0,0,12.2,3.5,3,'g']],
+  plates:[{b:[6,0,0,10,.3,3],tx:19,ty:7,vy:20}],cubes:[[20,7.25,8]],buttons:[[5,0,9]],
+  doors:[{b:[3,0,0,3.2,4,3],btn:[0]},{b:[0,0,3,3.2,4,3.2],btn:[0]}],
+  exit:[0,0,0,3,3,3],gel:[[10.5,0,7.5,13.5,.02,10.5]],
+  lines:[[1.2,'Kammer 03. Die Katapultplatte wurde dreimal geprüft. Zweimal davon erfolgreich.'],
+   [10,'Die Platte steht hinter Glas. Über dem Glas ist die Rückwand weiß.'],
+   [21,'Blaues Gel ist abstoßend. Wir arbeiten noch an seinem Charakter.']]},
+ {name:'Glaskäfig',spawn:[2,0,6],yaw:-Math.PI/2,chips:['Zwei Schalter','Glas','Würfel tragen'],
+  boxes:[[0,-.4,0,20,0,12,'m'],[0,8,0,20,8.4,12,'m'],[-.4,0,0,0,8,12,'w'],[20,0,0,20.4,8,12,'m'],
+   [0,0,-.4,10,8,0,'m'],[10,0,-.4,14,8,0,'w'],[14,0,-.4,20,8,0,'m'],[0,0,12,16,8,12.4,'w'],[16,0,12,20,8,12.4,'m'],
+   [10,0,4,14,3.5,4.2,'g'],[9.8,0,0,10,3.5,4.2,'g'],[14,0,0,14.2,3.5,4.2,'g']],
+  doors:[{b:[16,0,0,16.3,8,12],btn:[0,1]}],buttons:[[5,0,3],[5,0,9]],cubes:[[3.5,.25,7.5],[12,.25,2]],exit:[17,0,1,20,3,11],
+  lines:[[1.2,'Kammer 04. Zwei Schalter, zwei Würfel. Einer davon steht hinter Glas, aus Gründen der Motivation.'],
+   [10,'Über dem Glas ist die Rückwand weiß. Was hineinkommt, kommt auch wieder heraus, mit Würfel, wenn Sie ihn festhalten.']]},
+ {name:'Sprungkraft',spawn:[3,0,5],yaw:-Math.PI/2,chips:['Gel','Fallhöhe','Kante'],
+  boxes:[[0,-.4,0,16,0,14,'m'],[0,12,0,16,12.4,14,'m'],[-.4,0,0,0,12,7,'w'],[-.4,0,7,0,12,14,'m'],[16,0,0,16.4,12,14,'m'],
+   [0,0,-.4,6,12,0,'m'],[6,0,-.4,12,12,0,'w'],[12,0,-.4,16,12,0,'m'],[0,0,14,16,12,14.4,'m'],[0,0,10,16,4.5,14,'m']],
+  gel:[[6,0,2,12,.02,8.5]],exit:[12,4.5,10.5,16,7.5,14],
+  lines:[[1.2,'Kammer 05. Blaues Gel speichert keine Energie. Es gibt sie nur zurück. Je höher der Fall, desto höher der Sprung.'],
+   [11,'Hinweis: Das Austrittsportal gehört so hoch wie möglich an die weiße Wand über dem Gel.']]},
+ {name:'Sperrzone',spawn:[2,0,5],yaw:-Math.PI/2,chips:['Sperrfeld','Würfel','Umweg'],
+  boxes:[[0,-.4,0,20,0,10,'m'],[0,8,0,20,8.4,10,'m'],[-.4,0,0,0,8,10,'w'],[20,0,0,20.4,8,10,'m'],
+   [0,0,-.4,18,8,0,'w'],[18,0,-.4,20,8,0,'m'],[0,0,10,18,8,10.4,'w'],[18,0,10,20,8,10.4,'m']],
+  fizz:[[10,0,0,10.15,8,10]],cubes:[[4,.25,5]],buttons:[[15,0,5]],doors:[{b:[18,0,0,18.3,8,10],btn:[0]}],exit:[18.5,0,1,20,3,9],
+  lines:[[1.2,'Kammer 06. Das Sperrfeld vernichtet Würfel. Ihre Portale reichen allerdings hindurch. Ein Konstruktionsfehler, den wir Ihnen nicht verraten haben.'],
+   [12,'Der Würfel muss auf die andere Seite. Er muss das Feld dabei nicht berühren.']]},
+ {name:'Wachposten',spawn:[2.5,0,5],yaw:-Math.PI/2,chips:['Wachposten','Deckung','Flanke'],
+  boxes:[[0,-.4,0,24,0,10,'m'],[0,10,0,24,10.4,10,'m'],[-.4,0,0,0,10,10,'w'],[24,0,0,24.4,10,10,'m'],
+   [0,0,-.4,12,10,0,'w'],[12,0,-.4,24,10,0,'m'],[0,0,10,18,10,10.4,'m'],[18,0,10,22,10,10.4,'w'],[22,0,10,24,10,10.4,'m'],
+   [5,0,2.5,5.4,2,7.5,'m'],[9,0,1.5,10,2.6,3.5,'m'],[12.5,0,6.5,13.5,2.6,8.5,'m']],
+  turrets:[{p:[17,0,5],yaw:Math.PI/2}],exit:[21,0,4,24,3,6],
+  lines:[[1.2,'Kammer 07. Neu im Programm: Wachposten. Sie sind freundlich, solange Sie nicht in ihrem Blickfeld stehen.'],
+   [9,'Wachposten sehen nur nach vorn. Von hinten lassen sie sich umrennen oder mit E aufheben.'],
+   [20,'Die weiße Wand hinter dem Wachposten ist rein zufällig weiß.']]},
+ {name:'Doppelwache',spawn:[2.5,0,5],yaw:-Math.PI/2,chips:['Zwei Wachposten','Glas','Würfel'],
+  boxes:[[0,-.4,0,22,0,10,'m'],[0,10,0,22,10.4,10,'m'],[-.4,0,0,0,10,10,'w'],
+   [0,0,-.4,10,10,0,'w'],[10,0,-.4,22,10,0,'m'],[0,0,10,22,10,10.4,'m'],
+   [22,0,0,22.4,4,10,'m'],[22,4,0,22.4,10,7,'w'],[22,4,7,22.4,10,10,'m'],
+   [10,0,0,10.2,3,10,'g']],
+  turrets:[{p:[16,0,2.5],yaw:Math.PI},{p:[16,0,7.5],yaw:0}],cubes:[[5,.25,7.5]],buttons:[[16,0,5]],
+  doors:[{b:[18.6,0,7.6,22,4,7.8],btn:[0]},{b:[18.6,0,7.6,18.8,4,10],btn:[0]}],exit:[19,0,8,22,3,10],
+  lines:[[1.2,'Kammer 08. Zwei Wachposten bewachen den Schalter. Sie bewachen ihn sehr gründlich.'],
+   [10,'Über dem Glas ist die Rückwand weiß. Nehmen Sie den Würfel mit, wenn Sie springen.']]},
+ {name:'Empfang',spawn:[3,12,5],yaw:-Math.PI/2,chips:['Schwung','Wachposten','Säure'],
+  boxes:[[0,-2.4,0,6,12,10,'w'],[6,-2.4,0,12,0,10,'w'],[12,-2.8,0,20,-2.4,10,'m'],[20,-2.4,0,31,1,10,'m'],
+   [0,16,0,31,16.4,10,'m'],[-.4,-2.8,0,0,16,10,'m'],[31,-2.8,0,31.4,16,10,'m'],[0,-2.8,-.4,31,16,0,'m'],[0,-2.8,10,31,16,10.4,'m'],
+   [23,1,1,23.6,3,4,'m'],[23,1,6,23.6,3,9,'m']],
+  goo:[[12,-2.4,0,20,-.7,10]],turrets:[{p:[26,1,5],yaw:Math.PI/2}],exit:[28,1,4,31,4,6],
+  lines:[[1.2,'Kammer 09. Am anderen Ufer wartet ein Empfangskomitee. Es besteht aus einem Wachposten.'],
+   [9,'Ein Wachposten, der mit Schwung getroffen wird, fällt um. Physik ist auf Ihrer Seite. Heute.']]},
+ {name:'Ausbruch',spawn:[3,12,5],yaw:-Math.PI/2,chips:['Schwung','Katapult','Unfertig'],
+  boxes:[[0,-2.4,0,6,12,10,'w'],[6,-2.4,0,12,0,10,'w'],[12,-2.8,0,20,-2.4,10,'m'],[20,-2.4,0,32,1,10,'m'],[32,-2.4,0,40,9,10,'m'],
+   [0,18,0,40,18.4,10,'m'],[-.4,-2.8,0,0,18,10,'m'],[40,-2.8,0,40.4,18,10,'m'],[0,-2.8,-.4,40,18,0,'m'],[0,-2.8,10,40,18,10.4,'m']],
+  goo:[[12,-2.4,0,20,-.7,10]],plates:[{b:[22,1,3,25,1.3,7],tx:36,ty:9,vy:20}],exit:[37,9,1,40,12,9],
+  lines:[[1.2,'Kammer 10. Diese Kammer ist noch nicht fertig. Bitte betreten Sie den hinteren Bereich nicht.'],
+   [12,'Wiederhole: Die Katapultplatte dort hinten ist außer Betrieb. Sie funktioniert nur zufällig.']]}
+];
+// ---------- Story (eigene Handlung) ----------
+const STORY=[
+ {t:'Aufwachen',p:['Du wachst in einer Ruhekapsel auf. Das Etikett an der Klappe sagt: Testperson 7.',
+   'Die Anlage heißt Kammerwerk. Die Leitstelle, ein Verwaltungssystem ohne Gesicht, begrüßt dich, als wäre nichts gewesen. Auf dem Gang liegt Staub, Jahrzehnte davon.',
+   'Jemand hat in die Wand neben deiner Kapsel gekratzt:'],s:'DIE 7 KOMMT RAUS.'},
+ {t:'Impuls',p:['Die Leitstelle lobt deine Ergebnisse. Sie lobt sie etwas zu oft.','Unter dem Schalter der ersten Kammer lag ein gefalteter, alter Zettel. Unterschrift: T6.'],s:'Sie zählt nicht mit, wie viele wir waren. Ich schon. Sechs.'},
+ {t:'Platten',p:['Die Leitstelle nennt die Katapultplatten nebenbei »Erbstücke der Gründer«.','Auf der Rückseite deines Portalgeräts klebt ein zweiter Zettel von T6.'],s:'Die Platten schießen weiter, als sie sollen. Merk dir das.'},
+ {t:'Glas',p:['Die Leitstelle stellt neue Kammern auf, schneller als zuvor. Manche Paneele sind noch feucht von Farbe.',
+   'Hinter dem Glas der nächsten Kammer steht ein zweiter Würfel. Jemand hat ein Gesicht darauf gemalt und es dann wieder durchgestrichen.']},
+ {t:'Höhe',p:['»Testperson 6 wurde neu zugeordnet«, sagt die Leitstelle. Du hattest nicht gefragt.','In einem Lüftungsgitter steckt der letzte Zettel von T6.'],
+   s:'Die letzte Kammer ist nicht fertig. Hinter der hohen Kante fehlt die Wand. Dort geht es in den Wartungsschacht.'},
+ {t:'Misstrauen',p:['Die Leitstelle installiert Sperrfelder. Aus Gründen der Hygiene, sagt sie.','Du glaubst ihr nicht mehr. Sie scheint das zu bemerken. Ihre Ansagen werden kürzer.']},
+ {t:'Wachposten',p:['Neue Lieferung im Lager: Kisten mit der Aufschrift WACHPOSTEN, ZUM SCHUTZ DER TESTPERSON.','Die Leitstelle erklärt nicht, wovor sie dich schützen sollen.'],s:'Sie sehen nur nach vorn. Geh nie vor ihnen her. T6'},
+ {t:'Doppelt',p:['Zwei Wachposten diesmal. Die Leitstelle nennt das Qualitätssicherung.','Auf dem Glas der Kammer hat jemand mit dem Finger geschrieben, spiegelverkehrt, damit man es von innen lesen kann:'],s:'VON OBEN KOMMEN.'},
+ {t:'Empfang',p:['Die Ansagen der Leitstelle bestehen jetzt fast nur noch aus Zahlen.','In den Wänden klingt etwas wie Schritte. Es hört auf, sobald du stehen bleibst.']},
+ {t:'Ausbruch',p:['Die letzte Kammer. Die Leitstelle bittet dich ausdrücklich, den hinteren Bereich nicht zu betreten.','Dort hinten steht eine Katapultplatte. Und hoch über ihr eine Kante, hinter der keine Wand mehr kommt.']},
+ {t:'Draußen',p:['Der Wartungsschacht ist eng, dann kalt, dann hell. Tageslicht.',
+   'Hinter dir, sehr leise, die Leitstelle: »Testperson 7 hat die Anlage verlassen. Ergebnis: unzulässig.« Eine Pause. »Ergebnis: bestanden.«',
+   'An der Schachtwand, frisch gekratzt, in einer Schrift, die du inzwischen kennst:'],s:'T6 WAR HIER.'}
+];
+
+// ---------- World ----------
+let W=null;
+const P={pos:new V3(),vel:new V3(),half:new V3(.3,.9,.3),onGround:false,yaw:0,pitch:0,held:null,bob:0};
+function mkCube(sp){const c={kind:'cube',q:new THREE.Quaternion(),w:new V3(),pos:new V3(...sp),vel:new V3(),half:new V3(.25,.25,.25),spawn:new V3(...sp),held:false,onGround:false,
+  mesh:new THREE.Mesh(new THREE.BoxGeometry(.5,.5,.5),MAT.cube)};c.ghost=new THREE.Mesh(c.mesh.geometry,MAT.cube);c.ghost.visible=false;
+  W.group.add(c.mesh,c.ghost);return c;}
+// Wachposten: eigenes Design, sechseckiger Rumpf auf Dreibein, eine Linse
+const TMAT={body:new THREE.MeshLambertMaterial({color:0xe3e7ea}),band:new THREE.MeshLambertMaterial({color:0x2f3a44}),leg:new THREE.MeshLambertMaterial({color:0x3a4249})};
+function mkTurret(d){const g=new THREE.Group();
+  const add=(geo,m,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);g.add(o);return o;};
+  add(new THREE.CylinderGeometry(.19,.25,.86,6),TMAT.body,0,.12,0);add(new THREE.CylinderGeometry(.255,.255,.12,6),TMAT.band,0,-.12,0);
+  add(new THREE.CylinderGeometry(.12,.19,.16,6),TMAT.band,0,.6,0);
+  const lensMat=new THREE.MeshBasicMaterial({color:0xffb02e});const lens=add(new THREE.SphereGeometry(.07,12,8),lensMat,0,.3,-.19);
+  for(const s of [-.3,-.3]){} 
+  for(let k=0;k<3;k++){const a=k*2.094+Math.PI/6;const leg=add(new THREE.BoxGeometry(.05,.5,.05),TMAT.leg,Math.sin(a)*.24,-.4,Math.cos(a)*.24);leg.rotation.set(Math.cos(a)*.45,0,-Math.sin(a)*.45);}
+  const p=new V3(d.p[0],d.p[1]+.6,d.p[2]);
+  const t={kind:'turret',q:new THREE.Quaternion().setFromEuler(new THREE.Euler(0,d.yaw,0)),w:new V3(),pos:p,vel:new V3(),half:new V3(.27,.6,.27),spawn:p.clone(),
+    held:false,onGround:false,yaw:d.yaw,tipped:false,lock:0,fireT:0,saidT:0,lensMat,mesh:g};
+  const gh=g.clone();gh.visible=false;t.ghost=gh;
+  const lg=new THREE.BufferGeometry().setFromPoints([new V3(),new V3()]);t.laser=new THREE.Line(lg,new THREE.LineBasicMaterial({color:0xff3b2f,transparent:true,opacity:.7}));
+  W.group.add(g,gh,t.laser);return t;}
+// Spielfigur: nur in Portalansichten sichtbar, damit man sich selbst durch Portale sieht
+function mkBody(){const g=new THREE.Group(),suit=new THREE.MeshLambertMaterial({color:0xd9dde0}),dk=new THREE.MeshLambertMaterial({color:0x2c3237}),acc=new THREE.MeshLambertMaterial({color:0xff8c2b});
+  const add=(geo,m,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);g.add(o);return o;};
+  add(new THREE.BoxGeometry(.42,.62,.24),suit,0,.24,0);add(new THREE.SphereGeometry(.15,16,12),suit,0,.72,0);add(new THREE.BoxGeometry(.22,.06,.06),dk,0,.74,-.13);
+  add(new THREE.BoxGeometry(.43,.07,.25),acc,0,-.04,0);for(const s of [-1,1]){add(new THREE.BoxGeometry(.15,.82,.17),dk,s*.11,-.48,0);add(new THREE.BoxGeometry(.1,.56,.12),suit,s*.27,.2,0);}
+  add(new THREE.BoxGeometry(.11,.11,.42),new THREE.MeshLambertMaterial({color:0xe9ecee}),.25,.22,-.24);g.visible=false;scene.add(g);return g;}
+const body=mkBody(),bodyGhost=mkBody();
+// Objekte, die gerade in einem Portal stecken, erscheinen gleichzeitig auf der anderen Seite
+function straddle(e){if(!linked())return null;for(let k=0;k<2;k++){const A=PT[k],l=A.local(e.pos);if(l.z>1.1||l.z<-1.1)continue;
+  const ex=Math.abs(A.r.x)*e.half.x+Math.abs(A.r.y)*e.half.y+Math.abs(A.r.z)*e.half.z,ey=Math.abs(A.u.x)*e.half.x+Math.abs(A.u.y)*e.half.y+Math.abs(A.u.z)*e.half.z,ez=Math.abs(A.n.x)*e.half.x+Math.abs(A.n.y)*e.half.y+Math.abs(A.n.z)*e.half.z;
+  if(Math.abs(l.z)<ez+.05&&Math.abs(l.x)<A.hw+ex&&Math.abs(l.y)<A.hh+ey)return [A,PT[1-k]];}return null;}
+function buildLevel(i){
+  if(W){scene.remove(W.group);W.group.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
+  const L=LEVELS[i],g=new THREE.Group();scene.add(g);
+  W={i,L,group:g,solids:[],doors:[],buttons:[],cubes:[],fizz:[],goo:[],plates:[],gel:[],exit:null,t:0,done:false,said:new Set(),dead:0};
+  // Über dem Ausgangsaufzug wird Decke (und alles darüber) ausgeschnitten, dazu ein Schacht nach oben
+  const ex=mkBox(L.exit),lx=(ex.min.x+ex.max.x)/2,lz=(ex.min.z+ex.max.z)/2,ly=ex.min.y,R=1;let shaftY=null;
+  const sx=L.spawn[0],sy=L.spawn[1],sz=L.spawn[2];let carvedStart=false;
+  for(const a of L.boxes){const b0=mkBox(a);let parts=[b0];
+    // Unter dem Ankunftsaufzug: Boden ausschneiden, der Aufzug kommt von unten
+    if(b0.max.y<=sy+.01&&b0.max.y>=sy-.6&&b0.max.x>sx-R&&b0.min.x<sx+R&&b0.max.z>sz-R&&b0.min.z<sz+R){carvedStart=true;parts=[];
+      const mk=(x0,x1,z0,z1)=>{if(x1-x0<1e-3||z1-z0<1e-3)return;parts.push(mkBox([x0,b0.min.y,z0,x1,b0.max.y,z1,b0.mat]));};
+      const cx0=Math.max(b0.min.x,sx-R),cx1=Math.min(b0.max.x,sx+R);
+      mk(b0.min.x,sx-R,b0.min.z,b0.max.z);mk(sx+R,b0.max.x,b0.min.z,b0.max.z);mk(cx0,cx1,b0.min.z,sz-R);mk(cx0,cx1,sz+R,b0.max.z);}
+    else if(b0.min.y>=ly+2.3&&b0.max.x>lx-R&&b0.min.x<lx+R&&b0.max.z>lz-R&&b0.min.z<lz+R){
+      shaftY=shaftY===null?b0.min.y:Math.min(shaftY,b0.min.y);parts=[];
+      const mk=(x0,x1,z0,z1)=>{if(x1-x0<1e-3||z1-z0<1e-3)return;const n=mkBox([x0,b0.min.y,z0,x1,b0.max.y,z1,b0.mat]);parts.push(n);};
+      const cx0=Math.max(b0.min.x,lx-R),cx1=Math.min(b0.max.x,lx+R);
+      mk(b0.min.x,lx-R,b0.min.z,b0.max.z);mk(lx+R,b0.max.x,b0.min.z,b0.max.z);mk(cx0,cx1,b0.min.z,lz-R);mk(cx0,cx1,lz+R,b0.max.z);}
+    for(const b of parts){W.solids.push(b);g.add(boxMesh(b,MAT[b.mat]));}}
+  if(shaftY!==null){const y0=shaftY,y1=shaftY+14,t=.12;
+    for(const s of [[lx-R-t,y0,lz-R-t,lx+R+t,y1,lz-R],[lx-R-t,y0,lz+R,lx+R+t,y1,lz+R+t],[lx-R-t,y0,lz-R,lx-R,y1,lz+R],[lx+R,y0,lz-R,lx+R+t,y1,lz+R]])
+      {const sb=mkBox([...s,'m']);W.solids.push(sb);g.add(boxMesh(sb,MAT.m));}
+    for(let k=1;k<6;k++){const ring=new THREE.Mesh(new THREE.TorusGeometry(R*.98,.03,4,4),MAT.ring);ring.rotation.set(Math.PI/2,0,Math.PI/4);ring.scale.set(1.41,1.41,1);ring.position.set(lx,y0+k*2.4,lz);g.add(ring);}}
+  {const pl=mkBox([sx-R,sy-.3,sz-R,sx+R,sy,sz+R,'m']);W.solids.push(pl);W.liftPlat=pl;
+    if(carvedStart){const y0=sy-14,y1=sy-.3,t=.12;for(const s of [[sx-R-t,y0,sz-R-t,sx+R+t,y1,sz-R],[sx-R-t,y0,sz+R,sx+R+t,y1,sz+R+t],[sx-R-t,y0,sz-R,sx-R,y1,sz+R],[sx+R,y0,sz-R,sx+R+t,y1,sz+R]])g.add(boxMesh(mkBox(s),MAT.m));}}
+  for(const t of L.turrets||[])W.cubes.push(mkTurret(t));
+  for(const d of L.doors||[]){const b=mkBox(d.b);b.mat='door';b.btn=d.btn;b.t=0;b.mesh=boxMesh(b,MAT.door);b.base=b.mesh.position.y;b.h=b.max.y-b.min.y;g.add(b.mesh);W.doors.push(b);}
+  for(const p of L.buttons||[]){const base=new THREE.Mesh(new THREE.CylinderGeometry(.9,1,.12,28),MAT.dark);base.position.set(p[0],p[1]+.06,p[2]);
+    const top=new THREE.Mesh(new THREE.CylinderGeometry(.62,.66,.12,28),new THREE.MeshLambertMaterial({color:0xd8442f,emissive:0x3a0d06}));top.position.set(p[0],p[1]+.15,p[2]);
+    g.add(base,top);W.buttons.push({pos:new V3(...p),top,on:false});}
+  for(const c of L.cubes||[])W.cubes.push(mkCube(c));
+  for(const f of L.fizz||[]){const b=mkBox(f);b.mesh=boxMesh(b,MAT.fizz);g.add(b.mesh);W.fizz.push(b);
+    const lo=b.min.z<.5?b.min.z:b.min.z;g.add(boxMesh(mkBox([b.min.x-.1,b.min.y,b.min.z,b.max.x+.1,b.max.y,b.min.z+.15]),MAT.emit),boxMesh(mkBox([b.min.x-.1,b.min.y,b.max.z-.15,b.max.x+.1,b.max.y,b.max.z]),MAT.emit));}
+  for(const q of L.goo||[]){const b=mkBox(q);g.add(boxMesh(b,MAT.goo));W.goo.push(b);}
+  for(const p of L.plates||[]){const b=mkBox(p.b);b.tx=p.tx;b.ty=p.ty;b.vy=p.vy;b.cool=0;
+    // Sichtbare Platte = Auslösefläche
+    b.y0=b.min.y;b.mesh=boxMesh(mkBox([b.min.x,b.min.y,b.min.z,b.max.x,b.min.y+.08,b.max.z]),MAT.plate);
+    {const sx=b.max.x-b.min.x,sz=b.max.z-b.min.z,uv=b.mesh.geometry.attributes.uv;for(let k=0;k<uv.count;k++)uv.setXY(k,uv.getX(k)/sx,uv.getY(k)/sz);}g.add(b.mesh);W.plates.push(b);}
+  for(const q of L.gel||[]){const b=mkBox(q);const m=new THREE.Mesh(new THREE.PlaneGeometry(b.max.x-b.min.x,b.max.z-b.min.z),MAT.gel);
+    m.rotation.x=-Math.PI/2;m.position.set((b.min.x+b.max.x)/2,b.max.y,(b.min.z+b.max.z)/2);g.add(m);W.gel.push(b);}
+  {const b=mkBox(L.exit);W.exit=b;W.liftB=mkLift(g,(b.min.x+b.max.x)/2,b.min.y,(b.min.z+b.max.z)/2,true);}
+  W.liftA=mkLift(g,L.spawn[0],L.spawn[1],L.spawn[2],false);W.liftA.c=1;W.arriveDur=2.4;W.openAt=2.8;W.arrive=0;
+  {const x=L.spawn[0],y=L.spawn[1],z=L.spawn[2],r=.8,t=.1;
+    W.liftWalls=[[x-r,y,z-r,x+r,y+3,z-r+t],[x-r,y,z+r-t,x+r,y+3,z+r],[x-r,y,z-r,x-r+t,y+3,z+r],[x+r-t,y,z-r,x+r,y+3,z+r]].map(mkBox);}
+  PT[0].clear();PT[1].clear();
+  respawnPlayer();updateHud();
+}
+// Glasröhren-Aufzug: Ankunft am Startpunkt, Abfahrt am Ausgang
+const liftGlass=new THREE.MeshLambertMaterial({color:0xcfeaff,transparent:true,opacity:.26,depthWrite:false,side:THREE.DoubleSide});
+function mkLift(g,x,y,z,isExit){const grp=new THREE.Group();grp.position.set(x,y,z);
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(.98,.98,.3,32),MAT.dark);base.position.y=-.15;
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.8,.05,8,40),isExit?MAT.ring:new THREE.MeshBasicMaterial({color:0xe9eef1}));ring.rotation.x=Math.PI/2;ring.position.y=.01;
+  const tube=new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,3,36,1,true),liftGlass);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(.92,.92,.16,32),MAT.dark);
+  const tg=new THREE.Group();tg.add(tube,cap);tube.position.y=1.5;cap.position.y=3.05;grp.add(base,ring,tg);g.add(grp);
+  return {x,y,z,grp,tube:tg,c:0,isExit};}
+function respawnPlayer(){const L=W.L;P.pos.set(L.spawn[0],L.spawn[1]+.9+.01,L.spawn[2]);P.vel.set(0,0,0);P.yaw=L.yaw;P.pitch=0;P.held=null;qOff.identity();P.hp=100;P.hurtT=9;
+  for(const c of W.cubes){c.held=false;}}
+function resetCube(c){if(P.held===c)P.held=null;c.held=false;c.pos.copy(c.spawn);c.vel.set(0,0,0);c.w.set(0,0,0);
+  if(c.kind==='turret'){c.dead=true;c.mesh.visible=false;c.laser.visible=false;c.pos.set(0,-500,0);}else c.q.identity();}
+
+
+// ---------- Physics ----------
+// Portale schneiden ein echtes Loch in ihre Wand: Rahmenstücke ersetzen den Wandblock.
+function splitHole(b,A){const a=A.n.x?'x':A.n.y?'y':'z',[a1,a2]=AX.filter(x=>x!==a);
+  const e1=Math.abs(A.r[a1])*A.hw+Math.abs(A.u[a1])*A.hh,e2=Math.abs(A.r[a2])*A.hw+Math.abs(A.u[a2])*A.hh;
+  const lo1=A.p[a1]-e1,hi1=A.p[a1]+e1,lo2=A.p[a2]-e2,hi2=A.p[a2]+e2;
+  if(hi1<=b.min[a1]||lo1>=b.max[a1]||hi2<=b.min[a2]||lo2>=b.max[a2]||A.p[a]<b.min[a]-1e-4||A.p[a]>b.max[a]+1e-4)return [b];
+  const out=[],mk=(m1,M1,m2,M2)=>{if(M1-m1<1e-4||M2-m2<1e-4)return;const n={min:b.min.clone(),max:b.max.clone(),mat:b.mat,src:b.src||b};
+    n.min[a1]=m1;n.max[a1]=M1;n.min[a2]=m2;n.max[a2]=M2;out.push(n);};
+  const c1=Math.max(lo1,b.min[a1]),C1=Math.min(hi1,b.max[a1]);
+  mk(b.min[a1],lo1,b.min[a2],b.max[a2]);mk(hi1,b.max[a1],b.min[a2],b.max[a2]);mk(c1,C1,b.min[a2],lo2);mk(c1,C1,hi2,b.max[a2]);return out;}
+let holeVer=-1,holeW=null,holeList=null;
+function worldSolids(){if(!linked())return W.solids;
+  if(holeVer!==portalVer||holeW!==W){holeVer=portalVer;holeW=W;holeList=[];
+    for(const b of W.solids){let parts=[b];for(const A of PT)if(A.box===b)parts=parts.flatMap(x=>splitHole(x,A));holeList.push(...parts);}}
+  return holeList;}
+function solidsFor(e){const L=[];for(const b of worldSolids())L.push(b);if(W.liftWalls&&W.liftA.c>.5)for(const b of W.liftWalls)L.push(b);for(const d of W.doors)if(d.t<.7)L.push(d);
+  for(const c of W.cubes)if(c!==e&&!c.held)L.push(entBox(c));
+  if(e!==P&&!e.held)L.push(entBox(P));return L;}
+function portalSkip(e){if(!linked())return null;let s=null;
+  for(const A of PT){const l=A.local(e.pos);if(l.z>1.3||l.z<-1.3)continue;
+    const ex=Math.abs(A.r.x)*e.half.x+Math.abs(A.r.y)*e.half.y+Math.abs(A.r.z)*e.half.z,ey=Math.abs(A.u.x)*e.half.x+Math.abs(A.u.y)*e.half.y+Math.abs(A.u.z)*e.half.z;
+    if(Math.abs(l.x)+ex<A.hw+.06&&Math.abs(l.y)+ey<A.hh+.1)(s||(s=[])).push(A.box);}return s;}
+// Schwung aus Boden-/Deckenportalen: Die Laufrichtung zählt als "oben" des Eingangs.
+// So schießt man aus dem Wandportal immer nach vorn (und leicht hoch), egal wie das Bodenportal gedreht ist.
+function xVel(A,B,v){if(Math.abs(A.n.y)>.7&&Math.abs(B.n.y)<.7){const h=new V3(v.x,0,v.z);
+    if(h.length()>.3){const u=h.normalize(),r=new V3().crossVectors(u,A.n);const lx=-v.dot(r),ly=v.dot(u),lz=-v.dot(A.n);
+      return B.dirWorld(new V3(lx,ly,lz));}}
+  return xDir(A,B,v);}
+// Spieler wechselt die Seite genau dann, wenn das Auge die Portalebene kreuzt. Bild bleibt dadurch lückenlos.
+const camShift=new V3(),qOff=new THREE.Quaternion(),qUp=new THREE.Quaternion(),_eu=new THREE.Euler(0,0,0,'YXZ'),qId=new THREE.Quaternion();
+const upQuat=()=>qUp.setFromEuler(_eu.set(P.pitch,P.yaw,0,'YXZ'));
+function tryTeleport(e,prev){if(!linked())return false;const isP=e===P,lift=isP?EYE:0;
+  const now=new V3(e.pos.x,e.pos.y+lift,e.pos.z),was=new V3(prev.x,prev.y+lift,prev.z);
+  for(let k=0;k<2;k++){const A=PT[k],B=PT[1-k];const d0=A.local(was).z,l=A.local(now);
+    if(d0>=0&&l.z<0&&Math.abs(l.x)<A.hw&&Math.abs(l.y)<A.hh){
+      const np=xPoint(A,B,now),lb=B.local(np);if(lb.z<.02)np.addScaledVector(B.n,.02-lb.z);
+      e.vel.copy(xVel(A,B,e.vel));e.pos.set(np.x,np.y-lift,np.z);e.onGround=false;
+      // Körper muss komplett in die Austrittsöffnung passen, sonst landet er in der Wand oder obendrauf
+      {const lb=B.local(e.pos),ex=Math.abs(B.r.x)*e.half.x+Math.abs(B.r.y)*e.half.y+Math.abs(B.r.z)*e.half.z,ey=Math.abs(B.u.x)*e.half.x+Math.abs(B.u.y)*e.half.y+Math.abs(B.u.z)*e.half.z;
+        const mx=Math.max(0,B.hw-ex-.01),my=Math.max(0,B.hh-ey-.01),cx=THREE.MathUtils.clamp(lb.x,-mx,mx),cy=THREE.MathUtils.clamp(lb.y,-my,my);
+        if(cx!==lb.x||cy!==lb.y){const before=e.pos.clone();lb.x=cx;lb.y=cy;e.pos.copy(B.world(lb));if(isP)camShift.add(before.sub(e.pos));}}
+      if(isP){const q=xQuat(A,B);const qNew=q.clone().multiply(qOff.clone().multiply(upQuat()));
+        const f=new V3(0,0,-1).applyQuaternion(qNew);P.yaw=Math.atan2(-f.x,-f.z);P.pitch=Math.asin(THREE.MathUtils.clamp(f.y,-.99,.99));
+        qOff.copy(qNew).multiply(upQuat().clone().invert());SND.warp();
+        if(P.held){const c=P.held,alt=xPoint(A,B,c.pos);if(alt.distanceTo(np)<c.pos.distanceTo(np)){c.pos.copy(alt);c.vel.copy(xDir(A,B,c.vel));}}}
+      else if(e.kind==='turret'){const q=xQuat(A,B),f=new V3(-Math.sin(e.yaw),0,-Math.cos(e.yaw)).applyQuaternion(q);e.yaw=Math.atan2(-f.x,-f.z);e.q.premultiply(q);
+        if(new V3(0,1,0).applyQuaternion(q).y<.7)tip(e,e.vel);}
+      else if(e.q){e.q.premultiply(xQuat(A,B));}
+      return true;}}
+  return false;}
+function step(e,dt){const sp=e.vel.length(),n=Math.min(10,Math.max(1,Math.ceil(sp*dt/.12))),h=dt/n;let land=0;
+  // Bodenkontakt gilt für den ganzen Frame, auch wenn die Landung in einem frühen Teilschritt passiert
+  e.onGround=false;
+  for(let s=0;s<n;s++){const prev=e.pos.clone(),sol=solidsFor(e);
+    for(const ax of AX){const v=e.vel[ax];e.pos[ax]+=v*h;
+      for(const b of sol){if(!entOver(e,b))continue;let dir;
+        if(v>0)dir=-1;else if(v<0)dir=1;else{const pn=b.max[ax]-(e.pos[ax]-e.half[ax]),pp=e.pos[ax]+e.half[ax]-b.min[ax];dir=pn<pp?1:-1;}
+        e.pos[ax]=dir>0?b.max[ax]+e.half[ax]+1e-4:b.min[ax]-e.half[ax]-1e-4;
+        if(ax==='y'&&dir>0){e.onGround=true;if(v<land)land=v;if(b.ent&&b.ent!==P){}}
+        if((dir>0&&e.vel[ax]<0)||(dir<0&&e.vel[ax]>0))e.vel[ax]=0;}}
+    tryTeleport(e,prev);}
+  return land;}
+// Gel zählt, sobald irgendein Teil der Fußfläche darauf steht
+const onRect=(e,b)=>e.pos.x+e.half.x>b.min.x&&e.pos.x-e.half.x<b.max.x&&e.pos.z+e.half.z>b.min.z&&e.pos.z-e.half.z<b.max.z&&Math.abs(e.pos.y-e.half.y-b.max.y)<.35;
+const onGel=e=>W.gel.some(g=>onRect(e,g));
+// Aufprall auf Gel: Fallgeschwindigkeit geht fast vollständig nach oben zurück, mindestens ein kräftiger Hüpfer
+function gelBounce(e,land){if(!e.onGround||!onGel(e))return false;const v=-land;if(v<1.2&&!(e===P&&Math.hypot(e.vel.x,e.vel.z)>.5))return false;
+  e.vel.y=Math.max(v,8);e.onGround=false;SND.boing();return true;}
+
+// ---------- Player ----------
+const K={};let jumpHeld=false;
+const fwd=()=>new V3(-Math.sin(P.yaw)*Math.cos(P.pitch),Math.sin(P.pitch),-Math.cos(P.yaw)*Math.cos(P.pitch));
+const eye=()=>new V3(P.pos.x,P.pos.y+EYE,P.pos.z);
+function accel(w,ws,a,dt){const cur=P.vel.x*w.x+P.vel.z*w.z,add=ws-cur;if(add<=0)return;const s=Math.min(a*ws*dt,add);P.vel.x+=w.x*s;P.vel.z+=w.z*s;}
+function updatePlayer(dt){
+  const f=new V3(-Math.sin(P.yaw),0,-Math.cos(P.yaw)),r=new V3(Math.cos(P.yaw),0,-Math.sin(P.yaw)),w=new V3();
+  if(K.KeyW)w.add(f);if(K.KeyS)w.sub(f);if(K.KeyD)w.add(r);if(K.KeyA)w.sub(r);const has=w.lengthSq()>0;if(has)w.normalize();
+  if(P.onGround){const sp=Math.hypot(P.vel.x,P.vel.z);if(sp>0){const ns=Math.max(sp-Math.max(sp,1.5)*8*dt,0)/sp;P.vel.x*=ns;P.vel.z*=ns;}
+    if(has)accel(w,5.5,10,dt);
+    if(K.Space&&!jumpHeld){P.vel.y=onGel(P)?11:6.4;jumpHeld=true;if(P.vel.y>7)SND.boing();}}
+  else if(has)accel(w,1.2,30,dt);
+  if(!K.Space)jumpHeld=false;
+  P.vel.y=Math.max(P.vel.y-G*dt,-40);
+  P.hv=Math.hypot(P.vel.x,P.vel.z);P.vtot=P.vel.length();
+  const land=step(P,dt);
+  gelBounce(P,land);
+  if(P.onGround&&has)P.bob+=dt*9;
+}
+function updateCube(c,dt){
+  if(c.held){const o=eye(),d=fwd();let dist=1.4;const h=castWorld(o,d,true);if(h&&h.t-.4<dist)dist=Math.max(.5,h.t-.4);
+    const real=o.addScaledVector(d,dist);let tgt=real,bd=real.distanceTo(c.pos);
+    // Das Ziel gibt es auf beiden Seiten jedes Portals. Der Würfel steuert die nächste Version an und fliegt so von selbst durchs Portal.
+    if(linked())for(let k=0;k<2;k++){const alt=xPoint(PT[k],PT[1-k],real),ad=alt.distanceTo(c.pos);if(ad<bd){tgt=alt;bd=ad;}}
+    c.vel.subVectors(tgt,c.pos).multiplyScalar(14);if(c.vel.length()>25)c.vel.setLength(25);
+    step(c,dt);
+    // Hängt der Würfel fest oder ist er abgehängt, wird er nachgeholt statt fallen gelassen
+    if(c.pos.distanceTo(tgt)>2.2){const probe={pos:real,half:c.half};
+      if(!solidsFor(c).some(b=>entOver(probe,b))){c.pos.copy(real);c.vel.copy(P.vel);}else if(c.pos.distanceTo(tgt)>6)drop();}
+    c.q.slerp(yawQuat(P.yaw),1-Math.exp(-dt*10));c.w.set(0,0,0);}
+  else{c.sp=c.vel.length();const hv0=Math.hypot(c.vel.x,c.vel.z);c.vel.y=Math.max(c.vel.y-G*dt,-40);const land=step(c,dt);
+    const hv1=Math.hypot(c.vel.x,c.vel.z);
+    if(c.kind==='turret'){if(land<-7)c.hardLand=true;if(c.onGround){const k=Math.max(0,1-8*dt);c.vel.x*=k;c.vel.z*=k;}
+      const tq=yawQuat(c.yaw);if(c.tipped)tq.multiply(new THREE.Quaternion().setFromAxisAngle(new V3(1,0,0),-Math.PI/2));c.q.slerp(tq,1-Math.exp(-dt*7));}
+    else{
+      if(land<-1.2&&gelBounce(c,land))c.w.add(randSpin(3));
+      else if(land<-3){// Aufprall: leicht abprallen und ins Kippen geraten
+        c.vel.y=-land*.22;c.onGround=false;c.w.add(new V3(c.vel.z,0,-c.vel.x).multiplyScalar(1.2)).add(randSpin(Math.min(5,-land*.3)));SND.clank();}
+      if(hv0-hv1>2.5){c.w.add(randSpin(hv0*.5));SND.clank();}// gegen eine Wand geprallt
+      if(c.onGround){const k=Math.max(0,1-8*dt);c.vel.x*=k;c.vel.z*=k;c.w.multiplyScalar(Math.exp(-dt*7));
+        if(hv1>.8)c.w.add(new V3(c.vel.z,0,-c.vel.x).multiplyScalar(dt*4));
+        spin(c,dt);c.q.slerp(flatQuat(c.q),1-Math.exp(-dt*(c.w.length()<1.5?10:2)));}
+      else{spin(c,dt);c.w.multiplyScalar(Math.exp(-dt*.3));}}}
+  c.mesh.position.copy(c.pos);c.mesh.quaternion.copy(c.q);}
+// ---------- Würfel-Drehung ----------
+const UPV=new V3(0,1,0),_qa=new THREE.Quaternion(),AXES=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].map(a=>new V3(...a));
+const yawQuat=y=>new THREE.Quaternion().setFromAxisAngle(UPV,y);
+const randSpin=m=>new V3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize().multiplyScalar(m);
+// Nächste flach liegende Ausrichtung: die Seite, die am meisten nach oben zeigt, wird genau nach oben gedreht
+function flatQuat(q){let best=null,bd=-2;for(const a of AXES){const w=a.clone().applyQuaternion(q);if(w.y>bd){bd=w.y;best=w;}}
+  return new THREE.Quaternion().setFromUnitVectors(best,UPV).multiply(q);}
+function spin(c,dt){const m=c.w.length();if(m>1e-3){_qa.setFromAxisAngle(c.w.clone().divideScalar(m),m*dt);c.q.premultiply(_qa);}}
+// ---------- Wachposten ----------
+const pickOne=a=>a[Math.floor(Math.random()*a.length)];
+SND.beep=()=>{tone(1250,1250,.07,'square',.04);tone(1250,1250,.07,'square',.04,.11);};
+SND.shot=()=>tone(rnd(300,420),60,.05,'square',.035);
+SND.tip=()=>tone(500,90,.5,'triangle',.07);
+SND.clank=()=>tone(rnd(140,220),70,.12,'square',.03);
+function touching(a,b,m){return Math.abs(a.pos.x-b.pos.x)<a.half.x+b.half.x+m&&Math.abs(a.pos.y-b.pos.y)<a.half.y+b.half.y+m&&Math.abs(a.pos.z-b.pos.z)<a.half.z+b.half.z+m;}
+function tip(t,push){if(t.tipped||t.dead)return;t.tipped=true;t.lock=0;t.lensMat.color.setHex(0x3a4249);t.laser.visible=false;
+  t.vel.add(new V3(push.x,0,push.z).multiplyScalar(.35));t.vel.y+=2;t.half.set(.42,.27,.42);t.pos.y-=.3;SND.tip();
+  say(pickOne(['Hoppla.','Ich melde das.','Außer Dienst.','Das war so nicht vorgesehen.','Ich sehe nur noch Decke.']),'WACHPOSTEN');}
+function hurt(x){P.hp-=x;P.hurtT=0;if(P.hp<=0){P.hp=0;die();}}
+function turretAI(t,dt){if(t.dead||t.tipped)return;
+  if(t.held){t.lock=0;t.laser.visible=false;return;}
+  if(touching(P,t,.08)&&(P.hv>2.6||P.vtot>7)){tip(t,P.vel.lengthSq()?P.vel:fwd());return;}
+  for(const c of W.cubes)if(c!==t&&!c.held&&!c.dead&&(c.sp||0)>3&&touching(c,t,.05)){tip(t,c.vel);return;}
+  if(t.hardLand){t.hardLand=false;tip(t,randSpin(1));return;}
+  const eyeT=new V3(t.pos.x,t.pos.y+.3,t.pos.z),f=new V3(-Math.sin(t.yaw),0,-Math.cos(t.yaw));
+  const tgt=new V3(P.pos.x,P.pos.y+.35,P.pos.z),d=tgt.clone().sub(eyeT),dist=d.length();let sees=false;
+  if(W.t>W.openAt&&W.riding==null&&!W.dead&&dist<18){const h=new V3(d.x,0,d.z).normalize();
+    if(h.dot(f)>Math.cos(.75)&&Math.abs(d.y)/dist<.6){const dn=d.clone().normalize(),hit=castWorld(eyeT,dn);let blocked=!!(hit&&hit.t<dist-.3);
+      if(!blocked)for(const c of W.cubes){if(c===t||c.dead||c.held)continue;const r=rayBox(eyeT,dn,entBox(c));if(r&&r.t<dist-.3){blocked=true;break;}}
+      sees=!blocked;}}
+  const was=t.lock>0;t.lock=sees?t.lock+dt:Math.max(0,t.lock-dt*1.5);
+  if(sees&&!was){SND.beep();if(clock-t.saidT>4){t.saidT=clock;say(pickOne(['Ziel erfasst.','Da sind Sie ja.','Bitte stillhalten.','Nicht bewegen.']),'WACHPOSTEN');}}
+  if(sees&&t.lock>.7){t.fireT-=dt;if(t.fireT<=0){t.fireT=.08;SND.shot();hurt(2.6);}}
+  const from=eyeT.clone().addScaledVector(f,.2);let to;
+  if(sees)to=tgt;else{const sw=t.yaw+Math.sin(clock*1.3+t.pos.x)*.5,dd=new V3(-Math.sin(sw),-.04,-Math.cos(sw)),h=castWorld(from,dd);to=from.clone().addScaledVector(dd,h?h.t:18);}
+  const a=t.laser.geometry.attributes.position;a.setXYZ(0,from.x,from.y,from.z);a.setXYZ(1,to.x,to.y,to.z);a.needsUpdate=true;t.laser.frustumCulled=false;t.laser.visible=true;}
+function castWorld(o,d,thruPortals){let best=null;const L=W.solids.concat(W.doors.filter(x=>x.t<.7));
+  for(const b of L){const h=rayBox(o,d,b);if(!h||(best&&h.t>=best.t))continue;
+    if(thruPortals&&linked()){const hp=o.clone().addScaledVector(d,h.t);if(PT.some(A=>A.box===b&&(()=>{const l=A.local(hp);return Math.abs(l.z)<.03&&Math.abs(l.x)<A.hw&&Math.abs(l.y)<A.hh;})()))continue;}
+    best=h;}return best;}
+function grab(){if(P.held){drop(true);return;}const o=eye(),d=fwd();let best=null;
+  for(const c of W.cubes){const h=rayBox(o,d,entBox(c));if(h&&h.t<2.5&&(!best||h.t<best.t))best={t:h.t,c};}
+  if(!best)return;const w=castWorld(o,d);if(w&&w.t<best.t)return;P.held=best.c;best.c.held=true;SND.grab();}
+function drop(toss){const c=P.held;if(!c)return;c.held=false;P.held=null;c.vel.copy(P.vel);if(toss)c.vel.addScaledVector(fwd(),2);
+  if(c.kind==='turret')c.yaw=P.yaw;else if(toss){const f=fwd();c.w.copy(new V3(f.z,0,-f.x).multiplyScalar(3)).add(randSpin(1.5));}}
+
+// ---------- Portal gun ----------
+let flash=0,flashCol=0x3aa8ff;
+function fire(i){const o=eye(),d=fwd();flash=1;flashCol=i?0xff8c2b:0x3aa8ff;tipMat.color.setHex(flashCol);
+  const h=castWorld(o,d);const deny=()=>SND.deny();if(!h||h.box.mat!=='w')return deny();
+  const b=h.box,n=new V3();n[h.ax]=h.sign;let u;
+  if(h.ax==='y'){u=new V3(d.x,0,d.z);if(u.lengthSq()<1e-6)u.set(-Math.sin(P.yaw),0,-Math.cos(P.yaw));u=Math.abs(u.x)>Math.abs(u.z)?new V3(Math.sign(u.x),0,0):new V3(0,0,Math.sign(u.z));}else u=new V3(0,1,0);
+  const r=new V3().crossVectors(u,n),c=o.clone().addScaledVector(d,h.t);
+  for(const ax of AX){if(ax===h.ax)continue;const e=Math.abs(r[ax])*.6+Math.abs(u[ax]);const lo=b.min[ax]+e,hi=b.max[ax]-e;if(lo>hi)return deny();c[ax]=THREE.MathUtils.clamp(c[ax],lo,hi);}
+  c[h.ax]=h.sign>0?b.max[h.ax]:b.min[h.ax];
+  // Wandportale nahe am Boden rasten auf Bodenhöhe ein, damit man hindurchlaufen kann
+  const blocked=c=>[[0,0],[.5,.9],[-.5,.9],[.5,-.9],[-.5,-.9]].some(([sx,sy])=>{const q=c.clone().addScaledVector(r,sx).addScaledVector(u,sy).addScaledVector(n,.08);
+    return W.solids.some(s=>s!==b&&ptIn(q,s));});
+  if(h.ax!=='y'){const fl=castWorld(c.clone().addScaledVector(n,.3),new V3(0,-1,0));
+    if(fl){const fy=c.y+.0-fl.t;if(c.y-1-fy<.8&&fy+1<=b.max.y-1+1e-6&&fy+1>=b.min.y+1-1e-6){const s=c.clone();s.y=fy+1;if(!blocked(s))c.y=s.y;}}}
+  if(blocked(c)){// Portal von Hindernissen wegschieben statt ablehnen
+    let ok=false;for(const [dx,dy] of [[0,.4],[0,-.4],[.4,0],[-.4,0],[0,.8],[.8,0],[-.8,0],[0,-.8]]){const s=c.clone().addScaledVector(r,dx).addScaledVector(u,dy);
+      let inFace=AX.every(ax=>ax===h.ax||(s[ax]>=b.min[ax]+Math.abs(r[ax])*.6+Math.abs(u[ax])-1e-6&&s[ax]<=b.max[ax]-Math.abs(r[ax])*.6-Math.abs(u[ax])+1e-6));
+      if(inFace&&!blocked(s)){c.copy(s);ok=true;break;}}
+    if(!ok)return deny();}
+  const O=PT[1-i];if(O.on&&O.n.dot(n)>.99){const l=O.local(c);if(Math.abs(l.z)<.05&&Math.abs(l.x)<1.2&&Math.abs(l.y)<2)return deny();}
+  PT[i].set(c,n,u,b);(i?SND.p1:SND.p0)();updateHud();}
+
+// ---------- Game flow ----------
+let playing=false,paused=false,locked=false,freeMouse=false,subT=0,cardT=0,pick=0;
+function say(t,who){$('#sub small').textContent=who||'LEITSTELLE';$('#subtext').textContent=t;$('#sub').hidden=false;subT=3.5+t.length*.05;}
+function fade(cb){$('#fade').classList.add('on');setTimeout(()=>{cb();setTimeout(()=>$('#fade').classList.remove('on'),120);},520);}
+function updateHud(){if(!W)return;const n=String(W.i+1).padStart(2,'0');$('#hNum').textContent=n;$('#hOf').textContent=`Testkammer ${n} von ${String(LEVELS.length).padStart(2,'0')}`;
+  $('#hName').textContent=W.L.name;$('#hChips').innerHTML=W.L.chips.map(c=>`<span>${c}</span>`).join('');
+  $('#ch .b').classList.toggle('on',PT[0].on);$('#ch .o').classList.toggle('on',PT[1].on);}
+function showCard(){$('#cK').textContent='KAMMER '+String(W.i+1).padStart(2,'0');$('#cN').textContent=W.L.name;$('#card').style.opacity=1;cardT=2.4;}
+function loadLevel(i){buildLevel(i);showCard();$('#sub').hidden=true;try{const b=+localStorage.getItem('kammerwerk.best')||0;if(i>b)localStorage.setItem('kammerwerk.best',i);}catch(e){}}
+function die(){if(W.dead>0)return;W.dead=1;SND.die();fade(()=>{PT[0].clear();PT[1].clear();for(const c of W.cubes)resetCube(c);respawnPlayer();updateHud();W.dead=0;
+  say('Testperson aufgelöst. Ein Ersatz wurde bereitgestellt. Er sieht Ihnen sehr ähnlich.');});}
+// Kammer verlassen: in den Aufzug treten, Röhre schließt, Fahrt nach oben, dann automatisch weiter
+function startRide(){W.done=true;W.riding=0;drop();P.vel.set(0,0,0);SND.win();say('Kammer bestanden. Bitte bleiben Sie während der Fahrt ruhig stehen.');}
+function ride(dt){const B=W.liftB,r=(W.riding+=dt),k=1-Math.exp(-dt*6),rise=r>.9?(r-.9)*(r-.9)*1.6:0;
+  P.pos.x+=(B.x-P.pos.x)*k;P.pos.z+=(B.z-P.pos.z)*k;P.pos.y=B.y+P.half.y+.01+rise;P.vel.set(0,0,0);B.grp.position.y=B.y+rise;
+  if(r>2.5&&!W.leaving){W.leaving=true;leave();}}
+function leave(){$('#fade').classList.add('on');
+  setTimeout(()=>{const next=W.i+1;
+    if(mode==='story')storyAuto(next,()=>next<LEVELS.length?enter(next):endStory());
+    else if(next<LEVELS.length)enter(next);else finish();},550);}
+// Ankunft: Bild blendet langsam von Schwarz auf, während der Aufzug von unten hochfährt
+function enter(i){loadLevel(i);playing=true;paused=false;const f=$('#fade');f.classList.add('on','slow');setTimeout(()=>f.classList.remove('on'),250);setTimeout(()=>f.classList.remove('slow'),2100);
+  if(!locked&&!freeMouse){paused=true;$('#pause').hidden=false;}}
+function finish(){playing=false;if(document.pointerLockElement)document.exitPointerLock();$('#fade').classList.remove('on');$('#done').hidden=false;$('#sub').hidden=true;}
+function endStory(){playing=false;mode='free';if(document.pointerLockElement)document.exitPointerLock();$('#storyL').hidden=true;$('#fade').classList.remove('on');$('#start').hidden=false;}
+let mode='free',storySkip=null;
+// Protokoll läuft von selbst ab (Lesezeit nach Wortzahl); Leertaste springt weiter
+function storyAuto(i,done){playing=false;const S=STORY[i],end=i>=LEVELS.length;
+  $('#sEye').textContent=`Protokoll ${i} · ${end?'Ende':'vor Kammer '+String(i+1).padStart(2,'0')}`;$('#sTitle').textContent=S.t;
+  const box=$('#sText');box.innerHTML='';for(const t of S.p){const p=document.createElement('p');p.textContent=t;box.appendChild(p);}
+  if(S.s){const p=document.createElement('p');p.className='scrawl';p.textContent=S.s;box.appendChild(p);}
+  const words=(S.p.join(' ')+' '+(S.s||'')).split(/\s+/).length,dur=Math.min(16,Math.max(5,2.5+words*.32));
+  const bar=$('#sBar');bar.style.transition='none';bar.style.width='0';$('#sub').hidden=true;$('#pause').hidden=true;$('#storyL').hidden=false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.transition=`width ${dur}s linear`;bar.style.width='100%';}));
+  let fired=false;const fin=()=>{if(fired)return;fired=true;clearTimeout(tm);storySkip=null;$('#storyL').hidden=true;done();};
+  const tm=setTimeout(fin,dur*1000);storySkip=fin;}
+$('#storyBtn').addEventListener('click',()=>{mode='story';ac();$('#start').hidden=true;$('#done').hidden=true;$('#fade').classList.add('on');lock();storyAuto(0,()=>enter(0));});
+function begin(i){mode='free';ac();paused=false;$('#start').hidden=true;$('#done').hidden=true;$('#pause').hidden=true;$('#fade').classList.add('on');lock();setTimeout(()=>enter(i),350);}
+function lock(){if(freeMouse)return;try{const r=renderer.domElement.requestPointerLock();if(r&&r.catch)r.catch(()=>{freeMouse=true;});}catch(e){freeMouse=true;}}
+
+function update(dt){
+  W.t+=dt;
+  for(const [t,txt] of W.L.lines)if(W.t>=t&&!W.said.has(t)){W.said.add(t);say(txt);}
+  if(W.dead)return;
+  if(W.riding!=null){ride(dt);return;}
+  if(W.arrive<W.arriveDur){W.arrive+=dt;const k=Math.min(1,W.arrive/W.arriveDur),off=-5*Math.pow(1-k,3),A=W.liftA;
+    A.grp.position.y=A.y+off;P.pos.set(A.x,A.y+off+P.half.y+.01,A.z);P.vel.set(0,0,0);P.onGround=true;
+    for(const c of W.cubes)if(!c.dead)updateCube(c,dt);return;}
+  P.hurtT+=dt;if(P.hurtT>2.5)P.hp=Math.min(100,P.hp+30*dt);
+  updatePlayer(dt);
+  for(const c of W.cubes)if(!c.dead)updateCube(c,dt);
+  for(const c of W.cubes)if(c.kind==='turret')turretAI(c,dt);
+  // buttons + doors
+  for(const b of W.buttons){const hit=e=>Math.hypot(e.pos.x-b.pos.x,e.pos.z-b.pos.z)<.85&&Math.abs(e.pos.y-e.half.y-b.pos.y)<.5;
+    const on=hit(P)||W.cubes.some(c=>!c.held&&hit(c));if(on!==b.on){b.on=on;(on?SND.btn:SND.btnUp)();
+      b.top.material.color.setHex(on?0x86e3b0:0xd8442f);b.top.material.emissive.setHex(on?0x123a22:0x3a0d06);b.top.position.y=b.pos.y+(on?.08:.15);}}
+  for(const d of W.doors){const open=d.btn.every(k=>W.buttons[k].on);d.t=THREE.MathUtils.clamp(d.t+(open?2.2:-2.2)*dt,0,1);d.mesh.position.y=d.base-d.t*d.h;d.mesh.visible=d.t<.99;}
+  // fizzlers
+  for(const f of W.fizz){if(entOver(P,f)){if(PT[0].on||PT[1].on){PT[0].clear();PT[1].clear();SND.fizz();updateHud();
+      if(!W.said.has('fz')){W.said.add('fz');say('Das Sperrfeld löscht Ihre Portale. Es ist nicht persönlich gemeint.');}}
+      if(P.held){const c=P.held;resetCube(c);SND.fizz();say('Würfel aufgelöst. Ein neuer ist unterwegs. Er ersetzt den alten vollständig.');}}
+    for(const c of W.cubes)if(!c.held&&entOver(c,f)){resetCube(c);SND.fizz();}}
+  for(const g of W.goo){if(entOver(P,g))die();for(const c of W.cubes)if(entOver(c,g))resetCube(c);}
+  if(P.pos.y<-30)die();
+  for(const pl of W.plates){pl.cool-=dt;for(const e of [P,...W.cubes.filter(c=>!c.held)]){
+    const feet=e.pos.y-e.half.y;
+    if(pl.cool<=0&&e.onGround&&e.vel.y<=.01&&feet<pl.max.y+.05&&feet>pl.min.y-.2&&e.pos.x>pl.min.x&&e.pos.x<pl.max.x&&e.pos.z>pl.min.z&&e.pos.z<pl.max.z){
+      // Flugbahn ab der aktuellen Position berechnen, Landung auf dem Ziel
+      const T=(pl.vy+Math.sqrt(Math.max(0,pl.vy*pl.vy-2*G*(pl.ty-feet))))/G;e.vel.set((pl.tx-e.pos.x)/T,pl.vy,0);e.onGround=false;pl.cool=.6;SND.launch();if(e===P&&P.held)drop();}}}
+  {const B=W.liftB;if(!W.done&&Math.hypot(P.pos.x-B.x,P.pos.z-B.z)<.6&&Math.abs(P.pos.y-P.half.y-B.y)<.5)startRide();}
+}
+
+// ---------- Input ----------
+const cv=renderer.domElement;
+addEventListener('keydown',e=>{K[e.code]=true;if(storySkip&&e.code==='Space'){e.preventDefault();storySkip();return;}if(!playing||paused)return;if(e.code==='Space')e.preventDefault();
+  if(e.code==='KeyE'&&!e.repeat)grab();if(e.code==='KeyR'&&!e.repeat&&!W.done){$('#fade').classList.add('on');const i=W.i;setTimeout(()=>enter(i),500);}});
+addEventListener('keyup',e=>{K[e.code]=false;});
+addEventListener('blur',()=>{for(const k in K)K[k]=false;});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('mousedown',e=>{if(!playing||paused||W.dead)return;if(!locked&&!freeMouse){lock();return;}if(e.button===0)fire(0);else if(e.button===2)fire(1);});
+addEventListener('mousemove',e=>{if(!playing||paused||!(locked||freeMouse))return;const s=.0022;
+  P.yaw-=(e.movementX||0)*s;P.pitch=THREE.MathUtils.clamp(P.pitch-(e.movementY||0)*s,-1.55,1.55);});
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;
+  if(locked){paused=false;$('#pause').hidden=true;}else if(playing&&!freeMouse){paused=true;$('#pause').hidden=false;for(const k in K)K[k]=false;}});
+document.addEventListener('pointerlockerror',()=>{freeMouse=true;paused=false;$('#pause').hidden=true;});
+$('#resume').addEventListener('click',()=>{if(freeMouse){paused=false;$('#pause').hidden=true;}else lock();});
+$('#restartBtn').addEventListener('click',()=>{loadLevel(W.i);if(freeMouse){paused=false;$('#pause').hidden=true;}else lock();});
+$('#menuBtn').addEventListener('click',()=>{playing=false;paused=false;$('#pause').hidden=true;$('#start').hidden=false;});
+$('#again').addEventListener('click',()=>begin(0));
+$('#go').addEventListener('click',()=>begin(pick));
+{const box=$('#pick');let best=0;try{best=+localStorage.getItem('kammerwerk.best')||0;}catch(e){}
+  LEVELS.forEach((L,i)=>{const b=document.createElement('button');b.id='pick'+i;b.textContent=`${String(i+1).padStart(2,'0')} · ${L.name}`;
+    b.addEventListener('click',()=>{pick=i;box.querySelectorAll('button').forEach((x,k)=>x.classList.toggle('sel',k===i));});box.appendChild(b);});
+  pick=Math.min(best,LEVELS.length-1);box.children[pick].classList.add('sel');}
+if(matchMedia('(pointer:coarse)').matches&&!matchMedia('(pointer:fine)').matches)$('#touchnote').hidden=false;
+
+// ---------- Loop ----------
+let last=performance.now(),clock=0;const hurtEl=$('#hurt');
+buildLevel(0);
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,1/30);last=now;clock+=dt;
+  if(playing&&!paused)update(dt);
+  if(subT>0){subT-=dt;if(subT<=0)$('#sub').hidden=true;}
+  if(cardT>0){cardT-=dt;if(cardT<=0)$('#card').style.opacity=0;}
+  // camera
+  if(!playing&&$('#start').hidden===false){P.yaw=W.L.yaw+Math.sin(clock*.15)*.5;}
+  const bob=P.onGround?Math.sin(P.bob)*.035:0;
+  camShift.multiplyScalar(Math.exp(-dt*9));camera.position.set(P.pos.x+camShift.x,P.pos.y+EYE+bob+camShift.y,P.pos.z+camShift.z);
+  qOff.slerp(qId,1-Math.exp(-dt*2.4));camera.quaternion.copy(qOff).multiply(upQuat());
+  body.position.copy(P.pos);body.rotation.set(0,P.yaw,0);
+  const sb=playing?straddle(P):null;bodyGhost.visible=false;
+  if(sb){bodyGhost.position.copy(xPoint(sb[0],sb[1],P.pos));bodyGhost.quaternion.copy(xQuat(sb[0],sb[1])).multiply(body.quaternion);}
+  for(const c of W.cubes){const s=straddle(c);c.ghost.visible=!!s;if(s){c.ghost.position.copy(xPoint(s[0],s[1],c.pos));c.ghost.quaternion.copy(xQuat(s[0],s[1])).multiply(c.mesh.quaternion);}}
+  flash=Math.max(0,flash-dt*5);vm.position.set(.3+Math.sin(P.bob*.5)*.008,-.27+bob*.3,-.55+flash*.06);
+  vmTip.scale.setScalar(1+flash*1.5);
+  for(const p of PT){p.mat.uniforms.t.value=clock;const g=p.mat.uniforms.grow;g.value=Math.min(1,g.value+dt*6);}
+  MAT.fizz.opacity=.12+.06*Math.sin(clock*9);
+  hurtEl.style.opacity=playing?((1-P.hp/100)*.95).toFixed(3):0;
+  for(const [L,tg] of [[W.liftA,W.t>W.openAt?0:1],[W.liftB,W.riding!=null?1:0]]){L.c+=Math.sign(tg-L.c)*Math.min(Math.abs(tg-L.c),dt*2.2);L.tube.position.y=-(1-L.c)*3.25;}
+  for(const pl of W.plates)pl.mesh.position.y=pl.y0+Math.max(0,pl.cool)*.3+.04;
+  // render
+  scene.updateMatrixWorld();camera.updateMatrixWorld();camera.getWorldPosition(_cw);
+  const both=linked();
+  for(const p of PT){p.mat.uniforms.open.value=both?1:0;p.mat.uniforms.map.value=both?p.rt.texture:null;}
+  for(const p of PT)p.tube.visible=false;
+  if(both){vm.visible=false;body.visible=playing;_pm.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);_fr.setFromProjectionMatrix(_pm);
+    for(let k=0;k<2;k++){const A=PT[k];bodyGhost.visible=!!sb&&sb[0]!==A;
+      if(_fr.intersectsObject(A.mesh)&&A.local(_cw).z>-.6)renderThrough(A,PT[1-k]);}
+    for(const p of PT)p.tube.visible=true;}
+  body.visible=false;bodyGhost.visible=!!sb;vm.visible=playing;
+  renderer.render(scene,camera);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

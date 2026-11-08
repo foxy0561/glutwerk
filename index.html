@@ -226,6 +226,27 @@ main{max-width:1240px;margin:0 auto;padding:32px}
 
 footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;border-top:1px solid var(--line);margin-top:60px}
 
+/* ---------- Launcher-Button ---------- */
+.launcher-btn{
+  position:relative;display:flex;align-items:center;gap:8px;flex-shrink:0;
+  padding:8px 14px;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;
+  letter-spacing:1px;text-transform:uppercase;
+  background:var(--download);color:#04121f;box-shadow:0 4px 16px rgba(90,169,255,.3);
+}
+.launcher-btn svg{width:16px;height:16px}
+.launcher-btn.soon{background:var(--bg2);color:var(--muted);border:1px dashed var(--line);box-shadow:none;cursor:help}
+.launcher-btn .soon-tag{
+  font-family:Inter,sans-serif;font-size:10px;letter-spacing:.5px;font-weight:700;
+  padding:2px 6px;border-radius:4px;background:var(--soon);color:#140a2e;
+}
+.launcher-tip{
+  position:absolute;top:calc(100% + 10px);right:0;width:250px;z-index:30;
+  background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+  font:500 13px/1.45 Inter,sans-serif;letter-spacing:0;text-transform:none;color:var(--text);
+  box-shadow:0 10px 30px rgba(0,0,0,.5);opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .15s,transform .15s;
+}
+.launcher-btn.show-tip .launcher-tip{opacity:1;transform:none}
+
 /* ---------- Spielername ---------- */
 .name-btn{
   display:flex;align-items:center;gap:8px;flex-shrink:0;
@@ -273,6 +294,14 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   .logo{font-size:20px}
   .search{width:auto;flex:1}
   .name-btn span{display:none}
+  .launcher-btn .lb-text,.launcher-btn .soon-tag{display:none}
+  .launcher-btn{padding:8px 9px}
+  header{gap:8px;padding:10px 12px}
+  .logo-mark{width:30px;height:30px}
+  .nav{gap:2px}
+  .nav a{white-space:nowrap;font-size:13px;padding:7px 8px!important}
+  .search{min-width:0;padding:8px 10px}
+  .name-btn{padding:8px 9px}
   #siteName{display:none}
   .nav a{padding:8px 10px}
   main{padding:20px 16px}
@@ -299,6 +328,12 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
     <input id="search" type="text" placeholder="Spiel suchen…">
   </label>
+  <button class="launcher-btn soon" id="launcherBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>
+    <span class="lb-text">Launcher</span>
+    <span class="soon-tag" id="launcherTag">BALD</span>
+    <span class="launcher-tip">Der Glutwerk-Launcher für Windows ist noch in Arbeit. Bis dahin kannst du alle Spiele direkt hier im Browser spielen.</span>
+  </button>
   <button class="name-btn" id="nameBtn" title="Spielername">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
     <span id="nameLabel">Name eingeben</span>
@@ -422,6 +457,13 @@ const NEW_DAYS = 30;
   einfach seinen Speicher-Schlüssel hier eintragen (oder im Spiel "glutwerk-name" auslesen).
 */
 const NAME_KEYS = ["glutwerk-name", "kiko-name"];
+
+/*
+  Desktop-Launcher: Solange hier nichts steht, zeigt der Button "BALD".
+  Sobald es ihn gibt, den Link zu den GitHub Releases eintragen, z.B.
+  "https://github.com/foxy0561/glutwerk-launcher/releases/latest"
+*/
+const LAUNCHER_URL = "";
 const GAMES = [
   {
     title: "Kiko Hüpft",
@@ -714,6 +756,22 @@ $("nameCancel").onclick = closeName;
 $("nameSave").onclick = () => { setName($("nameInput").value); closeName(); };
 $("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("nameSave").click(); });
 $("nameModal").addEventListener("click", e => { if (e.target === $("nameModal")) closeName(); });
+
+/* ---- Launcher-Button ---- */
+(function () {
+  const btn = $("launcherBtn");
+  if (LAUNCHER_URL) {
+    btn.classList.remove("soon");
+    $("launcherTag").remove();
+    btn.querySelector(".launcher-tip").remove();
+    btn.onclick = () => openDownload({ title: "Glutwerk-Launcher", url: LAUNCHER_URL });
+  } else {
+    let t;
+    btn.onclick = () => { btn.classList.add("show-tip"); clearTimeout(t); t = setTimeout(() => btn.classList.remove("show-tip"), 3500); };
+    btn.onmouseenter = () => btn.classList.add("show-tip");
+    btn.onmouseleave = () => btn.classList.remove("show-tip");
+  }
+})();
 
 renderName();
 renderHero();

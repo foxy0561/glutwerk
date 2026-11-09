@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glutwerk-Karten</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+:root{
+  --bg:#0b0d12;--bg2:#12151d;--card:#161a24;--card-hover:#1c2130;--line:#252b3a;
+  --text:#e8ebf2;--muted:#8a93a8;--accent:#ff6a2b;--accent2:#ffb347;
+  --common:#aab3c5;--rare:#4da3ff;--epic:#b26bff;--legendary:#ffc443;--mythic:#ff6ad5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 70% 45% at 50% -8%, rgba(255,106,43,.2), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 90% 10%, rgba(178,107,255,.12), transparent 70%),
+    linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
+  background-size:auto,auto,40px 40px,40px 40px;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.rj{font-family:Rajdhani,sans-serif;font-weight:700;text-transform:uppercase}
+
+/* ---------- Kopfleiste (wie auf der Spieleseite) ---------- */
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:24px;padding:14px 32px;
+  background:rgba(11,13,18,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase}
+.logo-mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;box-shadow:0 0 20px rgba(255,106,43,.5)}
+.logo-mark svg{width:20px;height:20px}
+.logo span{color:var(--accent)}
+.nav{display:flex;gap:4px}
+.nav a{padding:8px 14px;border-radius:7px;font-weight:600;font-size:14px;color:var(--muted);transition:color .15s,background .15s;white-space:nowrap}
+.nav a:hover{color:var(--text)}
+.nav a.active{color:var(--text);background:var(--card);box-shadow:inset 0 -2px 0 var(--accent)}
+.glut-chip{margin-left:auto;display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:8px;
+  background:linear-gradient(135deg,rgba(255,106,43,.16),rgba(255,179,71,.08));border:1px solid rgba(255,106,43,.45);
+  font-family:Rajdhani,sans-serif;font-weight:700;font-size:19px;color:var(--accent2)}
+.glut-chip svg{width:17px;height:17px;color:var(--accent);filter:drop-shadow(0 0 6px rgba(255,106,43,.8))}
+.glut-chip.bump{animation:bump .5s}
+.glut-chip.minus{animation:minus .5s}
+@keyframes bump{30%{transform:scale(1.18);box-shadow:0 0 24px rgba(255,106,43,.8)}}
+@keyframes minus{30%{transform:scale(.9);filter:brightness(.6)}}
+
+main{max-width:1240px;margin:0 auto;padding:32px}
+h2.sec{font-family:Rajdhani,sans-serif;font-size:28px;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2.sec small{font-size:15px;color:var(--muted);letter-spacing:0}
+
+/* ---------- Kopfbereich ---------- */
+.top{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:stretch;margin-bottom:44px}
+.intro{position:relative;border-radius:18px;border:1px solid var(--line);padding:30px 255px 30px 30px;overflow:hidden;
+  background:radial-gradient(circle at 85% 30%,rgba(255,106,43,.25),transparent 55%),linear-gradient(135deg,#1a1210,#12151d 60%)}
+.intro h1{font-family:Rajdhani,sans-serif;font-size:clamp(36px,5.5vw,54px);line-height:.95;text-transform:uppercase;margin:8px 0 10px}
+.intro h1 span{color:var(--accent);text-shadow:0 0 30px rgba(255,106,43,.6)}
+.intro .label{font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:2px;font-size:13px;color:var(--accent);text-transform:uppercase}
+.intro p{color:#c3c9d6;line-height:1.5;max-width:440px}
+.progress{margin-top:22px;max-width:420px}
+.progress-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+.progress-row b{color:var(--text);font-family:Rajdhani,sans-serif;font-size:18px}
+.bar{height:10px;border-radius:6px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:0 0 12px rgba(255,106,43,.7);transition:width .6s}
+.intro-fan{position:absolute;right:-10px;bottom:-30px;width:250px;height:230px;pointer-events:none}
+.intro-fan .tcard{position:absolute;width:118px;bottom:0;right:60px;transform-origin:50% 120%}
+.intro-fan .tcard:nth-child(1){transform:rotate(-16deg) translateX(-40px)}
+.intro-fan .tcard:nth-child(2){transform:rotate(0) translateY(-14px)}
+.intro-fan .tcard:nth-child(3){transform:rotate(16deg) translateX(40px)}
+.earn{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.earn span{font-size:12px;font-weight:600;padding:6px 10px;border-radius:7px;background:rgba(0,0,0,.35);border:1px solid var(--line);color:#d5dae5}
+.earn b{color:var(--accent2)}
+
+/* ---------- Shop ---------- */
+.shop{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.offer{position:relative;border-radius:18px;border:1px solid var(--line);background:var(--card);padding:18px 16px 16px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;overflow:hidden}
+.offer::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,var(--og),transparent 60%);opacity:.35;pointer-events:none}
+.offer .mini-pack{width:min(120px,60%);margin:4px 0 2px;animation:float 4s ease-in-out infinite}
+.offer:nth-child(2) .mini-pack{animation-delay:-2s}
+@keyframes float{50%{transform:translateY(-8px) rotate(1.5deg)}}
+.offer h3{font-family:Rajdhani,sans-serif;font-size:22px;text-transform:uppercase;letter-spacing:1px}
+.offer .odds{font-size:12px;color:var(--muted);line-height:1.45;min-height:34px}
+.buy{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 14px;border-radius:10px;
+  font-family:Rajdhani,sans-serif;font-weight:700;font-size:19px;letter-spacing:1px;text-transform:uppercase;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#140800;box-shadow:0 4px 20px rgba(255,106,43,.35);transition:transform .15s,box-shadow .15s}
+.buy:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,106,43,.6)}
+.buy svg{width:17px;height:17px}
+.buy[disabled]{background:var(--bg2);color:var(--muted);box-shadow:none;transform:none;cursor:not-allowed;border:1px solid var(--line);font-size:15px}
+.offer.inferno .buy:not([disabled]){background:linear-gradient(135deg,#ff2d55,#ff9a3c);box-shadow:0 4px 24px rgba(255,45,85,.45)}
+
+/* ---------- Sammlung ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;background:var(--bg2);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--muted)}
+.chip:hover{color:var(--text)}
+.chip.on{color:var(--text);border-color:var(--accent);background:rgba(255,106,43,.1)}
+.chip .dot{width:9px;height:9px;border-radius:50%}
+.chip em{font-style:normal;font-size:11px;color:var(--muted);font-weight:700}
+.chip.done em{color:#3ddc97}
+.chip-right{margin-left:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:20px}
+.grid .slotc{position:relative;cursor:pointer;container-type:inline-size}
+.count{position:absolute;top:-8px;right:-8px;z-index:5;min-width:26px;height:26px;padding:0 7px;border-radius:13px;display:grid;place-items:center;
+  font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;background:var(--accent);color:#140800;box-shadow:0 2px 10px rgba(0,0,0,.5)}
+.count.foilc{background:linear-gradient(135deg,#7df9ff,#ff7ae0,#ffe66d);top:22px}
+
+/* =========================================================
+   KARTE
+   ========================================================= */
+.tcard{--rc:var(--common);--rx:0deg;--ry:0deg;--mx:50%;--my:50%;
+  position:relative;width:100%;aspect-ratio:63/88;border-radius:6.5% / 4.65%;container-type:inline-size;
+  transform-style:preserve-3d;transition:transform .25s ease-out,box-shadow .25s;
+  transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
+  box-shadow:0 8px 24px rgba(0,0,0,.55)}
+.tcard.r-rare{--rc:var(--rare)}.tcard.r-epic{--rc:var(--epic)}.tcard.r-legendary{--rc:var(--legendary)}.tcard.r-mythic{--rc:var(--mythic)}
+.tcard .frame{position:absolute;inset:0;border-radius:inherit;padding:2.4cqw;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--rc) 85%,#fff),color-mix(in srgb,var(--rc) 55%,#000) 45%,color-mix(in srgb,var(--rc) 90%,#fff) 70%,color-mix(in srgb,var(--rc) 50%,#000))}
+.tcard.r-legendary .frame{background:conic-gradient(from var(--ang),#fff3c4,#ffb800,#7a4a00,#ffd56b,#fff3c4,#c27b00,#ffe9a0,#fff3c4);animation:spin 5s linear infinite}
+.tcard.r-mythic .frame{background:conic-gradient(from var(--ang),#ff6ad5,#ffe66d,#7df9ff,#9d7bff,#ff6ad5,#7dffb0,#ff9a5c,#ff6ad5);animation:spin 3.5s linear infinite}
+@keyframes spin{to{--ang:360deg}}
+.tcard .inner{position:relative;height:100%;border-radius:4.6cqw;overflow:hidden;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#1b1f2b,#0f1219)}
+.tc-head{display:flex;align-items:center;justify-content:space-between;gap:3cqw;padding:3.6cqw 4.5cqw 2.6cqw}
+.tc-name{font-family:Rajdhani,sans-serif;font-weight:700;font-size:9.6cqw;line-height:1.2;padding-top:.6cqw;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2cqw}
+.tc-pow{flex-shrink:0;width:13cqw;height:13cqw;border-radius:50%;display:grid;place-items:center;font-family:Rajdhani,sans-serif;font-weight:700;font-size:8.5cqw;color:#140800;
+  background:radial-gradient(circle at 35% 30%,#fff,var(--rc) 55%,color-mix(in srgb,var(--rc) 50%,#000));box-shadow:0 0 3cqw color-mix(in srgb,var(--rc) 70%,transparent)}
+.tc-art{position:relative;margin:0 3.6cqw;aspect-ratio:4/3;border-radius:2.6cqw;overflow:hidden;
+  box-shadow:inset 0 0 0 .6cqw rgba(255,255,255,.12),0 1cqw 3cqw rgba(0,0,0,.5)}
+.tc-art svg{position:absolute;inset:0;width:100%;height:100%}
+.tc-type{display:flex;justify-content:space-between;gap:2cqw;align-items:center;margin:2.6cqw 3.6cqw 0;padding:1.6cqw 3cqw;border-radius:1.8cqw;
+  background:rgba(255,255,255,.06);font-size:5.4cqw;font-weight:700;letter-spacing:.3cqw;text-transform:uppercase;color:#cfd5e2}
+.tc-type b{color:var(--rc)}
+.tc-text{flex:1;display:flex;align-items:center;padding:2cqw 5cqw;font-size:6.2cqw;line-height:1.3;color:#b9c0cf;font-style:italic}
+.tc-foot{display:flex;justify-content:space-between;align-items:center;padding:0 4.5cqw 3.4cqw;font-size:5cqw;color:#6f788c;font-weight:700;letter-spacing:.3cqw}
+.tc-gem{width:5cqw;height:5cqw;transform:rotate(45deg);background:var(--rc);box-shadow:0 0 2.5cqw var(--rc)}
+/* Mythisch: Bild über die ganze Karte */
+.tcard.r-mythic .tc-art{position:absolute;inset:0;margin:0;aspect-ratio:auto;border-radius:0;box-shadow:none}
+.tcard.r-mythic .tc-art img{width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+.tcard.r-mythic .tc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,20,.55) 0%,transparent 22%,transparent 52%,rgba(10,6,20,.92) 78%)}
+.tcard.r-mythic .tc-head,.tcard.r-mythic .tc-type,.tcard.r-mythic .tc-text,.tcard.r-mythic .tc-foot{position:relative;z-index:2}
+.tcard.r-mythic .tc-head{text-shadow:0 0 3cqw #000}
+.tcard.r-mythic .tc-spacer{flex:1}
+.tcard.r-mythic .tc-text{flex:0 0 auto;color:#f0e6ff;padding-bottom:3cqw}
+.tcard.r-mythic .tc-type{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
+/* Glanz (Holo) */
+.tc-holo,.tc-glare{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4}
+.tcard.foil .tc-holo{mix-blend-mode:color-dodge;opacity:.5;
+  background:
+    repeating-linear-gradient(115deg,#ff0080 0%,#ffd000 6%,#00ff9d 12%,#00b3ff 18%,#b300ff 24%,#ff0080 30%),
+    repeating-linear-gradient(25deg,rgba(255,255,255,.0) 0 6px,rgba(255,255,255,.25) 6px 7px);
+  background-size:400% 400%,100% 100%;background-position:var(--mx) var(--my),0 0;filter:saturate(1.3)}
+.tcard.foil:not(.tilting) .tc-holo{animation:holo 6s ease-in-out infinite alternate}
+@keyframes holo{from{background-position:0% 0%,0 0}to{background-position:100% 100%,0 0}}
+.tc-glare{background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,.4),transparent 45%);mix-blend-mode:overlay;opacity:0;transition:opacity .25s}
+.tcard.tilting .tc-glare{opacity:1}
+.foil-tag{position:absolute;z-index:5;left:4.5cqw;top:17cqw;font-size:4.6cqw;font-weight:800;letter-spacing:.4cqw;padding:.8cqw 2.4cqw;border-radius:2cqw;color:#1a0b2e;
+  background:linear-gradient(90deg,#7df9ff,#ff7ae0,#ffe66d);box-shadow:0 0 3cqw rgba(255,122,224,.7)}
+/* noch nicht gefunden */
+.tcard.locked{box-shadow:none}
+.tcard.locked .frame{background:#252b3a;animation:none}
+.tcard.locked .inner{background:repeating-linear-gradient(135deg,#141822 0 10px,#11141c 10px 20px);align-items:center;justify-content:center;gap:3cqw;text-align:center}
+.tcard.locked .q{font-family:Rajdhani,sans-serif;font-weight:700;font-size:34cqw;line-height:1;color:#252b3a}
+.tcard.locked .lk-set{font-size:6.2cqw;font-weight:700;color:#5d6578;text-transform:uppercase;letter-spacing:.4cqw;padding:0 6cqw}
+.tcard.locked .lk-rar{display:flex;align-items:center;gap:2cqw;font-size:5.4cqw;font-weight:700;color:#5d6578;text-transform:uppercase}
+.tcard.locked .lk-no{position:absolute;bottom:4cqw;font-size:5cqw;color:#3b4253;font-weight:700}
+
+/* Rückseite */
+.cback{position:absolute;inset:0;border-radius:6.5% / 4.65%;overflow:hidden;container-type:inline-size;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(255,106,43,.35),transparent 45%),
+    repeating-conic-gradient(from 0deg at 50% 50%,#1b0f0a 0deg 10deg,#140a07 10deg 20deg);
+  border:2.4cqw solid #3a1d10;box-shadow:inset 0 0 0 1cqw #7a3a14,0 8px 24px rgba(0,0,0,.55);display:grid;place-items:center}
+.cback::before{content:"";position:absolute;inset:6cqw;border-radius:4cqw;border:.8cqw solid rgba(255,179,71,.35)}
+.cback svg{width:38cqw;height:38cqw;color:var(--accent);filter:drop-shadow(0 0 5cqw rgba(255,106,43,.9))}
+.cback .bt{position:absolute;bottom:11cqw;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:1.5cqw;font-size:7cqw;color:#ffb347;text-transform:uppercase}
+
+/* =========================================================
+   PACK
+   ========================================================= */
+.pack{--p1:#ff6a2b;--p2:#8a1c00;--p3:#ffd27a;position:relative;aspect-ratio:5/8;border-radius:5%/3%;container-type:inline-size;filter:drop-shadow(0 18px 30px rgba(0,0,0,.6))}
+.pack.inferno{--p1:#ff2d55;--p2:#3a0016;--p3:#ffb36b}
+.pack .pk-top,.pack .pk-body{position:absolute;left:0;right:0;overflow:hidden;
+  background:
+    linear-gradient(115deg,transparent 20%,rgba(255,255,255,.35) 30%,transparent 40%) ,
+    radial-gradient(circle at 50% 42%,var(--p3),transparent 38%),
+    linear-gradient(160deg,var(--p1),var(--p2) 70%);
+  background-size:300% 100%,100% 100%,100% 100%;animation:sheen 4.5s linear infinite}
+@keyframes sheen{from{background-position:120% 0,0 0,0 0}to{background-position:-120% 0,0 0,0 0}}
+.pack .pk-top{top:0;height:15%;border-radius:5cqw 5cqw 0 0;
+  -webkit-mask:linear-gradient(#000,#000) top/100% 88% no-repeat,radial-gradient(circle 2.2cqw at 50% 100%,transparent 98%,#000) bottom/6cqw 12% repeat-x;
+          mask:linear-gradient(#000,#000) top/100% 88% no-repeat,radial-gradient(circle 2.2cqw at 50% 100%,transparent 98%,#000) bottom/6cqw 12% repeat-x;
+  transition:transform .7s cubic-bezier(.3,1.4,.5,1),opacity .7s}
+.pack .pk-top::after{content:"";position:absolute;left:0;right:0;top:20%;height:30%;background:repeating-linear-gradient(90deg,rgba(0,0,0,.25) 0 2cqw,rgba(255,255,255,.12) 2cqw 4cqw)}
+.pack .pk-body{top:14.5%;bottom:0;border-radius:0 0 5cqw 5cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;padding-bottom:6cqw;
+  -webkit-mask:linear-gradient(#000,#000) bottom/100% 96% no-repeat,radial-gradient(circle 2.2cqw at 50% 0,transparent 98%,#000) top/6cqw 4% repeat-x;
+          mask:linear-gradient(#000,#000) bottom/100% 96% no-repeat,radial-gradient(circle 2.2cqw at 50% 0,transparent 98%,#000) top/6cqw 4% repeat-x}
+.pack .pk-body::after{content:"";position:absolute;left:0;right:0;bottom:3%;height:5%;background:repeating-linear-gradient(90deg,rgba(0,0,0,.25) 0 2cqw,rgba(255,255,255,.12) 2cqw 4cqw)}
+.pk-emblem{width:42cqw;height:42cqw;border-radius:50%;display:grid;place-items:center;margin-top:-4cqw;
+  background:radial-gradient(circle,rgba(255,255,255,.35),rgba(0,0,0,.15) 70%);box-shadow:inset 0 0 0 1.2cqw rgba(255,255,255,.35),0 0 10cqw rgba(255,210,122,.6)}
+.pk-emblem svg{width:26cqw;height:26cqw;color:#fff;filter:drop-shadow(0 0 4cqw #fff)}
+.pk-name{font-family:Rajdhani,sans-serif;font-weight:700;font-size:14cqw;line-height:.9;text-transform:uppercase;letter-spacing:.8cqw;color:#fff;text-shadow:0 .8cqw 0 rgba(0,0,0,.35),0 0 5cqw rgba(255,255,255,.5);text-align:center}
+.pk-sub{font-size:5.2cqw;font-weight:700;letter-spacing:.8cqw;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.pk-brand{position:absolute;top:6cqw;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:1.6cqw;font-size:6cqw;color:rgba(255,255,255,.9);text-transform:uppercase}
+
+/* =========================================================
+   ÖFFNEN
+   ========================================================= */
+.opening{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:20px;overflow:hidden;
+  background:radial-gradient(circle at 50% 45%,#2a1208 0%,#0a0605 60%,#000 100%)}
+.opening.open{display:flex}
+.opening.mythic-bg{background:radial-gradient(circle at 50% 45%,#2b0b33 0%,#0b0412 60%,#000 100%)}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
+.flash.go{animation:flash .6s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+.op-hint{position:relative;z-index:2;font-family:Rajdhani,sans-serif;font-weight:700;font-size:20px;letter-spacing:2px;text-transform:uppercase;color:#ffcf9c;text-align:center;min-height:26px;animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.5}}
+.op-pack{position:relative;z-index:2;width:min(250px,58vw);cursor:pointer;transition:transform .4s}
+.op-pack .pack{animation:packIn .7s cubic-bezier(.2,1.4,.4,1)}
+@keyframes packIn{from{transform:translateY(60vh) rotate(-12deg) scale(.6)}}
+.op-pack:hover .pack{transform:scale(1.03)}
+.op-pack.shake .pack{animation:shake .5s linear}
+.op-pack.shake2 .pack{animation:shake 0.4s linear infinite}
+@keyframes shake{10%,90%{transform:translateX(-2px) rotate(-1deg)}20%,80%{transform:translateX(4px) rotate(1.5deg)}30%,50%,70%{transform:translateX(-6px) rotate(-2deg)}40%,60%{transform:translateX(6px) rotate(2deg)}}
+.op-pack.torn .pk-top{transform:translate(70%,-140%) rotate(38deg);opacity:0}
+.op-pack.gone .pack{transition:transform .6s ease-in,opacity .6s;transform:translateY(80vh) rotate(8deg);opacity:0}
+.op-glow{position:absolute;z-index:1;width:min(560px,130vw);aspect-ratio:1;border-radius:50%;
+  background:conic-gradient(from var(--ang),transparent 0 8deg,rgba(255,170,90,.18) 8deg 16deg,transparent 16deg 30deg,rgba(255,170,90,.14) 30deg 36deg,transparent 36deg 60deg);
+  -webkit-mask:radial-gradient(circle,#000 20%,transparent 70%);mask:radial-gradient(circle,#000 20%,transparent 70%);animation:spin 18s linear infinite;pointer-events:none}
+
+.reveal{position:relative;z-index:2;display:none;flex-wrap:wrap;justify-content:center;gap:clamp(10px,2vw,22px);max-width:1100px;width:100%}
+.reveal.on{display:flex}
+.rslot{--rc:var(--common);container-type:inline-size;position:relative;width:clamp(96px,17vw,190px);aspect-ratio:63/88;perspective:900px;cursor:pointer;
+  opacity:0;transform:translateY(40vh) scale(.5) rotate(var(--rot,0deg));transition:opacity .45s,transform .65s cubic-bezier(.2,1.3,.4,1)}
+.rslot.in{opacity:1;transform:none}
+.rslot.r-rare{--rc:var(--rare)}.rslot.r-epic{--rc:var(--epic)}.rslot.r-legendary{--rc:var(--legendary)}.rslot.r-mythic{--rc:var(--mythic)}
+.flipper{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.3,1.25,.5,1)}
+.rslot.flipped .flipper{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face.front{transform:rotateY(180deg)}
+/* Vorahnung: die Rückseite leuchtet in der Seltenheitsfarbe */
+.rslot:not(.flipped).r-rare .cback{box-shadow:inset 0 0 0 1cqw #7a3a14,0 0 22px 2px var(--rc)}
+.rslot:not(.flipped).r-epic .cback{box-shadow:inset 0 0 0 1cqw #7a3a14,0 0 30px 6px var(--rc);animation:pulseGlow 1.2s ease-in-out infinite}
+.rslot:not(.flipped).r-legendary .cback,.rslot:not(.flipped).r-mythic .cback{box-shadow:inset 0 0 0 1cqw #7a3a14,0 0 40px 10px var(--rc);animation:pulseGlow .8s ease-in-out infinite}
+.rslot:not(.flipped).r-legendary .flipper,.rslot:not(.flipped).r-mythic .flipper{animation:tremble .25s linear infinite}
+@keyframes pulseGlow{50%{filter:brightness(1.35)}}
+@keyframes tremble{25%{transform:translate(1px,-1px) rotate(.6deg)}75%{transform:translate(-1px,1px) rotate(-.6deg)}}
+.rays{position:absolute;left:50%;top:50%;width:280%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:-1;pointer-events:none;opacity:0;transition:opacity .5s;
+  background:conic-gradient(from var(--ang),transparent 0 10deg,var(--rc) 10deg 14deg,transparent 14deg 40deg,var(--rc) 40deg 43deg,transparent 43deg 70deg,var(--rc) 70deg 75deg,transparent 75deg 110deg,var(--rc) 110deg 113deg,transparent 113deg 150deg,var(--rc) 150deg 155deg,transparent 155deg 200deg,var(--rc) 200deg 204deg,transparent 204deg 250deg,var(--rc) 250deg 254deg,transparent 254deg 300deg,var(--rc) 300deg 305deg,transparent 305deg);
+  -webkit-mask:radial-gradient(circle,#000 10%,transparent 62%);mask:radial-gradient(circle,#000 10%,transparent 62%);animation:spin 9s linear infinite}
+.rslot.flipped.r-legendary .rays,.rslot.flipped.r-mythic .rays{opacity:.55}
+.rslot.flipped.r-epic .rays{opacity:.25}
+.rtag{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:6px;opacity:0;transition:opacity .3s .5s}
+.rslot.flipped .rtag{opacity:1}
+.rtag.new{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#140800;box-shadow:0 0 14px rgba(255,106,43,.7)}
+.rtag.dup{background:rgba(255,255,255,.08);color:#ffcf9c;border:1px solid rgba(255,179,71,.35)}
+.big-word{position:absolute;z-index:5;left:50%;top:14%;transform:translate(-50%,-50%) scale(.3);opacity:0;pointer-events:none;
+  font-family:Rajdhani,sans-serif;font-weight:700;font-size:clamp(40px,9vw,92px);letter-spacing:4px;text-transform:uppercase;white-space:nowrap}
+.big-word.go{animation:bigWord 1.9s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes bigWord{15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
+.opening.quake{animation:quake .5s linear}
+@keyframes quake{10%,90%{transform:translate(-3px,2px)}20%,80%{transform:translate(5px,-3px)}30%,50%,70%{transform:translate(-8px,4px)}40%,60%{transform:translate(8px,-4px)}}
+.op-actions{position:relative;z-index:2;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:28px;min-height:48px}
+.op-btn{padding:11px 20px;border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:17px;letter-spacing:1px;text-transform:uppercase;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff}
+.op-btn:hover{background:rgba(255,255,255,.14)}
+.op-btn.hot{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#140800;border:none;box-shadow:0 4px 20px rgba(255,106,43,.45)}
+.op-btn[disabled]{opacity:.4;cursor:not-allowed}
+.op-summary{position:relative;z-index:2;margin-top:18px;text-align:center;font-size:14px;color:#ffcf9c;min-height:20px;display:flex;flex-direction:column;gap:4px}
+.op-summary b{color:#fff}
+.mute{position:absolute;top:14px;right:14px;z-index:6;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:18px}
+.skip{position:absolute;top:14px;left:14px;z-index:6}
+
+/* ---------- Karte groß ---------- */
+.zoom{position:fixed;inset:0;z-index:110;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;background:rgba(3,4,8,.88);backdrop-filter:blur(6px)}
+.zoom.open{display:flex}
+.zoom .zc{width:min(340px,78vw,calc((100vh - 170px) * .716))}
+.zoom-info{text-align:center;font-size:14px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+.zoom-info b{color:var(--text)}
+.zoom-x{position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);font-size:22px;line-height:1}
+
+.toasts{position:fixed;right:18px;bottom:18px;z-index:120;display:flex;flex-direction:column;gap:10px;align-items:flex-end;pointer-events:none}
+.toast{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;max-width:340px;background:linear-gradient(135deg,#2a1408,#1a0e08);border:1px solid rgba(255,106,43,.55);box-shadow:0 10px 30px rgba(0,0,0,.55);font-size:13px;animation:tin .45s cubic-bezier(.2,1.4,.4,1)}
+.toast .amt{font-family:Rajdhani,sans-serif;font-weight:700;font-size:24px;color:var(--accent2)}
+.toast b{display:block;font-size:14px}
+@keyframes tin{from{opacity:0;transform:translateY(20px) scale(.9)}}
+
+footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;border-top:1px solid var(--line);margin-top:60px}
+
+@media (max-width:900px){
+  .top{grid-template-columns:1fr}
+  .intro-fan{display:none}
+  .intro{padding:30px}
+}
+@media (max-width:640px){
+  header{gap:8px;padding:10px 12px;flex-wrap:wrap;row-gap:8px}
+  .logo{font-size:20px}
+  .logo-mark{width:30px;height:30px}
+  #siteName{display:none}
+  .nav{order:10;width:100%;justify-content:space-between;gap:2px}
+  .nav a{flex:1;text-align:center;font-size:13px;padding:7px 6px}
+  main{padding:20px 16px}
+  .intro{padding:22px}
+  .shop{gap:10px}
+  .offer{padding:14px 10px 12px}
+  .offer .odds{font-size:11px}
+  .buy{font-size:16px;padding:11px 8px}
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .count{min-width:22px;height:22px;font-size:13px;top:-6px;right:-6px}
+  .count.foilc{top:18px}
+  .rslot{width:calc((100vw - 64px) / 3)}
+  .reveal{gap:44px 10px}
+  .rtag{font-size:10px;bottom:-24px;padding:3px 6px}
+  .op-actions{margin-top:24px}
+  .toasts{left:12px;right:12px;align-items:stretch}
+  .toast{max-width:none}
+  .chip-right{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .tcard.r-legendary .frame,.tcard.r-mythic .frame,.rays,.op-glow,.pack .pk-top,.pack .pk-body{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="../">
+    <div class="logo-mark"><svg viewBox="0 0 24 24" fill="#140800"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg></div>
+    <div id="siteName">Glut<span>werk</span></div>
+  </a>
+  <nav class="nav">
+    <a href="../">Spiele</a>
+    <a href="../minecraft/">Minecraft</a>
+    <a href="../thyrvenna/">Foxys Welt</a>
+    <a href="./" class="active">Karten</a>
+  </nav>
+  <a class="glut-chip" id="glutChip" href="#verdienen" title="Deine Glut-Punkte">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>
+    <b id="glutVal">0</b>
+  </a>
+</header>
+
+<main>
+  <div class="top">
+    <section class="intro" id="verdienen">
+      <div class="label">Serie 1</div>
+      <h1>Glutwerk-<br><span>Karten</span></h1>
+      <p>Spiel die Glutwerk-Spiele, sammle Glut und öffne Packs. Wer findet zuerst alle Karten?</p>
+      <div class="progress">
+        <div class="progress-row"><span>Sammlung</span><span><b id="progNum">0</b> / <span id="progTot">0</span></span></div>
+        <div class="bar"><i id="progBar" style="width:0"></i></div>
+      </div>
+      <div class="earn" id="earn"></div>
+      <div class="intro-fan" id="introFan"></div>
+    </section>
+    <section class="shop" id="shop"></section>
+  </div>
+
+  <h2 class="sec">Deine Sammlung <small id="collSub"></small></h2>
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>Glutwerk-Karten · Glut und Karten werden nur auf diesem Gerät gespeichert · <a href="../" style="color:var(--accent)">Zurück zu den Spielen</a></footer>
+
+<!-- Pack öffnen -->
+<div class="opening" id="opening">
+  <canvas id="fx"></canvas>
+  <div class="flash" id="flash"></div>
+  <button class="mute" id="muteBtn" title="Ton an/aus">🔊</button>
+  <div class="big-word" id="bigWord"></div>
+  <div class="op-glow" id="opGlow"></div>
+  <div class="op-hint" id="opHint"></div>
+  <div class="op-pack" id="opPack"></div>
+  <div class="reveal" id="reveal"></div>
+  <div class="op-summary" id="opSummary"></div>
+  <div class="op-actions" id="opActions"></div>
+</div>
+
+<!-- Karte groß -->
+<div class="zoom" id="zoom">
+  <button class="zoom-x" id="zoomX">×</button>
+  <div class="zc" id="zoomCard"></div>
+  <div class="zoom-info" id="zoomInfo"></div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* =========================================================
+   EINSTELLUNGEN
+   ========================================================= */
+/* Wie man Glut verdient – nur zur Anzeige, die echten Werte stehen in ../index.html (GLUT) */
+const EARN_INFO = [
+  ["Neues Spiel starten", 100],
+  ["Erstes Spiel am Tag", 40],
+  ["Pro Minute spielen", 2],
+  ["Alle Spiele gespielt", 300],
+  ["Set komplett", 200],
+];
+const SET_BONUS = 200;
+
+const RARITY = {
+  common:    { name: "Gewöhnlich", refund: 5 },
+  rare:      { name: "Selten",     refund: 12 },
+  epic:      { name: "Episch",     refund: 30 },
+  legendary: { name: "Legendär",   refund: 80 },
+  mythic:    { name: "Mythisch",   refund: 200 },
+};
+const RORDER = ["common", "rare", "epic", "legendary", "mythic"];
+
+/* Packs: Preis, Chancen pro Karte (in %), garantierte Mindest-Seltenheit der letzten Karte, Glanz-Chance */
+const PACKS = {
+  glut:    { name: "Glut-Pack",    price: 100, size: 5, foil: 0.07, guarantee: "rare",
+             odds: { common: 62, rare: 27, epic: 8.5, legendary: 2.2, mythic: 0.3 },
+             text: "5 Karten · mind. 1 Seltene" },
+  inferno: { name: "Inferno-Pack", price: 350, size: 5, foil: 0.15, guarantee: "epic",
+             odds: { common: 28, rare: 40, epic: 23, legendary: 8, mythic: 1 },
+             text: "5 Karten · mind. 1 Epische · doppelte Glanz-Chance" },
+};
+
+const SETS = {
+  kiko:       { name: "Kiko Hüpft",  c: ["#ff5f6d", "#ffc371"] },
+  kammerwerk: { name: "Kammerwerk",  c: ["#2193b0", "#6dd5ed"] },
+  shardfall:  { name: "Shardfall",   c: ["#3b1d8f", "#b26bff"] },
+  riftward:   { name: "Riftward",    c: ["#6a3093", "#a044ff"] },
+  ameisenbau: { name: "Ameisenbau",  c: ["#8e5a2b", "#d4a056"] },
+  drako:      { name: "Drako",       c: ["#7b2ff7", "#f107a3"] },
+  glutwerk:   { name: "Glutwerk",    c: ["#ff6a2b", "#ffb347"] },
+  foxy:       { name: "Foxy",        c: ["#ff6ad5", "#7df9ff"] },
+};
+
+/* ---------- Bilder (SVG, 120×90) ---------- */
+const sky = (a, b) => `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="120" height="90" fill="url(#g)"/>`;
+const glowC = (x, y, r, c, o = .55) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity="${o}" filter="url(#bl)"/>`;
+const BLUR = `<filter id="bl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>`;
+const ground = (c, y = 74) => `<rect y="${y}" width="120" height="${90 - y}" fill="${c}"/>`;
+const ant = (x, y, s, body, extra = "") => `<g transform="translate(${x} ${y}) scale(${s})">
+  <g stroke="${body}" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M-6 2l-8 8M-6 2l-10 1M-6 2l-8-7M2 3l3 10M2 3l9 5M2 3l7-7"/><path d="M14-4q4-10 10-12M14-4q8-6 14-5"/></g>
+  <ellipse cx="-16" cy="2" rx="11" ry="8" fill="${body}"/><ellipse cx="-2" cy="1" rx="7" ry="5" fill="${body}"/><circle cx="11" cy="-1" r="7" fill="${body}"/>
+  <circle cx="14" cy="-3" r="1.8" fill="#fff" opacity=".8"/><ellipse cx="-19" cy="-2" rx="5" ry="2.5" fill="#fff" opacity=".18"/>${extra}</g>`;
+const crystal = (x, y, s, c1, c2) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0-22L10-6 6 18-6 18-10-6z" fill="${c1}"/><path d="M0-22L10-6 0 0z" fill="#fff" opacity=".45"/><path d="M0 0L6 18-6 18z" fill="${c2}" opacity=".7"/><path d="M-10-6L0 0-6 18z" fill="#000" opacity=".2"/></g>`;
+const FLAME = `M60 10c4 14 22 20 22 40a22 22 0 0 1-44 0c0-9 5-16 10-20 0 9 4 13 9 13 0-13-5-25 3-33z`;
+
+const ART = {
+  kiko: sky("#7ec8ff", "#d8f1ff") + `<circle cx="22" cy="18" r="9" fill="#ffe680"/><ellipse cx="90" cy="20" rx="14" ry="5" fill="#fff"/>` + ground("#5bbf4a", 72) + ground("#8a5a2b", 80) +
+    `<ellipse cx="60" cy="74" rx="20" ry="3.5" fill="#0003"/><circle cx="60" cy="50" r="21" fill="#ff4d5e"/><circle cx="51" cy="44" r="6" fill="#fff"/><circle cx="68" cy="44" r="6" fill="#fff"/><circle cx="52.5" cy="45" r="3" fill="#111"/><circle cx="69.5" cy="45" r="3" fill="#111"/><path d="M52 57q8 6 16 0" stroke="#7a0010" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="47" cy="37" r="4.5" fill="#fff" opacity=".4"/><rect x="45" y="67" width="11" height="7" rx="3" fill="#7a2b00"/><rect x="64" y="67" width="11" height="7" rx="3" fill="#7a2b00"/>`,
+  starblock: sky("#6fb6ff", "#c6e6ff") + `<g transform="translate(36 16)"><rect width="48" height="48" rx="5" fill="#c98a1b"/><rect x="3" y="3" width="42" height="42" rx="3" fill="#f2b43a"/><path d="M24 9l4.5 9.5 10.5 1.3-7.7 7.2 2 10.4L24 32.3l-9.3 5.1 2-10.4-7.7-7.2 10.5-1.3z" fill="#fff3b0" stroke="#a8650a" stroke-width="2"/><circle cx="7" cy="7" r="2" fill="#a8650a"/><circle cx="41" cy="7" r="2" fill="#a8650a"/><circle cx="7" cy="41" r="2" fill="#a8650a"/><circle cx="41" cy="41" r="2" fill="#a8650a"/></g>` + ground("#5bbf4a", 78),
+  coin: `<defs>${BLUR}</defs>` + sky("#3a2a12", "#140c04") + glowC(60, 45, 34, "#ffd34d", .5) + `<ellipse cx="60" cy="45" rx="24" ry="28" fill="#c98a1b"/><ellipse cx="60" cy="45" rx="19" ry="23" fill="#ffd34d"/><path d="M60 30l3.6 7.6 8.4 1-6.2 5.8 1.6 8.3-7.4-4.1-7.4 4.1 1.6-8.3-6.2-5.8 8.4-1z" fill="#fff3b0"/><path d="M47 28q6-8 14-7" stroke="#fff" stroke-width="3" fill="none" opacity=".6" stroke-linecap="round"/><g fill="#ffe680"><circle cx="24" cy="22" r="2"/><circle cx="96" cy="66" r="2.5"/><circle cx="98" cy="20" r="1.5"/></g>`,
+  meadow: sky("#5fb3ff", "#e5f6ff") + `<circle cx="96" cy="16" r="8" fill="#ffe680"/><ellipse cx="30" cy="18" rx="15" ry="5" fill="#fff"/><path d="M0 62q20-26 44-10t46-8 30 6v30H0z" fill="#3fa34d"/><path d="M0 70q30-16 60-4t60-6v30H0z" fill="#5bbf4a"/><path d="M78 40l10-16 10 16z" fill="#8a8a9a"/><path d="M84 30l4-6 4 6-4 2z" fill="#fff"/><g fill="#ffd34d"><circle cx="20" cy="76" r="2"/><circle cx="46" cy="80" r="2"/><circle cx="70" cy="77" r="2"/><circle cx="100" cy="82" r="2"/></g>`,
+  pipe: sky("#7ec8ff", "#d8f1ff") + ground("#5bbf4a", 76) + `<rect x="42" y="38" width="36" height="40" fill="#1f9e3a"/><rect x="36" y="28" width="48" height="14" rx="2" fill="#2bc24a"/><rect x="40" y="31" width="6" height="8" fill="#7ff09a" opacity=".7"/><rect x="46" y="42" width="5" height="34" fill="#7ff09a" opacity=".5"/><rect x="70" y="42" width="5" height="34" fill="#0b5c1e" opacity=".5"/><ellipse cx="60" cy="29" rx="20" ry="3" fill="#0b3d14"/>`,
+  castle: `<defs>${BLUR}</defs>` + sky("#2a1238", "#ff7a45") + glowC(60, 70, 40, "#ff5a2a", .5) + `<path d="M28 80V40h8v6h6v-6h8v6h6v-6h8v6h6v-6h8v40z" fill="#3a2a40"/><rect x="52" y="58" width="16" height="22" rx="8" fill="#140a14"/><rect x="34" y="50" width="6" height="9" fill="#ffb347"/><rect x="80" y="50" width="6" height="9" fill="#ffb347"/><path d="M60 40V18" stroke="#ccc" stroke-width="2"/><path d="M60 18l16 5-16 5z" fill="#ff4d5e"/>` + ground("#1a0d10", 80),
+  cube: `<defs>${BLUR}</defs>` + sky("#d9dee6", "#8d96a6") + `<path d="M0 70l60-14 60 14v20H0z" fill="#6b7383"/><g transform="translate(60 46)"><path d="M0-26l24 12v28L0 26-24 14v-28z" fill="#c9ced8"/><path d="M0-26l24 12L0-2-24-14z" fill="#eef1f6"/><path d="M0-2l24-12v28L0 26z" fill="#9aa1af"/><circle cx="-12" cy="6" r="6" fill="none" stroke="#2ea8ff" stroke-width="3"/><circle cx="12" cy="6" r="6" fill="none" stroke="#ff8a1f" stroke-width="3"/><circle cx="0" cy="-14" r="5" fill="none" stroke="#2ea8ff" stroke-width="2.5"/></g>`,
+  gel: `<defs>${BLUR}</defs>` + sky("#cfd6e0", "#7d8696") + `<path d="M0 66l120-6v30H0z" fill="#5b6373"/>` + glowC(60, 66, 30, "#3fd0ff", .55) + `<path d="M22 70q6-10 16-4t14-6 18 2 14-4 16 6v8H22z" fill="#1fb3ff"/><circle cx="46" cy="44" r="7" fill="#1fb3ff"/><circle cx="66" cy="30" r="5" fill="#1fb3ff"/><circle cx="80" cy="46" r="4" fill="#1fb3ff"/><circle cx="44" cy="42" r="2" fill="#fff" opacity=".8"/><circle cx="65" cy="28" r="1.5" fill="#fff" opacity=".8"/><path d="M30 66q10-4 20 0" stroke="#bff0ff" stroke-width="2" fill="none"/>`,
+  portalB: `<defs>${BLUR}</defs>` + sky("#2b3240", "#11151d") + `<rect x="0" y="0" width="120" height="90" fill="url(#g)"/><g stroke="#3a4252" stroke-width="1"><path d="M0 30h120M0 60h120M40 0v90M80 0v90"/></g>` + glowC(60, 45, 30, "#2ea8ff", .8) + `<ellipse cx="60" cy="45" rx="17" ry="33" fill="#05121f"/><ellipse cx="60" cy="45" rx="17" ry="33" fill="none" stroke="#2ea8ff" stroke-width="5"/><ellipse cx="60" cy="45" rx="13" ry="28" fill="none" stroke="#bfe6ff" stroke-width="1.5" opacity=".8"/>`,
+  portalO: `<defs>${BLUR}</defs>` + sky("#2b3240", "#11151d") + `<g stroke="#3a4252" stroke-width="1"><path d="M0 30h120M0 60h120M40 0v90M80 0v90"/></g>` + glowC(60, 45, 30, "#ff8a1f", .8) + `<ellipse cx="60" cy="45" rx="17" ry="33" fill="#1f0d02"/><ellipse cx="60" cy="45" rx="17" ry="33" fill="none" stroke="#ff8a1f" stroke-width="5"/><ellipse cx="60" cy="45" rx="13" ry="28" fill="none" stroke="#ffe0b8" stroke-width="1.5" opacity=".8"/>`,
+  turret: `<defs>${BLUR}</defs>` + sky("#c3c9d3", "#5d6575") + `<path d="M60 40L120 26" stroke="#ff2a2a" stroke-width="1.5" opacity=".9"/><path d="M60 82l-8-16M60 82l8-16M60 82v-14" stroke="#4a5160" stroke-width="3"/><ellipse cx="60" cy="42" rx="14" ry="26" fill="#f2f4f8"/><path d="M60 16a14 26 0 0 1 0 52" fill="#d4d8e0"/><rect x="58" y="22" width="4" height="40" fill="#30353f"/>` + glowC(60, 40, 8, "#ff2a2a", .9) + `<circle cx="60" cy="40" r="4" fill="#ff3b3b"/><circle cx="59" cy="39" r="1.3" fill="#fff"/>`,
+  gun: `<defs>${BLUR}</defs>` + sky("#1d2330", "#0b0e14") + glowC(92, 34, 16, "#2ea8ff", .9) + `<g transform="rotate(-14 60 45)"><rect x="18" y="38" width="66" height="20" rx="10" fill="#eef1f6"/><rect x="18" y="50" width="66" height="8" rx="4" fill="#b9bfca"/><rect x="28" y="56" width="16" height="22" rx="5" fill="#30353f"/><path d="M84 36l14 4v16l-14 4z" fill="#30353f"/><circle cx="96" cy="48" r="5" fill="#bfe6ff"/><rect x="40" y="42" width="30" height="4" rx="2" fill="#2ea8ff"/></g><path d="M96 34l12-14M100 40l16-4" stroke="#bfe6ff" stroke-width="1.5" opacity=".7"/>`,
+  bolt: sky("#2a1f5c", "#120a2a") + `<path d="M0 74q60-8 120 0v16H0z" fill="#1a1238"/><rect x="48" y="40" width="24" height="38" fill="#3b4a6b"/><rect x="44" y="34" width="32" height="10" fill="#4f628c"/><rect x="44" y="30" width="6" height="6" fill="#4f628c"/><rect x="57" y="30" width="6" height="6" fill="#4f628c"/><rect x="70" y="30" width="6" height="6" fill="#4f628c"/><path d="M60 38L96 18" stroke="#7dd3fc" stroke-width="2.5"/><path d="M96 18l-8 1 4 5z" fill="#7dd3fc"/><rect x="56" y="54" width="8" height="12" rx="4" fill="#0f1320"/>`,
+  frost: `<defs>${BLUR}</defs>` + sky("#16234a", "#081022") + glowC(60, 48, 30, "#22d3ee", .55) + crystal(60, 46, 1.5, "#a5f3fc", "#0891b2") + crystal(38, 60, .8, "#cffafe", "#22d3ee") + crystal(84, 60, .9, "#cffafe", "#22d3ee") + `<g fill="#fff"><circle cx="20" cy="20" r="1.5"/><circle cx="100" cy="26" r="1.2"/><circle cx="90" cy="12" r="1"/></g>`,
+  tesla: `<defs>${BLUR}</defs>` + sky("#1f1340", "#0a0618") + glowC(60, 26, 22, "#8b5cf6", .8) + `<rect x="52" y="34" width="16" height="42" fill="#3b2a6b"/><g fill="none" stroke="#c4b5fd" stroke-width="3"><path d="M50 40h20M50 48h20M50 56h20M50 64h20"/></g><circle cx="60" cy="26" r="10" fill="#c4b5fd"/><path d="M60 26l-26-10 8 10-18 2M60 26l30-14-6 12 20 0" stroke="#e9e3ff" stroke-width="2" fill="none" stroke-linejoin="round"/><rect x="44" y="74" width="32" height="6" fill="#2a1d4d"/>`,
+  phantom: `<defs>${BLUR}</defs>` + sky("#24183a", "#0c0816") + glowC(60, 44, 26, "#e9d5ff", .35) + `<path d="M40 70V40a20 20 0 0 1 40 0v30l-6-6-7 6-7-6-7 6-7-6z" fill="#e9d5ff" opacity=".72"/><ellipse cx="52" cy="40" rx="3.5" ry="5" fill="#2a1840"/><ellipse cx="68" cy="40" rx="3.5" ry="5" fill="#2a1840"/><path d="M54 54q6 4 12 0" stroke="#2a1840" stroke-width="2" fill="none" opacity=".6"/>`,
+  prism: `<defs>${BLUR}</defs>` + sky("#2a0f33", "#0d0612") + `<path d="M0 46L50 44" stroke="#fff" stroke-width="3" opacity=".9"/><g stroke-width="4" opacity=".9"><path d="M70 46l50-22" stroke="#ff4d6d"/><path d="M70 47l50-12" stroke="#ffb347"/><path d="M70 48l50-1" stroke="#ffe66d"/><path d="M70 49l50 10" stroke="#3ddc97"/><path d="M70 50l50 21" stroke="#4da3ff"/><path d="M70 51l50 32" stroke="#b26bff"/></g>` + glowC(60, 48, 18, "#f0abfc", .6) + `<path d="M60 22L80 66H40z" fill="#f0abfc" opacity=".85"/><path d="M60 22L80 66H62z" fill="#fff" opacity=".3"/>`,
+  riftwalker: `<defs>${BLUR}</defs>` + sky("#06222b", "#020a0e") + `<path d="M90 8l-6 20 8 10-10 18 6 28" stroke="#06b6d4" stroke-width="4" fill="none" filter="url(#bl)"/><path d="M90 8l-6 20 8 10-10 18 6 28" stroke="#a5f3fc" stroke-width="1.5" fill="none"/>` + glowC(52, 46, 24, "#06b6d4", .45) + `<path d="M40 82l6-26-8-12 6-20h16l6 20-8 12 6 26z" fill="#0e3a47"/><circle cx="52" cy="20" r="10" fill="#0e3a47"/><path d="M47 19h10" stroke="#67e8f9" stroke-width="3" stroke-linecap="round"/><path d="M44 40l-10 14M60 40l12 10" stroke="#0e3a47" stroke-width="6" stroke-linecap="round"/><circle cx="72" cy="50" r="4" fill="#67e8f9"/>`,
+  boss: `<defs>${BLUR}</defs>` + sky("#3a0612", "#0e0205") + glowC(60, 50, 34, "#f43f5e", .45) + `<path d="M28 86l6-30-10-10 8-18 14-6h28l14 6 8 18-10 10 6 30z" fill="#4a0d1a"/><path d="M42 22l-8-14 14 8M78 22l8-14-14 8" fill="#7a1a2c"/><rect x="44" y="30" width="32" height="18" rx="4" fill="#2a0610"/><circle cx="52" cy="38" r="3.5" fill="#ff5470"/><circle cx="68" cy="38" r="3.5" fill="#ff5470"/><path d="M50 46h20" stroke="#ff5470" stroke-width="2"/><path d="M46 58l6 8 8-6 8 6 6-8" stroke="#f43f5e" stroke-width="2" fill="none"/>`,
+  rift: `<defs>${BLUR}</defs>` + sky("#1c0b2e", "#08030f") + `<path d="M62 4l-8 16 10 10-12 14 10 12-8 14 6 18" stroke="#a044ff" stroke-width="12" fill="none" filter="url(#bl)"/><path d="M62 4l-8 16 10 10-12 14 10 12-8 14 6 18l6-18-6-14 10-12-12-14 8-10-4-16z" fill="#0a0012"/><path d="M62 4l-8 16 10 10-12 14 10 12-8 14 6 18" stroke="#e2c4ff" stroke-width="1.5" fill="none"/><g fill="#d6b4ff"><circle cx="30" cy="30" r="1.5"/><circle cx="92" cy="60" r="2"/><circle cx="86" cy="22" r="1.2"/><circle cx="26" cy="70" r="1.3"/></g>`,
+  core: `<defs>${BLUR}</defs>` + sky("#1d0f33", "#0a0514") + glowC(60, 46, 28, "#a044ff", .6) + `<g transform="translate(60 46)"><path d="M0-30l22 14v32L0 30-22 16v-32z" fill="#7a2ed6"/><path d="M0-30l22 14L0-2-22-16z" fill="#c084fc"/><path d="M0-2l22-14v32L0 30z" fill="#4c1d95"/><path d="M-10-20l8-5" stroke="#fff" stroke-width="2.5" opacity=".7" stroke-linecap="round"/></g>`,
+  antWood: sky("#c9a46a", "#7a5530") + `<path d="M0 64q30-6 60 0t60 0v26H0z" fill="#5a3a1c"/><path d="M14 20l6 26M100 14l-4 30" stroke="#3a6b2a" stroke-width="2"/>` + ant(66, 50, 1.5, "#4a1d0e"),
+  antHarvest: sky("#e0c08a", "#9a7040") + `<path d="M0 66q30-6 60 0t60 0v24H0z" fill="#6b4a24"/>` + ant(64, 52, 1.5, "#2a1810") + `<ellipse cx="96" cy="64" rx="5" ry="3.5" fill="#f2dca0"/><ellipse cx="104" cy="70" rx="4" ry="3" fill="#f2dca0"/><ellipse cx="24" cy="70" rx="4" ry="3" fill="#f2dca0"/>`,
+  antLeaf: sky("#a8d08a", "#4f7a3a") + `<path d="M0 68q30-6 60 0t60 0v22H0z" fill="#4a3018"/>` + ant(56, 56, 1.35, "#8a3a14", `<path d="M10-8q4-26 26-30q-2 22-24 30z" fill="#3fbf4a" stroke="#1f7a2a" stroke-width="1"/><path d="M12-9l20-26" stroke="#1f7a2a" stroke-width="1"/>`),
+  fungus: `<defs>${BLUR}</defs>` + sky("#3a2614", "#1a0f06") + glowC(60, 56, 30, "#f2e6c8", .25) + `<path d="M0 74h120v16H0z" fill="#2a1a0c"/><g><rect x="34" y="52" width="8" height="22" fill="#efe3c8"/><ellipse cx="38" cy="52" rx="16" ry="10" fill="#f6efe0"/><rect x="66" y="44" width="10" height="30" fill="#efe3c8"/><ellipse cx="71" cy="44" rx="22" ry="13" fill="#fff8ec"/><rect x="92" y="60" width="6" height="14" fill="#efe3c8"/><ellipse cx="95" cy="60" rx="11" ry="7" fill="#f6efe0"/><g fill="#d8c8a6"><circle cx="64" cy="40" r="2.5"/><circle cx="76" cy="38" r="2"/><circle cx="34" cy="50" r="2"/></g></g>`,
+  queen: `<defs>${BLUR}</defs>` + sky("#5a3a1c", "#24160a") + glowC(60, 50, 30, "#ffd34d", .25) + ant(64, 54, 1.7, "#5a1d0e", `<path d="M4-14l3-8 4 5 4-7 3 7 4-5 2 8z" fill="#ffd34d" stroke="#a8650a" stroke-width=".8"/>`) + `<g fill="#f6efe0"><ellipse cx="16" cy="78" rx="4" ry="2.5"/><ellipse cx="26" cy="80" rx="4" ry="2.5"/><ellipse cx="104" cy="80" rx="4" ry="2.5"/></g>`,
+  rivals: sky("#b88a52", "#6b4a24") + `<path d="M0 66q30-6 60 0t60 0v24H0z" fill="#4a3018"/>` + ant(36, 52, 1.1, "#1a1210") + `<g transform="translate(120 0) scale(-1 1)">${ant(36, 52, 1.1, "#b2241a")}</g><path d="M56 30l4 8 4-8" stroke="#ffe066" stroke-width="2.5" fill="none"/><path d="M60 22v6" stroke="#ffe066" stroke-width="2.5"/>`,
+  drako: `<defs>${BLUR}</defs>` + sky("#5a1f8f", "#1a0833") + glowC(60, 46, 30, "#f107a3", .35) + `<path d="M24 70q4-30 30-36l-6-18 14 14 8-16 2 20q22 6 26 30-10-6-22-4-6 10-18 10t-18-8q-8 2-16 8z" fill="#8a3ff0"/><path d="M60 52q14-2 26 6" stroke="#5a1fb0" stroke-width="2" fill="none"/><ellipse cx="72" cy="46" rx="5" ry="6" fill="#ffe066"/><ellipse cx="73" cy="46" rx="2" ry="4.5" fill="#1a0833"/><path d="M84 60l6 2M82 64l6 3" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M40 60q8-8 18-6" stroke="#c9a2ff" stroke-width="3" fill="none" opacity=".6"/>`,
+  breath: `<defs>${BLUR}</defs>` + sky("#3a0a3a", "#120312") + glowC(70, 46, 30, "#ff7a1a", .7) + `<path d="M8 46q30-18 60-6 26 10 50-6-6 22-34 26-30 4-52-6z" fill="#ff5a1a"/><path d="M20 46q26-10 48-2 22 8 40-2-8 14-30 16-26 2-46-6z" fill="#ffb347"/><path d="M34 46q20-4 34 0 16 4 28-2-6 8-22 9-22 1-38-5z" fill="#fff3b0"/>`,
+  dcrystal: `<defs>${BLUR}</defs>` + sky("#2a0b33", "#0e0412") + glowC(60, 46, 28, "#f107a3", .55) + crystal(60, 46, 1.6, "#ff7ad9", "#a1006b") + `<g fill="#ffd6f2"><circle cx="26" cy="22" r="1.5"/><circle cx="94" cy="64" r="2"/><circle cx="96" cy="18" r="1.2"/></g>`,
+  lavalord: `<defs>${BLUR}</defs>` + sky("#3a0a00", "#120200") + `<path d="M0 72q20-6 40 0t40 0 40 0v18H0z" fill="#ff5a1a"/><path d="M0 78q20-4 40 0t40 0 40 0v12H0z" fill="#ffb347"/>` + glowC(60, 44, 30, "#ff3d00", .5) + `<path d="M36 74l4-30 8-10h24l8 10 4 30z" fill="#2a0a04"/><path d="M44 34l-4-12 8 6 4-10 4 10 4-10 4 10 8-6-4 12z" fill="#ffb347"/><circle cx="52" cy="44" r="3" fill="#ffe066"/><circle cx="68" cy="44" r="3" fill="#ffe066"/><path d="M46 56l6 4 8-4 8 4 6-4" stroke="#ff5a1a" stroke-width="2.5" fill="none"/><path d="M40 52l-10 10M80 52l10 10" stroke="#2a0a04" stroke-width="7" stroke-linecap="round"/>`,
+  ember: `<defs>${BLUR}<linearGradient id="fl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff3d00"/><stop offset=".6" stop-color="#ffb347"/><stop offset="1" stop-color="#fff3b0"/></linearGradient></defs>` + sky("#1f0a04", "#0a0302") + glowC(60, 54, 32, "#ff6a2b", .7) + `<path d="${FLAME}" fill="url(#fl)" transform="translate(0 6)"/><g fill="#ffb347"><circle cx="30" cy="30" r="1.8"/><circle cx="88" cy="22" r="1.4"/><circle cx="96" cy="44" r="1.2"/><circle cx="24" cy="56" r="1.4"/></g>`,
+  forge: `<defs>${BLUR}<linearGradient id="fl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff3d00"/><stop offset=".6" stop-color="#ffb347"/><stop offset="1" stop-color="#fff3b0"/></linearGradient></defs>` + sky("#2a0f06", "#0a0302") + glowC(60, 34, 26, "#ff6a2b", .8) + `<path d="${FLAME}" fill="url(#fl)" transform="translate(30 -6) scale(.5)"/><path d="M22 52h70q10 0 14-8h4q-2 14-16 16H82l-6 10h10v8H34v-8h10l-6-10H30q-8 0-8-8z" fill="#3a4252"/><path d="M22 52h70q10 0 14-8h4q-2 6-8 9H22z" fill="#5d6678"/><g fill="#ffb347"><circle cx="34" cy="40" r="1.6"/><circle cx="88" cy="30" r="1.4"/><circle cx="96" cy="38" r="1.2"/></g>`,
+};
+
+/* ---------- Die Karten (Serie 1) ---------- */
+const CARDS = [
+  { id: "kiko",        set: "kiko",       r: "rare",      pow: 4,  name: "Kiko",               art: "kiko",       text: "Klein, rot und nicht zu stoppen." },
+  { id: "sternblock",  set: "kiko",       r: "common",    pow: 2,  name: "Sternblock",         art: "starblock",  text: "Einmal draufhauen. Lohnt sich immer." },
+  { id: "muenze",      set: "kiko",       r: "common",    pow: 1,  name: "Goldmünze",          art: "coin",       text: "Hundert davon und das Leben lächelt." },
+  { id: "wiesenland",  set: "kiko",       r: "common",    pow: 2,  name: "Wiesenland",         art: "meadow",     text: "Welt 1. Hier fängt jedes Abenteuer an." },
+  { id: "roehre",      set: "kiko",       r: "rare",      pow: 3,  name: "Warp-Röhre",         art: "pipe",       text: "Wo sie hinführt? Spring rein." },
+  { id: "burg",        set: "kiko",       r: "epic",      pow: 6,  name: "Die Burg",           art: "castle",     text: "Das letzte Level wartet hinter diesen Mauern." },
+  { id: "wuerfel",     set: "kammerwerk", r: "common",    pow: 2,  name: "Testwürfel",         art: "cube",       text: "Er drückt Knöpfe. Er redet nicht." },
+  { id: "gel",         set: "kammerwerk", r: "common",    pow: 2,  name: "Sprung-Gel",         art: "gel",        text: "Draufsteigen. Abheben." },
+  { id: "portal-b",    set: "kammerwerk", r: "rare",      pow: 4,  name: "Blaues Portal",      art: "portalB",    text: "Rein hier …" },
+  { id: "portal-o",    set: "kammerwerk", r: "rare",      pow: 4,  name: "Oranges Portal",     art: "portalO",    text: "… raus da." },
+  { id: "wachposten",  set: "kammerwerk", r: "epic",      pow: 6,  name: "Wachposten",         art: "turret",     text: "Ein roter Strahl. Kein Ausweg." },
+  { id: "kanone",      set: "kammerwerk", r: "legendary", pow: 8,  name: "Portalkanone",       art: "gun",        text: "Denk mit Portalen." },
+  { id: "bolzenturm",  set: "shardfall",  r: "common",    pow: 2,  name: "Bolzenturm",         art: "bolt",       text: "Der erste Turm, der letzte Freund." },
+  { id: "frostkristall", set: "shardfall", r: "common",   pow: 3,  name: "Frostkristall",      art: "frost",      text: "Langsam. Langsamer. Stillstand." },
+  { id: "blitzspule",  set: "shardfall",  r: "rare",      pow: 4,  name: "Blitzspule",         art: "tesla",      text: "Springt von Gegner zu Gegner." },
+  { id: "phantom",     set: "shardfall",  r: "epic",      pow: 5,  name: "Phantom",            art: "phantom",    text: "Nur Scharfschützen sehen es kommen." },
+  { id: "prisma",      set: "shardfall",  r: "epic",      pow: 7,  name: "Prisma",             art: "prism",      text: "Licht wird zur Waffe." },
+  { id: "risslaeufer", set: "shardfall",  r: "legendary", pow: 8,  name: "Rissläufer",         art: "riftwalker", text: "Er kommt durch den Riss. Und er ist nicht allein." },
+  { id: "riftkoloss",  set: "shardfall",  r: "legendary", pow: 9,  name: "Riftkoloss",         art: "boss",       text: "Wenn der Boden bebt, ist es zu spät." },
+  { id: "riss",        set: "riftward",   r: "rare",      pow: 5,  name: "Der Riss",           art: "rift",       text: "Halte ihn auf. Um jeden Preis." },
+  { id: "kristallkern", set: "riftward",  r: "common",    pow: 3,  name: "Kristallkern",       art: "core",       text: "Das, was du verteidigst." },
+  { id: "waldameise",  set: "ameisenbau", r: "common",    pow: 2,  name: "Waldameise",         art: "antWood",    text: "Samen, Insekten, Nadeln: Hauptsache, es geht nach Hause." },
+  { id: "ernteameise", set: "ameisenbau", r: "common",    pow: 2,  name: "Ernteameise",        art: "antHarvest", text: "Große Köpfe, volle Vorräte." },
+  { id: "blattschneider", set: "ameisenbau", r: "rare",   pow: 4,  name: "Blattschneider",     art: "antLeaf",    text: "Trägt das Zehnfache ihres Gewichts." },
+  { id: "pilzgarten",  set: "ameisenbau", r: "rare",      pow: 3,  name: "Pilzgarten",         art: "fungus",     text: "Die Ameisen sind die Gärtner." },
+  { id: "rivalen",     set: "ameisenbau", r: "rare",      pow: 5,  name: "Rivalenkolonie",     art: "rivals",     text: "Unter der Erde ist nicht genug Platz für zwei." },
+  { id: "koenigin",    set: "ameisenbau", r: "epic",      pow: 7,  name: "Ameisenkönigin",     art: "queen",      text: "Alles beginnt mit ihr." },
+  { id: "drako",       set: "drako",      r: "epic",      pow: 6,  name: "Drako",              art: "drako",      text: "Klein für einen Drachen. Groß genug für die Welt." },
+  { id: "feueratem",   set: "drako",      r: "rare",      pow: 5,  name: "Feueratem",          art: "breath",     text: "Erst einatmen. Dann alles anzünden." },
+  { id: "drachenkristall", set: "drako",  r: "common",    pow: 1,  name: "Drachenkristall",    art: "dcrystal",   text: "Funkelt, klimpert, macht stärker." },
+  { id: "lavafuerst",  set: "drako",      r: "legendary", pow: 9,  name: "Lavafürst",          art: "lavalord",   text: "Er herrscht, wo der Boden brennt." },
+  { id: "glut",        set: "glutwerk",   r: "epic",      pow: 6,  name: "Die Glut",           art: "ember",      text: "Aus einem Funken wird ein Feuer." },
+  { id: "glutwerk",    set: "glutwerk",   r: "legendary", pow: 9,  name: "Glutwerk",           art: "forge",      text: "Hier werden Spiele geschmiedet." },
+  { id: "foxy-wander", set: "foxy",       r: "mythic",    pow: 10, name: "Die Wanderin",  img: "wander", w: 40, text: "Die letzte Füchsin von Nebelfarn." },
+  { id: "foxy-ruins",  set: "foxy",       r: "mythic",    pow: 10, name: "Mondquelle",    img: "ruins",  w: 30, text: "Wo sie die Hand hebt, findet das Wasser seinen Weg." },
+  { id: "foxy-frost",  set: "foxy",       r: "mythic",    pow: 10, name: "Kristallseele", img: "frost",  w: 20, text: "Für einen Atemzug gefriert der Nebel." },
+  { id: "foxy-seal",   set: "foxy",       r: "mythic",    pow: 10, name: "Stiller Zauber", img: "seal",  w: 10, text: "Kein Wort. Nur ein Kreis aus Licht." },
+];
+CARDS.forEach((c, i) => c.no = i + 1);
+const FOXY_IMG = k => `../shardfall/img/foxy-${k}.jpg`;
+
+/* =========================================================
+   Ab hier musst du nichts ändern
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = n => Math.round(n).toLocaleString("de-DE");
+const byId = id => CARDS.find(c => c.id === id);
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+/* ---- Speicher ---- */
+const glutGet = () => Math.max(0, parseInt(store("glutwerk-glut") || "0", 10) || 0);
+function glutSet(n, anim) {
+  store("glutwerk-glut", String(Math.max(0, Math.round(n))));
+  renderGlut(anim);
+}
+function loadColl() {
+  let d = {};
+  try { d = JSON.parse(store("glutwerk-cards") || "{}") || {}; } catch (e) { d = {}; }
+  d.c = d.c || {}; d.sets = d.sets || {}; d.packs = d.packs || 0;
+  return d;
+}
+let coll = loadColl();
+const saveColl = () => store("glutwerk-cards", JSON.stringify(coll));
+const own = id => coll.c[id] || { n: 0, f: 0 };
+const owned = id => { const o = own(id); return o.n + o.f > 0; };
+
+/* ---- Karte zeichnen ---- */
+let svgUid = 0;
+function artSVG(key) {
+  // eindeutige IDs, damit mehrere Karten auf einer Seite sich nicht stören
+  const u = "a" + (++svgUid);
+  const s = (ART[key] || "").replace(/id="(\w+)"/g, `id="$1${u}"`).replace(/url\(#(\w+)\)/g, `url(#$1${u})`);
+  return `<svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice">${s}</svg>`;
+}
+function cardHTML(c, foil) {
+  const set = SETS[c.set];
+  const mythic = c.r === "mythic";
+  return `<div class="tcard r-${c.r}${foil ? " foil" : ""}" data-tilt>
+    <div class="frame"><div class="inner">
+      ${mythic ? `<div class="tc-art"><img src="${FOXY_IMG(c.img)}" alt="" draggable="false"></div>` : ""}
+      <div class="tc-head"><span class="tc-name" style="font-size:${Math.min(9.6, 100 / c.name.length).toFixed(2)}cqw">${esc(c.name)}</span><span class="tc-pow">${c.pow}</span></div>
+      ${mythic ? `<div class="tc-spacer"></div>` : `<div class="tc-art" style="background:linear-gradient(135deg,${set.c[0]},${set.c[1]})">${artSVG(c.art)}</div>`}
+      <div class="tc-type"><span>${esc(set.name)}</span><b>${RARITY[c.r].name}</b></div>
+      <div class="tc-text">${esc(c.text)}</div>
+      <div class="tc-foot"><span>${String(c.no).padStart(2, "0")} / ${CARDS.length}</span><span class="tc-gem"></span></div>
+    </div></div>
+    ${foil ? `<div class="foil-tag">GLANZ</div>` : ""}
+    <div class="tc-holo"></div><div class="tc-glare"></div>
+  </div>`;
+}
+function lockedHTML(c) {
+  return `<div class="tcard locked"><div class="frame"><div class="inner">
+    <div class="q">?</div><div class="lk-set">${esc(SETS[c.set].name)}</div>
+    <div class="lk-rar"><span class="tc-gem" style="background:var(--${c.r});box-shadow:0 0 6px var(--${c.r})"></span>${RARITY[c.r].name}</div>
+    <div class="lk-no">${String(c.no).padStart(2, "0")} / ${CARDS.length}</div>
+  </div></div></div>`;
+}
+const FLAME_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>';
+const backHTML = () => `<div class="cback">${FLAME_SVG}<div class="bt">Glutwerk</div></div>`;
+const packHTML = key => `<div class="pack ${key}">
+  <div class="pk-top"></div>
+  <div class="pk-body"><div class="pk-brand">Glutwerk</div><div class="pk-emblem">${FLAME_SVG}</div>
+  <div class="pk-name">${esc(PACKS[key].name.replace("-Pack", ""))}<br>Pack</div><div class="pk-sub">Serie 1 · ${PACKS[key].size} Karten</div></div>
+</div>`;
+
+/* ---- 3D-Neigen mit Maus/Finger ---- */
+function tiltMove(e) {
+  const t = e.target.closest && e.target.closest("[data-tilt]");
+  if (!t) return;
+  const r = t.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  const k = t.closest(".zoom") ? 18 : 12;
+  t.style.setProperty("--ry", ((x - .5) * k) + "deg");
+  t.style.setProperty("--rx", ((.5 - y) * k) + "deg");
+  t.style.setProperty("--mx", (x * 100) + "%");
+  t.style.setProperty("--my", (y * 100) + "%");
+  t.classList.add("tilting");
+}
+function tiltOut(e) {
+  const t = e.target.closest && e.target.closest("[data-tilt]");
+  if (!t || (e.relatedTarget && t.contains(e.relatedTarget))) return;
+  t.style.removeProperty("--rx"); t.style.removeProperty("--ry");
+  t.classList.remove("tilting");
+}
+document.addEventListener("pointermove", tiltMove);
+document.addEventListener("pointerout", tiltOut);
+
+/* ---- Oberfläche ---- */
+function renderGlut(anim) {
+  $("glutVal").textContent = fmt(glutGet());
+  if (anim) { const c = $("glutChip"); c.classList.remove("bump", "minus"); void c.offsetWidth; c.classList.add(anim); }
+  renderShop();
+}
+function renderShop() {
+  const g = glutGet();
+  $("shop").innerHTML = Object.entries(PACKS).map(([k, p]) => `
+    <div class="offer ${k}" style="--og:${k === "inferno" ? "#ff2d55" : "#ff6a2b"}">
+      <div class="mini-pack">${packHTML(k)}</div>
+      <h3>${esc(p.name)}</h3>
+      <div class="odds">${esc(p.text)}</div>
+      <button class="buy" data-buy="${k}" ${g < p.price ? "disabled" : ""}>
+        ${g < p.price ? `Noch ${fmt(p.price - g)} Glut` : `${FLAME_SVG} ${fmt(p.price)} · Öffnen`}
+      </button>
+    </div>`).join("");
+}
+function renderEarn() {
+  $("earn").innerHTML = EARN_INFO.map(([t, n]) => `<span>${esc(t)} <b>+${n}</b></span>`).join("");
+}
+let setFilter = "all", onlyOwned = false;
+function renderFilters() {
+  const chip = (k, label, dot) => {
+    const list = CARDS.filter(c => k === "all" || c.set === k);
+    const have = list.filter(c => owned(c.id)).length;
+    return `<button class="chip${setFilter === k ? " on" : ""}${have === list.length ? " done" : ""}" data-set="${k}">${dot ? `<span class="dot" style="background:linear-gradient(135deg,${dot[0]},${dot[1]})"></span>` : ""}${esc(label)} <em>${have}/${list.length}</em></button>`;
+  };
+  $("filters").innerHTML = chip("all", "Alle") + Object.entries(SETS).map(([k, s]) => chip(k, s.name, s.c)).join("") +
+    `<button class="chip chip-right${onlyOwned ? " on" : ""}" id="onlyOwned">Nur gesammelte</button>`;
+}
+function renderGrid() {
+  const list = CARDS.filter(c => (setFilter === "all" || c.set === setFilter) && (!onlyOwned || owned(c.id)));
+  $("grid").innerHTML = list.length ? list.map(c => {
+    const o = own(c.id);
+    if (!owned(c.id)) return `<div class="slotc" data-card="${c.id}">${lockedHTML(c)}</div>`;
+    return `<div class="slotc" data-card="${c.id}">${cardHTML(c, o.n === 0 && o.f > 0)}
+      ${o.n > 1 ? `<span class="count">${o.n}×</span>` : ""}${o.f ? `<span class="count foilc" title="Glanzkarten">✦${o.f > 1 ? o.f : ""}</span>` : ""}</div>`;
+  }).join("") : `<div style="grid-column:1/-1;color:var(--muted);text-align:center;padding:40px">Hier hast du noch keine Karten. Öffne ein Pack!</div>`;
+}
+function renderProgress() {
+  const have = CARDS.filter(c => owned(c.id)).length;
+  $("progNum").textContent = have; $("progTot").textContent = CARDS.length;
+  $("progBar").style.width = (have / CARDS.length * 100) + "%";
+  const foils = CARDS.filter(c => own(c.id).f).length;
+  $("collSub").textContent = `${have} von ${CARDS.length} Karten${foils ? ` · ${foils} Glanz` : ""} · ${coll.packs} Packs geöffnet`;
+  // Fächer oben: die drei besten eigenen Karten (oder Beispiele)
+  const best = CARDS.filter(c => owned(c.id)).sort((a, b) => RORDER.indexOf(b.r) - RORDER.indexOf(a.r) || b.pow - a.pow).slice(0, 3);
+  const fan = best.length === 3 ? [best[1], best[0], best[2]] : [byId("kiko"), byId("glutwerk"), byId("drako")];
+  $("introFan").innerHTML = fan.map(c => cardHTML(c, !best.length ? c.id === "glutwerk" : own(c.id).f > 0 && own(c.id).n === 0)).join("");
+}
+function renderAll() { renderGlut(); renderEarn(); renderFilters(); renderGrid(); renderProgress(); }
+
+document.addEventListener("click", e => {
+  const s = e.target.closest("[data-set]");
+  if (s) { setFilter = s.dataset.set; renderFilters(); renderGrid(); return; }
+  if (e.target.closest("#onlyOwned")) { onlyOwned = !onlyOwned; renderFilters(); renderGrid(); return; }
+  const b = e.target.closest("[data-buy]");
+  if (b && !b.disabled) { buyPack(b.dataset.buy); return; }
+  const c = e.target.closest(".grid [data-card]");
+  if (c) openZoom(c.dataset.card);
+});
+
+/* ---- Karte groß ---- */
+let zoomFoil = false, zoomId = null;
+function openZoom(id, foil) {
+  const c = byId(id), o = own(id);
+  zoomId = id;
+  zoomFoil = foil != null ? foil : (o.n === 0 && o.f > 0);
+  $("zoomCard").innerHTML = owned(id) ? cardHTML(c, zoomFoil) : lockedHTML(c);
+  $("zoomInfo").innerHTML = !owned(id) ? `Noch nicht gefunden · <b>${RARITY[c.r].name}</b>` :
+    `Du hast <b>${o.n}× normal</b>${o.f ? ` und <b>${o.f}× Glanz</b>` : ""}` +
+    (o.n && o.f ? ` <button class="chip" id="zoomToggle">${zoomFoil ? "Normal zeigen" : "✦ Glanz zeigen"}</button>` : "");
+  const tg = $("zoomToggle"); if (tg) tg.onclick = ev => { ev.stopPropagation(); openZoom(id, !zoomFoil); };
+  $("zoom").classList.add("open");
+}
+function closeZoom() { $("zoom").classList.remove("open"); }
+$("zoomX").onclick = closeZoom;
+$("zoom").addEventListener("click", e => { if (e.target === $("zoom")) closeZoom(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeZoom(); });
+
+/* =========================================================
+   PACKS ZIEHEN
+   ========================================================= */
+function rollRarity(odds, min) {
+  const keys = RORDER.filter(r => RORDER.indexOf(r) >= RORDER.indexOf(min || "common"));
+  const sum = keys.reduce((a, k) => a + odds[k], 0);
+  let x = Math.random() * sum;
+  for (const k of keys) { x -= odds[k]; if (x <= 0) return k; }
+  return keys[0];
+}
+function pickCard(r) {
+  const list = CARDS.filter(c => c.r === r);
+  const sum = list.reduce((a, c) => a + (c.w || 1), 0);
+  let x = Math.random() * sum;
+  for (const c of list) { x -= (c.w || 1); if (x <= 0) return c; }
+  return list[0];
+}
+function buyPack(key) {
+  const p = PACKS[key];
+  if (glutGet() < p.price) return;
+  glutSet(glutGet() - p.price, "minus");
+  const pulls = [];
+  for (let i = 0; i < p.size; i++) {
+    const r = rollRarity(p.odds, i === p.size - 1 ? p.guarantee : null);
+    pulls.push({ c: pickCard(r), foil: Math.random() < p.foil });
+  }
+  // in die Sammlung legen (sofort speichern, damit nichts verloren geht)
+  let refund = 0;
+  pulls.forEach(x => {
+    const o = coll.c[x.c.id] || { n: 0, f: 0 };
+    x.isNew = o.n + o.f === 0;
+    x.newFoil = x.foil && !o.f && !x.isNew;
+    x.dup = !x.isNew && !x.newFoil;
+    x.refund = x.dup ? RARITY[x.c.r].refund * (x.foil ? 2 : 1) : 0;
+    refund += x.refund;
+    if (x.foil) o.f++; else o.n++;
+    coll.c[x.c.id] = o;
+  });
+  const sets = [];
+  Object.keys(SETS).forEach(k => {
+    if (coll.sets[k]) return;
+    if (CARDS.filter(c => c.set === k).every(c => owned(c.id))) { coll.sets[k] = true; sets.push(k); }
+  });
+  coll.packs++;
+  saveColl();
+  const bonus = refund + sets.length * SET_BONUS;
+  if (bonus) store("glutwerk-glut", String(glutGet() + bonus));
+  // spannend: die besten Karten zuletzt
+  pulls.sort((a, b) => RORDER.indexOf(a.c.r) - RORDER.indexOf(b.c.r) || (a.foil - b.foil));
+  startOpening(key, pulls, refund, sets);
+}
+
+/* =========================================================
+   ÖFFNEN – Animation, Effekte, Ton
+   ========================================================= */
+let op = null;
+function startOpening(key, pulls, refund, sets) {
+  op = { key, pulls, refund, sets, flipped: 0, stage: "pack", taps: 0 };
+  const best = pulls[pulls.length - 1].c.r;
+  $("opening").classList.toggle("mythic-bg", best === "mythic");
+  $("opPack").innerHTML = packHTML(key);
+  $("opPack").className = "op-pack";
+  $("opPack").style.display = "";
+  $("opGlow").style.display = "";
+  $("reveal").className = "reveal"; $("reveal").innerHTML = "";
+  $("opSummary").innerHTML = ""; $("opActions").innerHTML = "";
+  $("opHint").textContent = "Tippe auf das Pack";
+  $("opening").classList.add("open");
+  document.body.style.overflow = "hidden";
+  fxResize(); audio();
+}
+$("opPack").onclick = () => {
+  if (!op || op.stage !== "pack") return;
+  op.taps++;
+  const el = $("opPack");
+  if (op.taps === 1) {
+    $("opHint").textContent = "Nochmal!";
+    el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
+    sfx("tap");
+    return;
+  }
+  op.stage = "tearing";
+  $("opHint").textContent = "";
+  el.classList.remove("shake"); el.classList.add("shake2");
+  sfx("rumble");
+  setTimeout(() => {
+    el.classList.remove("shake2"); el.classList.add("torn");
+    sfx("tear");
+    const r = el.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height * .15, "#ffcf9c", 60, 7);
+  }, 650);
+  setTimeout(() => {
+    el.classList.add("gone");
+    $("flash").classList.remove("go"); void $("flash").offsetWidth; $("flash").classList.add("go");
+    dealCards();
+  }, 1250);
+};
+function dealCards() {
+  op.stage = "cards";
+  setTimeout(() => { $("opPack").style.display = "none"; }, 600);
+  $("opGlow").style.display = "none";
+  const rv = $("reveal");
+  rv.innerHTML = op.pulls.map((x, i) => `
+    <div class="rslot r-${x.c.r}" data-i="${i}" style="--rot:${(i - 2) * 9}deg">
+      <div class="rays"></div>
+      <div class="flipper"><div class="face back">${backHTML()}</div><div class="face front">${cardHTML(x.c, x.foil)}</div></div>
+      <div class="rtag ${x.dup ? "dup" : "new"}">${x.isNew ? "Neu!" : x.newFoil ? "Neu: Glanz!" : `+${x.refund} Glut`}</div>
+    </div>`).join("");
+  rv.classList.add("on");
+  [...rv.children].forEach((s, i) => setTimeout(() => { s.classList.add("in"); sfx("deal"); }, 150 + i * 140));
+  setTimeout(() => { $("opHint").textContent = "Tippe die Karten an"; showActions(); }, 300 + op.pulls.length * 140);
+}
+$("reveal").addEventListener("click", e => {
+  const s = e.target.closest(".rslot");
+  if (!s || !op) return;
+  if (s.classList.contains("flipped")) { openZoom(op.pulls[+s.dataset.i].c.id, op.pulls[+s.dataset.i].foil); return; }
+  flip(s);
+});
+function flip(s) {
+  if (s.classList.contains("flipped")) return;
+  s.classList.add("flipped");
+  const x = op.pulls[+s.dataset.i];
+  op.flipped++;
+  const r = s.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const col = { common: "#cfd6e4", rare: "#4da3ff", epic: "#b26bff", legendary: "#ffc443", mythic: "#ff6ad5" }[x.c.r];
+  setTimeout(() => {
+    sfx(x.c.r);
+    if (x.c.r === "common") burst(cx, cy, col, 14, 3);
+    if (x.c.r === "rare") burst(cx, cy, col, 40, 5);
+    if (x.c.r === "epic") { burst(cx, cy, col, 80, 7); burst(cx, cy, "#fff", 20, 5); }
+    if (x.c.r === "legendary" || x.c.r === "mythic") {
+      burst(cx, cy, col, 160, 10); burst(cx, cy, "#fff", 50, 8);
+      if (x.c.r === "mythic") { burst(cx, cy, "#7df9ff", 90, 9); burst(cx, cy, "#ffe66d", 90, 9); }
+      $("opening").classList.remove("quake"); void $("opening").offsetWidth; $("opening").classList.add("quake");
+      $("flash").classList.remove("go"); void $("flash").offsetWidth; $("flash").classList.add("go");
+      bigWord(RARITY[x.c.r].name + "!", col);
+      rain(col);
+    } else if (x.foil) bigWord("Glanz!", "#7df9ff", true);
+    if (x.foil) burst(cx, cy, "#7df9ff", 30, 6);
+  }, 330);
+  if (op.flipped === op.pulls.length) setTimeout(finish, 900);
+}
+function bigWord(t, c, small) {
+  const w = $("bigWord");
+  w.textContent = t;
+  w.style.color = c;
+  w.style.fontSize = small ? "clamp(30px,6vw,56px)" : "";
+  w.style.textShadow = `0 0 30px ${c}, 0 0 60px ${c}, 0 4px 0 rgba(0,0,0,.4)`;
+  w.classList.remove("go"); void w.offsetWidth; w.classList.add("go");
+}
+function showActions() {
+  if (op.stage !== "cards") return;
+  $("opActions").innerHTML = `<button class="op-btn hot" id="flipAll">Alle aufdecken</button>`;
+  $("flipAll").onclick = () => {
+    const rest = [...document.querySelectorAll(".rslot:not(.flipped)")];
+    rest.forEach((s, i) => setTimeout(() => flip(s), i * 380));
+    $("opActions").innerHTML = "";
+  };
+}
+function finish() {
+  op.stage = "done";
+  $("opHint").textContent = "";
+  const lines = [];
+  const news = op.pulls.filter(x => x.isNew || x.newFoil).length;
+  lines.push(news ? `<span><b>${news}</b> ${news === 1 ? "neue Karte" : "neue Karten"} in deiner Sammlung!</span>` : `<span>Diesmal nichts Neues, aber Glut zurück.</span>`);
+  if (op.refund) lines.push(`<span>Doppelte Karten: <b>+${op.refund} Glut</b></span>`);
+  op.sets.forEach(k => lines.push(`<span>🏆 Set <b>${esc(SETS[k].name)}</b> komplett: <b>+${SET_BONUS} Glut</b></span>`));
+  $("opSummary").innerHTML = lines.join("");
+  if (op.sets.length) setTimeout(() => { bigWord("Set komplett!", "#3ddc97"); rain("#3ddc97"); sfx("legendary"); }, 400);
+  const p = PACKS[op.key];
+  const can = glutGet() >= p.price;
+  $("opActions").innerHTML = `<button class="op-btn" id="opDone">Zur Sammlung</button>
+    <button class="op-btn hot" id="opAgain" ${can ? "" : "disabled"}>${can ? `Noch eins · ${fmt(p.price)} Glut` : `Noch ${fmt(p.price - glutGet())} Glut nötig`}</button>`;
+  $("opDone").onclick = closeOpening;
+  $("opAgain").onclick = () => { const k = op.key; closeOpening(true); buyPack(k); };
+}
+function closeOpening(keep) {
+  $("opening").classList.remove("open");
+  document.body.style.overflow = "";
+  op = null; parts.length = 0;
+  renderAll();
+  if (!keep) document.querySelector(".grid").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ---- Partikel ---- */
+const cv = $("fx"), cx2 = cv.getContext("2d");
+const parts = [];
+let raf = 0;
+function fxResize() { const d = Math.min(2, devicePixelRatio || 1); cv.width = innerWidth * d; cv.height = innerHeight * d; cx2.setTransform(d, 0, 0, d, 0, 0); }
+addEventListener("resize", fxResize);
+function burst(x, y, c, n, sp) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, v = (Math.random() * .8 + .2) * sp;
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - sp * .3, c, life: 1, d: .008 + Math.random() * .014, s: 1.5 + Math.random() * 3, g: .12, star: Math.random() < .25 });
+  }
+  loop();
+}
+function rain(c) {
+  for (let i = 0; i < 90; i++) parts.push({ x: Math.random() * innerWidth, y: -20 - Math.random() * innerHeight * .6, vx: (Math.random() - .5) * 1.2, vy: 1.5 + Math.random() * 2.5, c: Math.random() < .3 ? "#fff" : c, life: 1, d: .004 + Math.random() * .004, s: 2 + Math.random() * 3, g: .03, star: true });
+  loop();
+}
+function loop() {
+  if (raf) return;
+  const step = () => {
+    cx2.clearRect(0, 0, innerWidth, innerHeight);
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.x += p.vx; p.y += p.vy; p.vy += p.g; p.vx *= .985; p.life -= p.d;
+      if (p.life <= 0 || p.y > innerHeight + 30) { parts.splice(i, 1); continue; }
+      cx2.globalAlpha = Math.max(0, p.life);
+      cx2.fillStyle = p.c; cx2.shadowColor = p.c; cx2.shadowBlur = 10;
+      if (p.star) { cx2.save(); cx2.translate(p.x, p.y); cx2.rotate(p.life * 6); cx2.fillRect(-p.s, -p.s * .25, p.s * 2, p.s * .5); cx2.fillRect(-p.s * .25, -p.s, p.s * .5, p.s * 2); cx2.restore(); }
+      else { cx2.beginPath(); cx2.arc(p.x, p.y, p.s, 0, 7); cx2.fill(); }
+    }
+    cx2.globalAlpha = 1; cx2.shadowBlur = 0;
+    raf = parts.length ? requestAnimationFrame(step) : 0;
+  };
+  raf = requestAnimationFrame(step);
+}
+
+/* ---- Ton (selbst erzeugt, keine Dateien) ---- */
+let ac = null, muted = store("glutwerk-cards-mute") === "1";
+$("muteBtn").textContent = muted ? "🔇" : "🔊";
+$("muteBtn").onclick = () => { muted = !muted; store("glutwerk-cards-mute", muted ? "1" : "0"); $("muteBtn").textContent = muted ? "🔇" : "🔊"; };
+function audio() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume(); } catch (e) { ac = null; } }
+function tone(f, t0, dur, type = "sine", vol = .15, f2) {
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, ac.currentTime + t0);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, ac.currentTime + t0 + dur);
+  g.gain.setValueAtTime(0, ac.currentTime + t0);
+  g.gain.linearRampToValueAtTime(vol, ac.currentTime + t0 + .01);
+  g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + t0 + dur);
+  o.connect(g).connect(ac.destination); o.start(ac.currentTime + t0); o.stop(ac.currentTime + t0 + dur + .05);
+}
+function noise(t0, dur, vol = .2, hp = 1200) {
+  const b = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+  const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+  s.buffer = b; f.type = "highpass"; f.frequency.value = hp; g.gain.value = vol;
+  s.connect(f).connect(g).connect(ac.destination); s.start(ac.currentTime + t0);
+}
+function sfx(k) {
+  if (muted || !ac) return;
+  try {
+    const arp = (notes, gap, type, vol, dur) => notes.forEach((n, i) => tone(n, i * gap, dur || .35, type, vol));
+    ({
+      tap: () => tone(220, 0, .12, "triangle", .2, 140),
+      rumble: () => { tone(70, 0, .7, "sawtooth", .08, 110); noise(0, .6, .05, 300); },
+      tear: () => { noise(0, .35, .35, 900); tone(600, 0, .25, "triangle", .08, 1400); },
+      deal: () => noise(0, .08, .12, 2500),
+      common: () => tone(660, 0, .15, "triangle", .1),
+      rare: () => arp([660, 880], .08, "triangle", .12),
+      epic: () => arp([523, 659, 784, 1047], .07, "triangle", .12, .4),
+      legendary: () => { tone(98, 0, 1.2, "sawtooth", .07); arp([523, 659, 784, 1047, 1319, 1568], .07, "square", .05, .6); arp([1047, 1319, 1568], .09, "sine", .1, 1); },
+      mythic: () => { tone(65, 0, 1.6, "sawtooth", .08); arp([440, 554, 659, 880, 1109, 1319, 1760], .06, "sine", .12, .9); arp([880, 1109, 1319, 1760], .12, "triangle", .06, 1.4); },
+    })[k]?.();
+  } catch (e) {}
+}
+
+/* ---- Glut aus anderen Tabs übernehmen ---- */
+addEventListener("storage", e => { if (e.key === "glutwerk-glut") renderGlut(); if (e.key === "glutwerk-cards") { coll = loadColl(); renderAll(); } });
+
+renderAll();
+</script>
+</body>
+</html>

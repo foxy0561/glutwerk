@@ -58,7 +58,7 @@ header{
 .logo-mark svg{width:20px;height:20px}
 .logo span{color:var(--accent)}
 .nav{display:flex;gap:4px}
-.nav a{padding:8px 14px;border-radius:7px;font-weight:600;font-size:14px;color:var(--muted);transition:color .15s,background .15s}
+.nav a{white-space:nowrap;padding:8px 14px;border-radius:7px;font-weight:600;font-size:14px;color:var(--muted);transition:color .15s,background .15s}
 .nav a:hover{color:var(--text)}
 .nav a.active{color:var(--text);background:var(--card);box-shadow:inset 0 -2px 0 var(--accent)}
 .search{
@@ -321,6 +321,45 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 .top-empty{font-size:13px;color:var(--muted);line-height:1.5;padding:6px 2px}
 @media (max-width:900px){.info-row{grid-template-columns:1fr}}
 
+/* Gerade online */
+.live-badge{position:absolute;right:10px;bottom:10px;z-index:2;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 9px;border-radius:6px;background:rgba(11,13,18,.88);backdrop-filter:blur(6px);color:#bdf5d9}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--browser);box-shadow:0 0 0 0 rgba(61,220,151,.7);animation:livePulse 1.8s infinite}
+@keyframes livePulse{70%{box-shadow:0 0 0 7px rgba(61,220,151,0)}100%{box-shadow:0 0 0 0 rgba(61,220,151,0)}}
+.hero-live{display:inline-flex;align-items:center;gap:7px;margin:0 0 14px;font-size:13px;font-weight:600;color:#bdf5d9}
+.top-live{color:var(--browser)}
+
+/* Glut-Punkte */
+.glut-chip{display:flex;align-items:center;gap:6px;flex-shrink:0;padding:8px 12px;border-radius:8px;
+  background:linear-gradient(135deg,rgba(255,106,43,.16),rgba(255,179,71,.08));border:1px solid rgba(255,106,43,.45);
+  font-family:Rajdhani,sans-serif;font-weight:700;font-size:17px;color:var(--accent2);transition:transform .15s,box-shadow .15s}
+.glut-chip:hover{box-shadow:0 0 18px rgba(255,106,43,.45);transform:translateY(-1px)}
+.glut-chip svg{width:16px;height:16px;color:var(--accent);filter:drop-shadow(0 0 6px rgba(255,106,43,.8))}
+.glut-chip.bump{animation:glutBump .5s}
+@keyframes glutBump{30%{transform:scale(1.18);box-shadow:0 0 24px rgba(255,106,43,.8)}}
+.player-glut{font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;color:var(--accent2);display:flex;align-items:center;gap:5px}
+.player-glut:empty{display:none}
+.toasts{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;gap:10px;align-items:flex-end;pointer-events:none}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:12px;min-width:240px;max-width:340px;padding:12px 16px;border-radius:12px;
+  background:linear-gradient(135deg,#2a1408,#1a0e08);border:1px solid rgba(255,106,43,.55);box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 24px rgba(255,106,43,.25);
+  animation:toastIn .45s cubic-bezier(.2,1.4,.4,1)}
+.toast.out{animation:toastOut .35s forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.9)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
+.toast-amt{font-family:Rajdhani,sans-serif;font-weight:700;font-size:26px;color:var(--accent2);text-shadow:0 0 12px rgba(255,106,43,.7);white-space:nowrap}
+.toast-text{font-size:13px;line-height:1.35}
+.toast-text b{display:block;font-size:14px}
+.toast-text a{color:var(--accent);font-weight:700}
+
+/* Feedback */
+.fb-kinds{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.fb-kind{padding:8px 14px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--muted)}
+.fb-kind.on{color:var(--text);border-color:var(--accent);background:rgba(255,106,43,.12)}
+.fb-text{width:100%;min-height:120px;resize:vertical;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;color:var(--text);font:15px/1.5 Inter,sans-serif;outline:none;margin-bottom:8px}
+.fb-text:focus{border-color:var(--accent)}
+.fb-done{text-align:center;padding:10px 0 4px}
+.fb-done .big{font-size:44px;margin-bottom:8px}
+.footer-fb{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
 /* ---------- Handy ---------- */
 @media (max-width:640px){
   header{padding:12px 16px;gap:12px}
@@ -341,6 +380,15 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   .hero{padding:24px;min-height:280px}
   .tabs{width:100%}
   .tab{flex:1;padding:8px 6px;font-size:13px}
+  header{flex-wrap:wrap;row-gap:8px}
+  .nav{order:10;width:100%;justify-content:space-between}
+  .nav a{flex:1;text-align:center}
+  .glut-chip{padding:7px 9px;font-size:16px}
+  .fb-btn span,#newTabBtn{display:none}
+  .player-bar{gap:8px;padding:8px 10px}
+  .player-bar h3{font-size:16px}
+  .toasts{left:12px;right:12px;bottom:12px;align-items:stretch}
+  .toast{max-width:none}
 }
 @media (max-width:420px){header .logo{display:none}}
 </style>
@@ -358,6 +406,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
     <a href="./" class="active">Spiele</a>
     <a href="minecraft/">Minecraft</a>
     <a href="thyrvenna/">Foxys Welt</a>
+    <a href="karten/">Karten</a>
   </nav>
   <label class="search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -369,6 +418,10 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
     <span class="soon-tag" id="launcherTag">BALD</span>
     <span class="launcher-tip">Der Glutwerk-Launcher für Windows ist noch in Arbeit. Bis dahin kannst du alle Spiele direkt hier im Browser spielen.</span>
   </button>
+  <a class="glut-chip" id="glutChip" href="karten/" title="Glut-Punkte: Damit öffnest du Kartenpacks">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>
+    <b id="glutVal">0</b>
+  </a>
   <button class="name-btn" id="nameBtn" title="Spielername">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
     <span id="nameLabel">Name eingeben</span>
@@ -405,6 +458,11 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <div class="overlay" id="player">
   <div class="player-bar">
     <h3 id="playerTitle"></h3>
+    <span class="player-glut" id="playerGlut" title="Du sammelst gerade Glut-Punkte"></span>
+    <button class="icon-btn fb-btn" id="fbOpenBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/><path d="M12 8v4M12 14.5v.01"/></svg>
+      <span>Fehler melden</span>
+    </button>
     <button class="icon-btn" id="fullscreenBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
       Vollbild
@@ -444,6 +502,28 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
     </div>
   </div>
 </div>
+
+<!-- Fehler / Feedback melden -->
+<div class="modal-wrap" id="fbModal">
+  <div class="modal">
+    <h3 id="fbTitle">Feedback</h3>
+    <p>Was ist dir aufgefallen? Deine Nachricht geht direkt an den Entwickler.</p>
+    <div class="fb-kinds" id="fbKinds">
+      <button class="fb-kind on" data-kind="Bug">🐞 Fehler</button>
+      <button class="fb-kind" data-kind="Idee">💡 Idee</button>
+      <button class="fb-kind" data-kind="Lob">❤️ Lob</button>
+    </div>
+    <textarea class="fb-text" id="fbText" maxlength="1000" placeholder="z.B. In Level 3 falle ich durch den Boden, wenn ich …"></textarea>
+    <div class="name-hint" id="fbHint"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="fbCancel">Abbrechen</button>
+      <button class="btn btn-play" id="fbSend">Senden</button>
+    </div>
+  </div>
+</div>
+
+<!-- Glut-Meldungen -->
+<div class="toasts" id="toasts"></div>
 
 <!-- Spielername -->
 <div class="modal-wrap" id="nameModal">
@@ -514,6 +594,19 @@ const LAUNCHER_URL = "";
 const TOP_DB_URL = "https://fqidanxjcwdpjdtngimu.supabase.co";
 const TOP_DB_KEY = "sb_publishable_BSiWVUEtRP2hE6RL77pI8Q_J57eHlaj";
 const TOP_COUNT = 3;
+
+/*
+  Glut-Punkte: verdient man durch Spielen, ausgeben kann man sie im Tab "Karten" für Kartenpacks.
+  Gespeichert nur auf dem Gerät (kein Login).
+*/
+const GLUT = {
+  welcome: 250,     // Geschenk beim allerersten Besuch
+  newGame: 100,     // ein Spiel zum ersten Mal starten
+  daily: 40,        // erstes Spiel des Tages
+  perMinute: 2,     // pro Minute Spielzeit (nur wenn das Fenster offen ist)
+  minuteCap: 120,   // höchstens so viel Spielzeit-Glut pro Tag
+  allGames: 300,    // Bonus, wenn man alle Spiele einmal gespielt hat
+};
 const GAMES = [
   {
     title: "Kiko Hüpft",
@@ -745,6 +838,7 @@ function renderHero() {
     <div class="hero-content">
       <div class="hero-label">★ Empfohlen</div>
       <h1>${esc(g.title)}</h1>
+      ${onlineCounts[gameId(g)] ? `<div class="hero-live"><span class="live-dot"></span>${liveText(onlineCounts[gameId(g)])}</div>` : ""}
       <p>${esc(g.desc)}</p>
       ${actionHTML(g, true)}
     </div>`;
@@ -768,6 +862,7 @@ function renderGrid() {
         <div class="cover-art" style="${coverStyle(g)}">${coverHTML(g)}</div>
         <div class="badge ${g.type}">${LABELS[g.type]}</div>
         ${g.dev ? `<div class="dev-badge">${esc(g.dev)}</div>` : ""}
+        ${liveBadge(g)}
         ${status(g) === "new" ? `<div class="badge-new">NEU</div>` : status(g) === "upd" ? `<div class="badge-new upd">UPDATE</div>` : ""}
       </div>
       <div class="card-body">
@@ -817,7 +912,9 @@ function trackPlay(g) {
     .catch(() => {});
 }
 const ICON_FIRE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>';
+let lastTopRows = null;
 function renderTop(rows) {
+  if (rows) lastTopRows = rows;
   const head = `<h2>${ICON_FIRE} Beliebt</h2><div class="top-sub">Die meisten Spieler der letzten 7 Tage</div>`;
   const list = (rows || [])
     .map(r => ({ g: GAMES.find(x => gameId(x) === r.game), n: Number(r.players) }))
@@ -833,7 +930,7 @@ function renderTop(rows) {
       <span class="top-thumb" style="${coverStyle(x.g)}">${x.g.shots && x.g.shots[0] ? `<img src="${esc(x.g.shots[0])}" alt="" loading="lazy">` : ""}</span>
       <span class="top-info">
         <span class="top-title">${esc(x.g.title)}</span>
-        <span class="top-count">${x.n} Spieler</span>
+        <span class="top-count">${x.n} Spieler${onlineCounts[gameId(x.g)] ? ` · <span class="top-live">● ${onlineCounts[gameId(x.g)]} online</span>` : ""}</span>
       </span>
     </button>`).join("") + `</div>`;
 }
@@ -845,9 +942,188 @@ function loadTop() {
     .catch(() => $("top").style.display = "none");
 }
 
+/* ---- Gerade online ---- */
+let onlineCounts = {};
+let pingTimer = null;
+const liveText = n => n === 1 ? "1 spielt gerade" : `${n} spielen gerade`;
+function liveBadge(g) {
+  const n = onlineCounts[gameId(g)];
+  return n ? `<div class="live-badge"><span class="live-dot"></span>${liveText(n)}</div>` : "";
+}
+function pingOnline(game, keepalive) {
+  if (!TOP_DB_URL) return;
+  fetch(`${TOP_DB_URL}/rest/v1/rpc/glutwerk_ping`, {
+    method: "POST", keepalive: !!keepalive,
+    headers: { "Content-Type": "application/json", apikey: TOP_DB_KEY, Authorization: "Bearer " + TOP_DB_KEY },
+    body: JSON.stringify({ p_device: deviceId(), p_game: game || null }),
+  }).catch(() => {});
+}
+function startOnline(g) {
+  const id = gameId(g);
+  clearInterval(pingTimer);
+  pingOnline(id);
+  setTimeout(loadOnline, 1500);
+  pingTimer = setInterval(() => pingOnline(id), 30000);
+}
+function stopOnline() {
+  if (!pingTimer) return;
+  clearInterval(pingTimer); pingTimer = null;
+  pingOnline(null);
+  setTimeout(loadOnline, 1500);
+}
+let lastOnlineKey = "";
+function loadOnline() {
+  if (!TOP_DB_URL) return;
+  topRpc("glutwerk_online_counts", {})
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(rows => {
+      const m = {};
+      (rows || []).forEach(r => { m[r.game] = Number(r.players) || 0; });
+      const key = JSON.stringify(m);
+      onlineCounts = m;
+      if (key === lastOnlineKey) return;
+      lastOnlineKey = key;
+      renderGrid(); renderHero(); if (lastTopRows) renderTop(lastTopRows);
+    })
+    .catch(() => {});
+}
+window.addEventListener("pagehide", () => { if (pingTimer) pingOnline(null, true); });
+
+/* ---- Glut-Punkte ---- */
+const glutGet = () => Math.max(0, parseInt(store("glutwerk-glut") || "0", 10) || 0);
+function glutState() { try { return JSON.parse(store("glutwerk-glut-state") || "{}") || {}; } catch (e) { return {}; } }
+function glutSave(s) { store("glutwerk-glut-state", JSON.stringify(s)); }
+function renderGlut(bump) {
+  $("glutVal").textContent = glutGet().toLocaleString("de-DE");
+  if (bump) { const c = $("glutChip"); c.classList.remove("bump"); void c.offsetWidth; c.classList.add("bump"); }
+}
+function glutAdd(n, title, text) {
+  if (!n) return;
+  store("glutwerk-glut", String(glutGet() + n));
+  renderGlut(true);
+  if (playTimer) renderPlayerGlut();
+  if (title) toast(n, title, text);
+}
+function toast(n, title, text) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = `<div class="toast-amt">+${n}</div><div class="toast-text"><b>${esc(title)}</b>${text || ""}</div>`;
+  $("toasts").appendChild(t);
+  setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 400); }, 4200);
+}
+const PACK_LINK = ` <a href="karten/">Packs öffnen →</a>`;
+function glutWelcome() {
+  const s = glutState();
+  if (s.welcomed) return;
+  s.welcomed = true; glutSave(s);
+  setTimeout(() => glutAdd(GLUT.welcome, "Willkommen auf Glutwerk!", "Ein Geschenk für deine ersten Kartenpacks." + PACK_LINK), 900);
+}
+function glutOnStart(g) {
+  const s = glutState(), id = gameId(g);
+  s.played = s.played || {};
+  if (!s.played[id]) {
+    s.played[id] = today(); glutSave(s);
+    glutAdd(GLUT.newGame, "Neues Spiel entdeckt", esc(g.title) + " zum ersten Mal gestartet.");
+    const playable = GAMES.filter(x => x.url && x.type !== "soon").map(gameId);
+    if (!s.allBonus && playable.every(p => s.played[p])) {
+      s.allBonus = true; glutSave(s);
+      setTimeout(() => glutAdd(GLUT.allGames, "Alle Spiele gespielt!", "Du hast jedes Glutwerk-Spiel ausprobiert." + PACK_LINK), 1200);
+    }
+  }
+  if (s.daily !== today()) {
+    s.daily = today(); glutSave(s);
+    setTimeout(() => glutAdd(GLUT.daily, "Tagesbonus", "Danke, dass du heute spielst!"), s.played[id] === today() ? 900 : 0);
+  }
+}
+/* Spielzeit: jede volle Minute mit offenem, sichtbarem Spiel */
+let playTimer = null, playSecs = 0;
+function renderPlayerGlut() {
+  const s = glutState(), used = s.minDay === today() ? (s.minGlut || 0) : 0;
+  $("playerGlut").innerHTML = used >= GLUT.minuteCap ? "" :
+    `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>${glutGet().toLocaleString("de-DE")}`;
+}
+function startPlayTimer() {
+  clearInterval(playTimer); playSecs = 0; renderPlayerGlut();
+  playTimer = setInterval(() => {
+    if (document.visibilityState !== "visible") return;
+    if (++playSecs < 60) return;
+    playSecs = 0;
+    const s = glutState();
+    if (s.minDay !== today()) { s.minDay = today(); s.minGlut = 0; }
+    if (s.minGlut >= GLUT.minuteCap) return;
+    const add = Math.min(GLUT.perMinute, GLUT.minuteCap - s.minGlut);
+    s.minGlut += add; glutSave(s);
+    glutAdd(add);
+    renderPlayerGlut();
+  }, 1000);
+}
+function stopPlayTimer() { clearInterval(playTimer); playTimer = null; }
+
+/* ---- Fehler / Feedback ---- */
+let fbGame = null, fbKind = "Bug";
+function openFeedback(g) {
+  fbGame = g || { title: "Glutwerk" };
+  $("fbTitle").textContent = fbGame.title + ": Feedback";
+  $("fbText").value = "";
+  $("fbModal").querySelector(".modal").classList.remove("sent");
+  resetFbModal();
+  $("fbHint").textContent = "Gesendet als: " + (getName() || "Anonym") + " · ohne Anmeldung";
+  $("fbModal").classList.add("open");
+  setTimeout(() => $("fbText").focus(), 50);
+}
+function resetFbModal() {
+  const m = $("fbModal").querySelector(".modal");
+  if (m._orig) m.innerHTML = m._orig; else m._orig = m.innerHTML;
+  bindFbModal();
+}
+function closeFeedback() { $("fbModal").classList.remove("open"); }
+function bindFbModal() {
+  document.querySelectorAll(".fb-kind").forEach(b => b.onclick = () => {
+    document.querySelectorAll(".fb-kind").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); fbKind = b.dataset.kind;
+    $("fbText").placeholder = fbKind === "Bug" ? "z.B. In Level 3 falle ich durch den Boden, wenn ich …" :
+      fbKind === "Idee" ? "z.B. Es wäre cool, wenn man …" : "Was gefällt dir besonders?";
+  });
+  fbKind = "Bug";
+  $("fbCancel").onclick = closeFeedback;
+  $("fbSend").onclick = sendFeedback;
+}
+function sendFeedback() {
+  const text = $("fbText").value.trim();
+  if (text.length < 3) { $("fbText").focus(); $("fbHint").textContent = "Schreib bitte kurz, was los ist."; return; }
+  const last = +store("glutwerk-fb-last") || 0;
+  if (Date.now() - last < 30000) { $("fbHint").textContent = "Kurz warten, du hast gerade schon etwas gesendet."; return; }
+  const btn = $("fbSend"); btn.disabled = true; btn.textContent = "Sendet…";
+  const mobile = window.matchMedia("(pointer: coarse)").matches;
+  fetch(`${TOP_DB_URL}/rest/v1/bug_reports`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: TOP_DB_KEY, Authorization: "Bearer " + TOP_DB_KEY, Prefer: "return=minimal" },
+    body: JSON.stringify({
+      player_name: (getName() || "Anonym").slice(0, 40),
+      report_text: (`[GLUTWERK] [${fbKind}] ${fbGame.title}: ${text}\n— ${mobile ? "Handy" : "PC"}, ${innerWidth}×${innerHeight}`).slice(0, 1500),
+      game_version: ("Glutwerk · " + fbGame.title).slice(0, 80),
+    }),
+  }).then(r => {
+    if (!r.ok) throw 0;
+    store("glutwerk-fb-last", String(Date.now()));
+    $("fbModal").querySelector(".modal").innerHTML =
+      `<div class="fb-done"><div class="big">${fbKind === "Lob" ? "❤️" : fbKind === "Idee" ? "💡" : "🛠️"}</div><h3>Danke!</h3>
+       <p style="color:var(--muted);margin:6px 0 20px">Deine Nachricht ist angekommen.</p>
+       <button class="btn btn-play" onclick="closeFeedback()">Weiterspielen</button></div>`;
+  }).catch(() => {
+    btn.disabled = false; btn.textContent = "Senden";
+    $("fbHint").textContent = "Senden hat nicht geklappt. Bist du online? Versuch es gleich nochmal.";
+  });
+}
+$("fbOpenBtn").onclick = () => openFeedback(currentGame);
+$("fbModal").addEventListener("click", e => { if (e.target === $("fbModal")) closeFeedback(); });
+
 function openPlayer(g) {
   currentGame = g;
   trackPlay(g);
+  glutOnStart(g);
+  startOnline(g);
+  startPlayTimer();
   markSeen(g); renderGrid();
   $("playerTitle").textContent = g.title;
   $("frame").src = g.url;
@@ -855,6 +1131,8 @@ function openPlayer(g) {
   document.body.style.overflow = "hidden";
 }
 function closePlayer() {
+  stopOnline();
+  stopPlayTimer();
   $("frame").src = "about:blank";
   $("player").classList.remove("open");
   document.body.style.overflow = "";
@@ -862,6 +1140,7 @@ function closePlayer() {
 }
 function openDownload(g) {
   trackPlay(g);
+  if (findGame(g.title)) glutOnStart(g);
   markSeen(g); renderGrid();
   $("dlTitle").textContent = g.title + " herunterladen";
   $("dlGo").href = g.url;
@@ -882,7 +1161,9 @@ $("fullscreenBtn").onclick = () => $("frame").requestFullscreen?.();
 $("dlCancel").onclick = closeDownload;
 $("dlGo").addEventListener("click", () => setTimeout(closeDownload, 300));
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { closePlayer(); closeDownload(); closeName(); }
+  if (e.key !== "Escape") return;
+  if ($("fbModal").classList.contains("open")) { closeFeedback(); return; }
+  closePlayer(); closeDownload(); closeName();
 });
 
 document.querySelectorAll("[data-only]").forEach(b => {
@@ -902,7 +1183,9 @@ const half = Math.ceil(SITE_NAME.length / 2);
 $("siteName").innerHTML = esc(SITE_NAME.slice(0, half)) + "<span>" + esc(SITE_NAME.slice(half)) + "</span>";
 document.title = SITE_NAME + " – Spiele";
 $("footer").innerHTML = `© ${new Date().getFullYear()} ${esc(SITE_NAME)} · ${esc(SITE_TAGLINE)}` +
-  (GITHUB_PROFILE ? ` · <a href="${esc(GITHUB_PROFILE)}" target="_blank" rel="noopener" style="color:var(--accent)">GitHub</a>` : "");
+  (GITHUB_PROFILE ? ` · <a href="${esc(GITHUB_PROFILE)}" target="_blank" rel="noopener" style="color:var(--accent)">GitHub</a>` : "") +
+  ` · <a href="#" class="footer-fb" id="footerFb">Feedback geben</a>`;
+$("footerFb").onclick = e => { e.preventDefault(); openFeedback(null); };
 
 /* ---- Namens-Fenster ---- */
 function openName() { $("nameInput").value = getName(); $("nameModal").classList.add("open"); setTimeout(() => $("nameInput").focus(), 50); }
@@ -986,6 +1269,10 @@ renderHero();
 renderNews();
 renderTop(null);
 loadTop();
+renderGlut();
+glutWelcome();
+loadOnline();
+setInterval(() => { if (document.visibilityState === "visible") loadOnline(); }, 30000);
 renderGrid();
 </script>
 </body>

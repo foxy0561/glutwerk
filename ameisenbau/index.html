@@ -62,7 +62,7 @@ body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);o
 .tray{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;background:var(--panel);border-top:3px solid var(--line);
   padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .group{display:flex;gap:6px;align-items:center}
-.tools{display:grid;grid-template-columns:repeat(4,auto);gap:6px}
+.tools{display:grid;grid-template-columns:repeat(5,auto);gap:6px}
 .btn{font-family:var(--font);font-size:15px;color:var(--ink);background:var(--panel2);border:2px solid var(--line);
   box-shadow:0 3px 0 #0a0604;padding:7px 11px;min-height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:0}
 .btn.small{min-height:34px;padding:4px 9px;font-size:14px}
@@ -83,6 +83,9 @@ body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);o
   border:2px solid var(--seed);color:var(--ink);padding:8px 14px;font-size:15px;text-align:center;pointer-events:none;opacity:0;transition:opacity .25s;z-index:3}
 .toast.show{opacity:1}
 .toast.bad{border-color:var(--warn)}
+.selbar{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:calc(100% - 24px);
+  background:rgba(36,24,15,.92);border:2px solid var(--seed);padding:6px 8px;z-index:3}
+.selbar b{font-size:15px;color:var(--seed);font-variant-numeric:tabular-nums;padding:0 4px}
 .sheet{position:absolute;left:0;right:0;bottom:0;max-height:min(72%,480px);display:flex;flex-direction:column;background:var(--panel);
   border-top:3px solid var(--seed);z-index:4;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px}
@@ -187,7 +190,7 @@ details.help[open] summary{margin-bottom:8px}
   .stat b{font-size:15px}
   .chip{font-size:14px;padding:1px 3px}
   .goal{flex-basis:100%;font-size:13px}
-  .tools{grid-template-columns:repeat(4,1fr);flex:1 1 100%}
+  .tools{grid-template-columns:repeat(5,1fr);flex:1 1 100%}
   .tools .btn{font-size:14px;padding:6px 2px}
   .group.rec{flex:1 1 auto}
   .group.rec .btn{flex:1}
@@ -227,6 +230,12 @@ details.help[open] summary{margin-bottom:8px}
   <div class="stage">
     <canvas id="game" aria-label="Ameisenbau Spielfeld"></canvas>
     <div class="toast" id="toast" role="status"></div>
+    <div class="selbar" id="selBar" hidden>
+      <b id="selN">0 ausgewählt</b>
+      <button class="btn small" id="selAll">Alle im Bild</button>
+      <button class="btn small" id="selFree">Freilassen</button>
+      <button class="btn small" id="selClear">Abwählen</button>
+    </div>
     <div class="sheet" id="sheet" hidden>
       <div class="sheet-head">
         <div class="tabs">
@@ -267,13 +276,14 @@ details.help[open] summary{margin-bottom:8px}
           <li><b>Grabbereich</b>: Gegraben werden kann nur innerhalb der gestrichelten Grenze rund um deine Räume. Baue am Rand neue Räume, vor allem Wachposten, damit der Bereich wächst.</li>
           <li><b>Wasser</b>: Regen läuft durch die Eingänge, fließt nach unten und sammelt sich an der tiefsten Stelle. Es verdunstet nur sehr langsam. Ameisen kommen nicht hindurch und ertrinken darin, die Königin auch. Baue Eingänge mit einer Grube, schütte Gänge zu oder fange das Wasser mit einer Zisterne auf.</li>
           <li><b>Wachposten</b>: Dort wohnen bis zu 4 Wächterinnen fest und schützen die Umgebung.</li>
+          <li><b>Befehl</b>: Tippe Ameisen an oder ziehe einen Rahmen um sie, dann tippe auf ein Ziel. Sie laufen hin, halten dort 2,5 Minuten die Stellung und kämpfen gegen Feinde in der Nähe. Neue Räume bekommen automatisch einen Gang zum Bau.</li>
           <li><b>Schichten</b>: Oberboden, Lehmboden, Gestein, Tiefengestein und ganz unten die heiße Glutschicht. Dort verbrennen sich Ameisen ohne Hitzepanzer.</li>
           <li><b>Jahreszeiten</b>: Jede dauert 3 Tage. Im Frühling sitzen Blattläuse auf den Pflanzen, im Herbst fallen Eicheln, im Winter wächst nichts und draußen friert es.</li>
           <li><b>Gefahren</b>: Spinnen (nachts mehr), Käfer und Glutskorpione aus der Tiefe, Maulwurf und Ameisenbär als Bosse, und die rote Kolonie schickt Kriegerinnen.</li>
         </ul></details>
         <details class="help"><summary>Steuerung</summary>
         <div class="ctrl">
-          <div><b>PC</b><br>Linksklick / ziehen: Werkzeug<br>Rechtsklick: Markierung löschen<br>WASD / Pfeile / Mittelklick: Kamera<br>Mausrad: Zoom · C: zum Nest<br>1 Tunnel · 2 Bauen · 3 Löschen · 4 Bewegen<br>R Arbeiterin · Q/E Sammler · F/G Wächter<br>T Tempo · M Ton · Esc Pause</div>
+          <div><b>PC</b><br>Linksklick / ziehen: Werkzeug<br>Rechtsklick: Markierung löschen<br>WASD / Pfeile / Mittelklick: Kamera<br>Mausrad: Zoom · C: zum Nest<br>1 Tunnel · 2 Bauen · 3 Löschen · 4 Bewegen · 5 Befehl<br>R Arbeiterin · Q/E Sammler · F/G Wächter<br>T Tempo · M Ton · Esc Pause</div>
           <div><b>Handy</b><br>Tippen / wischen: Werkzeug<br>Zwei Finger: verschieben und zoomen<br>Werkzeug „Bewegen“: mit einem Finger umsehen</div>
         </div></details>
       </div>
@@ -303,6 +313,7 @@ details.help[open] summary{margin-bottom:8px}
       <button class="btn tool" data-tool="build" aria-pressed="false"><i>2</i><span id="buildLbl">Bauen</span></button>
       <button class="btn tool" data-tool="erase" aria-pressed="false"><i>3</i>Löschen</button>
       <button class="btn tool" data-tool="pan" aria-pressed="false"><i>4</i>Bewegen</button>
+      <button class="btn tool" data-tool="cmd" aria-pressed="false"><i>5</i>Befehl</button>
     </div>
     <div class="group rec">
       <button class="btn recruit" id="recruitBtn"><i>R</i>Arbeiterin <span id="costLbl">5</span></button>
@@ -339,7 +350,7 @@ details.help[open] summary{margin-bottom:8px}
     <button class="btn menu" id="tQuit">Verlassen</button>
     <p class="tmsg" id="tMsg" hidden></p>
   </div>
-  <div class="tfoot">Glutwerk · Version 2.0</div>
+  <div class="tfoot">Glutwerk · Version 2.1</div>
 </div>
 <div class="screen dim" id="setupScr" hidden>
   <div class="card">
@@ -489,7 +500,7 @@ const DIFFS={
   normal:{name:'Normal',d:'So ist das Spiel gedacht',threat:1,raid:1,ehp:1,hunger:1},
   schwer:{name:'Schwer',d:'Häufige, starke Angriffe, mehr Hunger',threat:.65,raid:.7,ehp:1.35,hunger:1.3}};
 const WEATHERS={mild:{name:'Mild',d:'Selten und wenig Regen',chance:.5,amt:.6},normal:{name:'Normal',d:'Regen wie gewohnt',chance:1,amt:1},sturm:{name:'Stürmisch',d:'Viel und starker Regen',chance:1.5,amt:1.6}};
-let species='wald', wopt={size:'mittel',diff:'normal',weather:'normal',rival:true};
+let genVer=2, species='wald', wopt={size:'mittel',diff:'normal',weather:'normal',rival:true};
 const SP=(k,d=1)=>{const v=SPECIES[species][k];return v==null?d:v;};
 const DF=k=>DIFFS[wopt.diff][k];
 const EN={
@@ -504,6 +515,7 @@ const EN={
 // ---------- state ----------
 let seedStr, regions, biomeX, tiles, orig, shade, mark, rev, caveId, caveTiles, chMap, claimed, surf, maxSurf, chambers, seedAt, ants, eggs;
 let food, collected, foragers, soldiers, entX, rivalX, queens, rival, goalIdx, res, up, found, deco, plantXs, flowerXs, disc, traps, stars, fungT=0;
+let sel=new Set(), cmdDrag=null, orderMarks=[];
 let water, wet=new Set(), active=new Set(), terr, terrDepth=0, simT=0, evapT=0, cisternAcc=0, openings=[], rainTold=false, waterTold=false;
 let enemies=[], corpses=[], weather={rain:false,next:0,end:0,drain:0,wT:0,fT:0,dur:0}, lastDay=-1, lastSeason=-1;
 let gameT=0, speed=1, kills=0, bossKills=0, deaths=0, maxAnts=0, maxDepth=0, over=false, attackRival=false, hist=[], histT=0, chestsFound=0;
@@ -574,7 +586,7 @@ function gen(str){
   for(let x=0;x<W;x++){
     let v=Math.sin(x*f1+p1)*amp[x]+Math.sin(x*f2+p2)*amp[x]*.45+Math.sin(x*.5+p3)*.4+Math.sin(x*.015+p4)*3;
     for(const nx of[entX,rivalX]){const d=Math.abs(x-nx);if(d<9)v*=d/9;}
-    surf[x]=20+Math.round(v);
+    surf[x]=(genVer>=2?52:20)+Math.round(v);
   }
   maxSurf=0; for(let x=0;x<W;x++) maxSurf=Math.max(maxSurf,surf[x]);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;tiles[i]=y<surf[x]?AIR:y>=H-2?BED:DIRT;shade[i]=(r()*256)|0;}
@@ -679,18 +691,29 @@ function gen(str){
   for(let x=0;x<W;x++)for(let y=0;y<Math.min(H,surf[x]+3);y++) rev[y*W+x]=1;
   for(let y=surf[entX]-1;y<=qy+6;y++)for(let x=entX-6;x<=entX+6;x++) if(inW(x,y)&&Math.hypot(x-entX,Math.max(0,y-qy))<=6) rev[y*W+x]=1;
   deco=[];
-  for(let x=2;x<W-2;x++){
-    if(Math.abs(x-entX)<5||Math.abs(x-rivalX)<5) continue;
-    const b=BIOMES[BK[biomeX[x]]], q=r();
-    if(b.deco==='trees'&&q<.07) deco.push({x,k:'tree',h:18+((r()*16)|0),v:r()});
-    else if(b.deco==='boulders'&&q<.08) deco.push({x,k:'boulder',v:r()});
-    else if(b.deco==='bushes'&&q<.1) deco.push({x,k:'bush',v:r()});
-    if(r()<(b.deco==='flowers'?.35:.12)) deco.push({x,k:'flower',v:r()});
+  if(genVer>=2){
+    for(let x=4;x<W-4;x++){
+      const dn=Math.min(Math.abs(x-entX),Math.abs(x-rivalX)); if(dn<6) continue;
+      const b=BIOMES[BK[biomeX[x]]], q=r();
+      if(b.deco==='trees'&&q<.035&&dn>12&&!deco.some(d=>d.k==='tree'&&Math.abs(d.x-x)<26)) deco.push({x,k:'tree',big:1,h:200+r()*170,tw:22+r()*26,cr:60+r()*45,v:r()});
+      else if(b.deco==='boulders'&&q<.05) deco.push({x,k:'boulder',big:1,w:14+r()*30,h:10+r()*20,v:r()});
+      else if((b.deco==='bushes'&&q<.07)||(q<.012)) deco.push({x,k:'bush',big:1,rw:16+r()*22,rh:14+r()*20,v:r()});
+      if(r()<(b.deco==='flowers'?.16:.05)) deco.push({x,k:'flower',big:1,h:36+r()*70,v:r(),lean:r()*2-1});
+    }
+  } else {
+    for(let x=2;x<W-2;x++){
+      if(Math.abs(x-entX)<5||Math.abs(x-rivalX)<5) continue;
+      const b=BIOMES[BK[biomeX[x]]], q=r();
+      if(b.deco==='trees'&&q<.07) deco.push({x,k:'tree',h:18+((r()*16)|0),v:r()});
+      else if(b.deco==='boulders'&&q<.08) deco.push({x,k:'boulder',v:r()});
+      else if(b.deco==='bushes'&&q<.1) deco.push({x,k:'bush',v:r()});
+      if(r()<(b.deco==='flowers'?.35:.12)) deco.push({x,k:'flower',v:r()});
+    }
   }
   plantXs=deco.filter(d=>d.k!=='boulder').map(d=>d.x);
   flowerXs=deco.filter(d=>d.k==='flower'||d.k==='bush').map(d=>d.x);
   stars=[]; for(let k=0;k<70;k++) stars.push({x:r(),y:r()*.8,s:r()});
-  clouds=[]; for(let k=0;k<Math.round(16*W/400);k++) clouds.push({x:r()*W*T,y:(10+r()*50)|0,w:14+((r()*16)|0),s:3+r()*4});
+  clouds=[]; for(let k=0;k<Math.round(16*W/400);k++) clouds.push({x:r()*W*T,y:(10+r()*(genVer>=2?170:50))|0,w:(genVer>=2?30:14)+((r()*(genVer>=2?40:16))|0),s:3+r()*4});
   disc=new Set(); traps=new Map();
   orig=tiles.slice();
   recomputeTerr();
@@ -887,7 +910,7 @@ const gDmg=a=>(a.caste==='sold'?3:1)*(up.acid?2:1)*SP('dmg');
 function release(a){
   if(a.target>=0){
     if(a.job==='toDig'||a.job==='digging') claimed[a.target]=0;
-    if(a.job==='toSeed'||a.job==='pick'){const s=seedAt.get(a.target);if(s)s.claimed=false;}
+    if(a.job==='toSeed'||a.job==='pick'){const s=seedAt.get(a.target);if(s)s.claims=Math.max(0,s.claims-1);}
   }
   a.target=-1; a.job=null;
 }
@@ -913,6 +936,13 @@ function assignPosts(){
 }
 function postCenter(id){const c=chambers[id];return{x:(c.x0+c.w/2)*T,y:(c.y0+c.h-1)*T+5};}
 const startI=a=>a.ty*W+a.tx;
+function addItem(o){
+  o.w=o.w||1; o.pieces=o.pieces||1; o.max=o.max||o.pieces; o.claims=0; o.tiles=[];
+  for(let k=0;k<o.w;k++){const x=o.x+k,y=o.w===1?o.y:topY(x);const i=y*W+x;o.tiles.push(i);seedAt.set(i,o);}
+  return o;
+}
+function removeItem(o){for(const t of o.tiles) if(seedAt.get(t)===o) seedAt.delete(t);}
+const itemList=()=>[...new Set(seedAt.values())];
 function findDig(a){
   const r=bfs(startI(a),i=>{
     const x=i%W,y=(i/W)|0;
@@ -926,9 +956,9 @@ function findDig(a){
 function findSeed(a){
   const R=range();
   const E=SP('eats');
-  const r=bfs(startI(a),i=>{const s=seedAt.get(i);return s&&!s.claimed&&E[s.kind]&&Math.abs(s.x-entX)<=R?i:-1;});
+  const r=bfs(startI(a),i=>{const s=seedAt.get(i);return s&&s.claims<s.pieces&&E[s.kind]&&Math.abs(s.x-entX)<=R?i:-1;});
   if(!r) return false;
-  a.path=r.path; a.target=r.hit; seedAt.get(r.hit).claimed=true; a.job='toSeed'; return true;
+  a.path=r.path; a.target=r.hit; seedAt.get(r.hit).claims++; a.job='toSeed'; return true;
 }
 function addFood(n,wx,wy){
   const before=food; food=Math.min(foodCap(),food+n); const got=food-before;
@@ -988,12 +1018,13 @@ function digTile(i){
   reveal(x,y,3); redrawAround(i);
   const c=chMap[i]; if(c>=0) checkChamber(chambers[c]);
   const above=i-W, s=seedAt.get(above);
-  if(s&&!walkI(above)) seedAt.delete(above);
+  if(s&&!walkI(above)) removeItem(s);
   hud();
 }
 function nearHot(x,y){for(const[dx,dy]of D4){const X=x+dx,Y=y+dy;if(inW(X,Y)&&tiles[Y*W+X]===HOT)return true;}return false;}
 function upd(a,dt){
   a.anim+=dt; a.age+=dt; a.fight-=dt; a.hit-=dt;
+  if(a.order){a.order.w-=dt;if(a.order.w<=0){a.order=null;if(a.job==='order')a.job=null;}}
   if(a.age>a.maxAge*(up.life?1.5:1)){
     killAnt(a,'alt');
     if(!oldAgeTold){oldAgeTold=true;toast('Eine Ameise ist an Altersschwäche gestorben. Lass regelmäßig neue schlüpfen.');}
@@ -1011,7 +1042,12 @@ function upd(a,dt){
   }
   if(a.hp<=0){killAnt(a,'');return;}
   if(!hazard&&a.fight<=0) a.hp=Math.min(maxHp(a),a.hp+dt*(a.role==='guard'&&roomsOf('wache').length?.5:.15));
-  if(a.role==='guard'&&!a.carry&&a.job!=='escape'){
+  if(a.order&&a.job!=='escape'&&enemies.length){
+    let best=null,bd=1e9;
+    for(const e of enemies){if(e.dead)continue;const p=enemyPos(e);const d=Math.hypot(p.x-a.px,p.y-a.py)-EN[e.type].rad+10;if(d<bd){bd=d;best=e;}}
+    if(best&&bd<10){a.path=[];a.moving=false;a.vert=0;a.dir=best.px>a.px?1:-1;if(a.hit<=0){a.hit=.7;hurtEnemy(best,gDmg(a));}return;}
+  }
+  if(a.role==='guard'&&!a.carry&&a.job!=='escape'&&!a.order){
     if(enemies.length&&guardUpd(a,dt)) return;
     if(a.post==null&&attackRival&&rival.alive&&!enemies.some(e=>!e.dead)&&rivalStrike(a)) return;
   }
@@ -1032,6 +1068,14 @@ function upd(a,dt){
     a.moving=true; return;
   }
   a.moving=false;
+  if(a.order&&a.job!=='escape'){
+    if(startI(a)!==a.order.t){
+      a.rp-=dt;
+      if(a.rp<=0){a.rp=.8;const t=a.order.t;const r=bfs(startI(a),i=>i===t?i:-1);
+        if(r&&r.path.length){a.path=r.path;a.job='order';} else{a.order=null;a.job=null;floater(a.px,a.py-6,'?','#e9b443');}}
+    }
+    return;
+  }
   switch(a.job){
     case 'toDig':
       if(!diggable(tiles[a.target])||!mark[a.target]){release(a);break;}
@@ -1049,9 +1093,10 @@ function upd(a,dt){
     case 'pick':{
       const s=seedAt.get(a.target);
       a.work+=dt;
-      if(s&&s.kind==='blatt'&&Math.random()<dt*8) particles.push({x:s.x*T+rand(2,6),y:s.y*T+rand(2,5),vx:rand(-12,12),vy:rand(-20,-6),life:.5,c:Math.random()<.5?'#6fae3a':'#a8e070'});
-      if(a.work<(s&&s.kind==='blatt'?1.3:s&&s.kind==='insekt'?1:.45)) return;
-      if(s){seedAt.delete(a.target);const m=(a.caste==='trag'?2:1)*SP('carry');
+      if(s&&(s.kind==='blatt'||s.kind==='insekt')&&Math.random()<dt*8) particles.push({x:a.px+a.dir*3,y:a.py-4,vx:rand(-12,12),vy:rand(-20,-6),life:.5,c:s.kind==='insekt'?'#7cc04a':(seasonIdx()===2?'#d08a32':Math.random()<.5?'#6fae3a':'#a8e070')});
+      if(s&&s.w>1&&a.vert===0) a.dir=a.px<(s.x+s.w/2)*T?1:-1;
+      if(a.work<(s&&s.kind==='blatt'?1.4:s&&s.kind==='insekt'?1.2:.45)) return;
+      if(s){s.pieces--;s.claims=Math.max(0,s.claims-1);if(s.pieces<=0)removeItem(s);a.job='carrying';const m=(a.caste==='trag'?2:1)*SP('carry');
         if(s.kind==='laus'){a.carry=m;a.ck='laus';}
         else{a.carry=Math.round(s.v*m*(up.basket?2:1));a.ck=s.kind==='seed'?s.v:s.kind;}}
       a.target=-1; a.job=null;
@@ -1070,7 +1115,7 @@ function upd(a,dt){
 }
 function killAnt(a,why){
   const k=ants.indexOf(a); if(k<0) return;
-  release(a); ants.splice(k,1); deaths++;
+  release(a); ants.splice(k,1); deaths++; if(sel.delete(a)) updSelBar();
   corpses.push({x:a.px,y:a.py,t:30});
   if(a.caste==='arb'){if(a.role==='forage'&&foragers>0)foragers--;else if(a.role==='guard'&&soldiers>0)soldiers--;}
   floater(a.px,a.py-4,why==='alt'?'† alt':'†','#d9c9b0');
@@ -1152,17 +1197,19 @@ function spawnSeed(){
     else x=entX+ri(-R,R);
     if(x<2||x>W-3||Math.abs(x-entX)<3) continue;
     const y=topY(x); if(y<0||y>=surf[x]+1||!walk(x,y)) continue;
-    const i=y*W+x; if(seedAt.has(i)) continue;
     const far=Math.abs(x-entX), b=biomeAt(x);
-    let v=1;
+    let v=1, w=1, pieces=1;
+    if(kind==='blatt'){w=b.deco==='trees'?ri(4,6):ri(3,4);pieces=w*2;}
+    else if(kind==='insekt'){w=ri(2,3);pieces=w*2;v=2;}
+    let ok=true;
+    for(let k2=0;k2<w;k2++){const xx=x+k2,yy=topY(xx);if(xx>W-3||Math.abs(xx-entX)<3||yy<0||yy>=surf[xx]+1||!walk(xx,yy)||seedAt.has(yy*W+xx)){ok=false;break;}}
+    if(!ok) continue;
     if(kind==='seed'){
       if(s===2&&b.deco==='trees'&&far>8&&Math.random()<.4) v=5;
       else if(far>26&&Math.random()<(s>=1?.45:.25)) v=3;
       else if(far>14&&Math.random()<(b.deco==='bushes'?.65:.5)) v=2;
-    } else if(kind==='insekt') v=far>20?4:3;
-    else if(kind==='blatt') v=b.deco==='trees'?2:1;
-    else if(kind==='nektar') v=far>18?3:2;
-    seedAt.set(i,{x,y,v,kind,claimed:false}); return;
+    } else if(kind==='nektar') v=far>18?3:2;
+    addItem({x,y,v,kind,w,pieces,leaf:Math.random()}); return;
   }
 }
 const PCOL={[CLAY]:['#a5623d','#c07a52'],[WATER]:['#5fb3e0','#2f6f9e'],[LAKE]:['#5fb3e0','#2f6f9e'],[AMBER]:['#e39a2a','#ffd27a'],[CRYS]:['#a8f3f6','#4fbac2'],[SPORE]:['#d9c6ee','#b48ad6'],[ROCK]:['#9a958c','#625e57'],[BONE]:['#efe6d6','#b8ab95'],[GLUT]:['#ff7a3a','#ffd27a'],[HOT]:['#ff6a2a','#5a1d14'],[CHEST]:['#e9b443','#6b3a1a']};
@@ -1663,7 +1710,6 @@ function roomCheck(type,cx,cy){
     const i=y*W+x, t=tiles[i];
     if(y<surf[x]+(R.near?1:2)) return 'Räume müssen unter der Erde liegen.';
     if(R.near&&y>surf[x]+7) return 'Ein Ausguck muss knapp unter der Oberfläche liegen.';
-    if(!rev[i]) return 'Erforsche den Boden hier zuerst mit einem Gang.';
     if(t===BED||(solid(t)&&!diggable(t))) return 'Da liegt etwas im Weg, das deine Ameisen nicht graben können.';
     if(chMap[i]>=0) return 'Da ist schon ein Raum.';
     if(Math.abs(x-rival.qx)<5&&Math.abs(y-rival.qy)<4) return 'Das ist der Bau der roten Kolonie.';
@@ -1674,8 +1720,37 @@ function roomCheck(type,cx,cy){
 function placeRoom(cx,cy){
   const err=roomCheck(roomType,cx,cy); if(err){toast(err);return;}
   const R=ROOMS[roomType], b=roomBox(roomType,cx,cy);
-  pay(roomCost(roomType)); makeChamber(roomType,b.x0,b.y0); AU.play('click');
-  toast(`${R.name} geplant. Verbinde den Raum mit einem Gang.`); hud();
+  pay(roomCost(roomType)); const c=makeChamber(roomType,b.x0,b.y0); AU.play('click');
+  const n=c.done?0:autoTunnel(c);
+  toast(n>0?`${R.name} geplant. Deine Ameisen graben automatisch einen Gang dorthin.`:n===0?`${R.name} geplant.`:`${R.name} geplant. Es gibt keinen Weg dorthin, grabe selbst einen Gang.`); hud();
+}
+function autoTunnel(c){
+  const q0=queens[0]; if(!q0) return -1;
+  const N=W*H, reach=new Uint8Array(N);
+  for(const i of reachList(q0.y*W+q0.x,true)) reach[i]=1;
+  for(let y=c.y0;y<c.y0+c.h;y++)for(let x=c.x0;x<c.x0+c.w;x++) if(reach[y*W+x]) return 0;
+  const dist=new Float32Array(N).fill(1e9), from=new Int32Array(N).fill(-1), heap=[];
+  const push=(d,i)=>{heap.push([d,i]);let k=heap.length-1;while(k>0){const p=(k-1)>>1;if(heap[p][0]<=heap[k][0])break;const t=heap[p];heap[p]=heap[k];heap[k]=t;k=p;}};
+  const pop=()=>{const top=heap[0],last=heap.pop();if(heap.length){heap[0]=last;let k=0;for(;;){const l=2*k+1,r=l+1;let m=k;if(l<heap.length&&heap[l][0]<heap[m][0])m=l;if(r<heap.length&&heap[r][0]<heap[m][0])m=r;if(m===k)break;const t=heap[m];heap[m]=heap[k];heap[k]=t;k=m;}}return top;};
+  for(let y=c.y0;y<c.y0+c.h;y++)for(let x=c.x0;x<c.x0+c.w;x++){const i=y*W+x;dist[i]=0;push(0,i);}
+  let end=-1, n=0;
+  while(heap.length&&n<300000){
+    const[d,u]=pop(); n++; if(d>dist[u]) continue;
+    if(reach[u]&&chMap[u]!==c.id){end=u;break;}
+    const x=u%W, y=(u/W)|0;
+    for(const[dx,dy]of D4){
+      const nx=x+dx, ny=y+dy; if(!inW(nx,ny)||ny<surf[nx]+1) continue;
+      const v=ny*W+nx; if(!terr[v]&&chMap[v]!==c.id&&!reach[v]) continue;
+      if(water[v]>=WET) continue;
+      const t=tiles[v]; let cost;
+      if(isOpen(t)) cost=1; else if(diggable(t)) cost=2+2*(HARD[t]||1); else continue;
+      const nd=d+cost; if(nd<dist[v]){dist[v]=nd;from[v]=u;push(nd,v);}
+    }
+  }
+  if(end<0) return -1;
+  let k=from[end], cnt=0;
+  while(k>=0&&chMap[k]!==c.id){if(solid(tiles[k])&&!mark[k]){mark[k]=1;cnt++;}k=from[k];}
+  return cnt;
 }
 function line(a,b,fn){let x0=a.x,y0=a.y;const dx=Math.abs(b.x-x0),dy=-Math.abs(b.y-y0),sx=x0<b.x?1:-1,sy=y0<b.y?1:-1;let e=dx+dy;
   for(let n=0;n<400;n++){fn(x0,y0);if(x0===b.x&&y0===b.y)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}}
@@ -1691,6 +1766,7 @@ cv.addEventListener('pointerdown',e=>{
   action=e.button===2?'erase':e.button===1?'pan':tool;
   warned=false; eraseDone=false;
   if(action==='pan'){lastTile=p;return;}
+  if(action==='cmd'){const wx=cam.x+p.x*dpr/scale, wy=cam.y+p.y*dpr/scale;cmdDrag={sx:p.x,sy:p.y,x0:wx,y0:wy,x1:wx,y1:wy,box:false};return;}
   const tt=tileAt(e); lastTile=tt;
   if(action==='room'){placeRoom(tt.x,tt.y);action=null;return;}
   if(action==='trap'){placeTrap(tt.x,tt.y);action=null;return;}
@@ -1707,19 +1783,55 @@ cv.addEventListener('pointermove',e=>{
     return;
   }
   if(action==='pan'){panBy(p.x-lastTile.x,p.y-lastTile.y);lastTile=p;return;}
+  if(action==='cmd'&&cmdDrag){cmdDrag.x1=cam.x+p.x*dpr/scale;cmdDrag.y1=cam.y+p.y*dpr/scale;if(Math.hypot(p.x-cmdDrag.sx,p.y-cmdDrag.sy)>8)cmdDrag.box=true;return;}
   if(action==='dig'||action==='erase'||action==='fill'){const tt=tileAt(e);line(lastTile,tt,(x,y)=>paint(x,y,action));lastTile=tt;}
 });
-function ptrUp(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;if(pointers.size===0)action=null;}
+function ptrUp(e){if(action==='cmd'&&cmdDrag&&pointers.size===1&&e.type==='pointerup')finishCmd(e);cmdDrag=null;pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;if(pointers.size===0)action=null;}
 cv.addEventListener('pointerup',ptrUp); cv.addEventListener('pointercancel',ptrUp);
 cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hover=null;});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('wheel',e=>{e.preventDefault();const p=rel(e);zoomAt(p.x,p.y,zoom+(e.deltaY<0?1:-1));},{passive:false});
 
-const TIPS={dig:'Tunnel: Ziehe über Erde, um Gänge zu markieren.',erase:'Löschen: Entfernt Markierungen, Fallen und geplante Räume.',pan:'Bewegen: Ziehe, um dich umzusehen.'};
+function findStand(tx,ty){
+  for(let r=0;r<=4;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
+    if(Math.max(Math.abs(dx),Math.abs(dy))!==r) continue;
+    const x=tx+dx,y=ty+dy; if(inW(x,y)&&walk(x,y)&&rev[y*W+x]) return y*W+x;
+  }
+  return -1;
+}
+function finishCmd(e){
+  const p=rel(e), wx=cam.x+p.x*dpr/scale, wy=cam.y+p.y*dpr/scale;
+  if(cmdDrag.box){
+    const x0=Math.min(cmdDrag.x0,wx),x1=Math.max(cmdDrag.x0,wx),y0=Math.min(cmdDrag.y0,wy),y1=Math.max(cmdDrag.y0,wy);
+    if(!e.shiftKey) sel.clear();
+    for(const a of ants) if(a.px>=x0&&a.px<=x1&&a.py>=y0-3&&a.py<=y1+3) sel.add(a);
+    AU.play('click'); toast(sel.size?`${sel.size} ${sel.size===1?'Ameise':'Ameisen'} ausgewählt. Tippe jetzt auf ein Ziel.`:'Im Rahmen ist keine Ameise.'); updSelBar(); return;
+  }
+  const tol=Math.max(5,14*dpr/scale);
+  let best=null,bd=tol; for(const a of ants){const d=Math.hypot(a.px-wx,a.py-wy);if(d<bd){bd=d;best=a;}}
+  if(best){sel.has(best)?sel.delete(best):sel.add(best);AU.play('click');updSelBar();return;}
+  if(!sel.size){toast('Tippe Ameisen an oder ziehe einen Rahmen um mehrere.');return;}
+  const t=findStand(Math.floor(wx/T),Math.floor(wy/T));
+  if(t<0){toast('Da kommen deine Ameisen nicht hin. Wähle einen Gang oder den Boden draußen.');return;}
+  for(const a of sel){a.order={t,w:150};release(a);a.path=[];a.job='order';a.rp=0;}
+  orderMarks.push({i:t,t:1.2}); AU.play('menu');
+  toast(`${sel.size} ${sel.size===1?'Ameise läuft':'Ameisen laufen'} los und halten dort die Stellung.`);
+  updSelBar();
+}
+function updSelBar(){
+  for(const a of sel) if(!ants.includes(a)) sel.delete(a);
+  $('selBar').hidden=tool!=='cmd'&&!sel.size;
+  $('selN').textContent=`${sel.size} ausgewählt`;
+}
+$('selAll').addEventListener('click',()=>{const vw=cv.width/scale,vh=cv.height/scale;sel.clear();for(const a of ants)if(a.px>=cam.x&&a.px<=cam.x+vw&&a.py>=cam.y&&a.py<=cam.y+vh)sel.add(a);AU.play('click');updSelBar();});
+$('selFree').addEventListener('click',()=>{let n=0;for(const a of sel)if(a.order){a.order=null;a.job=null;n++;}toast(n?'Freigelassen. Sie arbeiten wieder wie vorher.':'Die ausgewählten Ameisen haben gerade keinen Befehl.');updSelBar();});
+$('selClear').addEventListener('click',()=>{sel.clear();updSelBar();});
+const TIPS={cmd:'Befehl: Tippe Ameisen an oder ziehe einen Rahmen. Dann tippe auf ein Ziel, und sie laufen hin.',dig:'Tunnel: Ziehe über Erde, um Gänge zu markieren.',erase:'Löschen: Entfernt Markierungen, Fallen und geplante Räume.',pan:'Bewegen: Ziehe, um dich umzusehen.'};
 function setTool(t){
   tool=t;
   document.querySelectorAll('.tool').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tool===t||(b.dataset.tool==='build'&&(t==='room'||t==='fill'||t==='trap'))));
-  cv.style.cursor=t==='pan'?'grab':'crosshair';
+  cv.style.cursor=t==='pan'?'grab':t==='cmd'?'pointer':'crosshair';
+  updSelBar();
   if(TIPS[t]) toast(TIPS[t]);
   hud();
 }
@@ -1747,12 +1859,12 @@ addEventListener('keydown',e=>{
   if(k==='escape'&&screen==='options'){closeOptions();return;}
   if(k==='escape'&&screen==='setup'){showTitle();return;}
   if(screen!=='play'&&screen!=='pause') return;
-  if(k==='escape'){if(!sheet.hidden){closeSheet();return;}if(screen==='play')showMenu();else hideMenu();return;}
+  if(k==='escape'){if(!sheet.hidden){closeSheet();return;}if(sel.size&&screen==='play'){sel.clear();updSelBar();return;}if(screen==='play')showMenu();else hideMenu();return;}
   if(k==='?'||k==='h'){if(screen==='play')showMenu();return;}
   if(k==='m'){$('soundBtn').click();return;}
   if(paused){if(k==='enter')hideMenu();return;}
   if(k==='1'){closeSheet();setTool('dig');} else if(k==='2'||k==='b'){sheet.hidden?openSheet():closeSheet();}
-  else if(k==='3'){closeSheet();setTool('erase');} else if(k==='4'){closeSheet();setTool('pan');}
+  else if(k==='3'){closeSheet();setTool('erase');} else if(k==='4'){closeSheet();setTool('pan');} else if(k==='5'){closeSheet();setTool('cmd');}
   else if(k==='r')recruit('arb');
   else if(k==='q')$('fMinus').click(); else if(k==='e')$('fPlus').click();
   else if(k==='f')$('gMinus').click(); else if(k==='g')$('gPlus').click();
@@ -1829,12 +1941,12 @@ function save(){
     const diff=[],mk=[];
     for(let i=0;i<W*H;i++){if(tiles[i]!==orig[i])diff.push(i.toString(36)+':'+tiles[i].toString(36));if(mark[i])mk.push(i.toString(36)+':'+mark[i]);}
     localStorage.setItem(KEY,JSON.stringify({seed:seedStr,diff:diff.join(','),rev:rleEnc(rev),mark:mk.join(','),disc:[...disc],
-      chambers,seeds:[...seedAt.values()].map(s=>[s.x,s.y,s.v,s.kind]),food,collected,foragers,soldiers,
+      chambers,seeds:itemList().map(s=>[s.x,s.y,s.v,s.kind,s.w,s.pieces,s.max]),food,collected,foragers,soldiers,
       ants:ants.map(a=>[a.caste,Math.round(a.age),Math.round(a.maxAge)]),eggs:eggs.map(e=>[e.c,e.t]),
       goalIdx,res,up,found,cam,zoom,queens,rival,traps:[...traps],gameT,threatT,hungerT,kills,bossKills,deaths,maxAnts,maxDepth,
       hist,attackRival,chestsFound,rainTold,cisternAcc,
       water:[...wet].map(i=>i.toString(36)+':'+Math.round(water[i]*100).toString(36)).join(','),weather:{rain:weather.rain,next:weather.next,end:weather.end,dur:weather.dur},
-      species,wopt,fungT}));
+      species,wopt,fungT,genVer}));
     localStorage.setItem(KEY+'-meta',JSON.stringify({species,seed:seedStr,t:Math.round(gameT),ants:ants.length}));
   }catch(e){}
 }
@@ -1842,9 +1954,9 @@ function load(){
   let d; try{d=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){d=null;}
   if(!d||d.diff==null) return false;
   try{
-    loading=true;
+    loading=true; sel=new Set(); orderMarks=[];
     wopt=Object.assign({size:'mittel',diff:'normal',weather:'normal',rival:true},d.wopt||{}); species=SPECIES[d.species]?d.species:'wald';
-    W=SIZES[wopt.size].W; H=SIZES[wopt.size].H;
+    W=SIZES[wopt.size].W; H=SIZES[wopt.size].H; genVer=d.genVer||1;
     gen(d.seed);
     if(d.diff) for(const p of d.diff.split(',')){const[a,b]=p.split(':');tiles[parseInt(a,36)]=parseInt(b,36);}
     rev.fill(0); rleDec(d.rev,rev);
@@ -1852,7 +1964,7 @@ function load(){
     disc=new Set(d.disc||[]);
     chambers=d.chambers; chMap.fill(-1);
     for(const c of chambers){if(c.removed)continue;for(let y=c.y0;y<c.y0+c.h;y++)for(let x=c.x0;x<c.x0+c.w;x++)chMap[y*W+x]=c.id;}
-    seedAt=new Map(); for(const[x,y,v,kind]of d.seeds) seedAt.set(y*W+x,{x,y,v,kind:kind||'seed',claimed:false});
+    seedAt=new Map(); for(const[x,y,v,kind,w,pieces,max]of d.seeds) addItem({x,y,v,kind:kind||'seed',w:w||1,pieces:pieces||1,max:max||pieces||1,leaf:Math.random()});
     food=d.food; collected=d.collected; foragers=d.foragers; soldiers=d.soldiers; goalIdx=d.goalIdx; res=d.res; up=d.up; found=d.found;
     queens=d.queens; rival=d.rival; traps=new Map(d.traps); gameT=d.gameT; threatT=d.threatT; hungerT=d.hungerT;
     kills=d.kills; bossKills=d.bossKills; deaths=d.deaths; maxAnts=d.maxAnts; maxDepth=d.maxDepth; hist=d.hist||[]; attackRival=!!d.attackRival; chestsFound=d.chestsFound||0;
@@ -1869,7 +1981,7 @@ function load(){
   }catch(e){loading=false;return false;}
 }
 function newGame(str){
-  W=SIZES[wopt.size].W; H=SIZES[wopt.size].H; colonyActive=false;
+  W=SIZES[wopt.size].W; H=SIZES[wopt.size].H; colonyActive=false; genVer=2; sel=new Set(); orderMarks=[];
   gen(str||randSeed());
   seedAt=new Map(); ants=[]; eggs=[]; food=10; collected=0; foragers=0; soldiers=0; goalIdx=0;
   res={}; for(const k of RES) res[k]=0; up={}; found={}; particles=[]; floaters=[];
@@ -2116,7 +2228,8 @@ function antDots(o){
   return(pts,c)=>{ctx.fillStyle=c;for(const[dx,dy]of pts){const[X,Y]=tf(dx,dy);ctx.fillRect(X,Y,1,1);}};
 }
 function drawAnt(a){
-  const dot=antDots(a), c=a.caste, g=a.role==='guard';
+  const it=a.job==='pick'?seedAt.get(a.target):null, lift=it&&it.w>1?(it.kind==='blatt'?4:5):0;
+  const dot=antDots(lift?{px:a.px,py:a.py-lift,vert:0,dir:a.dir}:a), c=a.caste, g=a.role==='guard';
   dot(((a.moving||a.job==='digging')&&((a.anim*10)|0)%2)?LB:LA,SPECIES[species].col[2]);
   const SC=SPECIES[species].col;
   let body=SC[0], hi=g?'#c04a2a':SC[1];
@@ -2224,23 +2337,87 @@ function drawSky(vL,vw,vT){
     P(x,y,cc,c.w,4); P(x+3,y-3,cc,c.w-8,3); P(x+6,y-5,cc,c.w/3|0,2);
   }
 }
-function drawDecoBack(vL,vR){
-  const s=seasonIdx();
-  for(const d of deco){
-    if(d.k!=='tree'||d.x*T<vL-30||d.x*T>vR+30) continue;
-    const gy=surf[d.x]*T, x=d.x*T+3;
-    P(x,gy-d.h,'#5a3a22',2,d.h); P(x+2,gy-d.h+4,'#46301c',1,d.h-4);
-    const cw=10+Math.round(d.v*6), cy=gy-d.h-6;
-    if(s===3){P(x-3,gy-d.h+2,'#5a3a22',3,1);P(x+3,gy-d.h+4,'#5a3a22',3,1);P(x-1,gy-d.h-1,'#ffffff',4,1);P(x-3,gy-d.h+1,'#ffffff',3,1);continue;}
-    const L=s===2?['#b8662a','#d08a32','#e8b04a']:['#3f7a2a','#4f8f33','#62a640'];
-    P(x-cw/2+1,cy,L[0],cw,9); P(x-cw/2-1,cy+2,L[0],cw+4,5);
-    P(x-cw/2+2,cy-2,L[1],cw-2,4); P(x-cw/2+3,cy-1,L[2],4,2); P(x+1,cy+3,L[2],3,2);
+function pxBlob(cx,cy,rx,ry,col){ctx.fillStyle=col;for(let dy=-ry;dy<=ry;dy+=2){const hw=Math.round(rx*Math.sqrt(Math.max(0,1-(dy*dy)/(ry*ry))));if(hw>0)ctx.fillRect(Math.round(cx-hw),Math.round(cy+dy),hw*2,2);}}
+const LEAFC=[['#2f6a22','#3f7a2a','#4f8f33','#62a640'],['#3a6a1e','#4a7a24','#5f8f2a','#7aa83a'],['#8a3a14','#b8662a','#d08a32','#e8b04a'],null];
+function drawBigTree(d,se){
+  const gx=d.x*T+4, gy=surf[d.x]*T, tw=Math.round(d.tw), h=Math.round(d.h), r=mul(d.x*977+3), L=-tw/2;
+  P(gx+L-8,gy-5,'#4a301c',tw+16,5); P(gx+L-14,gy-2,'#4a301c',tw+28,2); P(gx+L-4,gy-9,'#4a301c',tw+8,4);
+  P(gx+L,gy-h,'#5a3a22',tw,h); P(gx+L+2,gy-h,'#6e4a2c',3,h); P(gx+L+tw-4,gy-h,'#46301c',4,h);
+  for(let k=6;k<tw-5;k+=5){const off=(r()*30)|0;P(gx+L+k,gy-h+off,'#46301c',1,h-off-6);}
+  for(let k=0;k<3;k++){const by=gy-h+20+k*28, dir=k%2?1:-1, len=26+r()*30;P(dir>0?gx+L+tw:gx+L-len,by,'#5a3a22',len,4);P(dir>0?gx+L+tw:gx+L-len,by,'#6e4a2c',len,1);}
+  const C=LEAFC[se], cy=gy-h-d.cr*.25, R=d.cr;
+  if(!C){for(const[ox,oy]of[[-R*.6,-10],[R*.5,-6],[0,-R*.4]]){P(gx+ox,gy-h+oy,'#5a3a22',3,Math.abs(oy)+16);}P(gx+L-4,gy-h-2,'#ffffff',tw+8,2);P(gx-R*.6-2,gy-h-12,'#ffffff',6,1);P(gx+R*.5-2,gy-h-8,'#ffffff',6,1);return;}
+  const blobs=[];for(let k=0;k<9;k++){const a=k/9*Math.PI*2+d.v;blobs.push([gx+Math.cos(a)*R*.62,cy+Math.sin(a)*R*.32]);}blobs.push([gx,cy-R*.15],[gx,cy+R*.15]);
+  for(const[bx,by]of blobs) pxBlob(bx,by+4,R*.48,R*.34,C[0]);
+  for(const[bx,by]of blobs) pxBlob(bx,by,R*.42,R*.28,C[1]);
+  for(const[bx,by]of blobs) pxBlob(bx-R*.08,by-R*.08,R*.24,R*.15,C[2]);
+  for(let k=0;k<40;k++){const a=r()*Math.PI*2,rr=r()*R*.8;P(gx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.5-4,C[3],2,2);}
+}
+function drawGrass(vL,vR,se){
+  const x0=Math.max(1,Math.floor(vL/T)), x1=Math.min(W-2,Math.ceil(vR/T));
+  const col=se===3?['#b8c4a0','#a8b490','#ffffff']:se===2?['#9a9a3a','#b0a848','#c8b858']:se===1?['#4f8f2a','#6aab3c','#86c046']:['#4a8a2e','#5fa034','#7cc04a'];
+  const hm=se===3?.35:se===2?.85:1;
+  for(let x=x0;x<=x1;x++){
+    if(Math.abs(x-entX)<=2||Math.abs(x-rivalX)<=2) continue;
+    const top=surf[x]*T; if(tiles[surf[x]*W+x]!==DIRT&&tiles[surf[x]*W+x]!==CLAY&&tiles[surf[x]*W+x]!==ROOT&&tiles[surf[x]*W+x]!==ROCK) continue;
+    let hs=(Math.imul(x,2654435761)>>>0);
+    const n=hs%5===0?2:hs%3===0?0:1;
+    for(let k=0;k<n;k++){
+      hs=Math.imul(hs^(hs>>>13),1274126177)>>>0;
+      const bx=x*T+(hs%8), hgt=Math.round((10+(hs>>>8)%34)*hm), c=col[(hs>>>4)%3];
+      const sway=Math.sin(gameT*1.3+x*.37+k)*hgt/22+((hs>>>6)%5-2)*hgt/40;
+      const segs=Math.max(2,hgt>>2);
+      for(let sg=0;sg<segs;sg++){const yy=top-(sg+1)*4, dx=Math.round(sway*(sg/segs)*(sg/segs)*3);P(bx+dx,yy,c,1,4);}
+      if(se===3) P(bx+Math.round(sway*3),top-segs*4,'#ffffff');
+    }
   }
+}
+function drawDecoBack(vL,vR){
+  const se=seasonIdx();
+  for(const d of deco){
+    if(!d.big){
+      if(d.k!=='tree'||d.x*T<vL-30||d.x*T>vR+30) continue;
+      const gy=surf[d.x]*T, x=d.x*T+3;
+      P(x,gy-d.h,'#5a3a22',2,d.h); P(x+2,gy-d.h+4,'#46301c',1,d.h-4);
+      const cw=10+Math.round(d.v*6), cy=gy-d.h-6;
+      if(se===3){P(x-3,gy-d.h+2,'#5a3a22',3,1);P(x+3,gy-d.h+4,'#5a3a22',3,1);P(x-1,gy-d.h-1,'#ffffff',4,1);P(x-3,gy-d.h+1,'#ffffff',3,1);continue;}
+      const L=se===2?['#b8662a','#d08a32','#e8b04a']:['#3f7a2a','#4f8f33','#62a640'];
+      P(x-cw/2+1,cy,L[0],cw,9); P(x-cw/2-1,cy+2,L[0],cw+4,5);
+      P(x-cw/2+2,cy-2,L[1],cw-2,4); P(x-cw/2+3,cy-1,L[2],4,2); P(x+1,cy+3,L[2],3,2);
+      continue;
+    }
+    const reach=d.k==='tree'?d.cr+40:60;
+    if(d.x*T<vL-reach||d.x*T>vR+reach) continue;
+    const gy=surf[d.x]*T, gx=d.x*T+4;
+    if(d.k==='tree') drawBigTree(d,se);
+    else if(d.k==='bush'){
+      const C=se===3?['#7a7a6a','#8a8a7a','#ffffff']:se===2?['#7a5a1e','#9a7a2a','#c8a040']:['#3f7a2a','#5f9e34','#86c046'];
+      pxBlob(gx,gy-d.rh*.55,d.rw,d.rh*.6,C[0]); pxBlob(gx-d.rw*.3,gy-d.rh*.7,d.rw*.6,d.rh*.45,C[1]); pxBlob(gx+d.rw*.35,gy-d.rh*.6,d.rw*.5,d.rh*.4,C[1]);
+      pxBlob(gx-d.rw*.35,gy-d.rh*.85,d.rw*.3,d.rh*.2,C[2]);
+      if(se<=1&&d.v>.5){const r=mul(d.x);for(let k=0;k<6;k++)P(gx+(r()-.5)*d.rw*1.4,gy-r()*d.rh*1.1,'#c8324a',2,2);}
+    }
+    else if(d.k==='boulder'){
+      const w=Math.round(d.w), h=Math.round(d.h);
+      pxBlob(gx,gy-h*.45,w,h*.55,'#6a665f'); pxBlob(gx-w*.15,gy-h*.6,w*.75,h*.4,'#8a857d'); pxBlob(gx-w*.35,gy-h*.8,w*.3,h*.15,se===3?'#ffffff':'#a8a39a');
+      P(gx-w,gy-2,'#4a4740',w*2,2);
+    }
+    else if(d.k==='flower'){
+      if(se===3) continue;
+      const h=Math.round(d.h*(se===2?.8:1)), r=mul(d.x*31+7);
+      for(let k=0;k<h;k+=3){const t=k/h, dx=Math.round(d.lean*t*t*14+Math.sin(gameT*.9+d.x)*t*2);P(gx+dx,gy-k-3,'#4a812a',2,3);if(k===Math.round(h*.35)){P(gx+dx-8,gy-k-2,'#5f9e34',8,3);P(gx+dx-10,gy-k,'#5f9e34',3,2);}if(k===Math.round(h*.55)){P(gx+dx+2,gy-k-2,'#5f9e34',8,3);}}
+      const tx=gx+Math.round(d.lean*14+Math.sin(gameT*.9+d.x)*2), ty=gy-h-3;
+      if(se===2&&d.v>.4){pxBlob(tx+1,ty,4,4,'#8a6a2a');continue;}
+      const c=[['#f2d04c','#e0b030'],['#ee6a7c','#c84a5c'],['#ffffff','#d8d8e8'],['#c39af0','#9a70c8']][Math.floor(d.v*4)];
+      for(let k=0;k<6;k++){const a=k/6*Math.PI*2;pxBlob(tx+1+Math.cos(a)*6,ty+Math.sin(a)*5,4,3,c[k%2]);}
+      pxBlob(tx+1,ty,3,3,'#ffd27a'); P(tx,ty-1,'#e9a43a',2,2);
+    }
+  }
+  if(genVer>=2) drawGrass(vL,vR,se);
 }
 function drawDecoFront(vL,vR){
   const s=seasonIdx();
   for(const d of deco){
-    if(d.x*T<vL-10||d.x*T>vR+10) continue;
+    if(d.big||d.x*T<vL-10||d.x*T>vR+10) continue;
     const y=topY(d.x); if(y<0||y>surf[d.x]) continue;
     const gy=(y+1)*T, x=d.x*T+2+Math.round(d.v*3);
     if(d.k==='flower'){if(s===3||(s===2&&d.v>.4))continue;const c=['#f2d04c','#ee6a7c','#ffffff','#c39af0'][Math.floor(d.v*4)];P(x,gy-3,biomeAt(d.x).gd,1,3);P(x-1,gy-4,c,3,1);P(x,gy-5,c);P(x,gy-4,'#ffe27a');}
@@ -2268,6 +2445,27 @@ function drawFlags(R){
 }
 function drawSeed(s,alpha){
   const x=s.x*T+3, y=s.y*T+5; ctx.globalAlpha=alpha;
+  if(s.w>1){
+    const L=s.w*T, x0=s.x*T, gy=(s.y+1)*T, keep=Math.max(3,Math.round(L*s.pieces/s.max)), r=mul((s.x*131+s.y)|0);
+    if(s.kind==='blatt'){
+      const se=seasonIdx(), col=se===2?['#b8662a','#d08a32','#8a4a1a']:s.leaf<.3?['#4f8f33','#6aab3c','#3a6e22']:['#5f9e34','#86c046','#3f7a2a'];
+      for(let px=0;px<L;px++){
+        const prof=Math.sin(Math.PI*(px+.5)/L), h=Math.max(1,Math.round(prof*5+.4));
+        if(px>=keep) continue;
+        const bite=px>keep-4?((r()*3)|0):0, hh=Math.max(1,h-bite);
+        P(x0+px,gy-hh,col[0],1,hh); P(x0+px,gy-hh,col[1],1,1);
+        if(px%5===2&&hh>2) P(x0+px,gy-hh+1,col[2],1,hh-1);
+      }
+      P(x0,gy-2,col[2],Math.min(keep,L-2),1);
+      P(x0+L-2,gy-2,'#6a4a22',3,1);
+    } else {
+      const wv=((gameT*2+s.x)|0)%2;
+      for(let px=0;px<Math.min(keep,L-3);px++){const seg=(px>>2)%2;P(x0+px,gy-4,seg?'#7cc04a':'#6aab3c',1,4);P(x0+px,gy-4,'#a8e070',1,1);}
+      for(let k=2;k<Math.min(keep,L-3);k+=4)P(x0+k+wv,gy-1,'#3a6a1a',1,1);
+      if(keep>=L-3){P(x0+L-4,gy-5,'#4a8a2a',4,5);P(x0+L-2,gy-4,'#1a2a10');P(x0+L-1,gy-7,'#3a6a1a',1,3);}
+    }
+    ctx.globalAlpha=1; return;
+  }
   if(s.kind==='laus'){P(x,y,'#7cc04a',3,2);P(x+1,y-1,'#9be06a');P(x+2,y+1,'#3a6a1a');}
   else if(s.kind==='insekt'){const w=((gameT*3+s.x)|0)%2;P(x-1,y+w,'#7cc04a',2,2);P(x+1,y+1-w,'#7cc04a',2,2);P(x+3,y,'#2a3a1a',1,2);P(x-1,y+1+w,'#4a8a2a',4,1);}
   else if(s.kind==='blatt'){P(x-1,y-1,'#5f9e34',4,3);P(x,y-2,'#5f9e34',2,1);P(x,y-1,'#86c046',1,2);P(x+3,y+1,'#3a6a1a');}
@@ -2383,14 +2581,21 @@ function render(time){
     drawQueen(rival.qx,rival.qy,RPAL,{v:rival.hp,m:rival.max},rival.flash);
   }
   const R=range();
-  for(const s of seedAt.values()) if(s.x*T>vL-8&&s.x*T<vR+8) drawSeed(s,Math.abs(s.x-entX)<=R?1:.4);
+  for(const s of itemList()) if((s.x+s.w)*T>vL-8&&s.x*T<vR+8) drawSeed(s,Math.abs(s.x-entX)<=R?1:.4);
   for(const c of corpses){
     ctx.globalAlpha=Math.min(1,c.t/6); const x=Math.round(c.x), y=Math.round(c.y)+1;
     if(c.big){P(x-6,y,'#4a3a34',12,2);P(x-4,y-1,'#5a4a42',8,1);}
     else{P(x-3,y,'#4a3a34',6,1);P(x-2,y-1,'#5a4a42',4,1);P(x-2,y-2,'#3a2c27');P(x,y-2,'#3a2c27');P(x+2,y-2,'#3a2c27');}
   }
   ctx.globalAlpha=1;
+  const flags=new Set(); for(const a of ants) if(a.order) flags.add(a.order.t);
+  for(const i of flags){const x=(i%W)*T+4,y=((i/W)|0)*T+T;P(x,y-11,'#5b3b22',1,11);P(x+1,y-11,'#ffe27a',4,3);P(x+1,y-8,'#e9b443',2,1);}
+  for(const m of orderMarks){const x=(m.i%W)*T+4,y=((m.i/W)|0)*T+5,r=Math.round((1.2-m.t)*14)+3;ctx.strokeStyle=`rgba(255,226,122,${m.t/1.2})`;ctx.lineWidth=1;ctx.strokeRect(x-r+.5,y-r/2+.5,r*2,r);}
   for(const a of ants) if(a.px>vL-10&&a.px<vR+10&&a.py>vT-10&&a.py<vB+10) drawAnt(a);
+  for(const a of sel){const x=Math.round(a.px),y=Math.round(a.py),c='#ffe27a';P(x-6,y-5,c,3,1);P(x-6,y-5,c,1,3);P(x+4,y-5,c,3,1);P(x+6,y-5,c,1,3);P(x-6,y+3,c,3,1);P(x-6,y+1,c,1,3);P(x+4,y+3,c,3,1);P(x+6,y+1,c,1,3);}
+  for(const a of ants) if(a.order&&!sel.has(a)) P(Math.round(a.px),Math.round(a.py)-6,'#ffe27a');
+  if(cmdDrag&&cmdDrag.box){const x0=Math.min(cmdDrag.x0,cmdDrag.x1),y0=Math.min(cmdDrag.y0,cmdDrag.y1),w=Math.abs(cmdDrag.x1-cmdDrag.x0),h=Math.abs(cmdDrag.y1-cmdDrag.y0);
+    ctx.fillStyle='rgba(255,226,122,.12)';ctx.fillRect(x0,y0,w,h);ctx.strokeStyle='rgba(255,226,122,.9)';ctx.lineWidth=1;ctx.setLineDash([3,2]);ctx.strokeRect(Math.round(x0)+.5,Math.round(y0)+.5,Math.round(w),Math.round(h));ctx.setLineDash([]);}
   for(const e of enemies){
     if(e.dead) continue;
     if(e.type==='spinne') drawSpider(e); else if(e.type==='baer') drawBear(e); else if(e.type==='maulwurf') drawMole(e);
@@ -2420,7 +2625,7 @@ function render(time){
     if(tool==='room'){
       const ok=!roomCheck(roomType,hover.x,hover.y), b=roomBox(roomType,hover.x,hover.y);
       P(b.x0*T,b.y0*T,ok?'rgba(140,191,76,.35)':'rgba(239,116,87,.35)',b.w*T,b.h*T);
-    } else if(tool!=='pan'){
+    } else if(tool!=='pan'&&tool!=='cmd'){
       ctx.strokeStyle=tool==='dig'?(terr[hover.y*W+hover.x]?'rgba(242,201,76,.9)':'rgba(239,116,87,.9)'):tool==='fill'?'rgba(224,149,106,.9)':tool==='trap'?'rgba(255,194,90,.9)':'rgba(239,116,87,.9)';ctx.lineWidth=1;
       ctx.strokeRect(hover.x*T+.5,hover.y*T+.5,T-1,T-1);
     }
@@ -2482,10 +2687,11 @@ function step(dt){
   }
   spawnT+=dt;
   const sf=season().seeds;
-  if(sf>0){if(spawnT>2.4/sf){spawnT=0;if(seedAt.size<40)spawnSeed();}}
-  else if(spawnT>3){spawnT=0;if(Math.random()<.3){for(const[i,s]of seedAt){if(!s.claimed){seedAt.delete(i);break;}}}}
+  if(sf>0){if(spawnT>2.4/sf){spawnT=0;if(itemList().length<30)spawnSeed();}}
+  else if(spawnT>3){spawnT=0;if(Math.random()<.3){for(const it of seedAt.values()){if(!it.claims){removeItem(it);break;}}}}
   for(let k=particles.length-1;k>=0;k--){const p=particles[k];p.vy+=90*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;if(p.life<=0)particles.splice(k,1);}
   for(let k=floaters.length-1;k>=0;k--){floaters[k].life-=dt;if(floaters[k].life<=0)floaters.splice(k,1);}
+  for(let k=orderMarks.length-1;k>=0;k--){orderMarks[k].t-=dt;if(orderMarks[k].t<=0)orderMarks.splice(k,1);}
   histT+=dt; if(histT>=15){histT=0;hist.push([Math.round(gameT),ants.length,food]);if(hist.length>400)hist=hist.filter((_,i)=>i%2===0);}
   slow+=dt; if(slow>.4){slow=0;checkGoals();hud();}
 }

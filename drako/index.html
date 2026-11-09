@@ -1462,7 +1462,7 @@ function frontStrike(v){// 1 = Klauenhieb, 2 = Hornstoss
   if(e.air)juggle(e,4);if(dmgE(e,v===0?6:7,dx,dz,5))return;if(v===1){e.x+=dx*1.2;e.z+=dz*1.2;e.stun=Math.max(e.stun,.55)}burst(V(e.x,e.g.position.y+.9,e.z),0xffd166,10)});
  sfx('flap')}
 function launcher(){// Hornstoss nach oben: schleudert Gegner vor Drako in die Luft, Drako springt hinterher
- if(st!=='play'||!pl.g||pl.slam||pl.tailT>0||pl.atkCd>0)return false;pl.atkCd=.55;pl.atkT=pl.atkDur=.38;pl.atkKind='up';
+ if(st!=='play'||!pl.g||pl.slam||pl.tailT>0||pl.atkCd>0)return false;pl.atkCd=.2;pl.atkT=pl.atkDur=.38;pl.atkKind='up';
  const fx=Math.sin(pl.hd),fz=Math.cos(pl.hd);
  meleeHit(3.3,.15,(e,dx,dz)=>{dmgE(e,e.armor?2:4,dx*.2,dz*.2,6);if(!e.knocked){launchE(e,dx,dz,12);burst(V(e.x,e.g.position.y+.6,e.z),0xffe9a0,14)}});
  pl.g=false;pl.j=1;pl.box=null;pl.groundGrace=0;pl.sprintJump=false;pl.vy=11;pl.vx=fx*2;pl.vz=fz*2;sfx('jump');burst(V(pl.p.x+fx,pl.p.y+.3,pl.p.z+fz),0xffe9a0,16);return true}

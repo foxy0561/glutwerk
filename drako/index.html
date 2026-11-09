@@ -1687,7 +1687,7 @@ if(realm===4)arenaUpd(dt,ramF,firing&&beNow==='fire',fw);
 if(realm===6)trialUpd(dt,fw);
 if(brDirty&&t-brSaveT>5){brSaveT=t;saveBR()}
 saveT+=dt;if(saveT>3){saveT=0;saveGame()}
-if(realm===5){hubDisc.rotation.z+=dt*.5;if(Math.hypot(p.x-HBX,p.z-(HBZ+34))<2.6&&Math.abs(p.y-HTOP)<4){leaveOcean();return}}
+if(realm===5){hubDisc.rotation.z+=dt*.5;if(Math.hypot(p.x-HBX,p.z-(HBZ+34))<2.6&&Math.abs(p.y-HTOP)<4){leaveOcean();pl.p.set(0,H(0,52)+.5,52);lastSafe.copy(pl.p);cam.position.set(0,H(0,52)+5,60);for(const k in K)K[k]=false;return}}
 if(realm===4&&ab.state==='done'&&Math.hypot(p.x-AX,p.z-AZ)<3.1&&Math.abs(p.y-(ATOP+4))<5){enterHub();return}
 // Portal
 // Das bisherige Nordportal ist durch das Steinportal ersetzt; es gibt nur einen Welteneingang.

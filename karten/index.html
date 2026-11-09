@@ -461,6 +461,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <div class="toasts" id="toasts"></div>
 
 <script src="werte.js"></script>
+<script src="figuren.js"></script>
 <script>
 /* =========================================================
    EINSTELLUNGEN
@@ -687,7 +688,9 @@ let svgUid = 0;
 function artSVG(key) {
   // eindeutige IDs, damit mehrere Karten auf einer Seite sich nicht stören
   const u = "a" + (++svgUid);
-  const s = (ART[key] || "").replace(/id="(\w+)"/g, `id="$1${u}"`).replace(/url\(#(\w+)\)/g, `url(#$1${u})`);
+  const f = window.FIG && FIG[key];
+  const src = f ? f.bg + `<image href="fig/${key}.webp" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" preserveAspectRatio="xMidYMid meet"/>` : (ART[key] || "");
+  const s = src.replace(/id="(\w+)"/g, `id="$1${u}"`).replace(/url\(#(\w+)\)/g, `url(#$1${u})`);
   return `<svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice">${s}</svg>`;
 }
 /* Sonderkarte mit freigestellter Figur, die oben aus der Karte ragt */

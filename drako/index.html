@@ -30,6 +30,7 @@ button:disabled{background:#666;box-shadow:none}
 #padinfo{font-size:14px;color:#bff5c8}
 #uw{position:fixed;inset:0;background:rgba(20,90,170,.38);pointer-events:none;z-index:1}
 #enb{position:fixed;left:50%;transform:translateX(-50%);bottom:58px;width:300px;max-width:70vw;height:12px;border-radius:8px;background:rgba(20,8,45,.7);border:2px solid #4fb8d6;z-index:2;pointer-events:none;overflow:hidden}#enb i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2bc0e4,#7df9ff);transition:width .15s}#enb b{position:absolute;left:6px;top:-3px;font-size:11px;color:#e8fbff;text-shadow:0 1px 2px #000}#enb.low i{background:linear-gradient(90deg,#ff5f6d,#ffc371)}#enb.flash{animation:enfl .45s}@keyframes enfl{0%,100%{border-color:#4fb8d6}40%{border-color:#ff4d4d;box-shadow:0 0 12px #ff4d4d}}
+#fub{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;width:200px;max-width:50vw;height:9px;border-radius:6px;background:rgba(20,8,45,.7);border:2px solid #8a4fd6;z-index:2;pointer-events:none;overflow:hidden}#fub i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7b2ff7,#d68bff);transition:width .2s}#fub b{position:absolute;left:6px;top:-4px;font-size:10px;color:#f3e6ff;text-shadow:0 1px 2px #000}#fub b span{display:none}#fub.full{border-color:#e9b6ff;box-shadow:0 0 14px #c06bff;animation:fupl 1s infinite}#fub.full b span{display:inline}@keyframes fupl{50%{box-shadow:0 0 4px #c06bff}}
 #bbar{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;display:flex;gap:8px;z-index:2;pointer-events:none;font-size:16px;align-items:center}
 #bbar .sl{background:rgba(30,10,60,.6);border:2px solid #6b4a9a;border-radius:12px;padding:5px 10px;color:#ccc;min-width:74px;text-align:center}
 #bbar .sl.on{border-color:#ffe066;color:#fff;box-shadow:0 0 12px #ffe066}#bbar .sl.lk{opacity:.4}#bbar .wal{color:#9ff;margin-left:6px}
@@ -78,7 +79,7 @@ button:disabled{background:#666;box-shadow:none}
 </style></head><body>
 <div id="hud" class="hidden"><div id="worldName">Kristalltal</div><div id="hp"></div><div>💎 Punkte: <span id="cr">0</span> / <span id="need">20</span></div><div id="bar"><i id="barfill"></i></div><div id="dr">🐲 Drachen: <span id="drn">0</span> / 3</div><div id="obj"></div><div id="bossbar" class="hidden"></div><div id="msg"></div></div><div id="compass" class="hidden"><svg id="arrow" width="46" height="46" viewBox="-23 -23 46 46"><polygon points="0,-21 7,0 -7,0" fill="#ff2b2b" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><polygon points="0,21 7,0 -7,0" fill="#dcdce8" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle r="3" fill="#2a1a40"/></svg></div><div id="flash"></div>
 <div id="menu" class="ov"><h1>🐉 Drako</h1><div id="sub">DIE KRISTALLWELTEN</div>
-<div class="keys"><span><b>WASD</b> laufen</span><span><b>Shift</b> rennen &amp; rammen</span><span><b>Leertaste</b> springen · 2× gleiten</span><span><b>Linksklick</b> Schwanz</span><span><b>Rechtsklick</b> Atem</span><span><b>Mausrad-Klick</b> Spezial-Atem</span><span>🔮 Atem braucht <b>Energie</b> – Kristalle laden auf</span><span><b>Q</b> Salto-Stoß</span><span><b>1–4</b> Atem · <b>Tab</b> verbessern</span><span><b>F</b> sprechen · <b>M</b> Ton</span></div>
+<div class="keys"><span><b>WASD</b> laufen</span><span><b>Shift</b> rennen &amp; rammen</span><span><b>Leertaste</b> springen · 2× gleiten</span><span><b>Linksklick</b> Schwanz</span><span><b>Rechtsklick</b> Atem</span><span><b>Mausrad-Klick</b> Spezial-Atem</span><span>🔮 Atem braucht <b>Energie</b> – Kristalle laden auf</span><span><b>V</b> Fury (lila Leiste voll)</span><span><b>Q</b> Salto-Stoß</span><span><b>1–4</b> Atem · <b>Tab</b> verbessern</span><span><b>F</b> sprechen · <b>M</b> Ton</span></div>
 <div class="menu-actions"><button id="play" disabled>Lädt…</button><button id="menuEdit">🎨 Drache</button><button id="menuOptions">Optionen</button><button id="menuNew">🆕 Neues Spiel</button></div>
 <div class="hint">🎮 Gamepad geht auch · Dein Fortschritt wird automatisch gespeichert</div></div>
 <div id="editor" class="hidden"><div class="ep"><h2>🎨 Drache anpassen</h2><div id="presets"></div>
@@ -112,7 +113,7 @@ button:disabled{background:#666;box-shadow:none}
 <div class="menu-actions" style="margin-top:12px"><button id="closeOptions">Zurück</button></div></div>
 <div id="fps" class="hidden"></div>
 <div id="bui" class="ov hidden"><h1>🐉 Atem-Kräfte</h1><div>💎 Atem-Kristalle: <b id="bwal">0</b> &nbsp;·&nbsp; Tab / Esc schließt · 1–4 wechselt den Atem</div><div id="bcards"></div><div class="ctrl">Neue Atem-Arten lernst du bei den großen Drachen am Ende der Welten. Jeder gesammelte Kristall zählt auch als Atem-Kristall.</div><div class="menu-actions"><button id="bclose">Schließen</button></div></div>
-<div id="bbar" class="hidden"></div><div id="enb" class="hidden"><i id="enf"></i><b>🔮 Energie</b></div>
+<div id="bbar" class="hidden"></div><div id="enb" class="hidden"><i id="enf"></i><b>🔮 Energie</b></div><div id="fub" class="hidden"><i id="fuf"></i><b>💜 Fury <span>– V drücken!</span></b></div>
 <div id="uw" class="hidden"></div>
 <div id="win" class="ov hidden"><h1>🎉 Geschafft!</h1><p id="ws"></p><button onclick="location.reload()">Nochmal spielen</button></div>
 <script>
@@ -942,8 +943,8 @@ const cfg=Object.assign({},CFG0);try{const sv=JSON.parse(localStorage.getItem('d
 function saveCfg(){try{localStorage.setItem('drako-cfg',JSON.stringify(cfg))}catch(e){}}
 function applyCfg(){try{rd.setPixelRatio(Math.min(devicePixelRatio,[1,1.5,2][cfg.q]||2))}catch(e){}sun.castShadow=!!cfg.sh;cam.fov=cfg.fov;cam.updateProjectionMatrix();sc.fog.far=cfg.far;sc.fog.near=Math.max(20,cfg.far/3);
  if(cfg.fps)$('fps').classList.remove('hidden');else $('fps').classList.add('hidden')}
-const DEFAULT_BINDINGS={forward:'KeyW',back:'KeyS',left:'KeyA',right:'KeyD',sprint:'ShiftLeft',jump:'Space',flap:'KeyE',slam:'KeyQ',interact:'KeyF',special:'KeyR'};
-const bindingNames={special:'Spezial-Atem (auch Mausrad-Klick)',forward:'Vorwärts',back:'Rückwärts',left:'Links',right:'Rechts',sprint:'Rennen / Rammen',jump:'Springen / Gleiten',flap:'Extra-Flügelschlag (alternativ)',slam:'Salto-Stoß / beim Gleiten Flügelschlag',interact:'Mit großem Drachen sprechen'};
+const DEFAULT_BINDINGS={forward:'KeyW',back:'KeyS',left:'KeyA',right:'KeyD',sprint:'ShiftLeft',jump:'Space',flap:'KeyE',slam:'KeyQ',interact:'KeyF',special:'KeyR',fury:'KeyV'};
+const bindingNames={special:'Spezial-Atem (auch Mausrad-Klick)',fury:'Fury-Angriff (wenn Leiste voll)',forward:'Vorwärts',back:'Rückwärts',left:'Links',right:'Rechts',sprint:'Rennen / Rammen',jump:'Springen / Gleiten',flap:'Extra-Flügelschlag (alternativ)',slam:'Salto-Stoß / beim Gleiten Flügelschlag',interact:'Mit großem Drachen sprechen'};
 let binds={...DEFAULT_BINDINGS};try{const saved=JSON.parse(localStorage.getItem('drako-keybinds-v2')||'null');if(saved&&typeof saved==='object')for(const name in DEFAULT_BINDINGS)if(typeof saved[name]==='string')binds[name]=saved[name];if(saved&&!saved.slam&&binds.flap==='KeyQ')binds.flap='KeyE'}catch(e){}
 let waitingBind=null,optionsFrom='pause';
 function readable(code){return ({Space:'Leertaste',ShiftLeft:'Shift (links)',ShiftRight:'Shift (rechts)',ArrowUp:'Pfeil ↑',ArrowDown:'Pfeil ↓',ArrowLeft:'Pfeil ←',ArrowRight:'Pfeil →'}[code]||code.replace(/^Key/,'').replace(/^Digit/,'').replace(/^Numpad/,'Num '))}
@@ -975,10 +976,10 @@ function padPoll(dt){
  GP.lx=dz(ax[0]||0);GP.ly=dz(ax[1]||0);GP.rx=dz(ax[2]||0);GP.ry=dz(ax[3]||0);
  const edge=(k,v)=>{const e=v&&!GP.prev[k];GP.prev[k]=v;return e};
  const A=b(0),B=b(1),X=b(2),Y=b(3),LB=b(4),RB=b(5),LT=b(6),RT=b(7),ST=b(9);
- GP.sprint=B||LT;GP.jump=A;GP.fire=RT;
- const eSel=edge('sel',b(8)),eDL=edge('dl',b(14)),eDR=edge('dr',b(15)),eDU=edge('du',b(12)),eA=edge('a',A),eX=edge('x',X),eY=edge('y',Y),eRB=edge('rb',RB),eLB=edge('lb',LB),eST=edge('st',ST);
+ GP.sprint=B||LT;GP.lb=LB;GP.jump=A;GP.fire=RT;
+ const eSel=edge('sel',b(8)),eDL=edge('dl',b(14)),eDR=edge('dr',b(15)),eDU=edge('du',b(12)),eA=edge('a',A),eX=edge('x',X),eY=edge('y',Y),eRB=edge('rb',RB),eLB=edge('lb',LB),eL3=edge('l3',b(10)||b(11)),eST=edge('st',ST);
  if(st==='play'){
-  if(eA)jump();if(eRB)bonusFlap();if(eLB)special();if(eY){if(pl.glNow)bonusFlap();else slam()}if(eX)tailWhip();if(eSel)openBUI();if(eDL)cycleEl(-1);if(eDR)cycleEl(1);if(eDU)interact();
+  if(eA)jump();if(eRB)bonusFlap();if(eLB)special();if(eL3)fury();if(eY){if(pl.glNow)bonusFlap();else slam()}if(eX)tailWhip();if(eSel)openBUI();if(eDL)cycleEl(-1);if(eDR)cycleEl(1);if(eDU)interact();
   cy-=GP.rx*dt*2.8*cfg.pad/100;cp=Math.max(-.1,Math.min(1.2,cp+GP.ry*dt*2*(cfg.inv?-1:1)*cfg.pad/100));
   if(eST){st='pause';md=false;GP.fire=false;if(document.pointerLockElement===cv)document.exitPointerLock();$('pause').classList.remove('hidden')}
  }else if(st==='ui'){if(eSel||eST)closeBUI()}else if(st==='pause'){if(eST||eA){if($('options').classList.contains('hidden'))$('resume').onclick()}}
@@ -1001,11 +1002,11 @@ const bits=(arr,f)=>arr.map(o=>f(o)?1:0).join('');
 const fromBits=(str,arr,f)=>{if(typeof str!=='string')return;for(let i=0;i<arr.length&&i<str.length;i++)if(str[i]==='1')f(arr[i])};
 function saveGame(){if(window.__drakoReset||(st==='menu'&&!hasSave))return;const w2=worlds[2];
  const sv={v:1,cnt,kills,fr:bits(dragons,o=>o.free),cry:bits(cry.slice(0,CRY0),q=>q.got),ch:bits(chests,q=>q.open),cr:bits(crates,o=>!o.a),en:bits(en,e=>e.dead||e.knocked),
-  ev:Math.round(EN.v),wd:WL.map(w=>w.done?1:0),wm:WL.map(w=>w.met?1:0),wg:WL.map(w=>w.got||0),gb:!boss.alive,door:door.open,arena:arenaDone,bonus:freed>=3&&bonusT<=0,
+  ev:Math.round(EN.v),fv:Math.round(FU.v),wd:WL.map(w=>w.done?1:0),wm:WL.map(w=>w.met?1:0),wg:WL.map(w=>w.got||0),gb:!boss.alive,door:door.open,arena:arenaDone,bonus:freed>=3&&bonusT<=0,
   w2:{braz:w2.braz.map(b=>b.lit?1:0),sol:w2.solved2,br:w2.bridgeOn},hints};
  try{localStorage.setItem(SAVE_KEY,JSON.stringify(sv));hasSave=true}catch(e){}}
 function loadGame(){let sv=null;try{sv=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){}if(!sv||sv.v!==1)return;hasSave=true;
- cnt=+sv.cnt||0;kills=+sv.kills||0;if(typeof sv.ev==='number')EN.v=Math.max(0,Math.min(EN.max,sv.ev));hints=sv.hints&&typeof sv.hints==='object'?sv.hints:{};
+ cnt=+sv.cnt||0;kills=+sv.kills||0;if(typeof sv.ev==='number')EN.v=Math.max(0,Math.min(EN.max,sv.ev));if(typeof sv.fv==='number')FU.v=Math.max(0,Math.min(FU.max,sv.fv));hints=sv.hints&&typeof sv.hints==='object'?sv.hints:{};
  fromBits(sv.fr,dragons,o=>{o.free=true;o.t=9;o.ice.visible=false;o.solid.r=-5;freed++});
  fromBits(sv.cry,cry,q=>{q.got=true;q.m.visible=false});
  fromBits(sv.ch,chests,q=>{q.open=true;q.lid.rotation.x=-1.1;q.lid.position.y=1.25});
@@ -1216,7 +1217,7 @@ function renderBUI(){$('bwal').textContent=BR.wallet;let h='';
  for(const k of ELS){const E=EL[k],o=BR.own[k],lv=BR.lv[k]||0;
   h+='<div class="bcard'+(BR.cur===k?' sel':'')+'"><h3>'+E.ic+' '+E.n+' <span class="st">'+(o?'★'.repeat(lv)+'☆'.repeat(5-lv):'🔒')+'</span></h3>';
   if(!o)h+='<p>Noch nicht gelernt. Bestehe die Prüfung des großen Drachen: '+E.where+'.</p>';
-  else{h+='<p>'+STAT[k](lv)+'</p>';
+  else{h+='<p>'+STAT[k](lv)+'</p>';h+='<p>🖱️ Spezial: <b>'+SPEC[k].n+'</b> – '+SPECD[k]+'</p>';
    h+=lv<5?'<p>Nächste Stufe: '+E.desc[lv]+'</p>':'<p>⭐ Höchste Stufe erreicht!</p>';
    if(lv<5)h+='<button '+(BR.wallet>=UPC[lv+1]?'':'disabled ')+'onclick="drakoBU.up(\''+k+'\')">⬆ Verbessern ('+UPC[lv+1]+' 💎)</button>';
    h+='<button onclick="drakoBU.sel(\''+k+'\')">'+(BR.cur===k?'✔ Aktiv':'Wählen')+'</button>';
@@ -1240,7 +1241,7 @@ function knockE(e,fx,fz,power,fire){e.knocked=true;e.downTime=-1;e.airY=.35;e.ky
 function slay(e,fx,fz){knockE(e,fx,fz,3,true);burst(e.g.position,0xff7b1c,20)}
 function dmgE(e,n,fx,fz,pw){e.hp-=n;e.hit=.28;e.stun=Math.max(e.stun,.35);if(e.hp<=0){knockE(e,fx,fz,pw||4,false);return true}e.x+=fx*.9;e.z+=fz*.9;return false}
 function shatter(e,fx,fz){e.frz=0;if(!dmgE(e,14,fx,fz,6)){burst(V(e.x,e.g.position.y+1,e.z),0xaee9ff,26);sfx('crate');return}burst(V(e.x,e.g.position.y+1,e.z),0xaee9ff,26);burst(V(e.x,e.g.position.y+1,e.z),0xffffff,12);sfx('crate')}
-function hitBoss(dmg){if(!boss.alive)return;boss.hp-=dmg;boss.hit=.22;if(boss.hp<=0){boss.alive=false;boss.dying=1.1;burst(boss.g.position.clone().add(V(0,2,0)),0xff6025,55);msg('💥 Der Wächter wurde besiegt!',3)}}
+function hitBoss(dmg){if(!boss.alive)return;boss.hp-=dmg;boss.hit=.22;if(boss.hp<=0){boss.alive=false;boss.dying=1.1;burst(boss.g.position.clone().add(V(0,2,0)),0xff6025,55);msg('💥 Der Wächter wurde besiegt!',3);if(typeof furyGain==='function')furyGain(40)}}
 function tailElem(e,be,bl){if(bl<2)return;
  if(be==='fire')applyStatus(e,'burn',bl);else if(be==='poison')applyStatus(e,'psn',bl);else if(be==='ice')applyStatus(e,'frz',bl);else if(be==='bolt'){applyStatus(e,'stun',bl);e.hp-=1.5}}
 // Blitz-Linien (Pool)
@@ -1288,7 +1289,8 @@ function breathFx(be,bl,dt,fw,mp){
  }}
 
 // ---- Spezial-Atem (Mausrad-Klick / Taste R / Gamepad LB): jedes Element hat einen eigenen starken Angriff mit Abklingzeit
-const SPEC={fire:{n:'Feuerbombe',cd:3.5,cost:25},bolt:{n:'Donnerschlag',cd:5,cost:30},ice:{n:'Frostnägel',cd:2.2,cost:18},poison:{n:'Giftnieser',cd:3.5,cost:20}};
+const SPEC={fire:{n:'Feuerbombe',cd:3.5,cost:25},bolt:{n:'Donnerschlag',cd:5,cost:30},ice:{n:'Frostsplitter',cd:0,cost:2.5},poison:{n:'Giftnieser',cd:3.5,cost:20}};
+const SPECD={fire:'Bombe im Bogen, explodiert und setzt in Brand (25 Energie)',bolt:'Blitze treffen automatisch mehrere Gegner (30 Energie)',ice:'Gedrückt halten: Dauerfeuer aus Eissplittern, friert ein (wenig Energie pro Splitter)',poison:'Giftstoß nach vorne wie ein Kegel (20 Energie)'};
 const SP={cd:{fire:0,bolt:0,ice:0,poison:0},shots:[],clouds:[],rings:[]};
 const spCd=()=>.15;// keine echte Abklingzeit mehr – die Energie begrenzt den Spezial-Atem
 // ---- Energie: Atem und Spezial-Atem verbrauchen Energie, aufgeladen wird nur durch Kristalle
@@ -1297,6 +1299,30 @@ function energyGain(n){EN.v=Math.min(EN.max,EN.v+n);renderEnergy()}
 function energyUse(n){if(TR.on)return true;if(EN.v<n){noEnergy();return false}EN.v-=n;renderEnergy();return true}
 function noEnergy(){if(EN.warn<=0){EN.warn=2.5;msg('🔮 Keine Energie – sammle Kristalle!',2);sfx('bump')}const b=$('enb');if(b){b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash')}}
 function renderEnergy(){const f=$('enf');if(f)f.style.width=(EN.v/EN.max*100).toFixed(1)+'%';const b=$('enb');if(b)b.classList.toggle('low',EN.v<20)}
+// ---- Fury (wie in A New Beginning): lila Kristalle von besiegten Gegnern fuellen die Leiste, voll -> Taste V = Riesenangriff des aktuellen Elements
+const FU={v:0,max:100,on:0,r:0,ring:null};
+const furyGem=new T.MeshBasicMaterial({color:0xc06bff});
+function furyGain(n,pos){if(FU.on>0)return;const was=FU.v>=FU.max;FU.v=Math.min(FU.max,FU.v+n);if(pos)for(let i=0;i<6;i++)emit(V(pos.x,pos.y+1,pos.z),V((R()-.5)*3,2+R()*2,(R()-.5)*3),0xc06bff,.6,.9);renderFury();if(!was&&FU.v>=FU.max){sfx('unlock');hintOnce('fury','💜 Fury bereit! Drücke V',3)}}
+function renderFury(){const f=$('fuf');if(f)f.style.width=(FU.v/FU.max*100).toFixed(1)+'%';const b=$('fub');if(b)b.classList.toggle('full',FU.v>=FU.max)}
+function fury(){if(st!=='play'||FU.v<FU.max||FU.on>0)return;const k=brEl(),lv=brLv(k),E=EL[k],p=pl.p;FU.v=0;renderFury();FU.on=1.6;FU.k=k;FU.lv=lv;FU.done=false;FU.x=p.x;FU.y=p.y;FU.z=p.z;
+ pl.inv=Math.max(pl.inv,2.4);pl.vy=Math.max(pl.vy,11);pl.g=false;pl.box=null;sfx('roar');
+ FU.ring=new T.Mesh(new T.TorusGeometry(1,.6,10,56),new T.MeshBasicMaterial({color:E.col,transparent:true,opacity:.8,depthWrite:false,blending:T.AdditiveBlending}));FU.ring.rotation.x=Math.PI/2;FU.ring.position.set(p.x,p.y+.6,p.z);sc.add(FU.ring);
+ const fl=$('flash');if(fl){fl.style.background=hx(E.col);fl.style.opacity=.55;setTimeout(()=>{fl.style.opacity=0},180)}
+ for(let i=0;i<80;i++)emit(V(p.x,p.y+1,p.z),V((R()-.5)*6,4+R()*8,(R()-.5)*6),R()<.5?E.col:E.col2,1,1.6)}
+function furyUpd(dt){if(FU.on<=0)return;FU.on-=dt;const k=FU.k,E=EL[k],lv=FU.lv,el=1.6-FU.on,Rmax=24;
+ const rr=Math.min(Rmax,el<.55?0:(el-.55)/.6*Rmax);
+ if(FU.ring){FU.ring.position.set(FU.x,FU.y+.6,FU.z);FU.ring.scale.set(Math.max(.01,rr),Math.max(.01,rr),1+rr*.05);FU.ring.material.opacity=el<.55?0:.85*(1-rr/Rmax*.7);}
+ if(el<.55){for(let i=0;i<10;i++){const a=R()*6.283;emit(V(pl.p.x+Math.sin(a)*3,pl.p.y+1+R()*2,pl.p.z+Math.cos(a)*3),V(-Math.sin(a)*5,1,-Math.cos(a)*5),R()<.5?E.col:E.col2,.5,1.2)}return}
+ for(let i=0;i<14;i++){const a=R()*6.283;emit(V(FU.x+Math.sin(a)*rr,FU.y+.8,FU.z+Math.cos(a)*rr),V(Math.sin(a)*3,2+R()*4,Math.cos(a)*3),R()<.5?E.col:E.col2,.7,1.8)}
+ if(!FU.done){FU.done=true;sfx('crate');if(k==='bolt')sfx('zap');
+  blastAt(FU.x,FU.y+.7,FU.z,Rmax,(e,dx,dz,d)=>{const sTag=k==='fire'?'burn':k==='poison'?'psn':k==='ice'?'frz':'stun';applyStatus(e,sTag,lv+4);
+   if(k==='bolt')SP.rings.push({kind:'strike',pt:V(e.x,e.g.position.y+.8,e.z),delay:d/Rmax*.5,lv,t:0});
+   setTimeout(()=>{if(!e.dead&&!e.knocked&&dmgE(e,70+12*lv,dx,dz,7))e.deathFire=k==='fire'},d/Rmax*600)});
+  cratesAt(FU.x,FU.y,FU.z,Rmax*.7,o=>destroyCrate(o));
+  if(k==='fire')dragons.forEach(o=>{if(!o.free&&Math.hypot(o.x-FU.x,o.z-FU.z)<Rmax){o.heat=1;freeDragon(o)}});
+  if(realm===0&&boss.alive&&Math.hypot(boss.x-FU.x,boss.z-FU.z)<Rmax)hitBoss(35+6*lv);
+  if(realm===4&&!ab.shield){const dx=ab.x-FU.x,dz=ab.z-FU.z,d=Math.hypot(dx,dz)||1;ab.pvx+=dx/d*12;ab.pvz+=dz/d*12}}
+ if(FU.on<=0&&FU.ring){sc.remove(FU.ring);FU.ring.geometry.dispose();FU.ring.material.dispose();FU.ring=null}}
 const groundAt=(x,z)=>realm===0||realm===7?H(x,z):realm===2?HL(x,z):-999;
 function blastAt(x,y,z,r,f){// f(e,dx,dz,d) fuer jeden Gegner im Radius
  for(const e of en){if(e.dead||e.knocked)continue;const dx=e.x-x,dz=e.z-z,d=Math.hypot(dx,dz);if(d<r&&Math.abs(e.g.position.y+.7-y)<r+1)f(e,dx/(d||1),dz/(d||1),d)}}
@@ -1332,8 +1358,7 @@ function special(){
   SP.shots.push({k,lv,g,vx:dx/tau,vy:(dy+.5*g2*tau*tau)/tau,vz:dz/tau,grav:g2,life:tau+1.2});
   sfx('roar');for(let i=0;i<14;i++)emit(mp,V(dx/tau*.3+(R()-.5)*4,(R()-.2)*3,dz/tau*.3+(R()-.5)*4),R()<.5?0xff6a00:0xffd60a,.4,1.2)}
  else if(k==='ice'){// Frostnaegel: schnelle Eisspitzen hintereinander, zielen automatisch auf das markierte Ziel
-  const tgt=aimPoint('ice'),n=4+Math.floor(lv/2);
-  for(let i=0;i<n;i++)SP.rings.push({kind:'nail',delay:i*.07,t:0,lv,tgt,i,n});sfx('zap')}
+  SP.iceT=0;nailShot({lv,tgt:aimPoint('ice'),i:0,n:1});sfx('zap')}
  else if(k==='poison'){// Giftnieser: blitzschneller Giftkegel nach vorne
   const r=9+.6*lv,dot=.5;sfx('flap');sfx('bump');
   for(let i=0;i<70;i++){const a=(R()-.5)*1.9,sp2=10+R()*14,dx=fx*Math.cos(a)-fz*Math.sin(a),dz=fz*Math.cos(a)+fx*Math.sin(a);emit(mp,V(dx*sp2,(R()-.35)*3,dz*sp2),R()<.5?0x7dff4a:(R()<.5?0x2a7a1a:0xd4ff8a),.45+R()*.3,1.1+R()*.8)}
@@ -1349,11 +1374,11 @@ function special(){
   if(!pts.length){const x=p.x+fx*8,z=p.z+fz*8,gy=groundAt(x,z);pts.push(V(x,gy>-900?gy+.3:p.y,z))}
   sfx('zap');pts.forEach((pt,i)=>SP.rings.push({kind:'strike',pt,delay:i*.07,lv,t:0}))}
  renderSpec()}
-function nailShot(q){const mp=head.localToWorld(V(0,-.12,.43)),fx=-Math.sin(cy),fz=-Math.cos(cy),spread=(q.i-(q.n-1)/2)*.06;
+function nailShot(q){const mp=head.localToWorld(V(0,-.12,.43)),fx=-Math.sin(cy),fz=-Math.cos(cy),spread=(R()-.5)*.09;
  let dir;if(q.tgt){const tg2=q.tgt;dir=V(tg2.x-mp.x,tg2.y-mp.y,tg2.z-mp.z).normalize()}else dir=V(fx,Math.max(-.5,Math.min(.5,(.35-cp)*.6)),fz).normalize();
  const ca=Math.cos(spread),sa=Math.sin(spread);dir.set(dir.x*ca-dir.z*sa,dir.y,dir.z*ca+dir.x*sa);
  const m=new T.Mesh(nailGeo,spMat.ice);m.position.copy(mp);m.lookAt(mp.clone().add(dir));sc.add(m);
- SP.shots.push({k:'ice',lv:q.lv,g:m,vx:dir.x*42,vy:dir.y*42,vz:dir.z*42,grav:0,life:.75,nail:true});
+ if(q.tgt)pl.hd=Math.atan2(dir.x,dir.z);SP.shots.push({k:'ice',lv:q.lv,g:m,vx:dir.x*42,vy:dir.y*(q.tgt?42:42)+(R()-.5)*1.5,vz:dir.z*42,grav:0,life:.75,nail:true});
  for(let i=0;i<3;i++)emit(mp,V(dir.x*6+(R()-.5)*2,dir.y*6+(R()-.5)*2,dir.z*6+(R()-.5)*2),0xcff6ff,.25,.6)}
 function explode(q){const x=q.g.position.x,y=q.g.position.y,z=q.g.position.z,lv=q.lv;sc.remove(q.g);
  if(q.nail){burst(V(x,y,z),0xcff6ff,6);return}
@@ -1370,6 +1395,10 @@ function nailHit(q,e){const lv=q.lv,dx=q.vx,dz=q.vz,d=Math.hypot(dx,dz)||1;
  if(dmgE(e,(5+1.5*lv)*(e.frz>0?1.5:1),dx/d,dz/d,4))e.deathFire=false;burst(V(e.x,e.g.position.y+.9,e.z),0xcff6ff,8)}
 function specUpd(dt){
  EN.warn=Math.max(0,EN.warn-dt);
+ // Frostsplitter-Dauerfeuer, solange Mausrad / R / LB gehalten wird (wie die Eissplitter in A New Beginning)
+ SP.held=(SP.heldM||SP.heldK||GP.lb)&&st==='play';
+ if(SP.held&&brEl()==='ice'&&!(pl.swim&&pl.wy!=null&&pl.p.y<pl.wy-.2)){const lv=brLv('ice');SP.iceT=(SP.iceT||0)-dt;
+  if(SP.iceT<=0){SP.iceT=1/(7+1.2*lv);if(energyUse(SPEC.ice.cost)){nailShot({lv,tgt:aimPoint('ice'),i:0,n:1});if(R()<.35)sfx('zap')}else SP.heldM=SP.heldK=false}}
  for(const k in SP.cd)SP.cd[k]=Math.max(0,SP.cd[k]-dt);
  // Zielring
  {const k=brEl(),ap=st==='play'&&!(pl.swim&&pl.wy!=null&&pl.p.y<pl.wy-.2)?aimPoint(k):null;aimRing.visible=!!ap;
@@ -1391,7 +1420,7 @@ function specUpd(dt){
     blastAt(pt.x,pt.y,pt.z,2.6,(e,dx,dz)=>{applyStatus(e,'stun',lv+8);if(dmgE(e,(22+5*lv)*(e.armor?1.3:1),dx,dz,5))e.deathFire=false});
     cratesAt(pt.x,pt.y,pt.z,2.6,o=>destroyCrate(o));bossAt(pt.x,pt.z,1.5,16+4*lv)}
    if(q.t>q.delay+.3)SP.rings.splice(i,1)}}
- energyCrystals(dt);
+ energyCrystals(dt);furyUpd(dt);
  renderSpecProgress()}
 // Energie-Kristalle: kleine tuerkise Kristallbuesche, die nach dem Einsammeln nachwachsen
 const ENC=[],encMat=new T.MeshBasicMaterial({color:0x5ff7ff}),encGlow=new T.MeshBasicMaterial({color:0x5ff7ff,transparent:true,opacity:.25,blending:T.AdditiveBlending,depthWrite:false}),encGeo=new T.OctahedronGeometry(.32);
@@ -1475,14 +1504,15 @@ addEventListener('keydown',e=>{
  if(st==='play'&&!e.repeat&&/^(Digit|Numpad)[1-4]$/.test(e.code))selEl(ELS[+e.code.slice(-1)-1]);
  if(e.code==='Tab'){e.preventDefault();if(st==='play')openBUI();else if(st==='ui')closeBUI()}
  if(e.code===binds.interact&&st==='play'&&!e.repeat)interact();
- if(e.code===binds.special&&st==='play'&&!e.repeat)special();
+ if(e.code===binds.special&&st==='play'&&!e.repeat){SP.heldK=true;special()}
+ if(e.code===binds.fury&&st==='play'&&!e.repeat)fury();
  if(e.code==='KeyM'&&!e.repeat)toggleSound();
 });
-addEventListener('keyup',e=>K[e.code]=0);addEventListener('blur',()=>{for(const k in K)K[k]=0;md=false});
-addEventListener('mousedown',e=>{if(st!=='play')return;if(e.button===0)tailWhip();else if(e.button===2)md=true;else if(e.button===1){if(e.preventDefault)e.preventDefault();special()}});addEventListener('auxclick',e=>{if(e.button===1&&e.preventDefault)e.preventDefault()});addEventListener('mouseup',e=>{if(e.button===undefined||e.button===2)md=false});addEventListener('contextmenu',e=>{if(e.preventDefault)e.preventDefault()});
+addEventListener('keyup',e=>{K[e.code]=0;if(e.code===binds.special)SP.heldK=false});addEventListener('blur',()=>{for(const k in K)K[k]=0;md=false;SP.heldM=SP.heldK=false});
+addEventListener('mousedown',e=>{if(st!=='play')return;if(e.button===0)tailWhip();else if(e.button===2)md=true;else if(e.button===1){if(e.preventDefault)e.preventDefault();SP.heldM=true;special()}});addEventListener('auxclick',e=>{if(e.button===1&&e.preventDefault)e.preventDefault()});addEventListener('mouseup',e=>{if(e.button===undefined||e.button===2)md=false;if(e.button===undefined||e.button===1)SP.heldM=false});addEventListener('contextmenu',e=>{if(e.preventDefault)e.preventDefault()});
 addEventListener('mousemove',e=>{if(st==='play'){const m=cfg.sens/100;cy-=e.movementX*.0025*m;cp=Math.max(-.1,Math.min(1.2,cp+e.movementY*.0025*m*(cfg.inv?-1:1)))}});
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement!==cv&&st==='play'){st='pause';md=false;$('pause').classList.remove('hidden')}});
-$('play').onclick=()=>{audioInit();st='play';$('menu').classList.add('hidden');$('hud').classList.remove('hidden');$('bbar').classList.remove('hidden');$('enb').classList.remove('hidden');renderEnergy();t0=performance.now();hud();$('need').textContent=need;sparx.position.set(pl.p.x,pl.p.y+2.5,pl.p.z);lock()};
+$('play').onclick=()=>{audioInit();st='play';$('menu').classList.add('hidden');$('hud').classList.remove('hidden');$('bbar').classList.remove('hidden');$('enb').classList.remove('hidden');$('fub').classList.remove('hidden');renderEnergy();renderFury();t0=performance.now();hud();$('need').textContent=need;sparx.position.set(pl.p.x,pl.p.y+2.5,pl.p.z);lock()};
 $('soundBtn').onclick=toggleSound;
 $('resume').onclick=()=>{audioInit();st='play';$('pause').classList.add('hidden');lock()};
 loadGame();$('play').disabled=false;$('play').textContent=hasSave?'▶ Weiter':'Spielen';hud();
@@ -1631,10 +1661,10 @@ else if(md||GP.fire){const desired=Math.atan2(-s,-c),diff=Math.atan2(Math.sin(de
 fw.set(Math.sin(pl.hd),0,Math.cos(pl.hd));
 let a=pl.hd-dr.rotation.y;a=Math.atan2(Math.sin(a),Math.cos(a));dr.rotation.y+=a*Math.min(1,dt*14);
 dr.position.set(p.x,p.y+.12,p.z);dr.visible=!(pl.inv>0&&Math.floor(t*14)%2);
-const mdA=md||GP.fire,wantFire=mdA&&!pl.swim&&!((keyDown('sprint'))&&movementSpeed>3),firing=wantFire&&(TR.on||EN.v>0);if(wantFire&&!firing)noEnergy();if(firing&&!TR.on){EN.v=Math.max(0,EN.v-BREATH_COST*dt);renderEnergy()}fireSound(firing);
+const mdA=md||GP.fire,wantFire=mdA&&!pl.swim&&!((keyDown('sprint'))&&movementSpeed>3),weakFire=wantFire&&!TR.on&&EN.v<=0&&brEl()==='fire',firing=wantFire&&(TR.on||EN.v>0||weakFire);if(wantFire&&!firing)noEnergy();if(firing&&!TR.on&&!weakFire){EN.v=Math.max(0,EN.v-BREATH_COST*dt);renderEnergy()}fireSound(firing);
 const beNow=brEl(),blNow=brLv(beNow);BRS.on=firing;BRS.el=beNow;BRS.lv=blNow;
-if(firing){const mp=head.localToWorld(V(0,-.12,.43)),BV=BRV[beNow];for(let i=0;i<BV.n;i++)emit(mp,fw.clone().multiplyScalar(BV.sp+R()*4).add(V((R()-.5)*BV.s2,(R()-.3)*2+.5,(R()-.5)*BV.s2)),R()<.5?EL[beNow].col:EL[beNow].col2,BV.life,BV.sz);
-if(beNow!=='fire')breathFx(beNow,blNow,dt,fw,mp);else{const fR=8+.7*(blNow-1),fD=12*(1+.2*(blNow-1));
+if(firing){const mp=head.localToWorld(V(0,-.12,.43)),BV=BRV[beNow];for(let i=0;i<(weakFire?1:BV.n);i++)emit(mp,fw.clone().multiplyScalar((BV.sp+R()*4)*(weakFire?.45:1)).add(V((R()-.5)*BV.s2,(R()-.3)*2+.5,(R()-.5)*BV.s2)),R()<.5?EL[beNow].col:EL[beNow].col2,BV.life,BV.sz);
+if(beNow!=='fire')breathFx(beNow,blNow,dt,fw,mp);else{const fR=(8+.7*(blNow-1))*(weakFire?.45:1),fD=12*(1+.2*(blNow-1))*(weakFire?.35:1);
 dragons.forEach(o=>{if(o.free)return;const ex=o.x-p.x,ez=o.z-p.z,d=Math.hypot(ex,ez)||1;
   if(d<fR&&(ex*fw.x+ez*fw.z)/d>.7){o.heat=Math.min(1,o.heat+dt*.7);if(o.heat>=1)freeDragon(o)}});
 en.forEach(e=>{
@@ -1798,7 +1828,7 @@ if(e.knocked){
     e.downTime-=dt;
     e.g.rotation.z+=(Math.PI*.5-e.g.rotation.z)*Math.min(1,dt*12);
     e.g.scale.setScalar(Math.max(.08,Math.min(1,e.downTime*2))*e.sc);
-    if(e.downTime<=0){e.dead=true;e.g.visible=false;burst(e.g.position,0xffd166,20);if(!e.rewarded){e.rewarded=true;gain(e.rew,e.g.position);kills++;butterfly(V(e.x,H(e.x,e.z)+.8,e.z))}}
+    if(e.downTime<=0){e.dead=true;e.g.visible=false;burst(e.g.position,0xffd166,20);if(!e.rewarded){e.rewarded=true;gain(e.rew,e.g.position);furyGain(8+e.rew*3,e.g.position);kills++;butterfly(V(e.x,H(e.x,e.z)+.8,e.z))}}
   }else{
     e.x+=e.kx*dt;e.z+=e.kz*dt;e.ky-=24*dt;e.airY+=e.ky*dt;
     e.g.position.set(e.x,H(e.x,e.z)+Math.max(0,e.airY),e.z);
@@ -1809,7 +1839,7 @@ if(e.knocked){
 }
 if(e.burn>0){e.burn-=dt;e.hp-=dt*(1.2+.6*e.bl)*(e.armor?.4:1);e.hit=Math.max(e.hit,.05);if(R()<dt*14)emit(V(e.x,e.g.position.y+1.1,e.z),V((R()-.5),1.6,(R()-.5)),0xff7a1a,.4,.7)}
 if(e.psn>0){e.psn-=dt;e.hp-=dt*(1.4+.5*e.pl)*(e.armor?.55:1);if(R()<dt*12)emit(V(e.x+(R()-.5)*.4,e.g.position.y+1.2,e.z),V((R()-.5),1.2,(R()-.5)),0x7dff4a,.6,1.1)}
-if(e.hp<=0){e.dead=true;e.g.visible=false;e.ice.visible=false;burst(e.g.position,0xff6a00,24);if(!e.rewarded){e.rewarded=true;gain(e.rew,e.g.position);kills++;butterfly(V(e.x,H(e.x,e.z)+.8,e.z))}return}
+if(e.hp<=0){e.dead=true;e.g.visible=false;e.ice.visible=false;burst(e.g.position,0xff6a00,24);if(!e.rewarded){e.rewarded=true;gain(e.rew,e.g.position);furyGain(8+e.rew*3,e.g.position);kills++;butterfly(V(e.x,H(e.x,e.z)+.8,e.z))}return}
 // Charge impact: requires an actual sprint with horizontal forward movement.
 const rx=e.x-p.x,rz=e.z-p.z,rdist=Math.hypot(rx,rz)||.001;
 const sprinting=pl.wallBump<=0&&(pl.g||pl.j===1||pl.groundGrace>0)&&(keyDown('sprint'))&&Math.hypot(pl.vx,pl.vz)>10;
@@ -1979,8 +2009,8 @@ function pu(dt){let any=false;for(let i=0;i<PN;i++){const q=P[i];if(q.l<=0){if(p
  pMat.uniforms.uScale.value=rd.domElement.height/(2*Math.tan(cam.fov*Math.PI/360))}
 // Kleiner Test-/Debug-Zugang (z.B. fuer spaetere Multiplayer-Tests): __drako.info()
 window.__drako={info:()=>({calls:rd.info.render.calls,tris:rd.info.render.triangles,geos:rd.info.memory.geometries,st,realm,cnt,freed,hp:pl.hp,fps:Math.round(1/Math.max(.001,fpsA)),pos:[+pl.p.x.toFixed(1),+pl.p.y.toFixed(1),+pl.p.z.toFixed(1)]}),
- playNoLock:()=>{audioInit();st='play';['menu','pause'].forEach(i=>$(i).classList.add('hidden'));$('hud').classList.remove('hidden');$('bbar').classList.remove('hidden');$('enb').classList.remove('hidden');renderEnergy();hud()},
- valley:()=>{realm=0;showRealm();setLook(0)},special:()=>special(),energy:v=>{if(v!=null){EN.v=v;renderEnergy()}return EN.v},aim:()=>{const k=brEl(),a=aimPoint(k);return a&&[+a.x.toFixed(1),+a.y.toFixed(1),+a.z.toFixed(1)]},cd:()=>({...SP.cd}),setEl:k=>{BR.own[k]=true;BR.lv[k]=Math.max(1,BR.lv[k]);BR.cur=k;renderBar()},enemyHp:()=>en.filter(e=>!e.dead&&!e.knocked).length,ocean:()=>enterOcean(),pose:()=>({rx:+dr.rotation.x.toFixed(2),ry:+dr.rotation.y.toFixed(2),tx:+torso.rotation.x.toFixed(2),swim:pl.swim,vy:+pl.vy.toFixed(1)}),view:(cx,cy2,cz,tx,ty,tz)=>{st='pause';cam.position.set(cx,cy2,cz);cam.lookAt(tx,ty,tz);sun.position.set(tx+30,ty+50,tz+20);sun.target.position.set(tx,ty,tz)},H:(x,z)=>H(x,z),enemies:()=>en.filter(e=>!e.dead).map(e=>[e.kind,+e.x.toFixed(1),+e.z.toFixed(1)]),dragons:()=>dragons.map(o=>[o.x,o.z]),tp:(x,z)=>{pl.p.set(x,H(x,z)+.5,z);pl.vx=pl.vz=pl.vy=0},save:()=>saveGame(),look:(y,pch)=>{cy=y;cp=pch}};
+ playNoLock:()=>{audioInit();st='play';['menu','pause'].forEach(i=>$(i).classList.add('hidden'));$('hud').classList.remove('hidden');$('bbar').classList.remove('hidden');$('enb').classList.remove('hidden');$('fub').classList.remove('hidden');renderEnergy();renderFury();hud()},
+ valley:()=>{realm=0;showRealm();setLook(0)},special:()=>special(),fury:v=>{if(v!=null){FU.v=v;renderFury()};fury();return FU.v},hold:b=>{SP.heldK=b},energy:v=>{if(v!=null){EN.v=v;renderEnergy()}return EN.v},aim:()=>{const k=brEl(),a=aimPoint(k);return a&&[+a.x.toFixed(1),+a.y.toFixed(1),+a.z.toFixed(1)]},cd:()=>({...SP.cd}),setEl:k=>{BR.own[k]=true;BR.lv[k]=Math.max(1,BR.lv[k]);BR.cur=k;renderBar()},enemyHp:()=>en.filter(e=>!e.dead&&!e.knocked).length,ocean:()=>enterOcean(),pose:()=>({rx:+dr.rotation.x.toFixed(2),ry:+dr.rotation.y.toFixed(2),tx:+torso.rotation.x.toFixed(2),swim:pl.swim,vy:+pl.vy.toFixed(1)}),view:(cx,cy2,cz,tx,ty,tz)=>{st='pause';cam.position.set(cx,cy2,cz);cam.lookAt(tx,ty,tz);sun.position.set(tx+30,ty+50,tz+20);sun.target.position.set(tx,ty,tz)},H:(x,z)=>H(x,z),enemies:()=>en.filter(e=>!e.dead).map(e=>[e.kind,+e.x.toFixed(1),+e.z.toFixed(1)]),dragons:()=>dragons.map(o=>[o.x,o.z]),tp:(x,z)=>{pl.p.set(x,H(x,z)+.5,z);pl.vx=pl.vz=pl.vy=0},save:()=>saveGame(),look:(y,pch)=>{cy=y;cp=pch}};
 let fpsA=.016,fpsT=0,last=performance.now();
 (function loop(){requestAnimationFrame(loop);const n=performance.now(),dt=Math.min(.05,(n-last)/1e3);last=n;padPoll(dt);if(cfg.fps){fpsA+=(dt-fpsA)*.05;fpsT+=dt;if(fpsT>.4){fpsT=0;$('fps').textContent=Math.round(1/Math.max(.001,fpsA))+' FPS'}}
 if(st==='play'){upd(dt);late(dt)}else if(st==='menu'){t+=dt;if(editing){const p=pl.p;dr.position.set(p.x,p.y+.12,p.z);dr.rotation.y=t*.7;dr.visible=true;torso.position.y=Math.sin(t*2)*.03;sun.position.set(p.x+30,p.y+50,p.z+20);sun.target.position.copy(p);cam.position.set(p.x+1,p.y+2.1,p.z+6.2);cam.lookAt(p.x-1.5,p.y+1.2,p.z)}else{cam.position.set(Math.sin(t*.2)*26,13,Math.cos(t*.2)*26);cam.lookAt(0,3,0)}cry.forEach((q,i)=>{q.m.rotation.y=t*2})}

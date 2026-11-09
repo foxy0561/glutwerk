@@ -576,19 +576,33 @@ const dr=new T.Group(),mP=mat(0x9d4edd),mL=mat(0xc77dff),mY=mat(0xffd166),mW=mat
 // A single animated torso pivot carries the belly, neck, head, wings, tail and back spikes.
 // This prevents the body from bobbing independently of the attached parts.
 const torso=new T.Group();dr.add(torso);
-const body=add(new T.SphereGeometry(.7,14,10),mP,0,.9,0,torso);body.scale.set(1,.9,1.35);
-add(new T.SphereGeometry(.55,12,8),mL,0,.75,.1,torso).scale.set(.9,.8,1.3);
+const body=add(new T.SphereGeometry(.7,22,16),mP,0,.9,0,torso);body.scale.set(1,.9,1.35);
+add(new T.SphereGeometry(.55,18,12),mL,0,.75,.1,torso).scale.set(.9,.8,1.3);
+// Bauchplatten
+// Bauchplatten folgen der Bauchrundung
+const mBelly=mY;for(let i=0;i<5;i++){const z=.5-i*.24,u=(z-.1)/.715,q=Math.sqrt(Math.max(.05,1-u*u)),y=.75-.44*q,sl=Math.atan2(.44*u/q/.715,1);
+ const m=add(new T.CylinderGeometry(1,1,.035,18),mBelly,0,y-.012,z,torso);m.scale.set(.495*q*.9,1,.1);m.rotation.x=-sl}
 const head=new T.Group();head.position.set(0,1.67,1.05);torso.add(head);
 // Neck dynamically bridges the chest and head as the head lowers to charge.
 const neck=add(new T.CylinderGeometry(.25,.38,1,12),mL,0,1.23,.69,torso);
 const neckBase=V(0,.99,.34),neckEnd=V(0,1.52,.96),neckAxis=V(0,1,0);
-add(new T.SphereGeometry(.45,12,10),mP,0,0,0,head);add(new T.SphereGeometry(.28,10,8),mL,0,-.12,.38,head);
-[-1,1].forEach(s=>{add(new T.SphereGeometry(.12,8,8),mEye,s*.2,.12,.35,head);add(new T.SphereGeometry(.06,6,6),mat(0x111111),s*.2,.12,.46,head);{const hg=new T.Group();hg.position.set(s*.24,.224,-.021);hg.rotation.x=-.28;hg.userData={s};head.add(hg);horns.push(hg)}});
+add(new T.SphereGeometry(.45,20,16),mP,0,0,0,head);add(new T.SphereGeometry(.28,16,12),mL,0,-.12,.38,head);
+// Kiefer, Zaehne, Nasenloecher, Wangen-Flossen
+add(new T.SphereGeometry(.22,14,10),mL,0,-.25,.32,head).scale.set(1.05,.55,1.15);
+const mIris=mat(0xffa41b,0x4a2a00),mDark=mat(0x16081f),mGlint=new T.MeshBasicMaterial({color:0xffffff}),mTooth=mat(0xfffbef);
+[-1,1].forEach(s=>{add(new T.SphereGeometry(.035,6,6),mDark,s*.085,-.04,.655,head);
+ add(new T.ConeGeometry(.026,.09,6),mTooth,s*.12,-.2,.57,head).rotation.x=Math.PI;
+ const fr=add(new T.ConeGeometry(.09,.38,5),mW,s*.4,.02,-.12,head);fr.rotation.z=-s*1.9;fr.rotation.y=s*.5;fr.scale.z=.35;
+ const fr2=add(new T.ConeGeometry(.07,.28,5),mW,s*.38,-.14,-.08,head);fr2.rotation.z=-s*2.2;fr2.rotation.y=s*.5;fr2.scale.z=.35});
+[-1,1].forEach(s=>{add(new T.SphereGeometry(.12,12,10),mEye,s*.2,.12,.35,head);add(new T.SphereGeometry(.085,10,8),mIris,s*.2,.12,.405,head);
+ add(new T.SphereGeometry(.05,8,8),mDark,s*.2,.12,.455,head).scale.set(.35,1,.6);add(new T.SphereGeometry(.022,6,6),mGlint,s*.2+.035,.16,.48,head);
+ const br=add(new T.BoxGeometry(.2,.05,.1),mP,s*.2,.255,.33,head);br.rotation.z=s*.28;br.rotation.x=-.2;{const hg=new T.Group();hg.position.set(s*.24,.224,-.021);hg.rotation.x=-.28;hg.userData={s};head.add(hg);horns.push(hg)}});
 const wings=[-1,1].map(s=>{const w=new T.Group();w.position.set(s*.45,1.35,-.1);torso.add(w);return{w,s}});
-const tail=[];let tp=torso;for(let i=0;i<4;i++){const g=new T.Group();g.position.set(0,i?0:.8,i?-.5:-1);tp.add(g);add(new T.SphereGeometry(.38-i*.07,10,8),mP,0,0,0,g);tp=g;tail.push(g)}
+const tail=[];let tp=torso;for(let i=0;i<4;i++){const g=new T.Group();g.position.set(0,i?0:.8,i?-.5:-1);tp.add(g);add(new T.SphereGeometry(.38-i*.07,16,12),mP,0,0,0,g).scale.z=1.25;tp=g;tail.push(g)}
+const tailSpk=tail.map((g,i)=>{const sg=new T.Group();sg.position.y=(.38-i*.07)*.85;g.add(sg);return sg});
 const tipG=new T.Group();tail[3].add(tipG);
 const spikeG=new T.Group();torso.add(spikeG);
-const legs=[[-.4,.5],[.4,.5],[-.4,-.5],[.4,-.5]].map(([x,z])=>{const g=new T.Group();g.position.set(x,.55,z);torso.add(g);add(new T.SphereGeometry(.21,8,6),mP,0,.08,0,g);add(new T.CylinderGeometry(.15,.12,.72),mP,0,-.12,0,g);add(new T.SphereGeometry(.17,8,6),mL,0,-.5,.06,g);return g});
+const legs=[[-.4,.5],[.4,.5],[-.4,-.5],[.4,-.5]].map(([x,z])=>{const g=new T.Group();g.position.set(x,.55,z);torso.add(g);add(new T.SphereGeometry(.21,8,6),mP,0,.08,0,g);add(new T.CylinderGeometry(.15,.12,.72),mP,0,-.12,0,g);add(new T.SphereGeometry(.17,10,8),mL,0,-.5,.06,g).scale.set(1,.75,1.2);for(let k=-1;k<=1;k++){const c=add(new T.ConeGeometry(.035,.13,6),mY,k*.08,-.55,.24,g);c.rotation.x=Math.PI/2+.4}return g});
 // ---- Charakter-Editor: Farben, Hoerner, Fluegel (wird gespeichert; spaeter auch fuer Multiplayer nutzbar)
 const SKINS=[{b:0x9d4edd,l:0xc77dff,a:0xffd166,w:0xff7eb6},{b:0xe8590c,l:0xffa94d,a:0xffe066,w:0xff8787},{b:0x2b8a3e,l:0x8ce99a,a:0xffd43b,w:0x63e6be},{b:0x1c7ed6,l:0xa5d8ff,a:0xe7f5ff,w:0x74c0fc},{b:0x343a40,l:0x868e96,a:0xff6b6b,w:0x9775fa},{b:0xf59f00,l:0xffe066,a:0xc92a2a,w:0xfff3bf}];
 let skin=Object.assign({h:1,k:1,hs:0,sp:1,tp:0,wy:0,e:0xffffff,sz:1,pt:0,pc:0x3c096c},SKINS[0]),editing=false;
@@ -608,7 +622,7 @@ function buildHorns(st){horns.forEach(hg=>{clearG(hg);const s=hg.userData.s;
  else if(st===4)curve(hg,[-s*.9,-s*.8,-s*.8,-s*.8],.26,.17);
  else if(st===5){for(let k=-1;k<=1;k++){const m=add(new T.ConeGeometry(.08,.42,6),mY,k*.17*s,.2+(1-Math.abs(k))*.08,0,hg);m.rotation.z=-k*.3*s}}
 })}
-function buildSpikes(st){clearG(spikeG);
+function buildSpikes(st){clearG(spikeG);tailSpk.forEach((sg,i)=>{clearG(sg);if(st>0){const m=add(new T.ConeGeometry(.08+st*.02-i*.015,.2+st*.06-i*.03,5),mY,0,.08,0,sg);m.rotation.x=-.5;if(st===3)m.scale.x=.35}});
  if(st===1)for(let i=0;i<4;i++)add(new T.ConeGeometry(.1,.3,5),mY,0,1.62-i*.05,.5-i*.4,spikeG);
  else if(st===2)for(let i=0;i<6;i++)add(new T.ConeGeometry(.16,.55,5),mY,0,1.58-i*.04,.75-i*.33,spikeG);
  else if(st===3)for(let i=0;i<7;i++){const m=add(new T.ConeGeometry(.22,.75-i*.04,4),mY,0,1.55-i*.04,.8-i*.28,spikeG);m.scale.x=.3}}
@@ -618,6 +632,7 @@ function buildTip(st){clearG(tipG);
  else if(st===2){const m=add(new T.ConeGeometry(.24,.85,7),new T.MeshBasicMaterial({color:0xff8a1a}),0,0,-.6,tipG);m.rotation.x=-Math.PI/2;const n=add(new T.ConeGeometry(.13,.55,7),new T.MeshBasicMaterial({color:0xffe14a}),0,0,-.5,tipG);n.rotation.x=-Math.PI/2}
  else if(st===3){const m=add(new T.OctahedronGeometry(.3),mY,0,0,-.55,tipG);m.scale.set(.45,.2,1.7)}}
 function buildWings(st){wings.forEach(o=>{clearG(o.w);const s=o.s;
+ {const arm=add(new T.CylinderGeometry(.05,.03,1.5,8),mL,s*.75,.05,.1,o.w);arm.rotation.z=Math.PI/2;arm.rotation.y=-s*.12;const cl=add(new T.ConeGeometry(.045,.16,6),mY,s*1.5,.08,.2,o.w);cl.rotation.z=-s*Math.PI/2}
  if(st===0){const m=add(new T.ConeGeometry(.55,1.5,3),mW,s*.75,0,0,o.w);m.rotation.z=-s*Math.PI/2;m.scale.x=.15}
  else if(st===1){const m=add(new T.SphereGeometry(.6,10,8),mW,s*.9,0,-.05,o.w);m.scale.set(1.35,.14,.85)}
  else{for(let k=0;k<4;k++){const m=add(new T.ConeGeometry(.13,1.5-k*.22,5),mW,s*(.7-k*.05),0,-.5+k*.36,o.w);m.rotation.z=-s*Math.PI/2;m.rotation.y=s*(k-1.5)*.16}
@@ -654,18 +669,35 @@ applySkin();
 // Spring-chain tail: each segment has its own inertia and follows turns and movement.
 const tailState=tail.map(()=>({yaw:0,yawVel:0,pitch:0,pitchVel:0}));
 let previousFacing=dr.rotation.y, previousSpeed=0;
-sc.add(dr);
+sc.add(dr);dr.rotation.order='YXZ';// Neigung beim Schwimmen um die eigene Achse
 // ---- Gegner
 const en=[];
 const PROJ=[];for(let i=0;i<14;i++){const m=new T.Mesh(new T.SphereGeometry(.38,8,6),new T.MeshBasicMaterial({color:0xd6a8ff}));m.visible=false;sc.add(m);PROJ.push({mesh:m,on:false,x:0,y:0,z:0,vx:0,vz:0,life:0})}
 function spawnProj(e,dx,dz){const q=PROJ.find(o=>!o.on);if(!q)return;q.on=true;q.mesh.visible=true;q.x=e.x+dx*.9;q.z=e.z+dz*.9;q.y=H(e.x,e.z)+1;q.vx=dx*11;q.vz=dz*11;q.life=2.8;sfx('zap')}
 function projUpd(dt){for(const q of PROJ){if(!q.on)continue;q.life-=dt;q.x+=q.vx*dt;q.z+=q.vz*dt;q.mesh.position.set(q.x,q.y,q.z);if(Math.hypot(q.x-pl.p.x,q.z-pl.p.z)<1&&Math.abs(q.y-(pl.p.y+.8))<1.5&&pl.inv<=0){hurt();burst(V(q.x,q.y,q.z),0xd6a8ff,12);q.life=0}if(q.life<=0){q.on=false;q.mesh.visible=false}}}
 const EK={grunt:{c:0xe8590c,hp:10,sc:1,rew:1},armor:{c:0x56688a,hp:18,sc:1,rew:3},runner:{c:0xf2c200,hp:6,sc:.82,rew:1},spitter:{c:0x9b59b6,hp:8,sc:1,rew:2},brute:{c:0x8a2a1a,hp:32,sc:1.75,rew:4}};
-function enemy(x,z,arg){const kind=typeof arg==='string'?arg:arg?'armor':'grunt',armor=kind==='armor',EKd=EK[kind];const g=new T.Group();add(new T.SphereGeometry(.6,10,8),mat(EKd.c),0,.7,0,g);
+// Mehr Details fuer Gegner: Bauch, Augenbrauen, Maul mit Zaehnen, Fuesse, Arme und je Art eigene Teile
+const EM={dark:mat(0x1a0d12),white:mat(0xffffff),tooth:mat(0xfff8e1),iris:mat(0xff3b1f,0x551000),wood:mat(0x6b4426),woodD:mat(0x4a2c17),glow:mat(0xd6a8ff,0x7a3fb0),bone:mat(0xf1e6c8)};
+function enemyDetails(g,kind,c){const C=new T.Color(c),light=mat(C.clone().lerp(new T.Color(0xffffff),.38).getHex()),dark=mat(C.clone().multiplyScalar(.55).getHex());
+ add(new T.SphereGeometry(.42,16,12),light,0,.55,.3,g).scale.set(1,.85,.75);
+ [-1,1].forEach(s=>{add(new T.SphereGeometry(.09,8,8),EM.iris,s*.22,.95,.57,g);
+  const br=add(new T.BoxGeometry(.28,.07,.1),dark,s*.21,1.12,.55,g);br.rotation.z=s*.45;br.rotation.x=-.25;
+  add(new T.SphereGeometry(.2,12,8),dark,s*.27,.12,.12,g).scale.set(1,.55,1.35);
+  for(let k=-1;k<=1;k++){const cl=add(new T.ConeGeometry(.04,.12,5),EM.tooth,s*.27+k*.08,.1,.38,g);cl.rotation.x=Math.PI/2}
+  add(new T.SphereGeometry(.14,10,8),c===0x56688a?light:mat(c),s*.6,.62,.12,g).scale.set(.8,1.1,.8);
+  add(new T.ConeGeometry(.04,.12,6),EM.tooth,s*.075,.63,.64,g).rotation.x=Math.PI});
+ const mo=add(new T.TorusGeometry(.16,.04,6,14,Math.PI),EM.dark,0,.6,.6,g);mo.rotation.x=-.25;
+ if(kind==='grunt'){const cb=new T.Group();cb.position.set(.68,.62,.2);cb.rotation.set(.9,0,-.35);g.add(cb);add(new T.CylinderGeometry(.06,.08,.55,8),EM.wood,0,.28,0,cb);add(new T.SphereGeometry(.15,10,8),EM.woodD,0,.6,0,cb).scale.set(1,1.3,1);for(let k=0;k<4;k++){const sp=add(new T.ConeGeometry(.04,.12,5),EM.bone,Math.cos(k*1.57)*.14,.62,Math.sin(k*1.57)*.14,cb);sp.rotation.z=-Math.cos(k*1.57)*1.5;sp.rotation.x=Math.sin(k*1.57)*1.5}}
+ if(kind==='runner'){[-1,1].forEach(s=>{const e=add(new T.ConeGeometry(.1,.7,6),mat(c),s*.22,1.35,-.15,g);e.rotation.z=-s*.35;e.rotation.x=-.5;add(new T.ConeGeometry(.06,.45,6),light,s*.22,1.33,-.11,g).rotation.set(-.5,0,-s*.35)});for(let k=0;k<3;k++){const st=add(new T.BoxGeometry(.5,.07,.12),dark,0,.95-k*.18,-.42+k*.04,g);st.rotation.x=.5}}
+ if(kind==='spitter'){for(let k=0;k<6;k++){const a=k*1.05;add(new T.SphereGeometry(.09+(k%2)*.04,8,6),dark,Math.sin(a)*.45,.95+Math.cos(a*2)*.12,-.3+Math.cos(a)*.2,g)}for(let k=0;k<3;k++){const tn=add(new T.CylinderGeometry(.025,.05,.5,6),mat(0x5b2c83),(k-1)*.18,1.45,-.05,g);tn.rotation.z=(k-1)*.4;add(new T.SphereGeometry(.07,8,6),EM.glow,(k-1)*.28,1.7,-.05,g)}add(new T.TorusGeometry(.2,.05,6,14),mat(0x5b2c83),0,.65,.98,g)}
+ if(kind==='brute'){[-1,1].forEach(s=>{const tk=add(new T.ConeGeometry(.07,.38,7),EM.bone,s*.16,.66,.62,g);tk.rotation.x=-.35;tk.rotation.z=-s*.25;add(new T.SphereGeometry(.3,12,8),dark,s*.55,1.0,0,g).scale.set(1,.55,1.1);for(let k=0;k<2;k++)add(new T.ConeGeometry(.06,.2,5),EM.bone,s*(.55+k*.12),1.17,-.12+k*.2,g)});add(new T.TorusGeometry(.45,.05,6,16),dark,0,.42,0,g).rotation.x=Math.PI/2}
+ if(kind==='armor'){add(new T.TorusGeometry(.5,.07,6,18),mat(0xaeb8cc),0,1.0,0,g).rotation.x=Math.PI/2;add(new T.TorusGeometry(.56,.06,6,18),mat(0x8a96ad),0,.45,0,g).rotation.x=Math.PI/2;for(let k=0;k<8;k++){const a=k*.785;add(new T.SphereGeometry(.05,6,6),mat(0xdde3ee),Math.cos(a)*.62,.72,Math.sin(a)*.62,g)}}
+}
+function enemy(x,z,arg){const kind=typeof arg==='string'?arg:arg?'armor':'grunt',armor=kind==='armor',EKd=EK[kind];const g=new T.Group();add(new T.SphereGeometry(.6,20,14),mat(EKd.c),0,.7,0,g);
  if(kind==='runner'){const b=g.children[0];b.scale.set(.85,.8,1.35);add(new T.ConeGeometry(.12,.5,5),mat(0xffe066),0,.75,-.8,g).rotation.x=-Math.PI/2}
  if(kind==='spitter'){add(new T.CylinderGeometry(.14,.2,.55,8),mat(0x5b2c83),0,.65,.7,g).rotation.x=Math.PI/2;add(new T.SphereGeometry(.18,8,6),mat(0xd6a8ff),0,.65,1.0,g)}
  if(kind==='brute'){for(let i=0;i<5;i++){const a=i*1.2-2.4;add(new T.ConeGeometry(.17,.55,5),mat(0x3a1008),Math.sin(a)*.5,1.25,-Math.cos(a)*.35,g)}}
- g.scale.setScalar(EKd.sc);if(armor){for(let i=0;i<6;i++){const a=i*1.047;add(new T.ConeGeometry(.14,.5,6),mat(0xdde3ee),Math.cos(a)*.32,1.25,Math.sin(a)*.32,g)}add(new T.TorusGeometry(.62,.09,6,16),mat(0xaeb8cc),0,.72,0,g).rotation.x=Math.PI/2}[-1,1].forEach(s=>{add(new T.SphereGeometry(.15,6,6),mat(0xffffff),s*.22,.95,.5,g);add(new T.SphereGeometry(.07,6,6),mat(0x111111),s*.22,.95,.63,g);add(new T.ConeGeometry(.15,.4,6),mat(0xfff3bf),s*.3,1.4,0,g)});const tel=add(new T.CircleGeometry(1.5,20),new T.MeshBasicMaterial({color:0xff2a2a,transparent:true,opacity:.45,depthWrite:false,side:T.DoubleSide}),0,.08,0);tel.rotation.x=-Math.PI/2;tel.visible=false;sc.add(tel);
+ g.scale.setScalar(EKd.sc);if(armor){for(let i=0;i<6;i++){const a=i*1.047;add(new T.ConeGeometry(.14,.5,6),mat(0xdde3ee),Math.cos(a)*.32,1.25,Math.sin(a)*.32,g)}add(new T.TorusGeometry(.62,.09,6,16),mat(0xaeb8cc),0,.72,0,g).rotation.x=Math.PI/2}[-1,1].forEach(s=>{add(new T.SphereGeometry(.15,6,6),mat(0xffffff),s*.22,.95,.5,g);add(new T.SphereGeometry(.07,6,6),mat(0x111111),s*.22,.95,.63,g);add(new T.ConeGeometry(.15,.4,6),mat(0xfff3bf),s*.3,1.4,0,g)});enemyDetails(g,kind,EKd.c);const tel=add(new T.CircleGeometry(1.5,20),new T.MeshBasicMaterial({color:0xff2a2a,transparent:true,opacity:.45,depthWrite:false,side:T.DoubleSide}),0,.08,0);tel.rotation.x=-Math.PI/2;tel.visible=false;sc.add(tel);
 const ice=add(new T.SphereGeometry(1.05,12,8),new T.MeshBasicMaterial({color:0xaee9ff,transparent:true,opacity:.45,depthWrite:false}),0,.8,0,g);ice.visible=false;
 const hbG=new T.Group(),hbBg=new T.Mesh(new T.PlaneGeometry(1.3,.2),new T.MeshBasicMaterial({color:0x220000,transparent:true,opacity:.75,depthTest:false})),hbFi=new T.Mesh(new T.PlaneGeometry(1.2,.12),new T.MeshBasicMaterial({color:0x44dd44,depthTest:false}));hbBg.renderOrder=20;hbFi.renderOrder=21;hbFi.position.z=.01;hbG.add(hbBg);hbG.add(hbFi);hbG.visible=false;sc.add(hbG);
 bakeGroup(g,[ice]);sc.add(g);en.push({kind,sc:EKd.sc,rew:EKd.rew,hbG,hbFi,mhp:EKd.hp,ice,burn:0,psn:0,frz:0,stun:0,bl:1,pl:1,tel,as:0,at:0,cd:0,dirx:0,dirz:1,hitDone:false,g,armor:!!armor,hx:x,hz:z,tx:x,tz:z,x,z,hp:EKd.hp,hit:0,dead:false,knocked:false,kx:0,kz:0,ky:0,airY:0,downTime:0,deathFire:false,rewarded:false})}
@@ -689,21 +721,38 @@ for(const sign of [-1,1]){
  add(new T.ConeGeometry(.37,1.6,8),bossHorn,sign*.95,4.2,.4,bossG).rotation.z=-sign*.33;
  add(new T.SphereGeometry(.22),mat(0xff5544,0x991c15),sign*.44,3.55,1.55,bossG);
  for(const z of [-.8,.9])add(new T.CylinderGeometry(.35,.45,1.4,8),bossMat,sign*1.0,.65,z,bossG);
+ // Details: Hauer, Schulterpanzer mit Dornen, Brauen, Krallen
+ const tk=add(new T.ConeGeometry(.17,.75,8),bossHorn,sign*.42,2.75,1.6,bossG);tk.rotation.x=-.5;tk.rotation.z=-sign*.3;
+ add(new T.SphereGeometry(.75,14,10),mat(0x48465c),sign*1.65,2.75,0,bossG).scale.set(1,.55,1.2);
+ for(let k=0;k<3;k++){const sp=add(new T.ConeGeometry(.16,.6,6),bossHorn,sign*(1.55+k*.15),3.2,-.5+k*.5,bossG);sp.rotation.z=-sign*.5}
+ const bw=add(new T.BoxGeometry(.6,.14,.2),mat(0x23222f),sign*.45,3.82,1.45,bossG);bw.rotation.z=sign*.45;
+ for(const z of [-.8,.9])for(let k=-1;k<=1;k++){const c=add(new T.ConeGeometry(.08,.25,6),bossHorn,sign*1.0+k*.17,.05,z+.42,bossG);c.rotation.x=Math.PI/2}
 }
-sc.add(bossG);
+add(new T.SphereGeometry(1.25,16,12),mat(0x8d8aa6),0,1.45,1.3,bossG).scale.set(1,1.05,.6);
+for(let k=0;k<6;k++){const th=.35+k*.24,sp=add(new T.ConeGeometry(.28-k*.02,.9-k*.06,6),bossHorn,0,1.7+1.75*Math.cos(th),-1.75*Math.sin(th),bossG);sp.rotation.x=-th}
+bakeGroup(bossG);sc.add(bossG);
 const boss={g:bossG,x:bossX,z:bossZ,hp:90,alive:true,hit:0,dying:0,deathY:0,attackCooldown:0};
 // ---- Eingefrorene Drachen: befreie sie mit Feuer oder einem Sprint-Stoss
-function miniDragon(c1,c2){const g=new T.Group(),m1=mat(c1),m2=mat(c2),mw=mat(0xffa6d5);
- add(new T.SphereGeometry(.5,12,10),m1,0,.5,0,g).scale.set(1,.9,1.3);
+function miniDragon(c1,c2){const g=new T.Group(),m1=mat(c1),m2=mat(c2),mw=mat(0xffa6d5),mh=mat(0xffd166),mI=mat(0xffa41b,0x4a2a00),mD=mat(0x16081f),mG=new T.MeshBasicMaterial({color:0xffffff});
+ add(new T.SphereGeometry(.5,20,14),m1,0,.5,0,g).scale.set(1,.9,1.3);
+ add(new T.SphereGeometry(.38,16,12),m2,0,.42,.12,g).scale.set(.9,.75,1.25);
  const h=new T.Group();h.position.set(0,.95,.55);g.add(h);
- add(new T.SphereGeometry(.34,10,8),m1,0,0,0,h);add(new T.SphereGeometry(.2,8,6),m2,0,-.08,.28,h);
+ add(new T.CylinderGeometry(.16,.24,.5,12),m2,0,.72,.38,g).rotation.x=.6;
+ add(new T.SphereGeometry(.34,18,14),m1,0,0,0,h);add(new T.SphereGeometry(.2,14,10),m2,0,-.08,.28,h);add(new T.SphereGeometry(.16,12,8),m2,0,-.18,.24,h).scale.set(1.05,.55,1.15);
  [-1,1].forEach(s=>{
-  add(new T.SphereGeometry(.07,6,6),mat(0xffffff),s*.15,.08,.25,h);add(new T.SphereGeometry(.035,6,6),mat(0x111111),s*.15,.08,.31,h);
-  add(new T.ConeGeometry(.07,.3,6),mY,s*.16,.34,-.05,h);
-  const w=add(new T.ConeGeometry(.32,.9,3),mw,s*.5,.8,-.1,g);w.rotation.z=-s*1.2;w.scale.x=.15;
-  add(new T.SphereGeometry(.12,6,6),m2,s*.28,.1,.3,g);add(new T.SphereGeometry(.12,6,6),m2,s*.28,.1,-.3,g)});
- add(new T.SphereGeometry(.22,8,6),m1,0,.45,-.7,g);add(new T.ConeGeometry(.13,.3,5),mY,0,.45,-1,g).rotation.x=-Math.PI/2;
- return g}
+  add(new T.SphereGeometry(.08,10,8),mat(0xffffff),s*.15,.08,.25,h);add(new T.SphereGeometry(.055,8,8),mI,s*.15,.08,.29,h);add(new T.SphereGeometry(.035,8,6),mD,s*.15,.08,.325,h).scale.set(.4,1,.6);add(new T.SphereGeometry(.015,6,6),mG,s*.15+.025,.11,.34,h);
+  add(new T.SphereGeometry(.025,6,6),mD,s*.06,-.04,.47,h);
+  const hb=new T.Group();hb.position.set(s*.16,.26,-.08);hb.rotation.set(-.5,0,-s*.25);h.add(hb);add(new T.ConeGeometry(.07,.36,8),mh,0,.18,0,hb);
+  const fr=add(new T.ConeGeometry(.06,.26,5),mw,s*.3,0,-.1,h);fr.rotation.z=-s*1.9;fr.scale.z=.35;
+  const wg=new T.Group();wg.position.set(s*.32,.8,-.1);wg.rotation.z=s*.6;g.add(wg);
+  const arm=add(new T.CylinderGeometry(.035,.02,.85,8),m2,s*.42,.05,0,wg);arm.rotation.z=Math.PI/2;
+  for(let k=0;k<3;k++){const w=add(new T.ConeGeometry(.34-k*.06,1-k*.18,3),mw,s*(.44-k*.05),-.02,-.16-k*.17,wg);w.rotation.z=-s*Math.PI/2;w.rotation.y=s*(k-1)*.25;w.scale.x=.14}
+  add(new T.ConeGeometry(.03,.1,6),mh,s*.88,.05,0,wg).rotation.z=-s*Math.PI/2;
+  for(const z of[.3,-.3]){add(new T.SphereGeometry(.12,10,8),m1,s*.28,.16,z,g);for(let k=-1;k<=1;k++)add(new T.ConeGeometry(.022,.08,5),mh,s*.28+k*.05,.06,z+.13,g).rotation.x=Math.PI/2}});
+ for(let i=0;i<4;i++){const sp=add(new T.ConeGeometry(.06,.18,5),mh,0,.98-i*.03,.15-i*.22,g);sp.rotation.x=-.4}
+ let tp=g;for(let i=0;i<3;i++){const tg2=new T.Group();tg2.position.set(0,i?0:.42,i?-.28:-.62);tg2.rotation.x=i?.12:-.1;tp.add(tg2);add(new T.SphereGeometry(.2-i*.045,12,10),m1,0,0,0,tg2).scale.z=1.3;add(new T.ConeGeometry(.04,.12,5),mh,0,.18-i*.04,0,tg2).rotation.x=-.5;tp=tg2}
+ add(new T.ConeGeometry(.1,.3,6),mh,0,0,-.28,tp).rotation.x=-Math.PI/2;
+ return bakeGroup(g)}
 const iceMat=new T.MeshLambertMaterial({color:0xa5ecff,emissive:0x1b7da0,transparent:true,opacity:.5});
 const dragons=[];
 function prison(x,z,c1,c2,hint){const y=H(x,z),g=new T.Group();g.position.set(x,y,z);
@@ -755,7 +804,7 @@ function bigDragon(w,x,z,y,el){const E=EL[el],g=new T.Group();g.position.set(x,y
  bigDragon(worlds[2],l2[0]+7,l2[1]-5,HL(l2[0]+7,l2[1]-5),'ice')}
 showRealm();
 function nearBig(){if(realm<1||realm>3)return null;for(const b of bigDragons)if(b.w.id===realm&&Math.hypot(b.x-pl.p.x,b.z-pl.p.z)<7&&Math.abs(b.y-pl.p.y)<6)return b;return null}
-function interact(){if(st!=='play'||TR.on)return;const b=nearBig();if(!b)return;
+function interact(){if(st!=='play'||TR.on)return;const b=nearBig();if(!b)return;b.w.met=true;
  if(BR.own[b.el]){msg(EL[b.el].ic+' Du beherrschst den '+EL[b.el].n+'-Atem schon! Verbessere ihn mit Tab.',4);return}
  startTrial(b.el)}
 // Pruefungen: 5 Aufgaben + Mini-Boss, ohne Erklaertext
@@ -950,7 +999,7 @@ const bits=(arr,f)=>arr.map(o=>f(o)?1:0).join('');
 const fromBits=(str,arr,f)=>{if(typeof str!=='string')return;for(let i=0;i<arr.length&&i<str.length;i++)if(str[i]==='1')f(arr[i])};
 function saveGame(){if(window.__drakoReset||(st==='menu'&&!hasSave))return;const w2=worlds[2];
  const sv={v:1,cnt,kills,fr:bits(dragons,o=>o.free),cry:bits(cry.slice(0,CRY0),q=>q.got),ch:bits(chests,q=>q.open),cr:bits(crates,o=>!o.a),en:bits(en,e=>e.dead||e.knocked),
-  wd:WL.map(w=>w.done?1:0),wg:WL.map(w=>w.got||0),gb:!boss.alive,door:door.open,arena:arenaDone,bonus:freed>=3&&bonusT<=0,
+  wd:WL.map(w=>w.done?1:0),wm:WL.map(w=>w.met?1:0),wg:WL.map(w=>w.got||0),gb:!boss.alive,door:door.open,arena:arenaDone,bonus:freed>=3&&bonusT<=0,
   w2:{braz:w2.braz.map(b=>b.lit?1:0),sol:w2.solved2,br:w2.bridgeOn},hints};
  try{localStorage.setItem(SAVE_KEY,JSON.stringify(sv));hasSave=true}catch(e){}}
 function loadGame(){let sv=null;try{sv=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){}if(!sv||sv.v!==1)return;hasSave=true;
@@ -961,7 +1010,7 @@ function loadGame(){let sv=null;try{sv=JSON.parse(localStorage.getItem(SAVE_KEY)
  fromBits(sv.cr,crates,o=>{o.a=false;o.m.visible=false});
  fromBits(sv.en,en,e=>{e.dead=true;e.rewarded=true;e.g.visible=false});
  if(sv.gb){boss.alive=false;boss.dying=0;boss.g.visible=false}
- WL.forEach((w,i)=>{w.done=!!(sv.wd&&sv.wd[i]);w.got=+(sv.wg&&sv.wg[i])||0;w.unlocked=cnt>=w.pts&&freed>=w.dr});
+ WL.forEach((w,i)=>{w.done=!!(sv.wd&&sv.wd[i]);w.got=+(sv.wg&&sv.wg[i])||0;w.met=!!(sv.wm&&sv.wm[i]);w.unlocked=cnt>=w.pts&&freed>=w.dr});
  arenaDone=!!sv.arena;if(freed>=3&&!sv.bonus)bonusT=1;
  if(sv.door||(WL.every(q=>q.done)&&freed>=3&&cnt>=150)){door.open=true;door.k=1;door.solids.forEach(o=>{o.r=-5});door.dg.visible=false;for(const l of door.leaves)l.g.position.x=l.s*4.7}
  const w2=worlds[2],s2=sv.w2||{};
@@ -1320,21 +1369,27 @@ const gl=!pl.slam&&!pl.g&&pl.j===2&&!pl.flapLock&&pl.groundGrace<=0&&keyDown('ju
 const sprintKey=!!(keyDown('sprint')),sp=sprintKey?15:9;
 if(gl)pl.glideStarted=true;
 // Gliding has one fixed speed, independent of Shift or the speed before takeoff.
-const tg=(gl?10.5:sp)*(pl.swim?(sprintKey?.85:.55):1),k=Math.min(1,dt*(gl?15:pl.g?12:5));
+pl.dashT=Math.max(0,(pl.dashT||0)-dt);pl.dashCd=Math.max(0,(pl.dashCd||0)-dt);
+const tg=(gl?10.5:sp)*(pl.swim?(sprintKey?(pl.dashT>0?1.7:1.05):.55):1),k=Math.min(1,dt*(gl?15:pl.g?12:5));
 const bouncing=pl.wallBump>0;
 // After hitting a wall, do not immediately accelerate back into it.
 if(!bouncing){pl.vx+=(dx*tg-pl.vx)*k;pl.vz+=(dz*tg-pl.vz)*k}
 else {pl.vx*=Math.exp(-dt*3);pl.vz*=Math.exp(-dt*3)}
 pl.vy-=30*dt;if(gl)pl.vy=Math.max(pl.vy,-2.2);
  {const wyN=waterY(p.x,p.z),inW=wyN!==null&&p.y<wyN+.4;pl.wy=wyN;
- if(inW&&!pl.swim){burst(V(p.x,wyN+.2,p.z),0x9fe0ff,18);sfx('jump');hintOnce('swim','🏊 Leertaste = hoch · Shift = tauchen',4)}
+ if(inW&&!pl.swim){burst(V(p.x,wyN+.2,p.z),0x9fe0ff,18);sfx('jump');hintOnce('swim2','🏊 Maus = Richtung · Shift = Dash/Tauchen · Leertaste = hoch',4)}
  else if(!inW&&pl.swim){burst(V(p.x,p.y+.3,p.z),0x9fe0ff,10)}
- pl.swim=inW;
+ pl.swim=inW;if(!inW){pl.swimWave=false;pl.dashHeld=false}
  if(inW){const dive=keyDown('sprint'),upk=keyDown('jump'),mov=l>.1;pl.vy+=30*dt;
-  if(dive&&mov){const tvy=Math.max(-7,Math.min(7,-(cp-.35)*12));pl.vy+=(tvy-pl.vy)*Math.min(1,dt*5)}
+  if(dive&&mov){const tvy=Math.max(-10,Math.min(10,-(cp-.35)*15))*(pl.dashT>0?1.5:1);pl.vy+=(tvy-pl.vy)*Math.min(1,dt*5);
+   // Unterwasser-Dash: kurzer Schub in Blickrichtung beim Druecken von Shift
+   if(!pl.dashHeld&&pl.dashCd<=0){pl.dashT=.45;pl.dashCd=.9;pl.vx+=dx*9;pl.vz+=dz*9;pl.vy+=tvy*.6;sfx('flap');for(let i=0;i<14;i++)emit(V(p.x+(R()-.5)*.8,p.y+.8+(R()-.5)*.8,p.z+(R()-.5)*.8),V(-dx*3+(R()-.5)*2,(R()-.5)*2,-dz*3+(R()-.5)*2),0xdff6ff,.7,.5)}
+   if(R()<dt*30)emit(V(p.x-dx*1.2,p.y+.8,p.z-dz*1.2),V((R()-.5),1,(R()-.5)),0xdff6ff,.8,.32)}
+  // Unter Wasser: mit W in Blickrichtung der Maus schwimmen (auch hoch/runter)
+  else if(mov&&!upk&&iz>0&&p.y<wyN-1){const tvy=Math.max(-7,Math.min(7,-(cp-.35)*12));pl.vy+=(tvy-pl.vy)*Math.min(1,dt*4)}
   else if(dive)pl.vy-=14*dt;else if(upk)pl.vy+=16*dt;
   else if(p.y>wyN-.5)pl.vy+=((wyN-.3)-p.y)*10*dt;
-  pl.vy*=Math.exp(-dt*(dive&&mov?.8:2.4));if(pl.j>0&&pl.vy<2)pl.j=0;pl.glideStarted=false;pl.flapUsed=false;
+  pl.dashHeld=dive;pl.swimWave=dive&&mov&&p.y<wyN-.4;pl.vy*=Math.exp(-dt*((dive||iz>0&&p.y<wyN-1)&&mov?.8:2.4));if(pl.j>0&&pl.vy<2)pl.j=0;pl.glideStarted=false;pl.flapUsed=false;
   if(Math.hypot(pl.vx,pl.vz)>2.5&&p.y>wyN-1&&R()<dt*10)emit(V(p.x+(R()-.5),wyN+.1,p.z+(R()-.5)),V((R()-.5),1.5,(R()-.5)),0x9fe0ff,.5,.6);
   else if(R()<dt*5)emit(V(p.x+(R()-.5),p.y+1.2,p.z+(R()-.5)),V(0,1.2,0),0xdff6ff,.9,.35)}
  $('uw').classList[(wyN!==null&&p.y+1.6<wyN)?'remove':'add']('hidden');
@@ -1551,7 +1606,7 @@ for(let i=0;i<tail.length;i++){
   // Preserve a continuous idle sway, but give turns and acceleration real weight.
   const yawTarget=(i?parentYaw*.78:0)-turnRate*(.10+lag*.085)+stride*1.6+
     Math.sin(t*2.1-i*.65)*(.055+lag*.055)+Math.max(-.20,Math.min(.20,acceleration*.011));
-  const pitchTarget=(i?parentPitch*.65:0)+(pl.g?Math.sin(t*2.3-i*.5)*.035:Math.max(-.32,Math.min(.35,-pl.vy*.032)))+
+  const pitchTarget=(pl.swimWave?Math.sin(t*(pl.dashT>0?14:10)-1.1-i*.9)*(.18+lag*.3):0)+(i?parentPitch*.65:0)+(pl.g?Math.sin(t*2.3-i*.5)*.035:Math.max(-.32,Math.min(.35,-pl.vy*.032)))+
     Math.max(-.2,Math.min(.2,-acceleration*.009));
   const step=Math.min(dt,.05),stiffness=38-lag*7,damping=Math.exp(-5.4*step);
   state.yawVel=(state.yawVel+(yawTarget-state.yaw)*stiffness*step)*damping;
@@ -1563,9 +1618,13 @@ for(let i=0;i<tail.length;i++){
 if(pl.tailT>0){const k=Math.min(1,1-pl.tailT/pl.tailDur),d=TAIL_V[pl.tailV];torso.rotation.y=pl.tailDir*d.turns*Math.PI*2*k;const off=pl.tailDir*.75*Math.sin(k*Math.PI);for(let i=0;i<tail.length;i++)tail[i].rotation.y=tailState[i].yaw+off}else torso.rotation.y=0;
 // All attached parts rise and fall together with the torso, not just the body mesh.
 torso.position.y+=( (pl.flapTime>0?.22:(sv>1&&!air?Math.sin(ph*2)*.045:0))-torso.position.y)*Math.min(1,dt*18);
-if(pl.slam===1){const a=pl.spinA;torso.rotation.x=a;torso.position.y=.9*(1-Math.cos(a));torso.position.z=-.9*Math.sin(a)}else torso.position.z=0;
+if(pl.slam===1){const a=pl.spinA;torso.rotation.x=a;torso.position.y=.9*(1-Math.cos(a));torso.position.z=-.9*Math.sin(a)}else{torso.position.z=0;
+ // Delfin-Schlaengeln beim Unterwasser-Dash: Koerper wippt hoch und runter
+ const tw=pl.swimWave?Math.sin(t*(pl.dashT>0?14:10))*(pl.dashT>0?.3:.2):0;torso.rotation.x+=(tw-torso.rotation.x)*Math.min(1,dt*12)}
 // No terrain-aligned pitching or rolling: keep the dragon upright on hills.
-dr.rotation.x+=(0-dr.rotation.x)*Math.min(1,dt*12);
+// Beim Tauchen neigt sich der Drache in Schwimmrichtung (hoch/runter), an Land bleibt er aufrecht
+const uw=pl.swim&&pl.wy!=null&&p.y<pl.wy-.4,hsp=Math.hypot(pl.vx,pl.vz),swimPitch=uw&&(hsp>1.5||Math.abs(pl.vy)>1.5)?Math.max(-1.1,Math.min(1.1,Math.atan2(-pl.vy,Math.max(.6,hsp)))):0;
+dr.rotation.x+=(swimPitch-dr.rotation.x)*Math.min(1,dt*(uw?7:12));
 dr.rotation.z+=(0-dr.rotation.z)*Math.min(1,dt*12);
 // Kamera
 const dist=9,tx=p.x,ty=p.y+1.6,tz=p.z,cx=tx+Math.sin(cy)*Math.cos(cp)*dist,cz=tz+Math.cos(cy)*Math.cos(cp)*dist,cyy=Math.max(ty+Math.sin(cp)*dist+1,H(cx,cz)+1.3);
@@ -1703,7 +1762,11 @@ for(const w of WL){
 if(realm>=1&&realm<=3){
  const w=worlds[realm];w.eDisc.rotation.z+=dt*.4;
  if(Math.hypot(p.x-w.ex,p.z-w.ez)<3.25&&Math.abs(p.y-w.ey)<5){
-  if(realmGems>=(w.done?0:w.exit)){leaveWorld(w);return}
+  const bd=bigDragons.find(b=>b.w===w);
+  if(bd&&!BR.own[bd.el]&&!w.met){// Erst mit dem grossen Drachen reden, sonst rutscht man aus Versehen durchs Tor
+   const ax=p.x-w.ex,az=p.z-w.ez,d=Math.hypot(ax,az)||1;p.x=w.ex+ax/d*3.4;p.z=w.ez+az/d*3.4;pl.vx=ax/d*4;pl.vz=az/d*4;
+   if(msgT<=0)msg(EL[bd.el].ic+' Sprich zuerst mit dem großen Drachen! (F)',2.5)}
+  else if(realmGems>=(w.done?0:w.exit)){leaveWorld(w);return}
   if(msgT<=0)msg('💎 Sammle '+w.exit+' Edelsteinpunkte, um das Zieltor zu öffnen!',3);
  }
 }
@@ -1790,7 +1853,7 @@ function pu(dt){let any=false;for(let i=0;i<PN;i++){const q=P[i];if(q.l<=0){if(p
 // Kleiner Test-/Debug-Zugang (z.B. fuer spaetere Multiplayer-Tests): __drako.info()
 window.__drako={info:()=>({calls:rd.info.render.calls,tris:rd.info.render.triangles,geos:rd.info.memory.geometries,st,realm,cnt,freed,hp:pl.hp,fps:Math.round(1/Math.max(.001,fpsA)),pos:[+pl.p.x.toFixed(1),+pl.p.y.toFixed(1),+pl.p.z.toFixed(1)]}),
  playNoLock:()=>{audioInit();st='play';['menu','pause'].forEach(i=>$(i).classList.add('hidden'));$('hud').classList.remove('hidden');$('bbar').classList.remove('hidden');hud()},
- valley:()=>{realm=0;showRealm();setLook(0)},tp:(x,z)=>{pl.p.set(x,H(x,z)+.5,z);pl.vx=pl.vz=pl.vy=0},save:()=>saveGame(),look:(y,pch)=>{cy=y;cp=pch}};
+ valley:()=>{realm=0;showRealm();setLook(0)},ocean:()=>enterOcean(),pose:()=>({rx:+dr.rotation.x.toFixed(2),ry:+dr.rotation.y.toFixed(2),tx:+torso.rotation.x.toFixed(2),swim:pl.swim,vy:+pl.vy.toFixed(1)}),view:(cx,cy2,cz,tx,ty,tz)=>{st='pause';cam.position.set(cx,cy2,cz);cam.lookAt(tx,ty,tz);sun.position.set(tx+30,ty+50,tz+20);sun.target.position.set(tx,ty,tz)},H:(x,z)=>H(x,z),enemies:()=>en.filter(e=>!e.dead).map(e=>[e.kind,+e.x.toFixed(1),+e.z.toFixed(1)]),dragons:()=>dragons.map(o=>[o.x,o.z]),tp:(x,z)=>{pl.p.set(x,H(x,z)+.5,z);pl.vx=pl.vz=pl.vy=0},save:()=>saveGame(),look:(y,pch)=>{cy=y;cp=pch}};
 let fpsA=.016,fpsT=0,last=performance.now();
 (function loop(){requestAnimationFrame(loop);const n=performance.now(),dt=Math.min(.05,(n-last)/1e3);last=n;padPoll(dt);if(cfg.fps){fpsA+=(dt-fpsA)*.05;fpsT+=dt;if(fpsT>.4){fpsT=0;$('fps').textContent=Math.round(1/Math.max(.001,fpsA))+' FPS'}}
 if(st==='play'){upd(dt);late(dt)}else if(st==='menu'){t+=dt;if(editing){const p=pl.p;dr.position.set(p.x,p.y+.12,p.z);dr.rotation.y=t*.7;dr.visible=true;torso.position.y=Math.sin(t*2)*.03;sun.position.set(p.x+30,p.y+50,p.z+20);sun.target.position.copy(p);cam.position.set(p.x+1,p.y+2.1,p.z+6.2);cam.lookAt(p.x-1.5,p.y+1.2,p.z)}else{cam.position.set(Math.sin(t*.2)*26,13,Math.cos(t*.2)*26);cam.lookAt(0,3,0)}cry.forEach((q,i)=>{q.m.rotation.y=t*2})}

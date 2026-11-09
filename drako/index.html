@@ -1290,7 +1290,7 @@ function breathFx(be,bl,dt,fw,mp){
 // ---- Spezial-Atem (Mausrad-Klick / Taste R / Gamepad LB): jedes Element hat einen eigenen starken Angriff mit Abklingzeit
 const SPEC={fire:{n:'Feuerbombe',cd:3.5,cost:25},bolt:{n:'Donnerschlag',cd:5,cost:30},ice:{n:'Frostnägel',cd:2.2,cost:18},poison:{n:'Giftnieser',cd:3.5,cost:20}};
 const SP={cd:{fire:0,bolt:0,ice:0,poison:0},shots:[],clouds:[],rings:[]};
-const spCd=(k,lv)=>SPEC[k].cd*(1-.06*(lv-1));
+const spCd=()=>.15;// keine echte Abklingzeit mehr – die Energie begrenzt den Spezial-Atem
 // ---- Energie: Atem und Spezial-Atem verbrauchen Energie, aufgeladen wird nur durch Kristalle
 const EN={v:100,max:100,warn:0};const BREATH_COST=9;
 function energyGain(n){EN.v=Math.min(EN.max,EN.v+n);renderEnergy()}
@@ -1320,7 +1320,7 @@ const spCore=new T.MeshBasicMaterial({color:0xfff2b0}),nailGeo=new T.ConeGeometr
 function special(){
  if(st!=='play'||pl.slam)return;const k=brEl(),lv=brLv(k);
  if(pl.swim&&pl.wy!=null&&pl.p.y<pl.wy-.2){if(msgT<=0)msg('🫧 Unter Wasser geht kein Spezial-Atem',1.5);return}
- if(SP.cd[k]>0){sfx('bump');return}
+ if(SP.cd[k]>0)return;
  if(!energyUse(SPEC[k].cost))return;
  SP.cd[k]=spCd(k,lv);
  const s=Math.sin(cy),c=Math.cos(cy),fx=-s,fz=-c,mp=head.localToWorld(V(0,-.12,.43)),p=pl.p;
@@ -1373,7 +1373,7 @@ function specUpd(dt){
  for(const k in SP.cd)SP.cd[k]=Math.max(0,SP.cd[k]-dt);
  // Zielring
  {const k=brEl(),ap=st==='play'&&!(pl.swim&&pl.wy!=null&&pl.p.y<pl.wy-.2)?aimPoint(k):null;aimRing.visible=!!ap;
-  if(ap){aimRing.position.set(ap.x,ap.y+(k==='fire'?.05:1.2),ap.z);aimRing.material.color.setHex(EL[k].col);aimRing.material.opacity=SP.cd[k]<=0&&EN.v>=SPEC[k].cost?.9:.3;aimRing.rotation.z+=dt*2;const sc3=k==='fire'?1+.08*brLv(k):.8;aimRing.scale.setScalar(sc3*(1+.08*Math.sin(t*6)))}}
+  if(ap){aimRing.position.set(ap.x,ap.y+(k==='fire'?.05:1.2),ap.z);aimRing.material.color.setHex(EL[k].col);aimRing.material.opacity=EN.v>=SPEC[k].cost?.9:.3;aimRing.rotation.z+=dt*2;const sc3=k==='fire'?1+.08*brLv(k):.8;aimRing.scale.setScalar(sc3*(1+.08*Math.sin(t*6)))}}
  for(let i=SP.shots.length-1;i>=0;i--){const q=SP.shots[i],g=q.g.position;q.life-=dt;q.vy-=q.grav*dt;g.x+=q.vx*dt;g.y+=q.vy*dt;g.z+=q.vz*dt;
   if(!q.nail){q.g.rotation.y+=dt*8;emit(g,V((R()-.5)*2,(R()-.5)*2+1,(R()-.5)*2),R()<.5?0xff6a00:0xffd60a,.35,1.1)}else if(R()<.5)emit(g,V(0,.3,0),0xcff6ff,.2,.35);
   let hit=q.life<=0||g.y<groundAt(g.x,g.z)+.2||(realm===7&&g.y<SY),hitE=null;
@@ -1407,7 +1407,7 @@ function energyCrystals(dt){const p=pl.p;for(const q of ENC){const vis=q.rl===re
   q.g.visible=vis&&q.on;if(!vis||!q.on)continue;q.g.rotation.y+=dt*1.2;
   if(Math.hypot(p.x-q.x,p.z-q.z)<1.6&&Math.abs(p.y-q.y)<2.2){if(EN.v>=EN.max)continue;q.on=false;q.t=25;energyGain(30);sfx('gem');burst(V(q.x,q.y+.6,q.z),0x5ff7ff,16)}}}
 function renderSpec(){const el=$('spc');if(!el)return;const k=brEl();$('spcN').textContent=EL[k].ic+' '+SPEC[k].n;renderSpecProgress()}
-function renderSpecProgress(){const el=$('spc');if(!el)return;const k=brEl(),lv=brLv(k),f=1-SP.cd[k]/spCd(k,lv);el.style.setProperty('--p',(Math.max(0,Math.min(1,f))*100).toFixed(0)+'%');el.classList.toggle('rdy',SP.cd[k]<=0)}
+function renderSpecProgress(){const el=$('spc');if(!el)return;const k=brEl(),f=EN.v/SPEC[k].cost;el.style.setProperty('--p',(Math.max(0,Math.min(1,f))*100).toFixed(0)+'%');el.classList.toggle('rdy',EN.v>=SPEC[k].cost)}
 renderSpec();
 function slam(){
  if(st!=='play'||pl.g||pl.slam||pl.glNow||pl.slamCd>0||pl.wallBump>0||pl.groundGrace>0)return false;

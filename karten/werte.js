@@ -118,6 +118,20 @@ window.WERTE = {
   "fennwyrd":      { t: "ort", kosten: 2, ort: "dorf" },
   "hafen":         { t: "ort", kosten: 2, ort: "hafen" },
   "weisse-stadt":  { t: "ort", kosten: 4, ort: "stadt" },
+  "verband":       { t: "zauber", kosten: 0, ziel: "eigenesWesen", heile: 3, entfrosten: true },
+  "gifttrank":     { t: "zauber", kosten: 1, ziel: "feindWesen", schaden: 2, frost: true },
+  "bombe":         { t: "zauber", kosten: 3, schadenAlleFeinde: 2, schadenGegner: 2 },
+  "pfotentrank":   { t: "zauber", kosten: 1, ziel: "eigenesWesen", gibFlink: true },
+  "grimoire":      { t: "zauber", kosten: 2, ziel: "eigenesWesen", schild: true, ziehe: 1 },
+  "schatztruhe":   { t: "zauber", kosten: 3, ziehe: 3 },
+  "bannkreis":     { t: "zauber", kosten: 5, frostAlle: true },
+  "fuchsschild":   { t: "ausr", kosten: 2, plusLeben: 3, gibWaechter: true },
+  "ruestung":      { t: "ausr", kosten: 3, plusLeben: 4, weniger: 1 },
+  "umhang":        { t: "ausr", kosten: 2, gibFlink: true, plusSchaden: 1 },
+  "marktstand":    { t: "ort", kosten: 1, ort: "markt" },
+  "uralter-baum":  { t: "ort", kosten: 2, ort: "baum" },
+  "kristallhoehle":{ t: "ort", kosten: 3, ort: "hoehle" },
+  "altes-tor":     { t: "ort", kosten: 2, ort: "ruinen" },
 
   /* ---------------- Foxy ---------------- */
   "foxy-wander":   { t: "wesen", hp: 10, flink: true, foxy: true, atk: [["Nebelschritt", 2, 3], ["Wasserzauber", 4, 6]] },
@@ -149,6 +163,10 @@ window.ORTE = {
   dorf:        "Jede Heilung heilt 2 mehr.",
   hafen:       "Jeder zieht zu Rundenbeginn 1 Karte mehr.",
   stadt:       "Alle Angriffe kosten 1 Energie weniger (mind. 1).",
+  markt:       "Ausrüstung kostet 1 Energie weniger.",
+  baum:        "Rundenbeginn: Der Spieler am Zug und seine Wesen heilen 1.",
+  hoehle:      "Zauber kosten 1 Energie weniger.",
+  ruinen:      "Wird ein Wesen besiegt, zieht sein Besitzer 1 Karte.",
 };
 
 /* Kleine Wesen, die von Karten erschaffen werden */
@@ -168,5 +186,6 @@ window.STARTERDECK = [
 window.GEGNER_DECKS = [
   { name: "Ameisenvolk", deck: ["waldameise", "waldameise", "ernteameise", "ernteameise", "blattschneider", "spinne", "honigtopf", "koenigin", "treiberameise", "gruenling", "gruenling", "kraeuter", "blattlausfarm", "pilzgarten", "funke", "funke", "dolch", "heiltrank", "rivalen", "muenze"] },
   { name: "Turmwacht", deck: ["bolzenturm", "bolzenturm", "kanone-sf", "kanone-sf", "frostkristall", "frostkristall", "blitzspule", "moerser", "leuchtfeuer", "schildtraeger", "wuerfel", "wuerfel", "kristallkern", "kristallkern", "sternblock", "feueratem", "funke", "muenze", "laterne", "burg"] },
+  { name: "Nebelwald", deck: ["spinne", "blattschneider", "golem", "drako", "rissbestie", "rissbestie", "kiko", "ernteameise", "waldameise", "phantom", "verband", "gifttrank", "gifttrank", "bombe", "pfotentrank", "grimoire", "fuchsschild", "umhang", "uralter-baum", "heiltrank"] },
   { name: "Drachenfeuer", deck: ["drako", "kiko", "gruenling", "gruenling", "schaf", "schaf", "rissbestie", "rissbestie", "golem", "phantom", "feueratem", "feueratem", "funke", "funke", "drachenkristall", "kristalltal", "dolch", "heiltrank", "brot", "glut"] },
 ];

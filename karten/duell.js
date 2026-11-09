@@ -57,6 +57,7 @@
     P.feld.forEach(u => { u.neu = false; u.angegriffen = false; u.nochmal = false; u.gesperrt = u.frost > 0; if (u.frost > 0) u.frost--; });
     if (ortIs("wiese")) P.feld.forEach(u => heal(u, 1));
     if (ortIs("pilze")) healHero(pi, 2);
+    if (ortIs("baum")) { P.feld.forEach(u => heal(u, 1)); healHero(pi, 1); }
     if (ortIs("riss") && S.p[foe(pi)].feld.length) { const u = rnd(S.p[foe(pi)].feld); hurt(u, 2); log(`Der Riss trifft ${u.name}.`); }
     P.feld.slice().forEach(u => {
       if (u.pas === "brut" && P.feld.length < R.feldPlaetze) { P.feld.push(mkUnit("#ameise", pi)); log("Eine Ameise schlüpft."); }
@@ -90,6 +91,7 @@
         log(`${u.name} wurde besiegt.`);
         if (!u.tok) P.grab.push(u.id);
         if (u.pas === "schaf") draw(pi);
+        if (ortIs("ruinen") && !u.tok) draw(pi);
         return false;
       });
     });
@@ -156,7 +158,8 @@
     const w = W[id];
     if (w.t === "wesen") return 0;
     const still = w.t === "zauber" && S.p[pi].feld.some(u => u.pas === "stillerZauber");
-    return Math.max(0, w.kosten - (still ? 1 : 0));
+    const ort = (w.t === "zauber" && ortIs("hoehle")) || (w.t === "ausr" && ortIs("markt"));
+    return Math.max(0, w.kosten - (still ? 1 : 0) - (ort ? 1 : 0));
   }
   function playTargets(pi, id) {
     const w = W[id], me = S.p[pi], E = S.p[foe(pi)];
@@ -205,11 +208,17 @@
       tu.plusSchaden += (w.plusSchaden || 0) + (tu.foxy ? (w.foxySchaden || 0) : 0);
       tu.billiger += w.billiger || 0; tu.weniger += w.weniger || 0;
       if (w.plusLeben) { tu.max += w.plusLeben; tu.hp += w.plusLeben; ev("u" + tu.uid, "+" + w.plusLeben, "heal"); }
+      if (w.gibFlink) tu.flink = true;
+      if (w.gibWaechter) tu.waechter = true;
       tu.equip.push(id); log(`${tu.name} trägt jetzt ${name}.`);
     } else {
       log(`${P.name} spielt ${name}.`);
       if (w.schaden) { if (tu) hurt(tu, w.schaden); else hurtHero(foe(pi), w.schaden); }
       if (w.schadenAlleFeinde) E.feld.slice().forEach(u => hurt(u, w.schadenAlleFeinde));
+      if (w.schadenGegner) hurtHero(foe(pi), w.schadenGegner);
+      if (w.frostAlle) E.feld.forEach(u => { u.frost = 1; ev("u" + u.uid, "Frost", "frost"); });
+      if (w.entfrosten && tu) { tu.frost = 0; tu.gesperrt = false; }
+      if (w.gibFlink && tu) { tu.flink = true; ev("u" + tu.uid, "Flink!", "heal"); }
       if (w.schadenAlleWesen) S.p.forEach(Q => Q.feld.slice().forEach(u => hurt(u, w.schadenAlleWesen)));
       if (w.heile) { if (tu) heal(tu, w.heile); else healHero(pi, w.heile); }
       if (w.heileAlle) P.feld.forEach(u => heal(u, w.heileAlle));
@@ -248,6 +257,8 @@
         if (E.hp <= w.schaden) return { k: "play", hi: x.hi, t: "h" + foe(pi) };
       }
       if (w.schadenAlleFeinde && E.feld.length >= 2) return { k: "play", hi: x.hi };
+      if (w.frostAlle && E.feld.length >= 2) return { k: "play", hi: x.hi };
+      if (w.gibFlink && w.t === "zauber" && E.feld.length) { const u = P.feld.filter(u => !u.flink).sort((a, b) => unitVal(b) - unitVal(a))[0]; if (u) return { k: "play", hi: x.hi, t: "u" + u.uid }; }
       if (w.schadenAlleWesen && E.feld.length > P.feld.length + 1) return { k: "play", hi: x.hi };
       if (w.maxEnergie && P.maxE < R.maxEnergie) return { k: "play", hi: x.hi };
     }
@@ -262,7 +273,7 @@
       if (w.heile) {
         const u = P.feld.filter(u => u.max - u.hp >= 3).sort((a, b) => (b.max - b.hp) - (a.max - a.hp))[0];
         if (u) return { k: "play", hi: x.hi, t: "u" + u.uid };
-        if (P.hp <= R.leben - 6) return { k: "play", hi: x.hi, t: "h" + pi };
+        if (P.hp <= R.leben - 6 && w.ziel === "eigen") return { k: "play", hi: x.hi, t: "h" + pi };
       }
       if (w.heileAlle && P.feld.reduce((s, u) => s + u.max - u.hp, 0) >= 3) return { k: "play", hi: x.hi };
       if (w.heileSpieler && P.hp <= R.leben - 4) return { k: "play", hi: x.hi };
@@ -274,7 +285,7 @@
       if (w.nochmal) { const u = P.feld.find(u => u.angegriffen && !u.gesperrt && u.atk.some(a => atkCost(u, a) <= P.energie - cardCost(pi, x.id))); if (u) return { k: "play", hi: x.hi, t: "u" + u.uid }; }
       if (w.wiederbeleben || w.beschwoere) return { k: "play", hi: x.hi };
       if (w.energie && P.feld.some(u => canAct(u))) return { k: "play", hi: x.hi };
-      if (t === null && !w.zurueck && w.t === "zauber" && !w.heile && !w.heileAlle && !w.heileSpieler && !w.energie) return { k: "play", hi: x.hi };
+      if (t === null && !w.zurueck && w.t === "zauber" && !w.heile && !w.heileAlle && !w.heileSpieler && !w.energie && !w.frostAlle) return { k: "play", hi: x.hi };
     }
     return null;
   }
@@ -698,14 +709,14 @@
       if (!a) break;
       if (a.k === "play") {
         const id = S.p[1].hand[a.hi];
-        play(1, a.hi, a.t || null);
+        if (!play(1, a.hi, a.t || null)) break;
         const before = snapshot(); render(); flushFx(before);
         if (W[id].t === "ort") banner(card(id).name, "#ffcf9c");
         else if (W[id].t !== "wesen") banner(card(id).name, "#d6b4ff");
         if (window.__sfx) window.__sfx(W[id].t === "wesen" ? "deal" : "rare");
       } else {
         await lunge(a.uid, a.t || "h0");
-        attack(a.uid, a.ai, a.t || null);
+        if (!attack(a.uid, a.ai, a.t || null)) break;
         if (window.__sfx) window.__sfx("tear");
         const before = snapshot(); render(); flushFx(before);
       }

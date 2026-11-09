@@ -744,10 +744,10 @@ function miniDragon(c1,c2){const g=new T.Group(),m1=mat(c1),m2=mat(c2),mw=mat(0x
   add(new T.SphereGeometry(.025,6,6),mD,s*.06,-.04,.47,h);
   const hb=new T.Group();hb.position.set(s*.16,.26,-.08);hb.rotation.set(-.5,0,-s*.25);h.add(hb);add(new T.ConeGeometry(.07,.36,8),mh,0,.18,0,hb);
   const fr=add(new T.ConeGeometry(.06,.26,5),mw,s*.3,0,-.1,h);fr.rotation.z=-s*1.9;fr.scale.z=.35;
-  const wg=new T.Group();wg.position.set(s*.32,.8,-.1);wg.rotation.z=s*.35;g.add(wg);
-  const arm=add(new T.CylinderGeometry(.035,.02,1,8),m2,s*.5,.05,0,wg);arm.rotation.z=Math.PI/2;
-  for(let k=0;k<3;k++){const w=add(new T.ConeGeometry(.28-k*.05,.9-k*.15,3),mw,s*(.42-k*.04),-.12,-.12-k*.16,wg);w.rotation.z=-s*Math.PI/2;w.rotation.y=s*(k-1)*.25;w.scale.x=.12}
-  add(new T.ConeGeometry(.03,.1,6),mh,s*1,.05,0,wg).rotation.z=-s*Math.PI/2;
+  const wg=new T.Group();wg.position.set(s*.32,.8,-.1);wg.rotation.z=s*.6;g.add(wg);
+  const arm=add(new T.CylinderGeometry(.035,.02,.85,8),m2,s*.42,.05,0,wg);arm.rotation.z=Math.PI/2;
+  for(let k=0;k<3;k++){const w=add(new T.ConeGeometry(.34-k*.06,1-k*.18,3),mw,s*(.44-k*.05),-.02,-.16-k*.17,wg);w.rotation.z=-s*Math.PI/2;w.rotation.y=s*(k-1)*.25;w.scale.x=.14}
+  add(new T.ConeGeometry(.03,.1,6),mh,s*.88,.05,0,wg).rotation.z=-s*Math.PI/2;
   for(const z of[.3,-.3]){add(new T.SphereGeometry(.12,10,8),m1,s*.28,.16,z,g);for(let k=-1;k<=1;k++)add(new T.ConeGeometry(.022,.08,5),mh,s*.28+k*.05,.06,z+.13,g).rotation.x=Math.PI/2}});
  for(let i=0;i<4;i++){const sp=add(new T.ConeGeometry(.06,.18,5),mh,0,.98-i*.03,.15-i*.22,g);sp.rotation.x=-.4}
  let tp=g;for(let i=0;i<3;i++){const tg2=new T.Group();tg2.position.set(0,i?0:.42,i?-.28:-.62);tg2.rotation.x=i?.12:-.1;tp.add(tg2);add(new T.SphereGeometry(.2-i*.045,12,10),m1,0,0,0,tg2).scale.z=1.3;add(new T.ConeGeometry(.04,.12,5),mh,0,.18-i*.04,0,tg2).rotation.x=-.5;tp=tg2}

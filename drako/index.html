@@ -979,7 +979,7 @@ function padPoll(dt){
  GP.sprint=B||LT;GP.lb=LB;GP.jump=A;GP.fire=RT;
  const eSel=edge('sel',b(8)),eDL=edge('dl',b(14)),eDR=edge('dr',b(15)),eDU=edge('du',b(12)),eA=edge('a',A),eX=edge('x',X),eY=edge('y',Y),eRB=edge('rb',RB),eLB=edge('lb',LB),eL3=edge('l3',b(10)||b(11)),eST=edge('st',ST);
  if(st==='play'){
-  if(eA)jump();if(eRB)bonusFlap();if(eLB)special();if(eL3)fury();if(eY){if(pl.glNow)bonusFlap();else slam()}if(eX){pl.lmbT=0;pl.lmbDone=false;tailWhip()}GP.atk=X;if(eSel)openBUI();if(eDL)cycleEl(-1);if(eDR)cycleEl(1);if(eDU)interact();
+  if(eA)jump();if(eRB)bonusFlap();if(eLB)special();if(eL3)fury();if(eY){if(pl.glNow)bonusFlap();else slam()}if(eX){pl.lmbT=0;pl.lmbDone=false;if(!pl.g||pl.swim){pl.lmbDone=true;tailWhip()}}if(GP.atk&&!X&&!pl.lmbDone)tailWhip();if(!X)pl.lmbDone=false;GP.atk=X;if(eSel)openBUI();if(eDL)cycleEl(-1);if(eDR)cycleEl(1);if(eDU)interact();
   cy-=GP.rx*dt*2.8*cfg.pad/100;cp=Math.max(-.1,Math.min(1.2,cp+GP.ry*dt*2*(cfg.inv?-1:1)*cfg.pad/100));
   if(eST){st='pause';md=false;GP.fire=false;if(document.pointerLockElement===cv)document.exitPointerLock();$('pause').classList.remove('hidden')}
  }else if(st==='ui'){if(eSel||eST)closeBUI()}else if(st==='pause'){if(eST||eA){if($('options').classList.contains('hidden'))$('resume').onclick()}}
@@ -1465,7 +1465,7 @@ function launcher(){// Hornstoss nach oben: schleudert Gegner vor Drako in die L
  if(st!=='play'||!pl.g||pl.slam||pl.tailT>0||pl.atkCd>0)return false;pl.atkCd=.2;pl.atkT=pl.atkDur=.38;pl.atkKind='up';
  const fx=Math.sin(pl.hd),fz=Math.cos(pl.hd);
  meleeHit(3.3,.15,(e,dx,dz)=>{dmgE(e,e.armor?2:4,dx*.2,dz*.2,6);if(!e.knocked){launchE(e,dx,dz,12);burst(V(e.x,e.g.position.y+.6,e.z),0xffe9a0,14)}});
- pl.g=false;pl.j=1;pl.box=null;pl.groundGrace=0;pl.sprintJump=false;pl.vy=11;pl.vx=fx*2;pl.vz=fz*2;sfx('jump');burst(V(pl.p.x+fx,pl.p.y+.3,pl.p.z+fz),0xffe9a0,16);return true}
+ pl.vx*=.2;pl.vz*=.2;sfx('jump');burst(V(pl.p.x+fx,pl.p.y+.3,pl.p.z+fz),0xffe9a0,16);return true}
 function airAttack(){// Luft-Kombo: 2 Treffer halten Gegner oben, der 3. schmettert sie auf den Boden
  if(pl.atkCd>0)return;const n=pl.airCombo>0?(pl.airN+1)%3:0;pl.airN=n;pl.airCombo=.75;pl.atkCd=.2;pl.atkT=pl.atkDur=n===2?.32:.22;pl.atkKind=n===2?'smash':'air';pl.atkSide=n===1?-1:1;
  const EC=EL[brEl()];for(let i=0;i<12;i++){const a=i/12*Math.PI*2;emit(V(pl.p.x+Math.sin(a)*1.2,pl.p.y+.9,pl.p.z+Math.cos(a)*1.2),V(Math.sin(a)*5,(R()-.5)*2,Math.cos(a)*5),i%2?EC.col:0xffffff,.2,.8)}
@@ -1542,7 +1542,7 @@ addEventListener('keydown',e=>{
  if(e.code==='KeyM'&&!e.repeat)toggleSound();
 });
 addEventListener('keyup',e=>{K[e.code]=0;if(e.code===binds.special)SP.heldK=false});addEventListener('blur',()=>{for(const k in K)K[k]=0;md=false;pl.lmb=false;SP.heldM=SP.heldK=false});
-addEventListener('mousedown',e=>{if(st!=='play')return;if(e.button===0){pl.lmb=true;pl.lmbT=0;pl.lmbDone=false;tailWhip()}else if(e.button===2)md=true;else if(e.button===1){if(e.preventDefault)e.preventDefault();SP.heldM=true;special()}});addEventListener('auxclick',e=>{if(e.button===1&&e.preventDefault)e.preventDefault()});addEventListener('mouseup',e=>{if(e.button===undefined||e.button===0)pl.lmb=false;if(e.button===undefined||e.button===2)md=false;if(e.button===undefined||e.button===1)SP.heldM=false});addEventListener('contextmenu',e=>{if(e.preventDefault)e.preventDefault()});
+addEventListener('mousedown',e=>{if(st!=='play')return;if(e.button===0){pl.lmb=true;pl.lmbT=0;pl.lmbDone=false;if(!pl.g||pl.swim){pl.lmbDone=true;tailWhip()}}else if(e.button===2)md=true;else if(e.button===1){if(e.preventDefault)e.preventDefault();SP.heldM=true;special()}});addEventListener('auxclick',e=>{if(e.button===1&&e.preventDefault)e.preventDefault()});addEventListener('mouseup',e=>{if(e.button===undefined||e.button===0){if(pl.lmb&&!pl.lmbDone&&st==='play')tailWhip();pl.lmb=false;pl.lmbDone=false}if(e.button===undefined||e.button===2)md=false;if(e.button===undefined||e.button===1)SP.heldM=false});addEventListener('contextmenu',e=>{if(e.preventDefault)e.preventDefault()});
 addEventListener('mousemove',e=>{if(st==='play'){const m=cfg.sens/100;cy-=e.movementX*.0025*m;cp=Math.max(-.1,Math.min(1.2,cp+e.movementY*.0025*m*(cfg.inv?-1:1)))}});
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement!==cv&&st==='play'){st='pause';md=false;$('pause').classList.remove('hidden')}});
 $('play').onclick=()=>{audioInit();st='play';$('menu').classList.add('hidden');$('hud').classList.remove('hidden');$('bbar').classList.remove('hidden');$('enb').classList.remove('hidden');$('fub').classList.remove('hidden');renderEnergy();renderFury();t0=performance.now();hud();$('need').textContent=need;sparx.position.set(pl.p.x,pl.p.y+2.5,pl.p.z);lock()};
@@ -1589,7 +1589,7 @@ pl.vy-=30*dt;if(gl)pl.vy=Math.max(pl.vy,-2.2);
 // Angriff gedrueckt halten (Maus links / Gamepad X): nach kurzem Aufladen schleudert ein Hornstoss Gegner hoch
 {const held=(pl.lmb||GP.atk)&&st==='play';if(held&&!pl.lmbDone){pl.lmbT=(pl.lmbT||0)+dt;
   if(pl.g&&pl.lmbT>.12&&R()<dt*40){const hp=head.localToWorld(V(0,.4,0));emit(hp,V((R()-.5)*1.5,1.5+R(),(R()-.5)*1.5),0xffe9a0,.3,.6)}
-  if(pl.lmbT>=.38&&pl.g&&launcher())pl.lmbDone=true}else if(!held){pl.lmbT=0;pl.lmbDone=false}}
+  if(pl.lmbT>=.3&&pl.g&&launcher())pl.lmbDone=true}else if(!held){pl.lmbT=0}}
 pl.slamCd=Math.max(0,pl.slamCd-dt);pl.atkCd=Math.max(0,(pl.atkCd||0)-dt);pl.atkT=Math.max(0,(pl.atkT||0)-dt);pl.airCombo=Math.max(0,(pl.airCombo||0)-dt);if(pl.g)pl.airCombo=0;pl.ramCd=Math.max(0,(pl.ramCd||0)-dt);pl.tailCd=Math.max(0,pl.tailCd-dt);pl.tailCombo=Math.max(0,pl.tailCombo-dt);
 pl.glNow=gl;
 if(pl.tailT>0){pl.tailT-=dt;const k=1-pl.tailT/pl.tailDur;while(pl.tailN<pl.tailMarks.length&&k>=pl.tailMarks[pl.tailN]){tailStrike(pl.tailV);pl.tailN++}}

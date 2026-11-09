@@ -398,9 +398,9 @@
 @keyframes banner{15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%)}}
 .d-tbar{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:26;display:none;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:12px;background:#1a1410;border:1px solid #ffb347;box-shadow:0 8px 24px rgba(0,0,0,.6);font-weight:700;font-size:14px;white-space:nowrap}
 .d-tbar.on{display:flex}
-.d-float{position:fixed;z-index:200;pointer-events:none;font-family:Rajdhani,sans-serif;font-weight:700;font-size:30px;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 12px currentColor;animation:float 1.1s ease-out forwards;transform:translate(-50%,-50%)}
+.d-float{position:fixed;z-index:200;pointer-events:none;font-family:Rajdhani,sans-serif;font-weight:700;font-size:30px;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 12px currentColor;animation:dFloat 1.1s ease-out forwards;transform:translate(-50%,-50%)}
 .d-float.dmg{color:#ff4d5e}.d-float.heal{color:#3ddc97}.d-float.shield{color:#93c5fd;font-size:22px}.d-float.frost{color:#7df9ff;font-size:22px}
-@keyframes float{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
+@keyframes dFloat{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
 .hit{animation:hit .35s}
 @keyframes hit{20%{transform:translateX(-6px) rotate(-2deg)}40%{transform:translateX(6px) rotate(2deg)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
 .d-log{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:220px;max-height:160px;overflow:hidden;font-size:12px;color:#8a93a8;display:flex;flex-direction:column;gap:3px;pointer-events:none;

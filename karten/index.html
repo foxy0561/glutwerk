@@ -143,6 +143,20 @@ h2.sec small{font-size:15px;color:var(--muted);letter-spacing:0}
 .tcard.r-mythic .tc-spacer{flex:1}
 .tcard.r-mythic .tc-text{flex:0 0 auto;color:#f0e6ff;padding-bottom:3cqw}
 .tcard.r-mythic .tc-type{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
+/* Sonderkarte "Ursprung": Foxy ragt aus dem Rahmen */
+.tcard.ursprung .tc-art svg{position:absolute;inset:0;width:100%;height:100%}
+.tcard.ursprung .tc-art::after{background:linear-gradient(180deg,transparent 0%,transparent 55%,rgba(10,6,20,.85) 72%,rgba(10,6,20,.96) 100%)}
+.tc-seal{position:absolute;left:50%;top:30%;width:92cqw;aspect-ratio:1;transform:translate(-50%,-50%);z-index:1;opacity:.75;
+  filter:drop-shadow(0 0 2.5cqw #ff6ad5);animation:sealSpin 24s linear infinite}
+.tc-seal svg{width:100%;height:100%}
+@keyframes sealSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.tc-pop{position:absolute;z-index:3;left:50%;top:-11%;height:78%;transform:translateX(-46%) translateZ(40px);pointer-events:none;user-select:none;
+  filter:drop-shadow(0 0 1.6cqw rgba(255,106,213,.55)) drop-shadow(0 1.5cqw 2cqw rgba(0,0,0,.6));
+  -webkit-mask:linear-gradient(180deg,#000 74%,transparent 96%);mask:linear-gradient(180deg,#000 74%,transparent 96%)}
+.tcard.ursprung .tc-head{position:relative;z-index:4;padding-top:1cqw}
+.tcard.ursprung .tc-type,.tcard.ursprung .tc-text,.tcard.ursprung .tc-foot{z-index:4}
+.tcard.ursprung .foil-tag{top:auto;bottom:36cqw;z-index:5}
+.tcard.ursprung .tc-holo,.tcard.ursprung .tc-glare{z-index:5}
 /* Glanz (Holo) */
 .tc-holo,.tc-glare{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4}
 .tcard.foil .tc-holo{mix-blend-mode:color-dodge;opacity:.5;
@@ -477,6 +491,28 @@ const ART = {
   lavalord: `<defs>${BLUR}</defs>` + sky("#3a0a00", "#120200") + `<path d="M0 72q20-6 40 0t40 0 40 0v18H0z" fill="#ff5a1a"/><path d="M0 78q20-4 40 0t40 0 40 0v12H0z" fill="#ffb347"/>` + glowC(60, 44, 30, "#ff3d00", .5) + `<path d="M36 74l4-30 8-10h24l8 10 4 30z" fill="#2a0a04"/><path d="M44 34l-4-12 8 6 4-10 4 10 4-10 4 10 8-6-4 12z" fill="#ffb347"/><circle cx="52" cy="44" r="3" fill="#ffe066"/><circle cx="68" cy="44" r="3" fill="#ffe066"/><path d="M46 56l6 4 8-4 8 4 6-4" stroke="#ff5a1a" stroke-width="2.5" fill="none"/><path d="M40 52l-10 10M80 52l10 10" stroke="#2a0a04" stroke-width="7" stroke-linecap="round"/>`,
   ember: `<defs>${BLUR}<linearGradient id="fl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff3d00"/><stop offset=".6" stop-color="#ffb347"/><stop offset="1" stop-color="#fff3b0"/></linearGradient></defs>` + sky("#1f0a04", "#0a0302") + glowC(60, 54, 32, "#ff6a2b", .7) + `<path d="${FLAME}" fill="url(#fl)" transform="translate(0 6)"/><g fill="#ffb347"><circle cx="30" cy="30" r="1.8"/><circle cx="88" cy="22" r="1.4"/><circle cx="96" cy="44" r="1.2"/><circle cx="24" cy="56" r="1.4"/></g>`,
   forge: `<defs>${BLUR}<linearGradient id="fl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff3d00"/><stop offset=".6" stop-color="#ffb347"/><stop offset="1" stop-color="#fff3b0"/></linearGradient></defs>` + sky("#2a0f06", "#0a0302") + glowC(60, 34, 26, "#ff6a2b", .8) + `<path d="${FLAME}" fill="url(#fl)" transform="translate(30 -6) scale(.5)"/><path d="M22 52h70q10 0 14-8h4q-2 14-16 16H82l-6 10h10v8H34v-8h10l-6-10H30q-8 0-8-8z" fill="#3a4252"/><path d="M22 52h70q10 0 14-8h4q-2 6-8 9H22z" fill="#5d6678"/><g fill="#ffb347"><circle cx="34" cy="40" r="1.6"/><circle cx="88" cy="30" r="1.4"/><circle cx="96" cy="38" r="1.2"/></g>`,
+  grunling: sky("#7ec8ff", "#d8f1ff") + ground("#5bbf4a", 70) + ground("#8a5a2b", 78) + `<ellipse cx="60" cy="71" rx="22" ry="3" fill="#0003"/><path d="M38 70q0-30 22-30t22 30z" fill="#2fa84a"/><path d="M42 66q2-20 14-24" stroke="#7ff09a" stroke-width="3" fill="none" opacity=".6" stroke-linecap="round"/><path d="M46 50l10 4M74 50l-10 4" stroke="#0b3d14" stroke-width="3" stroke-linecap="round"/><circle cx="52" cy="57" r="4" fill="#fff"/><circle cx="68" cy="57" r="4" fill="#fff"/><circle cx="53" cy="58" r="2" fill="#111"/><circle cx="67" cy="58" r="2" fill="#111"/><rect x="42" y="68" width="10" height="5" rx="2" fill="#0b3d14"/><rect x="68" y="68" width="10" height="5" rx="2" fill="#0b3d14"/>`,
+  heart: `<defs>${BLUR}</defs>` + sky("#3a0a1a", "#12030a") + glowC(60, 44, 30, "#ff4d6d", .6) + `<g transform="translate(36 22)" fill="#ff3355"><rect x="6" y="0" width="12" height="6"/><rect x="30" y="0" width="12" height="6"/><rect x="0" y="6" width="48" height="18"/><rect x="6" y="24" width="36" height="6"/><rect x="12" y="30" width="24" height="6"/><rect x="18" y="36" width="12" height="6"/></g><g fill="#fff" opacity=".7"><rect x="42" y="28" width="6" height="6"/><rect x="48" y="28" width="6" height="3"/></g><text x="60" y="80" text-anchor="middle" font-family="Rajdhani,Arial" font-weight="700" font-size="13" fill="#ffd6de">1UP</text>`,
+  four: sky("#7ec8ff", "#d8f1ff") + ground("#5bbf4a", 74) + ground("#8a5a2b", 82) + [["#ff4d5e", 22, 56], ["#4da3ff", 46, 44], ["#ffd34d", 72, 50], ["#3ddc97", 96, 60]].map(([c, x, y]) => `<g transform="translate(${x} ${y})"><circle r="10" fill="${c}"/><circle cx="-3.5" cy="-2" r="2.6" fill="#fff"/><circle cx="3.5" cy="-2" r="2.6" fill="#fff"/><circle cx="-3" cy="-1.6" r="1.3" fill="#111"/><circle cx="4" cy="-1.6" r="1.3" fill="#111"/><path d="M-3 4q3 2 6 0" stroke="#0006" stroke-width="1.5" fill="none"/></g>`).join("") + `<g fill="#ffd34d"><circle cx="34" cy="22" r="3"/><circle cx="60" cy="16" r="3"/><circle cx="86" cy="24" r="3"/></g>`,
+  button: `<defs>${BLUR}</defs>` + sky("#cfd5de", "#7f8898") + `<path d="M0 58l120-8v40H0z" fill="#5b6373"/><g stroke="#4a5160" stroke-width=".8" opacity=".6"><path d="M0 70h120M30 58v32M70 54v36"/></g><ellipse cx="60" cy="66" rx="34" ry="11" fill="#3a404c"/><ellipse cx="60" cy="63" rx="30" ry="9" fill="#e8ebf0"/>` + glowC(60, 59, 18, "#ff3b3b", .5) + `<ellipse cx="60" cy="61" rx="20" ry="6" fill="#d02020"/><ellipse cx="60" cy="58" rx="20" ry="6" fill="#ff4d4d"/><ellipse cx="54" cy="56.5" rx="7" ry="1.8" fill="#fff" opacity=".5"/>`,
+  glasscage: `<defs>${BLUR}</defs>` + sky("#2b3240", "#11151d") + `<path d="M0 70h120v20H0z" fill="#3a4252"/><g transform="translate(60 48)"><path d="M-30-30h60v52h-60z" fill="#7fd3ff" opacity=".12" stroke="#bfe6ff" stroke-width="1.5"/><path d="M-30-30l10-8h60l-10 8z" fill="#bfe6ff" opacity=".2" stroke="#bfe6ff" stroke-width="1"/><path d="M30-30l10-8v52l-10 8z" fill="#7fd3ff" opacity=".1" stroke="#bfe6ff" stroke-width="1"/><path d="M-24-24l12 30" stroke="#fff" stroke-width="2" opacity=".35"/><g transform="translate(0 6)"><path d="M0-12l11 6v12L0 12-11 6v-12z" fill="#c9ced8"/><path d="M0-12l11 6L0 0-11-6z" fill="#eef1f6"/><circle cx="-5" cy="4" r="3" fill="none" stroke="#2ea8ff" stroke-width="1.5"/></g></g>`,
+  catapult: `<defs>${BLUR}</defs>` + sky("#3a414f", "#171b23") + `<path d="M0 72h120v18H0z" fill="#4a5262"/><path d="M14 66q40-70 92-30" stroke="#ffd34d" stroke-width="2" stroke-dasharray="4 4" fill="none"/>` + glowC(26, 66, 14, "#ffd34d", .6) + `<path d="M10 70l32-6v6z" fill="#2a2f3a"/><path d="M12 66h28l-2 4H12z" fill="#ffd34d"/><g stroke="#2a2f3a" stroke-width="2.5" fill="none"><path d="M18 69l4-3 4 3M28 69l4-3 4 3"/></g><path d="M100 38l6-2-2 6" stroke="#ffd34d" stroke-width="2" fill="none"/>`,
+  cannon: sky("#3a1a1a", "#120808") + `<path d="M0 76q60-8 120 0v14H0z" fill="#241010"/><rect x="40" y="50" width="40" height="28" rx="3" fill="#4a3a3a"/><g transform="rotate(-24 60 48)"><rect x="56" y="38" width="44" height="16" rx="4" fill="#2a2a32"/><rect x="94" y="36" width="8" height="20" rx="2" fill="#3a3a44"/></g><circle cx="60" cy="50" r="14" fill="#3a3a44"/><circle cx="104" cy="16" r="6" fill="#1a1a1f"/><circle cx="102" cy="14" r="2" fill="#fca5a5" opacity=".6"/>`,
+  mortar: `<defs>${BLUR}</defs>` + sky("#3a1d08", "#120802") + `<path d="M24 66q30-70 74-14" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="3 3" fill="none"/>` + glowC(98, 64, 18, "#f97316", .8) + `<path d="M84 72l6-14 4 10 6-12 2 12 8-8-4 14z" fill="#ffb347"/><path d="M0 74h120v16H0z" fill="#2a1406"/><path d="M14 74l6-18h16l6 18z" fill="#4a3a2a"/><rect x="18" y="48" width="18" height="12" rx="2" transform="rotate(-35 27 54)" fill="#2a2a32"/>`,
+  beacon: `<defs>${BLUR}</defs>` + sky("#2a2208", "#0c0a02") + glowC(60, 22, 24, "#fde68a", .9) + `<circle cx="60" cy="22" r="22" fill="none" stroke="#fde68a" stroke-width="1" opacity=".6"/><circle cx="60" cy="22" r="32" fill="none" stroke="#fde68a" stroke-width=".8" opacity=".35"/><path d="M48 84l4-52h16l4 52z" fill="#4a4030"/><path d="M52 50h16M51 62h18M50 74h20" stroke="#eab308" stroke-width="2"/><rect x="50" y="26" width="20" height="8" fill="#5a4f38"/><circle cx="60" cy="22" r="7" fill="#fff3b0"/>`,
+  shieldbearer: `<defs>${BLUR}</defs>` + sky("#0f1d3a", "#050a16") + glowC(60, 48, 30, "#60a5fa", .35) + `<circle cx="60" cy="50" r="30" fill="#60a5fa" opacity=".15" stroke="#93c5fd" stroke-width="2"/><path d="M44 80l4-22-6-6 6-14h24l6 14-6 6 4 22z" fill="#1e3a6b"/><circle cx="60" cy="30" r="9" fill="#1e3a6b"/><circle cx="56" cy="29" r="1.8" fill="#bfdbfe"/><circle cx="64" cy="29" r="1.8" fill="#bfdbfe"/><path d="M68 44h14v14q0 10-7 14-7-4-7-14z" fill="#3b82f6" stroke="#bfdbfe" stroke-width="1.5"/>`,
+  leaderboard: `<defs>${BLUR}</defs>` + sky("#1d0f33", "#0a0514") + glowC(60, 30, 22, "#ffd34d", .5) + `<rect x="46" y="54" width="28" height="30" fill="#ffd34d"/><rect x="20" y="64" width="26" height="20" fill="#cfd6e4"/><rect x="74" y="70" width="26" height="14" fill="#d9925a"/><g font-family="Rajdhani,Arial" font-weight="700" font-size="12" text-anchor="middle" fill="#1a0b2e"><text x="60" y="73">1</text><text x="33" y="79">2</text><text x="87" y="81">3</text></g><path d="M48 14h24v10q0 12-12 14-12-2-12-14z" fill="#ffd34d"/><path d="M48 18h-6q0 8 8 10M72 18h6q0 8-8 10" stroke="#ffd34d" stroke-width="2.5" fill="none"/><rect x="56" y="38" width="8" height="8" fill="#e0a800"/><rect x="50" y="46" width="20" height="4" rx="1" fill="#e0a800"/>`,
+  riftbeast: `<defs>${BLUR}</defs>` + sky("#1c0b2e", "#08030f") + `<path d="M30 6l-6 14 8 10-10 14 8 12-6 14 4 14" stroke="#a044ff" stroke-width="10" fill="none" filter="url(#bl)"/><path d="M30 6l-6 14 8 10-10 14 8 12-6 14 4 14" stroke="#e2c4ff" stroke-width="1.2" fill="none"/><path d="M40 80q-2-26 18-32l10-14 6 12q20 2 24 22 4 10-4 12z" fill="#3b1466"/><path d="M60 40l-4-12 8 8M78 42l4-12-8 8" fill="#5b21b6"/><circle cx="66" cy="54" r="3.5" fill="#f0abfc"/><circle cx="80" cy="54" r="3.5" fill="#f0abfc"/><path d="M64 66l4 4 4-4 4 4 4-4" stroke="#f0abfc" stroke-width="1.8" fill="none"/>`,
+  honeypot: sky("#e8c890", "#9a7040") + `<path d="M0 68q30-6 60 0t60 0v22H0z" fill="#6b4a24"/>` + `<g transform="translate(62 52) scale(1.4)"><g stroke="#3a1a0a" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M-2 3l-6 9M-2 3l-9 2M4 3l3 10M4 3l9 5M14-4q4-10 10-12"/></g><circle cx="-18" cy="-2" r="16" fill="#ffb627"/><circle cx="-18" cy="-2" r="16" fill="url(#hp)"/><ellipse cx="-24" cy="-9" rx="6" ry="4" fill="#fff" opacity=".5"/><path d="M-30 -2h24M-31 4h26" stroke="#c97a00" stroke-width="1" opacity=".6"/><ellipse cx="2" cy="1" rx="6" ry="4.5" fill="#3a1a0a"/><circle cx="13" cy="-1" r="6" fill="#3a1a0a"/><circle cx="15" cy="-3" r="1.6" fill="#fff" opacity=".8"/></g><defs><radialGradient id="hp" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffe6a0" stop-opacity=".9"/><stop offset="1" stop-color="#c97a00" stop-opacity="0"/></radialGradient></defs>`,
+  driver: sky("#c99a5a", "#7a5530") + `<path d="M0 62q30-6 60 0t60 0v28H0z" fill="#5a3a1c"/>` + [[14, 70, .42], [30, 66, .45], [46, 70, .48], [62, 64, .5], [78, 69, .52], [96, 63, .55], [24, 80, .4], [52, 81, .42], [84, 80, .44]].map(([x, y, s]) => ant(x, y, s, "#8a1d0e")).join("") + ant(60, 40, 1, "#a8261a", `<path d="M14-6l6-4M14 0l6 2" stroke="#ffd34d" stroke-width="2"/>`),
+  spider: `<defs>${BLUR}</defs>` + sky("#3a2614", "#120a04") + `<g stroke="#d8c8a6" stroke-width=".7" opacity=".55" fill="none"><path d="M60 0v90M0 30l120 30M0 70l120-50"/><circle cx="60" cy="42" r="14"/><circle cx="60" cy="42" r="26"/><circle cx="60" cy="42" r="40"/></g><path d="M60 0v32" stroke="#d8c8a6" stroke-width="1"/><g stroke="#140a04" stroke-width="3" fill="none" stroke-linecap="round"><path d="M54 44l-14-10-6 8M54 48l-16-2-6 8M54 52l-12 8-2 10M66 44l14-10 6 8M66 48l16-2 6 8M66 52l12 8 2 10"/></g><ellipse cx="60" cy="54" rx="11" ry="13" fill="#140a04"/><circle cx="60" cy="40" r="7" fill="#1f120a"/><g fill="#ff4d4d"><circle cx="57" cy="39" r="1.6"/><circle cx="63" cy="39" r="1.6"/><circle cx="58.5" cy="36.5" r="1"/><circle cx="61.5" cy="36.5" r="1"/></g><path d="M56 52l4 6 4-6-4-3z" fill="#c0392b"/>`,
+  aphids: sky("#bfe0a0", "#6b9a50") + `<path d="M6 76Q40 20 114 30Q80 80 6 76z" fill="#3fbf4a"/><path d="M8 74Q60 50 112 32" stroke="#1f7a2a" stroke-width="1.5" fill="none"/>` + [[40, 54], [56, 48], [72, 44], [50, 60], [88, 40]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="5" ry="3.5" fill="#a6e85a" stroke="#5a9a2a" stroke-width=".8"/><circle cx="${x - 1.5}" cy="${y - 1}" r="1" fill="#fff" opacity=".7"/>`).join("") + ant(26, 64, .7, "#4a1d0e"),
+  antwinter: sky("#c9d8ea", "#eef4fa") + `<path d="M0 40q30-6 60 0t60 0v50H0z" fill="#fff"/><path d="M0 44q30-6 60 0t60 0v46H0z" fill="#5a3a1c"/><path d="M60 44v12q0 6 6 8h18" stroke="#2a1a0c" stroke-width="7" fill="none"/><ellipse cx="44" cy="72" rx="26" ry="10" fill="#2a1a0c"/>` + ant(36, 72, .45, "#8a3a14") + ant(52, 74, .45, "#8a3a14") + ant(46, 68, .4, "#8a3a14") + `<g fill="#fff"><circle cx="20" cy="14" r="1.6"/><circle cx="44" cy="8" r="1.2"/><circle cx="76" cy="18" r="1.6"/><circle cx="100" cy="10" r="1.3"/><circle cx="90" cy="28" r="1"/></g>`,
+  crystalvalley: `<defs>${BLUR}</defs>` + sky("#2a1a4a", "#120a24") + `<path d="M0 60l30-24 30 20 30-26 30 20v40H0z" fill="#1a1036"/>` + glowC(60, 66, 30, "#7df9ff", .3) + crystal(30, 64, .8, "#7df9ff", "#0891b2") + crystal(60, 60, 1.1, "#ff7ad9", "#a1006b") + crystal(90, 66, .75, "#c4b5fd", "#6d28d9") + crystal(46, 72, .5, "#7df9ff", "#0891b2") + crystal(76, 74, .5, "#ff7ad9", "#a1006b") + `<path d="M0 80h120v10H0z" fill="#0e0820"/>`,
+  golem: `<defs>${BLUR}</defs>` + sky("#2a2a34", "#0e0e14") + glowC(60, 40, 24, "#7df9ff", .25) + `<path d="M30 84l6-22-8-14 10-16h44l10 16-8 14 6 22z" fill="#5b5b68"/><path d="M38 32l6-14h32l6 14z" fill="#6b6b78"/><path d="M50 62l10-6 10 6M44 44l8 6" stroke="#3a3a44" stroke-width="2" fill="none"/><rect x="48" y="22" width="24" height="12" rx="2" fill="#3a3a44"/><rect x="51" y="26" width="6" height="4" fill="#7df9ff"/><rect x="63" y="26" width="6" height="4" fill="#7df9ff"/><circle cx="60" cy="52" r="5" fill="#7df9ff" opacity=".8"/>`,
+  sheep: sky("#9fd8ff", "#e6f6ff") + ground("#6fcf5a", 70) + `<ellipse cx="60" cy="72" rx="24" ry="3" fill="#0002"/><g fill="#fff">${[[46, 48], [56, 42], [68, 44], [76, 52], [70, 60], [54, 60], [44, 56], [60, 52]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="10"/>`).join("")}</g><g fill="#e3e8f0">${[[50, 58], [66, 58]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7"/>`).join("")}</g><rect x="48" y="62" width="4" height="10" fill="#3a3a44"/><rect x="66" y="62" width="4" height="10" fill="#3a3a44"/><ellipse cx="84" cy="48" rx="8" ry="9" fill="#3a3a44"/><circle cx="87" cy="46" r="2" fill="#fff"/><circle cx="87.5" cy="46.3" r="1" fill="#111"/><ellipse cx="78" cy="42" rx="5" ry="2.5" fill="#3a3a44" transform="rotate(-30 78 42)"/>`,
+  volcano: `<defs>${BLUR}</defs>` + sky("#2a0800", "#ff6a2b") + `<path d="M0 74q60-10 120 0v16H0z" fill="#1f4a8a"/>` + glowC(60, 24, 22, "#ff3d00", .8) + `<path d="M20 78l30-50h20l30 50z" fill="#2a1410"/><path d="M50 28l6 12 4-8 4 10 6-14z" fill="#ff5a1a"/><path d="M56 30l-4 18M66 30l6 20" stroke="#ff7a1a" stroke-width="3"/><g fill="#ffb347"><circle cx="50" cy="12" r="3"/><circle cx="70" cy="8" r="2.5"/><circle cx="60" cy="16" r="3.5"/></g><path d="M0 78q20-4 40 0t40 0 40 0v12H0z" fill="#2a6bc0" opacity=".8"/>`,
+  spark: `<defs>${BLUR}</defs>` + sky("#1a0a04", "#050201") + glowC(60, 46, 18, "#ffb347", .8) + `<g stroke="#ffd27a" stroke-width="1.6" stroke-linecap="round">${Array.from({ length: 12 }, (_, i) => { const a = i / 12 * 6.283, r1 = 8, r2 = 16 + (i % 3) * 6; return `<path d="M${(60 + Math.cos(a) * r1).toFixed(1)} ${(46 + Math.sin(a) * r1).toFixed(1)}L${(60 + Math.cos(a) * r2).toFixed(1)} ${(46 + Math.sin(a) * r2).toFixed(1)}"/>`; }).join("")}</g><circle cx="60" cy="46" r="5" fill="#fff3b0"/>`,
 };
 
 /* ---------- Die Karten (Serie 1) ---------- */
@@ -487,12 +523,18 @@ const CARDS = [
   { id: "wiesenland",  set: "kiko",       r: "common",    pow: 2,  name: "Wiesenland",         art: "meadow",     text: "Welt 1. Hier fängt jedes Abenteuer an." },
   { id: "roehre",      set: "kiko",       r: "rare",      pow: 3,  name: "Warp-Röhre",         art: "pipe",       text: "Wo sie hinführt? Spring rein." },
   { id: "burg",        set: "kiko",       r: "epic",      pow: 6,  name: "Die Burg",           art: "castle",     text: "Das letzte Level wartet hinter diesen Mauern." },
+  { id: "gruenling",   set: "kiko",       r: "common",    pow: 1,  name: "Grünling",           art: "grunling",   text: "Läuft immer geradeaus. Bis jemand draufspringt." },
+  { id: "extraleben",  set: "kiko",       r: "rare",      pow: 3,  name: "Extraleben",         art: "heart",      text: "Noch ein Versuch. Diesmal klappt es." },
+  { id: "vier-freunde", set: "kiko",      r: "epic",      pow: 6,  name: "Vier Freunde",       art: "four",       text: "Ein Gerät, vier Spieler, null Gnade." },
   { id: "wuerfel",     set: "kammerwerk", r: "common",    pow: 2,  name: "Testwürfel",         art: "cube",       text: "Er drückt Knöpfe. Er redet nicht." },
   { id: "gel",         set: "kammerwerk", r: "common",    pow: 2,  name: "Sprung-Gel",         art: "gel",        text: "Draufsteigen. Abheben." },
   { id: "portal-b",    set: "kammerwerk", r: "rare",      pow: 4,  name: "Blaues Portal",      art: "portalB",    text: "Rein hier …" },
   { id: "portal-o",    set: "kammerwerk", r: "rare",      pow: 4,  name: "Oranges Portal",     art: "portalO",    text: "… raus da." },
   { id: "wachposten",  set: "kammerwerk", r: "epic",      pow: 6,  name: "Wachposten",         art: "turret",     text: "Ein roter Strahl. Kein Ausweg." },
   { id: "kanone",      set: "kammerwerk", r: "legendary", pow: 8,  name: "Portalkanone",       art: "gun",        text: "Denk mit Portalen." },
+  { id: "bodenknopf",  set: "kammerwerk", r: "common",    pow: 1,  name: "Bodenknopf",         art: "button",     text: "Leg was drauf. Irgendwas." },
+  { id: "glaskaefig",  set: "kammerwerk", r: "rare",      pow: 4,  name: "Glaskäfig",          art: "glasscage",  text: "Man sieht den Ausgang. Man erreicht ihn nicht." },
+  { id: "katapult",    set: "kammerwerk", r: "epic",      pow: 6,  name: "Katapult",           art: "catapult",   text: "Kurz stehen bleiben. Dann fliegen." },
   { id: "bolzenturm",  set: "shardfall",  r: "common",    pow: 2,  name: "Bolzenturm",         art: "bolt",       text: "Der erste Turm, der letzte Freund." },
   { id: "frostkristall", set: "shardfall", r: "common",   pow: 3,  name: "Frostkristall",      art: "frost",      text: "Langsam. Langsamer. Stillstand." },
   { id: "blitzspule",  set: "shardfall",  r: "rare",      pow: 4,  name: "Blitzspule",         art: "tesla",      text: "Springt von Gegner zu Gegner." },
@@ -500,24 +542,42 @@ const CARDS = [
   { id: "prisma",      set: "shardfall",  r: "epic",      pow: 7,  name: "Prisma",             art: "prism",      text: "Licht wird zur Waffe." },
   { id: "risslaeufer", set: "shardfall",  r: "legendary", pow: 8,  name: "Rissläufer",         art: "riftwalker", text: "Er kommt durch den Riss. Und er ist nicht allein." },
   { id: "riftkoloss",  set: "shardfall",  r: "legendary", pow: 9,  name: "Riftkoloss",         art: "boss",       text: "Wenn der Boden bebt, ist es zu spät." },
+  { id: "kanone-sf",   set: "shardfall",  r: "common",    pow: 3,  name: "Kanone",             art: "cannon",     text: "Laut, langsam, wirkungsvoll." },
+  { id: "moerser",     set: "shardfall",  r: "rare",      pow: 4,  name: "Mörser",             art: "mortar",     text: "Was hochfliegt, kommt runter. Hart." },
+  { id: "leuchtfeuer", set: "shardfall",  r: "rare",      pow: 3,  name: "Leuchtfeuer",        art: "beacon",     text: "Macht alle Türme in der Nähe stärker." },
+  { id: "schildtraeger", set: "shardfall", r: "epic",     pow: 6,  name: "Schildträger",       art: "shieldbearer", text: "Erst das Schild. Dann der Rest." },
   { id: "riss",        set: "riftward",   r: "rare",      pow: 5,  name: "Der Riss",           art: "rift",       text: "Halte ihn auf. Um jeden Preis." },
   { id: "kristallkern", set: "riftward",  r: "common",    pow: 3,  name: "Kristallkern",       art: "core",       text: "Das, was du verteidigst." },
+  { id: "rissbestie",  set: "riftward",   r: "common",    pow: 2,  name: "Rissbestie",         art: "riftbeast",  text: "Was durch den Riss kriecht, hat Hunger." },
+  { id: "bestenliste", set: "riftward",   r: "rare",      pow: 4,  name: "Bestenliste",        art: "leaderboard", text: "Platz 1 ist nur geliehen." },
   { id: "waldameise",  set: "ameisenbau", r: "common",    pow: 2,  name: "Waldameise",         art: "antWood",    text: "Samen, Insekten, Nadeln: Hauptsache, es geht nach Hause." },
   { id: "ernteameise", set: "ameisenbau", r: "common",    pow: 2,  name: "Ernteameise",        art: "antHarvest", text: "Große Köpfe, volle Vorräte." },
   { id: "blattschneider", set: "ameisenbau", r: "rare",   pow: 4,  name: "Blattschneider",     art: "antLeaf",    text: "Trägt das Zehnfache ihres Gewichts." },
   { id: "pilzgarten",  set: "ameisenbau", r: "rare",      pow: 3,  name: "Pilzgarten",         art: "fungus",     text: "Die Ameisen sind die Gärtner." },
   { id: "rivalen",     set: "ameisenbau", r: "rare",      pow: 5,  name: "Rivalenkolonie",     art: "rivals",     text: "Unter der Erde ist nicht genug Platz für zwei." },
   { id: "koenigin",    set: "ameisenbau", r: "epic",      pow: 7,  name: "Ameisenkönigin",     art: "queen",      text: "Alles beginnt mit ihr." },
+  { id: "honigtopf",   set: "ameisenbau", r: "rare",      pow: 3,  name: "Honigtopfameise",    art: "honeypot",   text: "Die lebende Vorratskammer." },
+  { id: "treiberameise", set: "ameisenbau", r: "epic",    pow: 7,  name: "Treiberameise",      art: "driver",     text: "Sie bauen kein Nest. Sie ziehen weiter." },
+  { id: "spinne",      set: "ameisenbau", r: "rare",      pow: 5,  name: "Die Spinne",         art: "spider",     text: "Sie wartet am Eingang." },
+  { id: "blattlausfarm", set: "ameisenbau", r: "common",  pow: 2,  name: "Blattlausfarm",      art: "aphids",     text: "Melken statt jagen." },
+  { id: "ameisenwinter", set: "ameisenbau", r: "common",  pow: 2,  name: "Winterruhe",         art: "antwinter",  text: "Oben Schnee. Unten warm und eng." },
   { id: "drako",       set: "drako",      r: "epic",      pow: 6,  name: "Drako",              art: "drako",      text: "Klein für einen Drachen. Groß genug für die Welt." },
   { id: "feueratem",   set: "drako",      r: "rare",      pow: 5,  name: "Feueratem",          art: "breath",     text: "Erst einatmen. Dann alles anzünden." },
   { id: "drachenkristall", set: "drako",  r: "common",    pow: 1,  name: "Drachenkristall",    art: "dcrystal",   text: "Funkelt, klimpert, macht stärker." },
   { id: "lavafuerst",  set: "drako",      r: "legendary", pow: 9,  name: "Lavafürst",          art: "lavalord",   text: "Er herrscht, wo der Boden brennt." },
+  { id: "kristalltal", set: "drako",      r: "common",    pow: 2,  name: "Kristalltal",        art: "crystalvalley", text: "Hier funkelt der ganze Boden." },
+  { id: "schaf",       set: "drako",      r: "common",    pow: 1,  name: "Schaf",              art: "sheep",      text: "Mäh. Lauf lieber." },
+  { id: "golem",       set: "drako",      r: "rare",      pow: 5,  name: "Kristallgolem",      art: "golem",      text: "Langsam. Schwer. Sehr schwer." },
+  { id: "vulkaninsel", set: "drako",      r: "epic",      pow: 6,  name: "Vulkaninsel",        art: "volcano",    text: "Der Glutpfad führt mitten hinein." },
   { id: "glut",        set: "glutwerk",   r: "epic",      pow: 6,  name: "Die Glut",           art: "ember",      text: "Aus einem Funken wird ein Feuer." },
   { id: "glutwerk",    set: "glutwerk",   r: "legendary", pow: 9,  name: "Glutwerk",           art: "forge",      text: "Hier werden Spiele geschmiedet." },
+  { id: "funke",       set: "glutwerk",   r: "common",    pow: 1,  name: "Der Funke",          art: "spark",      text: "Jedes Spiel fängt so an." },
   { id: "foxy-wander", set: "foxy",       r: "mythic",    pow: 10, name: "Die Wanderin",  img: "wander", w: 40, text: "Die letzte Füchsin von Nebelfarn." },
   { id: "foxy-ruins",  set: "foxy",       r: "mythic",    pow: 10, name: "Mondquelle",    img: "ruins",  w: 30, text: "Wo sie die Hand hebt, findet das Wasser seinen Weg." },
   { id: "foxy-frost",  set: "foxy",       r: "mythic",    pow: 10, name: "Kristallseele", img: "frost",  w: 20, text: "Für einen Atemzug gefriert der Nebel." },
   { id: "foxy-seal",   set: "foxy",       r: "mythic",    pow: 10, name: "Stiller Zauber", img: "seal",  w: 10, text: "Kein Wort. Nur ein Kreis aus Licht." },
+  /* Sonderkarte: eines der ersten Foxy-Bilder, freigestellt – sie ragt aus dem Rahmen */
+  { id: "foxy-ursprung", set: "foxy",     r: "mythic",    pow: 10, name: "Ursprung",      cut: "foxy-ursprung.webp", w: 15, special: "Ursprung", text: "So fing alles an: die erste Foxy." },
 ];
 CARDS.forEach((c, i) => c.no = i + 1);
 const FOXY_IMG = k => `../shardfall/img/foxy-${k}.jpg`;
@@ -556,9 +616,40 @@ function artSVG(key) {
   const s = (ART[key] || "").replace(/id="(\w+)"/g, `id="$1${u}"`).replace(/url\(#(\w+)\)/g, `url(#$1${u})`);
   return `<svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice">${s}</svg>`;
 }
+/* Sonderkarte mit freigestellter Figur, die oben aus der Karte ragt */
+function cutCardHTML(c, foil) {
+  const u = "u" + (++svgUid);
+  const runes = Array.from({ length: 16 }, (_, i) => { const a = i / 16 * 6.283; return `<path d="M${(50 + Math.cos(a) * 40).toFixed(1)} ${(50 + Math.sin(a) * 40).toFixed(1)}l${(Math.cos(a + 1.6) * 3).toFixed(1)} ${(Math.sin(a + 1.6) * 3).toFixed(1)}"/>`; }).join("");
+  return `<div class="tcard r-mythic ursprung${foil ? " foil" : ""}" data-tilt>
+    <div class="frame"><div class="inner">
+      <div class="tc-art"><svg viewBox="0 0 63 88" preserveAspectRatio="xMidYMid slice">
+        <defs><linearGradient id="s${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#140a2e"/><stop offset=".55" stop-color="#4a1d5e"/><stop offset="1" stop-color="#d9608a"/></linearGradient>
+        <radialGradient id="m${u}"><stop offset="0" stop-color="#fff6e0"/><stop offset=".6" stop-color="#ffd6f2" stop-opacity=".5"/><stop offset="1" stop-color="#ffd6f2" stop-opacity="0"/></radialGradient>
+        <filter id="b${u}"><feGaussianBlur stdDeviation="2.4"/></filter></defs>
+        <rect width="63" height="88" fill="url(#s${u})"/>
+        <path d="M-5 30Q15 14 32 26T70 18" stroke="#7df9ff" stroke-width="5" fill="none" opacity=".35" filter="url(#b${u})"/>
+        <path d="M-5 38Q20 24 36 34T70 28" stroke="#c4b5fd" stroke-width="4" fill="none" opacity=".3" filter="url(#b${u})"/>
+        <circle cx="47" cy="17" r="13" fill="url(#m${u})"/><circle cx="47" cy="17" r="5.5" fill="#fff6e0"/>
+        <g fill="#fff">${[[8, 8], [20, 5], [30, 14], [56, 34], [12, 22], [38, 6], [58, 8]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".45"/>`).join("")}</g>
+        <path d="M0 62l5-14 4 8 5-16 5 14 4-6 5 12 6-18 5 16 5-8 5 12 5-14 4 10 5-6v34H0z" fill="#1a0a24"/>
+        <path d="M0 72q16-6 32 0t31-2v18H0z" fill="#10061a"/>
+      </svg></div>
+      <div class="tc-seal"><svg viewBox="0 0 100 100" fill="none" stroke="#ff6ad5"><circle cx="50" cy="50" r="46" stroke-width="1.2"/><circle cx="50" cy="50" r="36" stroke-width="2"/><g stroke-width="1.6">${runes}</g><path d="M50 20l6 24 24 6-24 6-6 24-6-24-24-6 24-6z" stroke-width="1.4"/></svg></div>
+      <div class="tc-spacer"></div>
+      <div class="tc-head"><span class="tc-name" style="font-size:${Math.min(9.6, 100 / ("Foxy · " + c.name).length).toFixed(2)}cqw">Foxy · ${esc(c.name)}</span><span class="tc-pow">${c.pow}</span></div>
+      <div class="tc-type"><span>Erstes Bild</span><b>${esc(c.special)}</b></div>
+      <div class="tc-text">${esc(c.text)}</div>
+      <div class="tc-foot"><span>${String(c.no).padStart(2, "0")} / ${CARDS.length}</span><span class="tc-gem"></span></div>
+    </div></div>
+    <img class="tc-pop" src="${esc(c.cut)}" alt="Foxy" draggable="false">
+    ${foil ? `<div class="foil-tag">GLANZ</div>` : ""}
+    <div class="tc-holo"></div><div class="tc-glare"></div>
+  </div>`;
+}
 function cardHTML(c, foil) {
   const set = SETS[c.set];
   const mythic = c.r === "mythic";
+  if (c.cut) return cutCardHTML(c, foil);
   return `<div class="tcard r-${c.r}${foil ? " foil" : ""}" data-tilt>
     <div class="frame"><div class="inner">
       ${mythic ? `<div class="tc-art"><img src="${FOXY_IMG(c.img)}" alt="" draggable="false"></div>` : ""}
@@ -825,7 +916,7 @@ function flip(s) {
       if (x.c.r === "mythic") { burst(cx, cy, "#7df9ff", 90, 9); burst(cx, cy, "#ffe66d", 90, 9); }
       $("opening").classList.remove("quake"); void $("opening").offsetWidth; $("opening").classList.add("quake");
       $("flash").classList.remove("go"); void $("flash").offsetWidth; $("flash").classList.add("go");
-      bigWord(RARITY[x.c.r].name + "!", col);
+      bigWord((x.c.special || RARITY[x.c.r].name) + "!", col);
       rain(col);
     } else if (x.foil) bigWord("Glanz!", "#7df9ff", true);
     if (x.foil) burst(cx, cy, "#7df9ff", 30, 6);

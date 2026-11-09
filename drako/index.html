@@ -79,7 +79,7 @@ button:disabled{background:#666;box-shadow:none}
 </style></head><body>
 <div id="hud" class="hidden"><div id="worldName">Kristalltal</div><div id="hp"></div><div>💎 Punkte: <span id="cr">0</span> / <span id="need">20</span></div><div id="bar"><i id="barfill"></i></div><div id="dr">🐲 Drachen: <span id="drn">0</span> / 3</div><div id="obj"></div><div id="bossbar" class="hidden"></div><div id="msg"></div></div><div id="compass" class="hidden"><svg id="arrow" width="46" height="46" viewBox="-23 -23 46 46"><polygon points="0,-21 7,0 -7,0" fill="#ff2b2b" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><polygon points="0,21 7,0 -7,0" fill="#dcdce8" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle r="3" fill="#2a1a40"/></svg></div><div id="flash"></div>
 <div id="menu" class="ov"><h1>🐉 Drako</h1><div id="sub">DIE KRISTALLWELTEN</div>
-<div class="keys"><span><b>WASD</b> laufen</span><span><b>Shift</b> rennen &amp; rammen</span><span><b>Leertaste</b> springen · 2× gleiten</span><span><b>Linksklick</b> Schwanz</span><span><b>Rechtsklick</b> Atem</span><span><b>Mausrad-Klick</b> Spezial-Atem</span><span>🔮 Atem braucht <b>Energie</b> – Kristalle laden auf</span><span><b>V</b> Fury (lila Leiste voll)</span><span><b>Q</b> Salto-Stoß</span><span><b>1–4</b> Atem · <b>Tab</b> verbessern</span><span><b>F</b> sprechen · <b>M</b> Ton</span></div>
+<div class="keys"><span><b>WASD</b> laufen</span><span><b>Shift</b> rennen &amp; rammen</span><span><b>Leertaste</b> springen · 2× gleiten</span><span><b>Linksklick</b> Schlag-Kombo (auch in der Luft)</span><span><b>Rechtsklick</b> Atem</span><span><b>Mausrad-Klick</b> Spezial-Atem</span><span>🔮 Atem braucht <b>Energie</b> – Kristalle laden auf</span><span><b>V</b> Fury (lila Leiste voll)</span><span><b>Q</b> Hochschleudern · in der Luft Salto-Stoß</span><span><b>1–4</b> Atem · <b>Tab</b> verbessern</span><span><b>F</b> sprechen · <b>M</b> Ton</span></div>
 <div class="menu-actions"><button id="play" disabled>Lädt…</button><button id="menuEdit">🎨 Drache</button><button id="menuOptions">Optionen</button><button id="menuNew">🆕 Neues Spiel</button></div>
 <div class="hint">🎮 Gamepad geht auch · Dein Fortschritt wird automatisch gespeichert</div></div>
 <div id="editor" class="hidden"><div class="ep"><h2>🎨 Drache anpassen</h2><div id="presets"></div>
@@ -944,7 +944,7 @@ function saveCfg(){try{localStorage.setItem('drako-cfg',JSON.stringify(cfg))}cat
 function applyCfg(){try{rd.setPixelRatio(Math.min(devicePixelRatio,[1,1.5,2][cfg.q]||2))}catch(e){}sun.castShadow=!!cfg.sh;cam.fov=cfg.fov;cam.updateProjectionMatrix();sc.fog.far=cfg.far;sc.fog.near=Math.max(20,cfg.far/3);
  if(cfg.fps)$('fps').classList.remove('hidden');else $('fps').classList.add('hidden')}
 const DEFAULT_BINDINGS={forward:'KeyW',back:'KeyS',left:'KeyA',right:'KeyD',sprint:'ShiftLeft',jump:'Space',flap:'KeyE',slam:'KeyQ',interact:'KeyF',special:'KeyR',fury:'KeyV'};
-const bindingNames={special:'Spezial-Atem (auch Mausrad-Klick)',fury:'Fury-Angriff (wenn Leiste voll)',forward:'Vorwärts',back:'Rückwärts',left:'Links',right:'Rechts',sprint:'Rennen / Rammen',jump:'Springen / Gleiten',flap:'Extra-Flügelschlag (alternativ)',slam:'Salto-Stoß / beim Gleiten Flügelschlag',interact:'Mit großem Drachen sprechen'};
+const bindingNames={special:'Spezial-Atem (auch Mausrad-Klick)',fury:'Fury-Angriff (wenn Leiste voll)',forward:'Vorwärts',back:'Rückwärts',left:'Links',right:'Rechts',sprint:'Rennen / Rammen',jump:'Springen / Gleiten',flap:'Extra-Flügelschlag (alternativ)',slam:'Hornstoß hoch (Boden) / Salto-Stoß (Luft)',interact:'Mit großem Drachen sprechen'};
 let binds={...DEFAULT_BINDINGS};try{const saved=JSON.parse(localStorage.getItem('drako-keybinds-v2')||'null');if(saved&&typeof saved==='object')for(const name in DEFAULT_BINDINGS)if(typeof saved[name]==='string')binds[name]=saved[name];if(saved&&!saved.slam&&binds.flap==='KeyQ')binds.flap='KeyE'}catch(e){}
 let waitingBind=null,optionsFrom='pause';
 function readable(code){return ({Space:'Leertaste',ShiftLeft:'Shift (links)',ShiftRight:'Shift (rechts)',ArrowUp:'Pfeil ↑',ArrowDown:'Pfeil ↓',ArrowLeft:'Pfeil ←',ArrowRight:'Pfeil →'}[code]||code.replace(/^Key/,'').replace(/^Digit/,'').replace(/^Numpad/,'Num '))}
@@ -979,7 +979,7 @@ function padPoll(dt){
  GP.sprint=B||LT;GP.lb=LB;GP.jump=A;GP.fire=RT;
  const eSel=edge('sel',b(8)),eDL=edge('dl',b(14)),eDR=edge('dr',b(15)),eDU=edge('du',b(12)),eA=edge('a',A),eX=edge('x',X),eY=edge('y',Y),eRB=edge('rb',RB),eLB=edge('lb',LB),eL3=edge('l3',b(10)||b(11)),eST=edge('st',ST);
  if(st==='play'){
-  if(eA)jump();if(eRB)bonusFlap();if(eLB)special();if(eL3)fury();if(eY){if(pl.glNow)bonusFlap();else slam()}if(eX)tailWhip();if(eSel)openBUI();if(eDL)cycleEl(-1);if(eDR)cycleEl(1);if(eDU)interact();
+  if(eA)jump();if(eRB)bonusFlap();if(eLB)special();if(eL3)fury();if(eY){if(pl.glNow)bonusFlap();else if(pl.g)launcher();else slam()}if(eX)tailWhip();if(eSel)openBUI();if(eDL)cycleEl(-1);if(eDR)cycleEl(1);if(eDU)interact();
   cy-=GP.rx*dt*2.8*cfg.pad/100;cp=Math.max(-.1,Math.min(1.2,cp+GP.ry*dt*2*(cfg.inv?-1:1)*cfg.pad/100));
   if(eST){st='pause';md=false;GP.fire=false;if(document.pointerLockElement===cv)document.exitPointerLock();$('pause').classList.remove('hidden')}
  }else if(st==='ui'){if(eSel||eST)closeBUI()}else if(st==='pause'){if(eST||eA){if($('options').classList.contains('hidden'))$('resume').onclick()}}
@@ -1237,7 +1237,7 @@ function applyStatus(e,kind,bl){
  else if(kind==='psn'){e.psn=Math.max(e.psn,3+bl);e.pl=bl}
  else if(kind==='frz'){e.frz=Math.max(e.frz,1.4+.6*bl)}
  else if(kind==='stun'){e.stun=Math.max(e.stun,.5+.1*bl)}}
-function knockE(e,fx,fz,power,fire){e.knocked=true;e.downTime=-1;e.airY=.35;e.ky=power;e.kx=fx*power*1.2;e.kz=fz*power*1.2;e.deathFire=!!fire;e.ice.visible=false}
+function knockE(e,fx,fz,power,fire){e.knocked=true;e.downTime=-1;e.airY=Math.max(.35,e.air?e.ay:0);e.air=false;e.slamD=false;e.ky=power;e.kx=fx*power*1.2;e.kz=fz*power*1.2;e.deathFire=!!fire;e.ice.visible=false}
 function slay(e,fx,fz){knockE(e,fx,fz,3,true);burst(e.g.position,0xff7b1c,20)}
 function dmgE(e,n,fx,fz,pw){e.hp-=n;e.hit=.28;e.stun=Math.max(e.stun,.35);if(e.hp<=0){knockE(e,fx,fz,pw||4,false);return true}e.x+=fx*.9;e.z+=fz*.9;return false}
 function shatter(e,fx,fz){e.frz=0;if(!dmgE(e,14,fx,fz,6)){burst(V(e.x,e.g.position.y+1,e.z),0xaee9ff,26);sfx('crate');return}burst(V(e.x,e.g.position.y+1,e.z),0xaee9ff,26);burst(V(e.x,e.g.position.y+1,e.z),0xffffff,12);sfx('crate')}
@@ -1272,18 +1272,18 @@ function breathFx(be,bl,dt,fw,mp){
   for(const e of en){if(e.dead||e.knocked)continue;const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz)||1;if(d<range&&(dx*fx+dz*fz)/d>.5&&Math.abs(e.g.position.y-p.y)<6)list.push([d,e])}
   list.sort((a,b)=>a[0]-b[0]);let n=0,last=mp;
   for(const[,e]of list){if(n>=maxT)break;n++;const to=V(e.x,e.g.position.y+.9,e.z);zapLine(last,to);last=to;
-   e.hp-=dt*14*(1+.25*(bl-1))*(e.armor?1.6:1);e.hit=.15;if(bl>=4)applyStatus(e,'stun',bl);if(R()<dt*10)emit(to,V((R()-.5)*4,R()*3,(R()-.5)*4),0xfff7a0,.3,.7);
+   if(e.air){juggle(e,2.6);e.hp-=dt*7}e.hp-=dt*14*(1+.25*(bl-1))*(e.armor?1.6:1);e.hit=.15;if(bl>=4)applyStatus(e,'stun',bl);if(R()<dt*10)emit(to,V((R()-.5)*4,R()*3,(R()-.5)*4),0xfff7a0,.3,.7);
    if(e.hp<=0)slay(e,fx,fz)}
   if(!n)zapLine(mp,V(mp.x+fx*(5+R()*3)+(R()-.5)*1.5,mp.y+(R()-.5)*.8,mp.z+fz*(5+R()*3)+(R()-.5)*1.5));
   for(const o of crates){if(!o.a)continue;if(cone(o.x,o.z,range-2,.75)&&Math.abs(H(o.x,o.z)-p.y)<3){zapLine(mp,V(o.x,H(o.x,o.z)+.8,o.z));o.chg=(o.chg||0)+dt*(o.metal?1:3);if(o.chg>1)destroyCrate(o)}}
   if(realm===0&&boss.alive&&cone(boss.x,boss.z,range,.8)){zapLine(mp,V(boss.x,H(boss.x,boss.z)+2,boss.z));hitBoss(dt*10*(1+.25*(bl-1)))}
  }else if(be==='ice'){
   const range=9+.5*bl;
-  for(const e of en){if(e.dead||e.knocked)continue;if(cone(e.x,e.z,range,.6)&&Math.abs(e.g.position.y-p.y)<4)applyStatus(e,'frz',bl)}
+  for(const e of en){if(e.dead||e.knocked)continue;if(cone(e.x,e.z,range,.6)&&Math.abs(e.g.position.y-p.y)<5){applyStatus(e,'frz',bl);if(e.air){juggle(e,2.4);e.hp-=dt*6}}}
   if(realm===2)icePlates(fw,bl);
  }else if(be==='poison'){
   const range=8+.4*bl;
-  for(const e of en){if(e.dead||e.knocked)continue;if(cone(e.x,e.z,range,.6)&&Math.abs(e.g.position.y-p.y)<4)applyStatus(e,'psn',bl)}
+  for(const e of en){if(e.dead||e.knocked)continue;if(cone(e.x,e.z,range,.6)&&Math.abs(e.g.position.y-p.y)<5){applyStatus(e,'psn',bl);if(e.air){juggle(e,2.4);e.hp-=dt*6}}}
   for(const o of crates){if(!o.a)continue;if(cone(o.x,o.z,range-1,.7)&&Math.abs(H(o.x,o.z)-p.y)<3){o.psn=(o.psn||0)+dt*(1+.25*bl);if(o.psn>(o.metal?(bl>=4?1.6:3):.8))destroyCrate(o)}}
   if(realm===0&&boss.alive&&cone(boss.x,boss.z,range+1,.7))hitBoss(dt*(3+bl));
  }}
@@ -1391,7 +1391,7 @@ function explode(q){const x=q.g.position.x,y=q.g.position.y,z=q.g.position.z,lv=
   bossAt(x,z,r,20+5*lv)}}
 function nailHit(q,e){const lv=q.lv,dx=q.vx,dz=q.vz,d=Math.hypot(dx,dz)||1;
  if(e.frz>0&&e.hp<=8+2*lv){shatter(e,dx/d,dz/d);return}
- e.frzN=(e.frzN||0)+1;if(e.frzN>=2){e.frzN=0;applyStatus(e,'frz',lv+1)}
+ if(e.air)juggle(e,3.2);e.frzN=(e.frzN||0)+1;if(e.frzN>=2){e.frzN=0;applyStatus(e,'frz',lv+1)}
  if(dmgE(e,(5+1.5*lv)*(e.frz>0?1.5:1),dx/d,dz/d,4))e.deathFire=false;burst(V(e.x,e.g.position.y+.9,e.z),0xcff6ff,8)}
 function specUpd(dt){
  EN.warn=Math.max(0,EN.warn-dt);
@@ -1443,9 +1443,41 @@ function slam(){
  pl.slam=1;pl.slamT=0;pl.spinA=0;pl.glideStarted=false;pl.flapTime=0;pl.tailT=0;sfx('flap');burst(V(pl.p.x,pl.p.y+1,pl.p.z),0xfff3b0,10);return true}
 // Schwanz-Drehangriff in 3 Varianten (Combo beim schnellen Wiederholen): Rechtsdreher, Gegendreher, Wirbelsturm
 const TAIL_V=[{dur:.36,cd:.55,dir:1,turns:1,marks:[.3],R:4.4,hop:0,dmg:7,name:'Drehhieb'},{dur:.36,cd:.55,dir:-1,turns:1,marks:[.3],R:4.4,hop:4.5,dmg:7,name:'Gegendreher'},{dur:.62,cd:1.1,dir:1,turns:2,marks:[.2,.5,.8],R:5.8,hop:7,dmg:12,name:'Wirbelsturm'}];
+// ---- Kampfsystem wie in A New Beginning: Boden-Kombo (Klaue, Hornstoss, Schwanz-Wirbel), Hornstoss nach oben schleudert Gegner hoch,
+// in der Luft: Luft-Kombo haelt Gegner oben, 3. Treffer schmettert sie auf den Boden. Atem auf Gegner in der Luft haelt sie schwebend.
+function launchE(e,fx,fz,pw){if(e.dead||e.knocked)return;if(e.kind==='brute'){e.stun=Math.max(e.stun,.4);return}
+ e.air=true;e.slamD=false;e.ay=Math.max(e.ay||0,.3);e.avy=(e.armor?.75:1)*pw;e.akx=fx*1.2;e.akz=fz*1.2;e.as=0;e.at=0;e.tel.visible=false}
+function juggle(e,up){if(e.air&&!e.slamD)e.avy=Math.max(e.avy,up||2.4)}
+function meleeHit(range,dot,fn,yOff,yTol){const p=pl.p,fx=Math.sin(pl.hd),fz=Math.cos(pl.hd),be=brEl(),bl=brLv(be);let hit=false;
+ for(const e of en){if(e.dead||e.knocked)continue;const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz)||1;if(d>range||(dx*fx+dz*fz)/d<dot)continue;if(Math.abs(e.g.position.y+.6-(p.y+.7+(yOff||0)))>(yTol||1.9))continue;
+  hit=true;if(e.frz>0&&!e.air){shatter(e,dx/d,dz/d);continue}tailElem(e,be,bl);fn(e,dx/d,dz/d)}
+ for(const o of crates){if(!o.a)continue;const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz)||1;if(d>range+.4||(dx*fx+dz*fz)/d<dot||Math.abs(H(o.x,o.z)-p.y)>2.6)continue;hit=true;if(!o.metal)destroyCrate(o);else{o.heat=Math.min(1,o.heat+.35);sfx('bump')}}
+ if(realm===0&&boss.alive){const dx=boss.x-p.x,dz=boss.z-p.z,d=Math.hypot(dx,dz)||1;if(d<range+2&&(dx*fx+dz*fz)/d>dot){hit=true;hitBoss(4+(bl>=2?bl:0))}}
+ trialTail(range);if(hit)sfx('hit');return hit}
+function frontStrike(v){// 1 = Klauenhieb, 2 = Hornstoss
+ const fx=Math.sin(pl.hd),fz=Math.cos(pl.hd),EC=EL[brEl()];pl.atkT=pl.atkDur=.26;pl.atkKind=v===0?'claw':'head';pl.atkSide=v===0?1:-1;
+ if(pl.g){pl.vx+=fx*5;pl.vz+=fz*5}
+ for(let i=0;i<10;i++){const a=(i/9-.5)*1.6+pl.hd;emit(V(pl.p.x+Math.sin(a)*1.6,pl.p.y+.9,pl.p.z+Math.cos(a)*1.6),V(Math.sin(a)*4,.5,Math.cos(a)*4),i%2?EC.col:0xffffff,.2,.8)}
+ meleeHit(3.1,.2,(e,dx,dz)=>{if(e.armor){dmgE(e,1.5,dx,dz,5);burst(V(e.x,e.g.position.y+1,e.z),0xdfe6ff,8);if(msgT<=0)hintOnce('armorTail','🛡️ Panzer! Hochschleudern (Q) oder Wirbelsturm',3);return}
+  if(e.air)juggle(e,4);if(dmgE(e,v===0?6:7,dx,dz,5))return;if(v===1){e.x+=dx*1.2;e.z+=dz*1.2;e.stun=Math.max(e.stun,.55)}burst(V(e.x,e.g.position.y+.9,e.z),0xffd166,10)});
+ sfx('flap')}
+function launcher(){// Hornstoss nach oben: schleudert Gegner vor Drako in die Luft, Drako springt hinterher
+ if(st!=='play'||!pl.g||pl.slam||pl.tailT>0||pl.atkCd>0)return false;pl.atkCd=.55;pl.atkT=pl.atkDur=.38;pl.atkKind='up';
+ const fx=Math.sin(pl.hd),fz=Math.cos(pl.hd);
+ meleeHit(3.3,.15,(e,dx,dz)=>{dmgE(e,e.armor?2:4,dx*.2,dz*.2,6);if(!e.knocked){launchE(e,dx,dz,12);burst(V(e.x,e.g.position.y+.6,e.z),0xffe9a0,14)}});
+ pl.g=false;pl.j=1;pl.box=null;pl.groundGrace=0;pl.sprintJump=false;pl.vy=11.5;pl.vx=fx*2;pl.vz=fz*2;sfx('jump');burst(V(pl.p.x+fx,pl.p.y+.3,pl.p.z+fz),0xffe9a0,16);return true}
+function airAttack(){// Luft-Kombo: 2 Treffer halten Gegner oben, der 3. schmettert sie auf den Boden
+ if(pl.atkCd>0)return;const n=pl.airCombo>0?(pl.airN+1)%3:0;pl.airN=n;pl.airCombo=.75;pl.atkCd=.2;pl.atkT=pl.atkDur=n===2?.32:.22;pl.atkKind=n===2?'smash':'air';pl.atkSide=n===1?-1:1;
+ const EC=EL[brEl()];for(let i=0;i<12;i++){const a=i/12*Math.PI*2;emit(V(pl.p.x+Math.sin(a)*1.2,pl.p.y+.9,pl.p.z+Math.cos(a)*1.2),V(Math.sin(a)*5,(R()-.5)*2,Math.cos(a)*5),i%2?EC.col:0xffffff,.2,.8)}
+ const hit=meleeHit(3.4,-.2,(e,dx,dz)=>{if(n<2){if(e.air)juggle(e,4.6);dmgE(e,e.armor?2.5:5,dx*.3,dz*.3,4);burst(V(e.x,e.g.position.y+.9,e.z),0xffd166,10)}
+  else{if(e.air&&!e.knocked){e.avy=-28;e.slamD=true;e.akx=dx*2;e.akz=dz*2}dmgE(e,e.armor?3:6,dx*.3,dz*.3,6);burst(V(e.x,e.g.position.y+.9,e.z),0xffe066,16)}},.3,2.6);
+ if(hit||n<2)pl.vy=Math.max(pl.vy,n<2?4:6);if(pl.j===2)pl.flapUsed=false;sfx(n===2?'zap':'flap')}
 function tailWhip(){
- if(st!=='play'||pl.slam||pl.tailCd>0)return;
+ if(st!=='play'||pl.slam||pl.tailCd>0||pl.tailT>0)return;
+ if(!pl.g&&!pl.glNow&&pl.groundGrace<=0&&!pl.swim){airAttack();return}
+ if(pl.atkCd>0)return;
  const v=pl.tailCombo>0?(pl.tailV+1)%3:0,d=TAIL_V[v];
+ if(v<2){pl.tailV=v;pl.tailCombo=.7;pl.atkCd=.24;frontStrike(v);return}
  pl.tailV=v;pl.tailDur=pl.tailT=d.dur;pl.tailCd=d.cd*(pl.g?1:1.5);pl.tailDir=d.dir;pl.tailN=0;pl.tailMarks=d.marks;pl.tailCombo=d.cd+.6;
  if(d.hop>0){if(pl.g){pl.g=false;pl.j=1;pl.groundGrace=0;pl.box=null;pl.sprintJump=false}pl.vy=Math.max(pl.vy,d.hop)}
  sfx(v===2?'zap':'flap');}
@@ -1500,7 +1532,7 @@ addEventListener('keydown',e=>{
  K[e.code]=1;
  if(e.code===binds.jump){e.preventDefault();if(st==='play'&&!e.repeat)jump()}
  if(e.code===binds.flap&&st==='play'&&!e.repeat)bonusFlap();
- if(e.code===binds.slam&&st==='play'&&!e.repeat){if(pl.glNow)bonusFlap();else slam()}
+ if(e.code===binds.slam&&st==='play'&&!e.repeat){if(pl.glNow)bonusFlap();else if(pl.g)launcher();else slam()}
  if(st==='play'&&!e.repeat&&/^(Digit|Numpad)[1-4]$/.test(e.code))selEl(ELS[+e.code.slice(-1)-1]);
  if(e.code==='Tab'){e.preventDefault();if(st==='play')openBUI();else if(st==='ui')closeBUI()}
  if(e.code===binds.interact&&st==='play'&&!e.repeat)interact();
@@ -1553,7 +1585,7 @@ pl.vy-=30*dt;if(gl)pl.vy=Math.max(pl.vy,-2.2);
  PO.water.material.opacity=.6+.04*Math.sin(t*2);
  if(realm===7)for(const f of OC.fish){f.a+=dt*f.sp;const fx=f.cx+Math.cos(f.a)*f.r,fz=f.cz+Math.sin(f.a)*f.r,fh=H(fx,fz);f.g.position.set(fx,Math.max(fh+1.2,Math.min(SY-1.5,fh+3+Math.sin(t+f.cx)*f.dy*3)),fz);f.g.rotation.y=Math.atan2(-Math.sin(f.a)*Math.sign(f.sp),Math.cos(f.a)*Math.sign(f.sp))}
  if(realm===7&&OC.ring){OC.ring.rotation.y+=dt*.8;if(Math.hypot(p.x-OC.ring.position.x,p.z-OC.ring.position.z)<2.4&&Math.abs(p.y-OC.ring.position.y)<3.5){leaveOcean();return}}}
-pl.slamCd=Math.max(0,pl.slamCd-dt);pl.ramCd=Math.max(0,(pl.ramCd||0)-dt);pl.tailCd=Math.max(0,pl.tailCd-dt);pl.tailCombo=Math.max(0,pl.tailCombo-dt);
+pl.slamCd=Math.max(0,pl.slamCd-dt);pl.atkCd=Math.max(0,(pl.atkCd||0)-dt);pl.atkT=Math.max(0,(pl.atkT||0)-dt);pl.airCombo=Math.max(0,(pl.airCombo||0)-dt);if(pl.g)pl.airCombo=0;pl.ramCd=Math.max(0,(pl.ramCd||0)-dt);pl.tailCd=Math.max(0,pl.tailCd-dt);pl.tailCombo=Math.max(0,pl.tailCombo-dt);
 pl.glNow=gl;
 if(pl.tailT>0){pl.tailT-=dt;const k=1-pl.tailT/pl.tailDur;while(pl.tailN<pl.tailMarks.length&&k>=pl.tailMarks[pl.tailN]){tailStrike(pl.tailV);pl.tailN++}}
 if(pl.slam){pl.slamT+=dt;pl.vx*=Math.exp(-dt*7);pl.vz*=Math.exp(-dt*7);
@@ -1672,7 +1704,7 @@ en.forEach(e=>{
   const ex=e.x-p.x,ez=e.z-p.z,d=Math.hypot(ex,ez)||1;
   if(d<fR&&(ex*fw.x+ez*fw.z)/d>.7){
     if(e.armor){e.hit=.12;if(blNow>=3)applyStatus(e,'burn',blNow);else if(msgT<=0)hintOnce('armorFire','🛡️ Feuer prallt ab – Sprint-Stoß (Shift) benutzen!',3);emit(V(e.x,e.g.position.y+1,e.z),V((R()-.5)*5,R()*4,(R()-.5)*5),0xdfe6ff,.35,.8);return}
-    e.hp-=dt*fD;e.hit=.2;
+    if(e.air){juggle(e,2.6);e.hp-=dt*fD*.5}e.hp-=dt*fD;e.hit=.2;
     // Flame kills rapidly and triggers a visible stagger, collapse, and fade.
     if(e.hp<=0){
       e.knocked=true;e.downTime=-1;e.airY=.35;e.ky=3.0;
@@ -1771,12 +1803,14 @@ for(let i=0;i<tail.length;i++){
   state.pitch=Math.max(-.48,Math.min(.48,state.pitch+state.pitchVel*step));
   tail[i].rotation.y=state.yaw;tail[i].rotation.x=state.pitch;
 }
-if(pl.tailT>0){const k=Math.min(1,1-pl.tailT/pl.tailDur),d=TAIL_V[pl.tailV];torso.rotation.y=pl.tailDir*d.turns*Math.PI*2*k;const off=pl.tailDir*.75*Math.sin(k*Math.PI);for(let i=0;i<tail.length;i++)tail[i].rotation.y=tailState[i].yaw+off}else torso.rotation.y=0;
+if(pl.tailT>0){const k=Math.min(1,1-pl.tailT/pl.tailDur),d=TAIL_V[pl.tailV];torso.rotation.y=pl.tailDir*d.turns*Math.PI*2*k;const off=pl.tailDir*.75*Math.sin(k*Math.PI);for(let i=0;i<tail.length;i++)tail[i].rotation.y=tailState[i].yaw+off}else if(pl.atkT>0&&(pl.atkKind==='claw'||pl.atkKind==='head'||pl.atkKind==='air')){const k=1-pl.atkT/pl.atkDur;torso.rotation.y=pl.atkSide*.55*Math.sin(k*Math.PI)}else torso.rotation.y=0;
 // All attached parts rise and fall together with the torso, not just the body mesh.
 torso.position.y+=( (pl.flapTime>0?.22:(sv>1&&!air?Math.sin(ph*2)*.045:0))-torso.position.y)*Math.min(1,dt*18);
 if(pl.slam===1){const a=pl.spinA;torso.rotation.x=a;torso.position.y=.9*(1-Math.cos(a));torso.position.z=-.9*Math.sin(a)}else{torso.position.z=0;
  // Delfin-Schlaengeln beim Unterwasser-Dash: Koerper wippt hoch und runter
- const tw=pl.swimWave?Math.sin(t*(pl.dashT>0?14:10))*(pl.dashT>0?.3:.2):0;torso.rotation.x+=(tw-torso.rotation.x)*Math.min(1,dt*12)}
+ let tw=pl.swimWave?Math.sin(t*(pl.dashT>0?14:10))*(pl.dashT>0?.3:.2):0;
+ if(pl.atkT>0){const k=1-pl.atkT/pl.atkDur,sk=Math.sin(k*Math.PI);if(pl.atkKind==='up')tw=-.75*sk;else if(pl.atkKind==='smash'){torso.rotation.x=k*Math.PI*2;tw=null}else if(pl.atkKind==='head')tw=.45*sk;else tw=.2*sk}
+ if(tw!==null)torso.rotation.x+=(tw-torso.rotation.x)*Math.min(1,dt*(pl.atkT>0?22:12))}
 // No terrain-aligned pitching or rolling: keep the dragon upright on hills.
 // Beim Tauchen neigt sich der Drache in Schwimmrichtung (hoch/runter), an Land bleibt er aufrecht
 const uw=pl.swim&&pl.wy!=null&&p.y<pl.wy-.4,hsp=Math.hypot(pl.vx,pl.vz),swimPitch=uw&&(hsp>1.5||Math.abs(pl.vy)>1.5)?Math.max(-1.1,Math.min(1.1,Math.atan2(-pl.vy,Math.max(.6,hsp)))):0;
@@ -1840,6 +1874,14 @@ if(e.knocked){
 if(e.burn>0){e.burn-=dt;e.hp-=dt*(1.2+.6*e.bl)*(e.armor?.4:1);e.hit=Math.max(e.hit,.05);if(R()<dt*14)emit(V(e.x,e.g.position.y+1.1,e.z),V((R()-.5),1.6,(R()-.5)),0xff7a1a,.4,.7)}
 if(e.psn>0){e.psn-=dt;e.hp-=dt*(1.4+.5*e.pl)*(e.armor?.55:1);if(R()<dt*12)emit(V(e.x+(R()-.5)*.4,e.g.position.y+1.2,e.z),V((R()-.5),1.2,(R()-.5)),0x7dff4a,.6,1.1)}
 if(e.hp<=0){e.dead=true;e.g.visible=false;e.ice.visible=false;burst(e.g.position,0xff6a00,24);if(!e.rewarded){e.rewarded=true;gain(e.rew,e.g.position);furyGain(8+e.rew*3,e.g.position);kills++;butterfly(V(e.x,H(e.x,e.z)+.8,e.z))}return}
+// Gegner in der Luft (hochgeschleudert): keine KI, schweben/fallen, beim Aufschlag nach einem Schmetterhieb Schockwelle
+if(e.air){e.avy-=(e.slamD?44:15)*dt;e.ay+=e.avy*dt;e.x+=e.akx*dt;e.z+=e.akz*dt;e.akx*=Math.exp(-dt*3);e.akz*=Math.exp(-dt*3);e.tel.visible=false;e.ice.visible=e.frz>0;e.hit-=dt;
+ if(e.ay<=0){e.ay=0;e.air=false;e.stun=Math.max(e.stun,.7);
+  if(e.slamD){e.slamD=false;sfx('boom');burst(V(e.x,H(e.x,e.z)+.3,e.z),0xffe9a0,24);for(let i=0;i<18;i++){const a=i/18*Math.PI*2;emit(V(e.x,H(e.x,e.z)+.3,e.z),V(Math.cos(a)*8,1,Math.sin(a)*8),0xc9a46a,.45,1)}
+   const dead=dmgE(e,9,0,0,5);blastAt(e.x,H(e.x,e.z)+.7,e.z,3.4,(o,dx,dz)=>{if(o!==e){dmgE(o,4,dx,dz,5);o.stun=Math.max(o.stun,.6)}});if(dead)return}}
+ e.g.position.set(e.x,H(e.x,e.z)+e.ay,e.z);e.g.rotation.x+=dt*(e.slamD?14:4);
+ {const k=e.hit>0?1.25:1;e.g.scale.set(k,k,k)}return}
+if(e.g.rotation.x>Math.PI||e.g.rotation.x<-Math.PI)e.g.rotation.x=0;
 // Charge impact: requires an actual sprint with horizontal forward movement.
 const rx=e.x-p.x,rz=e.z-p.z,rdist=Math.hypot(rx,rz)||.001;
 const sprinting=pl.wallBump<=0&&(pl.g||pl.j===1||pl.groundGrace>0)&&(keyDown('sprint'))&&Math.hypot(pl.vx,pl.vz)>10;
@@ -2010,7 +2052,7 @@ function pu(dt){let any=false;for(let i=0;i<PN;i++){const q=P[i];if(q.l<=0){if(p
 // Kleiner Test-/Debug-Zugang (z.B. fuer spaetere Multiplayer-Tests): __drako.info()
 window.__drako={info:()=>({calls:rd.info.render.calls,tris:rd.info.render.triangles,geos:rd.info.memory.geometries,st,realm,cnt,freed,hp:pl.hp,fps:Math.round(1/Math.max(.001,fpsA)),pos:[+pl.p.x.toFixed(1),+pl.p.y.toFixed(1),+pl.p.z.toFixed(1)]}),
  playNoLock:()=>{audioInit();st='play';['menu','pause'].forEach(i=>$(i).classList.add('hidden'));$('hud').classList.remove('hidden');$('bbar').classList.remove('hidden');$('enb').classList.remove('hidden');$('fub').classList.remove('hidden');renderEnergy();renderFury();hud()},
- valley:()=>{realm=0;showRealm();setLook(0)},special:()=>special(),fury:v=>{if(v!=null){FU.v=v;renderFury()};fury();return FU.v},hold:b=>{SP.heldK=b},energy:v=>{if(v!=null){EN.v=v;renderEnergy()}return EN.v},aim:()=>{const k=brEl(),a=aimPoint(k);return a&&[+a.x.toFixed(1),+a.y.toFixed(1),+a.z.toFixed(1)]},cd:()=>({...SP.cd}),setEl:k=>{BR.own[k]=true;BR.lv[k]=Math.max(1,BR.lv[k]);BR.cur=k;renderBar()},enemyHp:()=>en.filter(e=>!e.dead&&!e.knocked).length,ocean:()=>enterOcean(),pose:()=>({rx:+dr.rotation.x.toFixed(2),ry:+dr.rotation.y.toFixed(2),tx:+torso.rotation.x.toFixed(2),swim:pl.swim,vy:+pl.vy.toFixed(1)}),view:(cx,cy2,cz,tx,ty,tz)=>{st='pause';cam.position.set(cx,cy2,cz);cam.lookAt(tx,ty,tz);sun.position.set(tx+30,ty+50,tz+20);sun.target.position.set(tx,ty,tz)},H:(x,z)=>H(x,z),enemies:()=>en.filter(e=>!e.dead).map(e=>[e.kind,+e.x.toFixed(1),+e.z.toFixed(1)]),dragons:()=>dragons.map(o=>[o.x,o.z]),tp:(x,z)=>{pl.p.set(x,H(x,z)+.5,z);pl.vx=pl.vz=pl.vy=0},save:()=>saveGame(),look:(y,pch)=>{cy=y;cp=pch}};
+ valley:()=>{realm=0;showRealm();setLook(0)},special:()=>special(),face:(x,z)=>{pl.hd=Math.atan2(x-pl.p.x,z-pl.p.z);dr.rotation.y=pl.hd},launch:()=>launcher(),air:()=>en.filter(e=>e.air).map(e=>[e.kind,+e.ay.toFixed(1),+e.hp.toFixed(1)]),eh:(x,z)=>{const e=en.filter(e=>!e.dead&&!e.knocked).sort((a,b)=>Math.hypot(a.x-x,a.z-z)-Math.hypot(b.x-x,b.z-z))[0];return e&&[e.kind,+e.x.toFixed(1),+e.z.toFixed(1),+e.hp.toFixed(1),!!e.air,+(e.ay||0).toFixed(1)]},py:()=>+pl.p.y.toFixed(1),fury:v=>{if(v!=null){FU.v=v;renderFury()};fury();return FU.v},hold:b=>{SP.heldK=b},energy:v=>{if(v!=null){EN.v=v;renderEnergy()}return EN.v},aim:()=>{const k=brEl(),a=aimPoint(k);return a&&[+a.x.toFixed(1),+a.y.toFixed(1),+a.z.toFixed(1)]},cd:()=>({...SP.cd}),setEl:k=>{BR.own[k]=true;BR.lv[k]=Math.max(1,BR.lv[k]);BR.cur=k;renderBar()},enemyHp:()=>en.filter(e=>!e.dead&&!e.knocked).length,ocean:()=>enterOcean(),pose:()=>({rx:+dr.rotation.x.toFixed(2),ry:+dr.rotation.y.toFixed(2),tx:+torso.rotation.x.toFixed(2),swim:pl.swim,vy:+pl.vy.toFixed(1)}),view:(cx,cy2,cz,tx,ty,tz)=>{st='pause';cam.position.set(cx,cy2,cz);cam.lookAt(tx,ty,tz);sun.position.set(tx+30,ty+50,tz+20);sun.target.position.set(tx,ty,tz)},H:(x,z)=>H(x,z),enemies:()=>en.filter(e=>!e.dead).map(e=>[e.kind,+e.x.toFixed(1),+e.z.toFixed(1)]),dragons:()=>dragons.map(o=>[o.x,o.z]),tp:(x,z)=>{pl.p.set(x,H(x,z)+.5,z);pl.vx=pl.vz=pl.vy=0},save:()=>saveGame(),look:(y,pch)=>{cy=y;cp=pch}};
 let fpsA=.016,fpsT=0,last=performance.now();
 (function loop(){requestAnimationFrame(loop);const n=performance.now(),dt=Math.min(.05,(n-last)/1e3);last=n;padPoll(dt);if(cfg.fps){fpsA+=(dt-fpsA)*.05;fpsT+=dt;if(fpsT>.4){fpsT=0;$('fps').textContent=Math.round(1/Math.max(.001,fpsA))+' FPS'}}
 if(st==='play'){upd(dt);late(dt)}else if(st==='menu'){t+=dt;if(editing){const p=pl.p;dr.position.set(p.x,p.y+.12,p.z);dr.rotation.y=t*.7;dr.visible=true;torso.position.y=Math.sin(t*2)*.03;sun.position.set(p.x+30,p.y+50,p.z+20);sun.target.position.copy(p);cam.position.set(p.x+1,p.y+2.1,p.z+6.2);cam.lookAt(p.x-1.5,p.y+1.2,p.z)}else{cam.position.set(Math.sin(t*.2)*26,13,Math.cos(t*.2)*26);cam.lookAt(0,3,0)}cry.forEach((q,i)=>{q.m.rotation.y=t*2})}

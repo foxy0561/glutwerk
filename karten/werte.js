@@ -133,6 +133,27 @@ window.WERTE = {
   "kristallhoehle":{ t: "ort", kosten: 3, ort: "hoehle" },
   "altes-tor":     { t: "ort", kosten: 2, ort: "ruinen" },
 
+  /* ---------------- Wildnis ---------------- */
+  "w-schwein":     { t: "wesen", hp: 3, pas: "schaf", atk: [["Rüsselstoß", 1, 1]] },
+  "w-huhn":        { t: "wesen", hp: 2, flink: true, atk: [["Picken", 1, 1]] },
+  "w-kuh":         { t: "wesen", hp: 5, pas: "kuh", atk: [["Hornstoß", 2, 2]] },
+  "w-hoehlenspinne": { t: "wesen", hp: 4, atk: [["Netz", 1, 1, "frost"], ["Giftbiss", 3, 3]] },
+  "w-wolf":        { t: "wesen", hp: 4, flink: true, atk: [["Biss", 2, 3]] },
+  "w-zombie":      { t: "wesen", hp: 6, pas: "untot", atk: [["Kratzer", 1, 2], ["Zombiebiss", 3, 4]] },
+  "w-skelett":     { t: "wesen", hp: 4, atk: [["Pfeil", 2, 2], ["Pfeilhagel", 4, 2, "alle"]] },
+  "w-drache":      { t: "wesen", hp: 12, flink: true, atk: [["Klauen", 3, 4], ["Feuersturm", 6, 4, "alle"]] },
+  "w-spitzhacke":  { t: "zauber", kosten: 1, ziel: "feindWesen", schaden: 2, brichtSchild: true },
+  "w-fackel":      { t: "zauber", kosten: 1, ziel: "eigenesWesen", dauerSchaden: 1 },
+  "w-eisen":       { t: "ausr", kosten: 2, plusLeben: 2, weniger: 1 },
+  "w-gold":        { t: "zauber", kosten: 0, energie: 1, ziehe: 1 },
+  "w-werkbank":    { t: "zauber", kosten: 1, sucheTyp: "ausr" },
+  "w-diamant":     { t: "ausr", kosten: 3, plusSchaden: 3 },
+  "w-wueste":      { t: "ort", kosten: 2, ort: "wueste" },
+  "w-dschungel":   { t: "ort", kosten: 2, ort: "dschungel" },
+  "w-schnee":      { t: "ort", kosten: 2, ort: "schnee" },
+  "w-tiefe":       { t: "ort", kosten: 3, ort: "tiefe" },
+  "w-lavawelt":    { t: "ort", kosten: 3, ort: "lavawelt" },
+
   /* ---------------- Foxy ---------------- */
   "foxy-wander":   { t: "wesen", hp: 10, flink: true, foxy: true, atk: [["Nebelschritt", 2, 3], ["Wasserzauber", 4, 6]] },
   "foxy-ruins":    { t: "wesen", hp: 10, foxy: true, atk: [["Mondquelle", 3, 3, "saugen"], ["Flut", 5, 4, "alle"]] },
@@ -147,6 +168,8 @@ window.PASSIV = {
   brut:          "Rundenbeginn: Eine Ameise schlüpft (2 Leben).",
   honig:         "Rundenbeginn: Du heilst 1 Leben.",
   schaf:         "Wird es besiegt, ziehst du 1 Karte.",
+  kuh:           "Rundenbeginn: Deine Wesen heilen 1.",
+  untot:         "Wird er besiegt, steht er einmal mit 2 Leben wieder auf.",
   stillerZauber: "Deine Zauber kosten 1 Energie weniger.",
 };
 
@@ -164,6 +187,11 @@ window.ORTE = {
   hafen:       "Jeder zieht zu Rundenbeginn 1 Karte mehr.",
   stadt:       "Alle Angriffe kosten 1 Energie weniger (mind. 1).",
   markt:       "Ausrüstung kostet 1 Energie weniger.",
+  wueste:      "Flinke Wesen machen 1 Schaden mehr.",
+  dschungel:   "Jeder darf 2 Wesen pro Runde rufen.",
+  schnee:      "Wächter nehmen 1 Schaden weniger.",
+  tiefe:       "Ausrüstung gibt zusätzlich +1 Schaden.",
+  lavawelt:    "Rundenbeginn: Der Spieler am Zug verliert 1 Leben, bekommt aber 1 Energie extra.",
   baum:        "Rundenbeginn: Der Spieler am Zug und seine Wesen heilen 1.",
   hoehle:      "Zauber kosten 1 Energie weniger.",
   ruinen:      "Wird ein Wesen besiegt, zieht sein Besitzer 1 Karte.",
@@ -187,5 +215,6 @@ window.GEGNER_DECKS = [
   { name: "Ameisenvolk", deck: ["waldameise", "waldameise", "ernteameise", "ernteameise", "blattschneider", "spinne", "honigtopf", "koenigin", "treiberameise", "gruenling", "gruenling", "kraeuter", "blattlausfarm", "pilzgarten", "funke", "funke", "dolch", "heiltrank", "rivalen", "muenze"] },
   { name: "Turmwacht", deck: ["bolzenturm", "bolzenturm", "kanone-sf", "kanone-sf", "frostkristall", "frostkristall", "blitzspule", "moerser", "leuchtfeuer", "schildtraeger", "wuerfel", "wuerfel", "kristallkern", "kristallkern", "sternblock", "feueratem", "funke", "muenze", "laterne", "burg"] },
   { name: "Nebelwald", deck: ["spinne", "blattschneider", "golem", "drako", "rissbestie", "rissbestie", "kiko", "ernteameise", "waldameise", "phantom", "verband", "gifttrank", "gifttrank", "bombe", "pfotentrank", "grimoire", "fuchsschild", "umhang", "uralter-baum", "heiltrank"] },
+  { name: "Wildnis", deck: ["w-schwein", "w-schwein", "w-huhn", "w-kuh", "w-wolf", "w-wolf", "w-zombie", "w-zombie", "w-skelett", "w-hoehlenspinne", "w-drache", "w-spitzhacke", "w-spitzhacke", "w-fackel", "w-eisen", "w-gold", "w-werkbank", "w-diamant", "w-dschungel", "heiltrank"] },
   { name: "Drachenfeuer", deck: ["drako", "kiko", "gruenling", "gruenling", "schaf", "schaf", "rissbestie", "rissbestie", "golem", "phantom", "feueratem", "feueratem", "funke", "funke", "drachenkristall", "kristalltal", "dolch", "heiltrank", "brot", "glut"] },
 ];

@@ -27,7 +27,7 @@
       plusSchaden: 0, billiger: 0, weniger: 0, frost: 0, gesperrt: false, neu: true, angegriffen: false, nochmal: false, equip: [],
     };
   }
-  const mkPlayer = (name, deck, ki) => ({ name, ki, hp: R.leben, deck: shuffle(deck.slice()), hand: [], feld: [], energie: 0, maxE: 0, grab: [], beschworen: false });
+  const mkPlayer = (name, deck, ki) => ({ name, ki, hp: R.leben, deck: shuffle(deck.slice()), hand: [], feld: [], energie: 0, maxE: 0, grab: [], beschworen: 0 });
   const foe = pi => 1 - pi;
   const ortIs = k => S.ort && W[S.ort.id].ort === k;
   const log = t => { S.log.unshift(t); S.log.length = Math.min(S.log.length, 30); };
@@ -53,7 +53,8 @@
     const P = S.p[pi];
     P.maxE = Math.min(P.maxE + 1, R.maxEnergie);
     P.energie = P.maxE + (ortIs("kristalltal") ? 1 : 0);
-    P.beschworen = false;
+    P.beschworen = 0;
+    if (ortIs("lavawelt")) { hurtHero(pi, 1); P.energie += 1; }
     P.feld.forEach(u => { u.neu = false; u.angegriffen = false; u.nochmal = false; u.gesperrt = u.frost > 0; if (u.frost > 0) u.frost--; });
     if (ortIs("wiese")) P.feld.forEach(u => heal(u, 1));
     if (ortIs("pilze")) healHero(pi, 2);
@@ -62,6 +63,7 @@
     P.feld.slice().forEach(u => {
       if (u.pas === "brut" && P.feld.length < R.feldPlaetze) { P.feld.push(mkUnit("#ameise", pi)); log("Eine Ameise schlüpft."); }
       if (u.pas === "honig") healHero(pi, 1);
+      if (u.pas === "kuh") P.feld.forEach(x => heal(x, 1));
     });
     draw(pi); if (ortIs("hafen")) draw(pi);
     cleanup();
@@ -79,7 +81,7 @@
   function hurt(u, n) {
     if (n <= 0) return 0;
     if (u.schild) { u.schild = false; ev("u" + u.uid, "Schild!", "shield"); return 0; }
-    n = Math.max(0, n - (ortIs("burg") ? 1 : 0) - u.weniger);
+    n = Math.max(0, n - (ortIs("burg") ? 1 : 0) - (ortIs("schnee") && u.waechter ? 1 : 0) - u.weniger);
     u.hp -= n; ev("u" + u.uid, "-" + n, "dmg");
     return n;
   }
@@ -88,6 +90,7 @@
     S.p.forEach((P, pi) => {
       P.feld = P.feld.filter(u => {
         if (u.hp > 0) return true;
+        if (u.pas === "untot" && !u.auferstanden) { u.auferstanden = true; u.hp = 2; ev("u" + u.uid, "Steht auf!", "heal"); log(`${u.name} steht wieder auf!`); return true; }
         log(`${u.name} wurde besiegt.`);
         if (!u.tok) P.grab.push(u.id);
         if (u.pas === "schaf") draw(pi);
@@ -107,7 +110,7 @@
   }
   function atkDmg(u, a) {
     const beacons = S.p[u.owner].feld.filter(x => x !== u && x.pas === "leuchtfeuer").length;
-    return a[2] + u.plusSchaden + beacons + (ortIs("schmiede") ? 1 : 0);
+    return a[2] + u.plusSchaden + beacons + (ortIs("schmiede") ? 1 : 0) + (ortIs("wueste") && u.flink ? 1 : 0);
   }
   const canAct = u => S.cur === u.owner && !u.neu && !u.gesperrt && (!u.angegriffen || u.nochmal);
   function whyNotAct(u) {
@@ -178,7 +181,8 @@
     const w = W[id], P = S.p[pi];
     if (S.cur !== pi) return "Nicht dein Zug.";
     if (w.t === "wesen") {
-      if (P.beschworen) return "Nur 1 Wesen pro Runde.";
+      const maxW = ortIs("dschungel") ? 2 : 1;
+      if (P.beschworen >= maxW) return maxW === 1 ? "Nur 1 Wesen pro Runde." : "Schon 2 Wesen in dieser Runde gerufen.";
       if (P.feld.length >= R.feldPlaetze) return "Dein Feld ist voll.";
       return "";
     }
@@ -200,12 +204,12 @@
     const name = card(id).name, E = S.p[foe(pi)];
     const tu = target && target[0] === "u" ? findU(+target.slice(1)) : null;
     if (w.t === "wesen") {
-      const u = mkUnit(id, pi); P.feld.push(u); P.beschworen = true; log(`${P.name} ruft ${name}.`);
+      const u = mkUnit(id, pi); P.feld.push(u); P.beschworen++; log(`${P.name} ruft ${name}.`);
       if (w.beimSpielen) { P.feld.forEach(x => heal(x, w.beimSpielen.heileAlle)); for (let i = 0; i < w.beimSpielen.ziehe; i++) draw(pi); }
     } else if (w.t === "ort") {
       S.ort = { id, owner: pi }; log(`${P.name} wählt den Ort ${name}.`);
     } else if (w.t === "ausr") {
-      tu.plusSchaden += (w.plusSchaden || 0) + (tu.foxy ? (w.foxySchaden || 0) : 0);
+      tu.plusSchaden += (w.plusSchaden || 0) + (tu.foxy ? (w.foxySchaden || 0) : 0) + (ortIs("tiefe") ? 1 : 0);
       tu.billiger += w.billiger || 0; tu.weniger += w.weniger || 0;
       if (w.plusLeben) { tu.max += w.plusLeben; tu.hp += w.plusLeben; ev("u" + tu.uid, "+" + w.plusLeben, "heal"); }
       if (w.gibFlink) tu.flink = true;
@@ -213,7 +217,10 @@
       tu.equip.push(id); log(`${tu.name} trägt jetzt ${name}.`);
     } else {
       log(`${P.name} spielt ${name}.`);
+      if (w.brichtSchild && tu && tu.schild) { tu.schild = false; ev("u" + tu.uid, "Schild kaputt!", "shield"); }
       if (w.schaden) { if (tu) hurt(tu, w.schaden); else hurtHero(foe(pi), w.schaden); }
+      if (w.dauerSchaden && tu) { tu.plusSchaden += w.dauerSchaden; ev("u" + tu.uid, "+" + w.dauerSchaden + " ⚔", "heal"); }
+      if (w.sucheTyp) { const k = P.deck.findIndex(x => W[x] && W[x].t === w.sucheTyp); if (k >= 0 && P.hand.length < 9) { P.hand.push(P.deck.splice(k, 1)[0]); log(`${P.name} holt eine Ausrüstung.`); } }
       if (w.schadenAlleFeinde) E.feld.slice().forEach(u => hurt(u, w.schadenAlleFeinde));
       if (w.schadenGegner) hurtHero(foe(pi), w.schadenGegner);
       if (w.frostAlle) E.feld.forEach(u => { u.frost = 1; ev("u" + u.uid, "Frost", "frost"); });
@@ -254,7 +261,7 @@
       if (w.schaden) {
         const kill = E.feld.filter(u => !u.schild && u.hp <= w.schaden - (ortIs("burg") ? 1 : 0) - u.weniger).sort((a, b) => unitVal(b) - unitVal(a))[0];
         if (kill) return { k: "play", hi: x.hi, t: "u" + kill.uid };
-        if (E.hp <= w.schaden) return { k: "play", hi: x.hi, t: "h" + foe(pi) };
+        if (E.hp <= w.schaden && w.ziel !== "feindWesen") return { k: "play", hi: x.hi, t: "h" + foe(pi) };
       }
       if (w.schadenAlleFeinde && E.feld.length >= 2) return { k: "play", hi: x.hi };
       if (w.frostAlle && E.feld.length >= 2) return { k: "play", hi: x.hi };
@@ -278,10 +285,11 @@
       if (w.heileAlle && P.feld.reduce((s, u) => s + u.max - u.hp, 0) >= 3) return { k: "play", hi: x.hi };
       if (w.heileSpieler && P.hp <= R.leben - 4) return { k: "play", hi: x.hi };
       if ((w.ziehe || w.zieheBis) && P.hand.length <= 4) return { k: "play", hi: x.hi };
-      if (w.schaden) { const tt = E.feld.length ? "u" + E.feld.slice().sort((a, b) => unitVal(b) - unitVal(a))[0].uid : "h" + foe(pi); return { k: "play", hi: x.hi, t: tt }; }
+      if (w.schaden && (E.feld.length || w.ziel !== "feindWesen")) { const tt = E.feld.length ? "u" + E.feld.slice().sort((a, b) => unitVal(b) - unitVal(a))[0].uid : "h" + foe(pi); return { k: "play", hi: x.hi, t: tt }; }
       if (w.schild) { const u = P.feld.filter(u => !u.schild).sort((a, b) => unitVal(b) - unitVal(a))[0]; if (u) return { k: "play", hi: x.hi, t: "u" + u.uid }; }
       if (w.frost && E.feld.length) return { k: "play", hi: x.hi, t: "u" + E.feld.slice().sort((a, b) => unitVal(b) - unitVal(a))[0].uid };
       if (w.zurueck && w.ziel === "feindWesen") { const u = E.feld.filter(u => unitVal(u) >= 12)[0]; if (u) return { k: "play", hi: x.hi, t: "u" + u.uid }; }
+      if (w.dauerSchaden) { const u = P.feld.slice().sort((a, b) => unitVal(b) - unitVal(a))[0]; if (u) return { k: "play", hi: x.hi, t: "u" + u.uid }; }
       if (w.nochmal) { const u = P.feld.find(u => u.angegriffen && !u.gesperrt && u.atk.some(a => atkCost(u, a) <= P.energie - cardCost(pi, x.id))); if (u) return { k: "play", hi: x.hi, t: "u" + u.uid }; }
       if (w.wiederbeleben || w.beschwoere) return { k: "play", hi: x.hi };
       if (w.energie && P.feld.some(u => canAct(u))) return { k: "play", hi: x.hi };

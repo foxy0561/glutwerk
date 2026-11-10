@@ -301,7 +301,7 @@ details.help[open] summary{margin-bottom:8px}
           <li><b>Befehl</b>: Tippe Ameisen an oder ziehe einen Rahmen um sie, dann tippe auf ein Ziel. Sie laufen hin, halten dort 2,5 Minuten die Stellung und kämpfen gegen Feinde in der Nähe. Neue Räume bekommen automatisch einen Gang zum Bau.</li>
           <li><b>Schichten</b>: Oberboden, Lehmboden, Gestein, Tiefengestein und ganz unten die heiße Glutschicht. Dort verbrennen sich Ameisen ohne Hitzepanzer.</li>
           <li><b>Jahreszeiten</b>: Jede dauert 3 Tage. Im Frühling sitzen Blattläuse auf den Pflanzen, im Herbst fallen Eicheln, im Winter wächst nichts und draußen friert es.</li>
-          <li><b>Gefahren</b>: Spinnen (nachts mehr), Käfer und Glutskorpione aus der Tiefe, Maulwurf und Ameisenbär als Bosse, und die rote Kolonie schickt Kriegerinnen.</li>
+          <li><b>Gefahren</b>: Spinnen (nachts mehr), Käfer und Glutskorpione aus Nestern in Höhlen (zerstörbar), Maulwurf und Ameisenbär als Bosse, und die rote Kolonie schickt Kriegerinnen.</li>
         </ul></details>
         <details class="help"><summary>Steuerung</summary>
         <div class="ctrl">
@@ -375,7 +375,7 @@ details.help[open] summary{margin-bottom:8px}
     <button class="btn menu" id="tQuit">Verlassen</button>
     <p class="tmsg" id="tMsg" hidden></p>
   </div>
-  <div class="tfoot">Glutwerk · Version 2.2</div>
+  <div class="tfoot">Glutwerk · Version 2.3</div>
 </div>
 <div class="screen dim" id="setupScr" hidden>
   <div class="card">
@@ -475,7 +475,7 @@ const UPG=[
   {id:'jaw',name:'Starke Kiefer',desc:'Graben geht 40 % schneller',cost:{lehm:4,harz:2}},
   {id:'legs',name:'Flinke Beine',desc:'Ameisen laufen 30 % schneller',cost:{harz:3,wasser:3}},
   {id:'dach',name:'Lehmkuppel',desc:'Nur noch 40 % des Regenwassers läuft in die Eingänge',cost:{lehm:6,harz:1}},
-  {id:'teeth',name:'Kristallzähne',desc:'Ameisen können Steine graben',cost:{kristall:4}},
+  {id:'teeth',name:'Kristallzähne',desc:'Steine werden dreimal so schnell abgebaut',cost:{kristall:4}},
   {id:'basket',name:'Große Kiepe',desc:'Sammlerinnen tragen doppelt so viel',cost:{kristall:2,harz:3}},
   {id:'jelly',name:'Gelée royale',desc:'Alle Ameisen kosten 2 Futter weniger',cost:{sporen:3,wasser:4}},
   {id:'acid',name:'Säurespritze',desc:'Wächterinnen machen doppelten Schaden',cost:{harz:3,kristall:1}},
@@ -544,7 +544,7 @@ const EN={
   kaefer:  {name:'Käfer',hp:7,lv:1.5,dmg:1,rate:1.2,speed:13,loot:4,life:80,rad:9},
   skorpion:{name:'Glutskorpion',hp:20,lv:3,dmg:2,rate:1.1,speed:12,loot:10,life:90,rad:10},
   rot:     {name:'Rote Ameise',hp:4,lv:.6,dmg:1,rate:.9,speed:20,loot:2,life:150,rad:9},
-  maulwurf:{name:'Maulwurf',hp:50,lv:8,dmg:2,rate:1,speed:0,loot:25,life:95,rad:16,boss:true},
+  maulwurf:{name:'Maulwurf',hp:30,lv:4,dmg:1,rate:1.5,speed:0,loot:25,life:80,rad:16,boss:true},
   baer:    {name:'Ameisenbär',hp:80,lv:8,dmg:2,rate:.8,speed:15,loot:30,life:70,rad:20,boss:true},
 };
 
@@ -553,6 +553,7 @@ let seedStr, regions, biomeX, tiles, orig, shade, mark, rev, caveId, caveTiles, 
 let food, collected, foragers, soldiers, entX, rivalX, queens, rival, goalIdx, res, up, found, deco, plantXs, flowerXs, disc, traps, stars, fungT=0;
 let sel=new Set(), cmdDrag=null, orderMarks=[];
 let water, wet=new Set(), active=new Set(), terr, terrDepth=0, simT=0, evapT=0, cisternAcc=0, openings=[], rainTold=false, waterTold=false;
+let nests=[];
 let enemies=[], corpses=[], weather={rain:false,next:0,end:0,drain:0,wT:0,fT:0,dur:0}, lastDay=-1, lastSeason=-1;
 let gameT=0, speed=1, kills=0, bossKills=0, deaths=0, maxAnts=0, maxDepth=0, over=false, attackRival=false, hist=[], histT=0, chestsFound=0;
 let threatT=180, hungerT=0, threatWarned=false, hungerWarned=false, oldAgeTold=false, heatTold=false, coldTold=false, queenWarnT=0;
@@ -560,7 +561,7 @@ let particles=[], floaters=[], clouds=[], spawnT=0, paused=true, tool='dig', roo
 
 const isOpen=t=>t===AIR||t===TUN;
 const solid=t=>t!==AIR&&t!==TUN;
-const diggable=t=>t===DIRT||(t>=CLAY&&t!==HOT)||(t===ROCK&&up.teeth)||(t===HOT&&up.heat);
+const diggable=t=>t===DIRT||(t>=CLAY&&t!==HOT)||t===ROCK||(t===HOT&&up.heat);
 const inW=(x,y)=>x>=0&&y>=0&&x<W&&y<H;
 const dep=(x,y)=>y-surf[x];
 const biomeAt=x=>BIOMES[BK[biomeX[clamp(x,0,W-1)]]];
@@ -752,6 +753,17 @@ function gen(str){
   clouds=[]; for(let k=0;k<Math.round(16*W/400);k++) clouds.push({x:r()*W*T,y:(10+r()*(genVer>=2?170:50))|0,w:(genVer>=2?30:14)+((r()*(genVer>=2?40:16))|0),s:3+r()*4});
   disc=new Set(); traps=new Map();
   orig=tiles.slice();
+  // enemy nests in some natural caves (own random stream, does not change the terrain)
+  nests=[]; const nr=mul(hashStr(str)+4242);
+  for(let c=1;c<caveTiles.length;c++){
+    if(nr()>.5) continue;
+    const L=caveTiles[c].filter(i=>tiles[i]===TUN&&water[i]<WET&&i+W<W*H&&solid(tiles[i+W])&&dep(i%W,(i/W)|0)>=20);
+    if(!L.length) continue;
+    const i=L[(nr()*L.length)|0], x=i%W, y=(i/W)|0;
+    if(Math.abs(x-entX)<22&&y<surf[entX]+40) continue;
+    const type=dep(x,y)>=300*DS?'skorpion':'kaefer', hp=type==='skorpion'?80:45;
+    nests.push({x,y,type,hp,max:hp,alive:true,flash:0,hitT:0,defT:0});
+  }
   recomputeTerr();
 }
 function recomputeTerr(){
@@ -1050,7 +1062,7 @@ function wander(a){
   if(r){a.path=r.path;a.job='wander';a.wait=rand(1,3.2);}
 }
 const digSpeed=a=>(a.caste==='grab'?2.2:1)*(up.jaw?1.4:1)*(up.glutkiefer?2:1)*SP('dig');
-const digTime=(i,a)=>(0.9+Math.max(0,((i/W)|0)-surf[i%W])*0.004)*(HARD[tiles[i]]||1)/(a?digSpeed(a):1);
+const digTime=(i,a)=>(0.9+Math.max(0,((i/W)|0)-surf[i%W])*0.004)*(HARD[tiles[i]]||1)*(tiles[i]===ROCK&&!up.teeth?3:1)/(a?digSpeed(a):1);
 function faceTile(a,i){const x=i%W,y=(i/W)|0;if(x!==a.tx){a.vert=0;a.dir=x>a.tx?1:-1;}else{a.vert=1;a.dir=y>a.ty?1:-1;}}
 function openChest(x,y){
   chestsFound++;
@@ -1101,6 +1113,10 @@ function upd(a,dt){
   }
   if(a.hp<=0){killAnt(a,'');return;}
   if(!hazard&&a.fight<=0) a.hp=Math.min(maxHp(a),a.hp+dt*(a.role==='guard'&&roomsOf('wache').length?.5:.15));
+  if((a.order||a.role==='guard')&&!a.carry&&a.job!=='escape'){
+    const n=nestNear(a);
+    if(n){a.path=[];a.moving=false;a.vert=0;a.dir=n.x*T+4>a.px?1:-1;if(a.hit<=0){a.hit=.7;hitNest(n,gDmg(a));}return;}
+  }
   if(a.order&&a.job!=='escape'&&enemies.length){
     let best=null,bd=1e9;
     for(const e of enemies){if(e.dead)continue;const p=enemyPos(e);const d=Math.hypot(p.x-a.px,p.y-a.py)-EN[e.type].rad+10;if(d<bd){bd=d;best=e;}}
@@ -1301,15 +1317,15 @@ function mkEnemy(type,lvl,o){const d=EN[type];const hp=Math.round((d.hp+lvl*d.lv
 function spawnThreat(){
   const lvl=1+Math.floor(gameT/420)+Math.floor(ants.length/15);
   const q0=queens[0]; if(!q0) return;
-  const all=reachList(q0.y*W+q0.x,true).filter(i=>{const x=i%W,y=(i/W)|0;return tiles[i]===TUN&&dep(x,y)>=20&&Math.hypot(x-q0.x,y-q0.y)>16;});
-  const nat=all.filter(i=>caveId[i]), pool=nat.length?nat:all;
-  const deep=pool.filter(i=>dep(i%W,(i/W)|0)>=300*DS);
+  const reach=new Set(reachList(q0.y*W+q0.x,true));
+  const open=nests.filter(n=>n.alive&&reach.has(n.y*W+n.x));
+  const pool=open.filter(n=>n.type==='kaefer'), deep=open.filter(n=>n.type==='skorpion');
   const boss=enemies.some(e=>!e.dead&&EN[e.type].boss);
   const opts=[];
   if(!winter()) opts.push(['spinne',isNight()?3:1.5]);
-  if(pool.length) opts.push(['kaefer',nat.length?2.2:1.2]);
+  if(pool.length) opts.push(['kaefer',2.2]);
   if(deep.length) opts.push(['skorpion',1.6]);
-  if(gameT>720&&!boss) opts.push(['maulwurf',.6]);
+  if(gameT>1200&&!boss) opts.push(['maulwurf',.3]);
   if(gameT>900&&!boss&&!winter()&&!isNight()) opts.push(['baer',.5]);
   if(!opts.length) return;
   let sum=opts.reduce((s,o)=>s+o[1],0), pick=Math.random()*sum, type=opts[0][0];
@@ -1321,9 +1337,10 @@ function spawnThreat(){
     toast(`${n>1?n+' Spinnen kommen':'Eine Spinne kommt'} von ${left?'links':'rechts'}! Sammlerinnen draußen sind in Gefahr.`,true);
   } else if(type==='kaefer'||type==='skorpion'){
     const src=type==='skorpion'?deep:pool;
-    const n=Math.min(5,1+Math.floor((lvl-1)/2))-(type==='skorpion'?1:0), s=src[ri(0,src.length-1)], x=s%W, y=(s/W)|0;
+    const n=Math.min(5,1+Math.floor((lvl-1)/2))-(type==='skorpion'?1:0), nest=src[ri(0,src.length-1)], x=nest.x, y=nest.y;
     for(let k=0;k<Math.max(1,n);k++) enemies.push(mkEnemy(type,lvl,{tx:x,ty:y,px:x*T+4+rand(-2,2),py:y*T+5,rp:k*.3}));
-    toast(type==='skorpion'?'Glutskorpione kriechen aus der Tiefe in deinen Bau!':(n>1?`${n} Käfer sind aus der Tiefe eingedrungen!`:'Ein Käfer ist aus der Tiefe eingedrungen!'),true);
+    reveal(x,y,4);
+    toast(type==='skorpion'?'Glutskorpione kriechen aus einem Nest in der Tiefe! Zerstöre das Nest, dann ist dort Ruhe.':`${n>1?n+' Käfer kommen':'Ein Käfer kommt'} aus einem Käfernest! Schick Ameisen mit „Befehl“ hin und zerstöre es.`,true);
   } else if(type==='maulwurf'){
     const dir=Math.random()<.5?1:-1, tx=clamp(entX-dir*55,2,W-3);
     const ty=clamp(surf[entX]+ri(10,Math.max(12,Math.min(maxDepth+5,60))),surf[tx]+5,H-6);
@@ -1397,15 +1414,15 @@ function updBear(e,dt){
 function updMole(e,dt){
   if(e.life<=0||e.tx<1||e.tx>W-2){e.dead=true;if(e.life<=0)toast('Der Maulwurf gräbt sich davon.');return;}
   if(e.stuck>0){e.stuck-=dt;return;}
-  if(e.hit<=0){
+  if(!e.fled&&e.hp<e.max*.5){e.fled=true;e.dir=-e.dir;e.life=Math.min(e.life,14);toast('Der Maulwurf bekommt Angst und gräbt sich zurück!');}
+  if(e.hit<=0&&!e.fled){
     let any=false;
-    for(const a of ants.slice()) if(Math.hypot(a.px-e.px,a.py-e.py)<14){hurtAnt(a,EN.maulwurf.dmg,e);any=true;}
-    for(const q of queens) if(Math.hypot(q.x*T+4-e.px,q.y*T+5-e.py)<16){hurtQueen(q,2);any=true;}
+    for(const a of ants.slice()) if(Math.hypot(a.px-e.px,a.py-e.py)<12){hurtAnt(a,EN.maulwurf.dmg,e);any=true;break;}
     if(any) e.hit=EN.maulwurf.rate;
   }
   e.stepT-=dt;
   if(e.stepT<=0){
-    e.stepT=.5;
+    e.stepT=e.fled?.35:.7;
     const bad=(x,y)=>{if(!inW(x,y)||y>=H-3)return true;const t=tiles[y*W+x];return t===BED||t===ROCK||t===HOT||water[y*W+x]>.3;};
     let nx=e.tx+e.dir, ny=e.ty;
     if(Math.random()<.25) ny+=Math.sign(e.ty2-e.ty)||(Math.random()<.5?-1:1);
@@ -1442,6 +1459,40 @@ function updWalker(e,dt){
   if(e.rp<=0){e.rp=1.3;const set=new Set(ants.map(a=>a.ty*W+a.tx));for(const q of queens)set.add(q.y*W+q.x);
     const r=bfs(e.ty*W+e.tx,i=>set.has(i)?i:-1);e.path=r?r.path:[];}
   if(e.path.length) follow(e,dt,D.speed);
+}
+
+// ---------- enemy nests ----------
+function nestNear(a){for(const n of nests){if(!n.alive)continue;if(Math.abs(n.x*T+4-a.px)<15&&Math.abs(n.y*T+4-a.py)<12)return n;}return null;}
+function hitNest(n,d){
+  n.hp-=d; n.flash=.12; n.hitT=8;
+  if(n.hp<=0){
+    n.alive=false; kills++;
+    const k=n.type==='skorpion';
+    addFood(k?25:15,n.x*T+4,n.y*T); res.knochen+=2; found.knochen=(found.knochen||0)+2; if(k){res.kristall+=2;found.kristall=(found.kristall||0)+2;}
+    for(let j=0;j<16;j++) particles.push({x:n.x*T+rand(-6,10),y:n.y*T+rand(0,7),vx:rand(-24,24),vy:rand(-36,-8),life:rand(.5,1),c:k?'#8a2a12':'#2a3a24'});
+    toast(`${k?'Skorpionnest':'Käfernest'} zerstört! Von dort kommt nichts mehr. Beute: ${k?'25 Futter, 2 Knochen, 2 Kristall':'15 Futter, 2 Knochen'}.`); AU.play('chest'); hud();
+  }
+}
+function updNests(dt){
+  for(const n of nests){
+    if(!n.alive) continue;
+    n.flash-=dt; n.hitT-=dt;
+    if(n.hitT>0){
+      n.defT-=dt;
+      if(n.defT<=0){n.defT=6;const near=enemies.filter(e=>!e.dead&&Math.hypot(e.px-n.x*T,e.py-n.y*T)<60).length;
+        if(near<3){const lvl=1+Math.floor(gameT/420);enemies.push(mkEnemy(n.type,lvl,{tx:n.x,ty:n.y,px:n.x*T+4,py:n.y*T+5,life:50}));}}
+    } else if(n.hp<n.max) n.hp=Math.min(n.max,n.hp+dt*.5);
+  }
+}
+function drawNest(n,time){
+  const x=n.x*T+4, fy=(n.y+1)*T, k=n.type==='skorpion';
+  const c=n.flash>0?['#ffffff','#ffffff']:k?['#4a1a10','#6a2a18']:['#24301f','#34442a'];
+  pxBlob(x,fy-6,19,8,c[0]); pxBlob(x-3,fy-9,13,6,c[1]); pxBlob(x+6,fy-5,7,4,c[1]);
+  P(x-11,fy-5,'#0a0806',4,3); P(x+5,fy-7,'#0a0806',4,3); P(x-2,fy-12,'#0a0806',3,3); P(x+12,fy-3,'#0a0806',3,2);
+  for(let j=0;j<6;j++){const ex=x-14+j*5+(((time*2+j)|0)%2);P(ex,fy-1,'#e8e0c8',2,1);}
+  for(let j=0;j<3;j++){const bx=x-10+((time*6+j*9)|0)%20;P(bx,fy-2,k?'#8a2a12':'#1f3a3a',3,2);P(bx+3,fy-2,k?'#ff7a3a':'#5a9a86');}
+  if(((time*3)|0)%4===0) P(x-6+((time*7)|0)%12,fy-3,k?'#ff7a3a':'#5a9a86');
+  if(n.hp<n.max){P(x-12,fy-20,'#140d08',24,2);P(x-12,fy-20,'#ef7457',Math.max(1,Math.round(24*n.hp/n.max)),2);}
 }
 
 // ---------- rival colony ----------
@@ -1678,6 +1729,8 @@ function renderSheet(force){
     html+=`<div class="item info" style="border-left-color:#d0502c"><b>Wächterinnen: ${gs.length}</b><span class="d">${atGate} bewachen den Eingang. ${posts.length?`${gs.length-atGate} sind in Wachposten stationiert. Wachposten werden zuerst besetzt.`:'Baue einen Wachposten, um Wächterinnen dauerhaft in einem Teil des Baus zu stationieren.'} Mehr Wächterinnen stellst du unten mit + ein.</span></div>`;
     posts.forEach((c,k)=>{const n=gs.filter(a=>a.post===c.id).length;
       html+=`<div class="item info" style="border-left-color:${n?'#8cbf4c':'#ef7457'}"><b>Wachposten ${k+1}: ${n} von ${POSTN}</b><span class="d">${fmtDepth(Math.max(0,c.y0-surf[c.x0]))} tief. Schützt alles im Umkreis von ${POSTR} cm.${n?'':' Noch unbesetzt.'}</span></div>`;});
+    const seenN=nests.filter(n=>rev[n.y*W+n.x]), aliveN=seenN.filter(n=>n.alive).length;
+    html+=`<div class="item info" style="border-left-color:${aliveN?'#ef7457':'#8cbf4c'}"><b>Käfernester: ${aliveN} entdeckt</b><span class="d">${seenN.length-aliveN} zerstört. Käfer und Skorpione kommen nur aus Nestern in Höhlen, die mit deinem Bau verbunden sind. Schick Ameisen mit „Befehl“ direkt neben ein Nest, dann greifen sie es an.</span></div>`;
     const R=rival, dist=Math.abs(R.qx-entX), side=R.qx<entX?'links':'rechts', seenQ=rev[R.qy*W+R.qx];
     if(!wopt.rival) html+=`<div class="item info" style="border-left-color:#8cbf4c"><b>Keine rote Kolonie</b><span class="d">In dieser Welt habt ihr keine Rivalen.</span></div>`;
     else if(!R.alive) html+=`<div class="item info" style="border-left-color:#8cbf4c"><b>Rote Kolonie besiegt</b><span class="d">Ihr Bau steht leer. Ihre Gänge kannst du weiter nutzen.</span></div>`;
@@ -1739,7 +1792,8 @@ function paint(x,y,t){
     if(!terr[i]){if(!warned){warned=true;toast('Zu weit vom Bau entfernt! Baue am Rand der gestrichelten Grenze einen Raum, z. B. einen Wachposten, um weiter graben zu können.');}return;}
     if(!rev[i]){if(tiles[i]!==BED)mark[i]=1;return;}
     if(diggable(tiles[i])) mark[i]=1;
-    else if(!warned&&(tiles[i]===ROCK||tiles[i]===HOT)){warned=true;toast(tiles[i]===ROCK?'Steine kann man erst mit Kristallzähnen graben.':'Glutgestein kann man erst mit dem Hitzepanzer graben.');}
+    else if(!warned&&tiles[i]===HOT){warned=true;toast('Glutgestein kann man erst mit dem Hitzepanzer graben.');}
+    if(tiles[i]===ROCK&&!up.teeth&&!warned){warned=true;toast('Steine brauchen lange. Mit Kristallzähnen geht es dreimal so schnell.');}
   } else if(t==='erase'){
     if(mark[i]===1) mark[i]=0;
     else if(traps.has(i)){traps.delete(i);res.harz+=1;toast('Falle entfernt, 1 Harz zurück.');hud();}
@@ -2010,7 +2064,7 @@ function save(){
       goalIdx,res,up,found,cam,zoom,queens,rival,traps:[...traps],gameT,threatT,hungerT,kills,bossKills,deaths,maxAnts,maxDepth,
       hist,attackRival,chestsFound,rainTold,cisternAcc,
       water:[...wet].map(i=>i.toString(36)+':'+Math.round(water[i]*100).toString(36)).join(','),weather:{rain:weather.rain,next:weather.next,end:weather.end,dur:weather.dur},
-      species,wopt,fungT,genVer,weekly}));
+      species,wopt,fungT,genVer,weekly,nests:nests.map(n=>[n.x,n.y,n.type,Math.round(n.hp),n.alive?1:0])}));
     localStorage.setItem(KEY+'-meta',JSON.stringify({species,seed:seedStr,t:Math.round(gameT),ants:ants.length,weekly}));
   }catch(e){}
 }
@@ -2035,6 +2089,7 @@ function load(){
     Object.assign(weather,{rain:false,drain:0,wT:0,fT:0},d.weather||{});
     water.fill(0); wet=new Set(); active=new Set();
     if(d.water) for(const p of d.water.split(',')){const[a,b]=p.split(':');const i=parseInt(a,36);water[i]=parseInt(b,36)/100;if(water[i]>0){wet.add(i);touch(i);}}
+    if(d.nests) nests=d.nests.map(([x,y,type,hp,al])=>({x,y,type,hp,max:type==='skorpion'?80:45,alive:!!al,flash:0,hitT:0,defT:0}));
     rainTold=!!d.rainTold; cisternAcc=d.cisternAcc||0; fungT=d.fungT||0; colonyActive=true; weekly=d.weekly||null; tut=null; lastSubmit=gameT;
     recomputeTerr();
     enemies=[]; corpses=[]; over=false; lastDay=dayIdx(); lastSeason=seasonIdx();
@@ -2792,6 +2847,7 @@ function render(time){
   const flags=new Set(); for(const a of ants) if(a.order) flags.add(a.order.t);
   for(const i of flags){const x=(i%W)*T+4,y=((i/W)|0)*T+T;P(x,y-11,'#5b3b22',1,11);P(x+1,y-11,'#ffe27a',4,3);P(x+1,y-8,'#e9b443',2,1);}
   for(const m of orderMarks){const x=(m.i%W)*T+4,y=((m.i/W)|0)*T+5,r=Math.round((1.2-m.t)*14)+3;ctx.strokeStyle=`rgba(255,226,122,${m.t/1.2})`;ctx.lineWidth=1;ctx.strokeRect(x-r+.5,y-r/2+.5,r*2,r);}
+  for(const n of nests) if(n.alive&&rev[n.y*W+n.x]&&n.x*T>vL-20&&n.x*T<vR+20&&n.y*T>vT-20&&n.y*T<vB+20) drawNest(n,time);
   for(const a of ants) if(a.px>vL-10&&a.px<vR+10&&a.py>vT-10&&a.py<vB+10) drawAnt(a);
   for(const a of sel){const x=Math.round(a.px),y=Math.round(a.py),c='#ffe27a';P(x-6,y-5,c,3,1);P(x-6,y-5,c,1,3);P(x+4,y-5,c,3,1);P(x+6,y-5,c,1,3);P(x-6,y+3,c,3,1);P(x-6,y+1,c,1,3);P(x+4,y+3,c,3,1);P(x+6,y+1,c,1,3);}
   for(const a of ants) if(a.order&&!sel.has(a)) P(Math.round(a.px),Math.round(a.py)-6,'#ffe27a');
@@ -2820,7 +2876,12 @@ function render(time){
     if(weather.rain){ctx.fillStyle='rgba(170,200,230,.6)';for(let k=0;k<180;k++){const x=vL+md(k*97.31+gameT*30,vw),y=md(k*57.7+gameT*230,skyB);if(y<surf[clamp((x/T)|0,0,W-1)]*T)ctx.fillRect(x,y,1,4);}}
     else if(winter()){ctx.fillStyle='rgba(255,255,255,.85)';for(let k=0;k<140;k++){const x=vL+md(k*97.31+Math.sin(gameT*.8+k)*6+gameT*5,vw),y=md(k*37.7+gameT*18,skyB);if(y<surf[clamp((x/T)|0,0,W-1)]*T)ctx.fillRect(x,y,1,1);}}
     const Lt=light();
-    if(Lt<1){ctx.fillStyle=`rgba(8,12,34,${(1-Lt)*.6})`;ctx.fillRect(vL,0,vw,(maxSurf+3)*T);}
+    if(Lt<1){
+      const a=(1-Lt)*.6, x0=Math.max(0,Math.floor(vL/T)), x1=Math.min(W-1,Math.ceil((vL+vw)/T)), st=[.8,.6,.42,.26,.12];
+      ctx.fillStyle=`rgba(8,12,34,${a})`;
+      for(let x=x0;x<=x1;x++) ctx.fillRect(x*T,0,T,surf[x]*T);
+      for(let k=0;k<st.length;k++){ctx.fillStyle=`rgba(8,12,34,${a*st[k]})`;for(let x=x0;x<=x1;x++)ctx.fillRect(x*T,surf[x]*T+k*4,T,4);}
+    }
   }
   if(hover&&!paused&&inW(hover.x,hover.y)){
     if(tool==='room'){
@@ -2860,7 +2921,7 @@ function step(dt){
   gameT+=dt; fullWarnT-=dt;
   for(const a of ants.slice()) upd(a,dt);
   updDangers(dt); if(over) return;
-  updRival(dt); updWeather(dt);
+  updRival(dt); updWeather(dt); updNests(dt);
   simT+=dt; if(simT>=.1){simT=0;simWater();}
   evapT+=dt; if(evapT>=1){evapT=0;evapWater();}
   const ht=hatchTime(), slots=eggSlots();

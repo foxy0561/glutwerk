@@ -107,6 +107,18 @@ h2.sec small{font-size:15px;color:var(--muted);letter-spacing:0}
 .ar-fan{position:relative;height:290px}
 @media (max-width:900px){.arena{grid-template-columns:1fr;padding:22px}.ar-fan{display:none}}
 
+/* ---------- Gratis-Pack ---------- */
+.free-row{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.free-row.ready{background:linear-gradient(135deg,rgba(178,107,255,.18),rgba(255,106,213,.1));border-color:rgba(178,107,255,.55);box-shadow:0 0 24px rgba(178,107,255,.2)}
+.free-ic{font-size:30px;line-height:1}
+.free-row.ready .free-ic{animation:giftHop 1.6s ease-in-out infinite}
+@keyframes giftHop{0%,60%,100%{transform:none}70%{transform:translateY(-6px) rotate(-8deg)}80%{transform:translateY(0) rotate(6deg)}}
+.free-t{flex:1;min-width:0}
+.free-t b{display:block;font-family:Rajdhani,sans-serif;font-size:19px;text-transform:uppercase;letter-spacing:.5px}
+.free-t span{font-size:12px;color:var(--muted)}
+.buy.free-b{width:auto;flex-shrink:0;padding:10px 16px;font-size:16px;background:linear-gradient(135deg,#b26bff,#ff6ad5);color:#1a0b2e;box-shadow:0 4px 18px rgba(178,107,255,.4)}
+.shop{align-content:start}
+
 /* ---------- Sammlung ---------- */
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
 .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;background:var(--bg2);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--muted)}
@@ -366,6 +378,10 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   .toasts{left:12px;right:12px;align-items:stretch}
   .toast{max-width:none}
   .chip-right{margin-left:0}
+  .free-row{flex-wrap:wrap;gap:10px;padding:12px}
+  .free-ic{font-size:24px}
+  .free-t b{font-size:17px}
+  .buy.free-b{width:100%;font-size:15px}
 }
 @media (prefers-reduced-motion:reduce){
   .tcard.r-legendary .frame,.tcard.r-mythic .frame,.rays,.op-glow,.pack .pk-top,.pack .pk-body{animation:none!important}
@@ -469,6 +485,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 /* Wie man Glut verdient – nur zur Anzeige, die echten Werte stehen in ../index.html (GLUT) */
 const EARN_INFO = [
   ["Neues Spiel starten", 100],
+  ["Täglich vorbeischauen", "30–200"],
   ["Erstes Spiel am Tag", 40],
   ["Pro Minute spielen", 2],
   ["Alle Spiele gespielt", 300],
@@ -860,9 +877,22 @@ function renderGlut(anim) {
   if (anim) { const c = $("glutChip"); c.classList.remove("bump", "minus"); void c.offsetWidth; c.classList.add(anim); }
   renderShop();
 }
+const heuteLokal = () => new Date().toLocaleDateString("sv");
+const freiOffen = () => store("glutwerk-freepack") !== heuteLokal();
+function bisMorgen() {
+  const m = new Date(); m.setHours(24, 0, 0, 0);
+  const min = Math.ceil((m - Date.now()) / 6e4);
+  return min >= 60 ? `${Math.floor(min / 60)} Std ${min % 60} Min` : `${min} Min`;
+}
 function renderShop() {
   const g = glutGet();
-  $("shop").innerHTML = Object.entries(PACKS).map(([k, p]) => `
+  const frei = freiOffen();
+  $("shop").innerHTML = `
+    <div class="free-row${frei ? " ready" : ""}">
+      <div class="free-ic">🎁</div>
+      <div class="free-t"><b>Tägliches Gratis-Pack</b><span>${frei ? "Ein Glut-Pack geschenkt, jeden Tag neu!" : `Nächstes in ${bisMorgen()}`}</span></div>
+      <button class="buy free-b" data-free ${frei ? "" : "disabled"}>${frei ? "Gratis öffnen" : "Morgen wieder"}</button>
+    </div>` + Object.entries(PACKS).map(([k, p]) => `
     <div class="offer ${k}" style="--og:${k === "inferno" ? "#ff2d55" : "#ff6a2b"}">
       <div class="mini-pack">${packHTML(k)}</div>
       <h3>${esc(p.name)}</h3>
@@ -913,6 +943,8 @@ document.addEventListener("click", e => {
   if (e.target.closest("#onlyOwned")) { onlyOwned = !onlyOwned; renderFilters(); renderGrid(); return; }
   const b = e.target.closest("[data-buy]");
   if (b && !b.disabled) { buyPack(b.dataset.buy); return; }
+  const fb = e.target.closest("[data-free]");
+  if (fb && !fb.disabled) { buyPack("glut", true); return; }
   const c = e.target.closest(".grid [data-card]");
   if (c) openZoom(c.dataset.card);
 });
@@ -952,10 +984,16 @@ function pickCard(r) {
   for (const c of list) { x -= (c.w || 1); if (x <= 0) return c; }
   return list[0];
 }
-function buyPack(key) {
+function buyPack(key, free) {
   const p = PACKS[key];
-  if (glutGet() < p.price) return;
-  glutSet(glutGet() - p.price, "minus");
+  if (free) {
+    if (!freiOffen()) return;
+    store("glutwerk-freepack", heuteLokal());
+    renderShop();
+  } else {
+    if (glutGet() < p.price) return;
+    glutSet(glutGet() - p.price, "minus");
+  }
   const pulls = [];
   for (let i = 0; i < p.size; i++) {
     const r = rollRarity(p.odds, i === p.size - 1 ? p.guarantee : null);
@@ -1209,5 +1247,6 @@ window.__sfx = sfx;
 })();
 </script>
 <script src="duell.js"></script>
+<script src="../daily.js" data-karten="./"></script>
 </body>
 </html>

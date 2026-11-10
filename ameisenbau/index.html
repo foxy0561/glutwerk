@@ -85,6 +85,27 @@ body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);o
 .toast.bad{border-color:var(--warn)}
 .selbar{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:calc(100% - 24px);
   background:rgba(36,24,15,.92);border:2px solid var(--seed);padding:6px 8px;z-index:3}
+.coach{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);display:flex;align-items:center;gap:10px;
+  background:rgba(36,24,15,.95);border:3px solid var(--seed);box-shadow:0 4px 0 #070403;padding:8px 10px;z-index:4}
+.coach .cstep{font-size:13px;color:#2a1806;background:var(--seed);padding:2px 7px;font-variant-numeric:tabular-nums;flex:none}
+.coach b{font-size:17px;font-weight:600;line-height:1.25}
+.tutmode .toast{top:66px}
+.carrow{position:fixed;z-index:25;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:18px solid var(--seed);
+  filter:drop-shadow(0 3px 0 #3a2410);pointer-events:none;animation:bob .7s ease-in-out infinite alternate}
+.carrow.up{border-top:none;border-bottom:18px solid var(--seed)}
+@keyframes bob{from{translate:0 0}to{translate:0 -7px}}
+.carrow.up{animation-name:bobup}
+@keyframes bobup{from{translate:0 0}to{translate:0 7px}}
+.wlist{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+.wlist th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right;font-weight:400;padding:4px 6px;border-bottom:2px solid var(--line)}
+.wlist td{padding:6px;text-align:right;border-bottom:1px solid var(--line)}
+.wlist th:nth-child(2),.wlist td:nth-child(2),.wlist th:nth-child(3),.wlist td:nth-child(3){text-align:left}
+.wlist td:first-child{color:var(--muted)}
+.wlist tr.me td{background:#43301e;color:var(--seed)}
+.wlist tr.top td:first-child{color:var(--seed)}
+.wscroll{overflow-x:auto;max-width:100%}
+.wempty{color:var(--muted);font-size:15px;margin:0}
+@media (prefers-reduced-motion:reduce){.carrow{animation:none}}
 .selbar b{font-size:15px;color:var(--seed);font-variant-numeric:tabular-nums;padding:0 4px}
 .sheet{position:absolute;left:0;right:0;bottom:0;max-height:min(72%,480px);display:flex;flex-direction:column;background:var(--panel);
   border-top:3px solid var(--seed);z-index:4;
@@ -230,6 +251,7 @@ details.help[open] summary{margin-bottom:8px}
   <div class="stage">
     <canvas id="game" aria-label="Ameisenbau Spielfeld"></canvas>
     <div class="toast" id="toast" role="status"></div>
+    <div class="coach" id="coach" hidden><span class="cstep" id="cStep">1/9</span><b id="cText"></b><button class="btn small" id="cQuit">Beenden</button></div>
     <div class="selbar" id="selBar" hidden>
       <b id="selN">0 ausgewählt</b>
       <button class="btn small" id="selAll">Alle im Bild</button>
@@ -340,17 +362,20 @@ details.help[open] summary{margin-bottom:8px}
 </div>
 
 <canvas id="menuBg" aria-hidden="true"></canvas>
+<div class="carrow" id="cArrow" hidden></div>
 <div class="screen" id="titleScr">
   <div class="tmenu">
     <h1 class="logo">Ameisen&shy;bau</h1>
     <p class="tag" id="tGreet">Grab dir eine Kolonie unter der Erde</p>
     <button class="btn menu go" id="tCont" hidden>Weiterspielen<small id="tContInfo"></small></button>
     <button class="btn menu" id="tNew">Spiel starten</button>
+    <button class="btn menu" id="tWeek">Wochen-Welt<small id="tWeekInfo">Alle spielen dieselbe Welt</small></button>
+    <button class="btn menu" id="tTut">Tutorial<small id="tTutInfo">Lerne das Spiel in ein paar Minuten</small></button>
     <button class="btn menu" id="tOpt">Optionen</button>
     <button class="btn menu" id="tQuit">Verlassen</button>
     <p class="tmsg" id="tMsg" hidden></p>
   </div>
-  <div class="tfoot">Glutwerk · Version 2.1</div>
+  <div class="tfoot">Glutwerk · Version 2.2</div>
 </div>
 <div class="screen dim" id="setupScr" hidden>
   <div class="card">
@@ -366,6 +391,17 @@ details.help[open] summary{margin-bottom:8px}
     <div class="field"><span class="flabel">Rote Kolonie</span><div class="choices" data-opt="rival"></div></div>
     <p class="warnline" id="sWarn" hidden>Dein gespeichertes Spiel wird dabei überschrieben.</p>
     <div class="row"><button class="btn" id="sBack">Zurück</button><button class="btn go" id="sGo">Weiter</button></div>
+  </div>
+</div>
+<div class="screen dim" id="weekScr" hidden>
+  <div class="card">
+    <h1 class="h1s" id="wTitle">Wochen-Welt</h1>
+    <p class="hint" id="wHint"></p>
+    <label class="opt" id="wNameRow"><span>Dein Name</span><input type="text" id="wName" maxlength="20" placeholder="Für die Bestenliste" autocomplete="off"></label>
+    <div class="wscroll" id="wList"><p class="wempty">Bestenliste lädt …</p></div>
+    <p class="hint">Punkte: Ameisen × 10 + tiefster Gang in cm × 2 + überlebte Minuten. Dein bester Stand der Woche zählt.</p>
+    <p class="warnline" id="wWarn" hidden>Dein gespeichertes Spiel wird dabei überschrieben.</p>
+    <div class="row"><button class="btn" id="wBack">Zurück</button><button class="btn go" id="wPlay">Spielen</button></div>
   </div>
 </div>
 <div class="screen dim" id="spScr" hidden>
@@ -861,6 +897,29 @@ function paintTile(x,y,g,px,py){
   if(y<H-1&&kn(i+W)) f('rgba(0,0,0,.3)',0,T-1,T,1);
   if(x>0&&kn(i-1)) f('rgba(0,0,0,.28)',0,0,1,T);
   if(x<W-1&&kn(i+1)) f('rgba(0,0,0,.28)',T-1,0,1,T);
+  if(t!==BED) softEdges(i,x,y,t,g,px,py,B,r);
+}
+// rounded, slightly ragged edges between soil and open space (looks only, the grid stays the same)
+const CQ=[[0,0],[1,0],[2,0],[0,1],[1,1],[0,2]];
+function soilCol(k,B){const t=tiles[k];if(!rev[k])return B.u;if(t===ROCK)return dep(k%W,(k/W)|0)>300*DS?'#5d6170':'#77726b';if(t===CLAY)return'#a5623d';if(t===HOT)return'#5a1d14';if(t===CRYS)return'#3d3a4a';if(t===GLUT)return'#3a1512';return B.b;}
+function softEdges(i,x,y,t,g,px,py,B,r){
+  const nb=[y>0?i-W:-1,x<W-1?i+1:-1,y<H-1?i+W:-1,x>0?i-1:-1]; // up,right,down,left
+  const O=k=>k>=0&&(tiles[k]===AIR||(tiles[k]===TUN&&rev[k])), S=k=>k>=0&&!O(k);
+  const px1=(X,Y,c)=>{g.fillStyle=c;g.fillRect(px+X,py+Y,1,1);}, clr=(X,Y)=>g.clearRect(px+X,py+Y,1,1);
+  const corner=(sx,sy,fn)=>{for(const[a,b]of CQ)fn(sx?T-1-a:a,sy?T-1-b:b);};
+  const C=[[0,3,0,0],[0,1,1,0],[2,3,0,1],[2,1,1,1]]; // [vertical nb, horizontal nb, flipX, flipY]
+  if(t===TUN){
+    for(const[v,h,fx,fy]of C) if(S(nb[v])&&S(nb[h])){const c=soilCol(nb[v],B);corner(fx,fy,(X,Y)=>px1(X,Y,c));if(!fy)px1(fx?T-3:2,1,'rgba(0,0,0,.25)');}
+    for(let d=0;d<4;d++){ if(!S(nb[d])||r()<.45) continue; const c=soilCol(nb[d],B), p=2+((r()*4)|0), w=1+((r()*2)|0);
+      for(let k=0;k<w;k++){const q=p+k; if(d===0)px1(q,0,c); else if(d===2)px1(q,T-1,c); else if(d===1)px1(T-1,q,c); else px1(0,q,c);} }
+  } else {
+    for(const[v,h,fx,fy]of C) if(O(nb[v])&&O(nb[h])){
+      const air=tiles[nb[v]]===AIR||tiles[nb[h]]===AIR;
+      corner(fx,fy,(X,Y)=>air?clr(X,Y):px1(X,Y,B.t));
+    }
+    for(let d=0;d<4;d++){ const k=nb[d]; if(k<0||tiles[k]!==TUN||!rev[k]||r()<.5) continue; const q=2+((r()*4)|0);
+      if(d===0)px1(q,0,B.t); else if(d===2)px1(q,T-1,B.t); else if(d===1)px1(T-1,q,B.t); else px1(0,q,B.t); }
+  }
 }
 function buildChunk(cx,cy){
   const c=document.createElement('canvas'); c.width=c.height=CPX; const g=c.getContext('2d');
@@ -1004,7 +1063,7 @@ function openChest(x,y){
 }
 function digTile(i){
   const t=tiles[i], x=i%W, y=(i/W)|0;
-  tiles[i]=TUN; mark[i]=0; claimed[i]=0;
+  tiles[i]=TUN; mark[i]=0; claimed[i]=0; if(tut) tut.dug++;
   if(t===WATER){water[i]=1;wet.add(i);}
   touch(i);
   dirtBurst(i,8,t); AU.play('dig',.09);
@@ -1519,8 +1578,13 @@ function updDangers(dt){
 function gameOver(reason){
   if(over) return;
   over=true;
-  $('overTitle').textContent=queens.length?'Die Kolonie ist ausgestorben':'Die Königin ist tot';
-  $('overText').textContent=reason;
+  overMode=tut?'tut':'';
+  $('overTitle').style.color=tut?'var(--seed)':'';
+  $('overTitle').textContent=tut?'Tutorial geschafft!':queens.length?'Die Kolonie ist ausgestorben':'Die Königin ist tot';
+  $('overText').textContent=tut?'Gegen diese Übermacht hatte keine Kolonie eine Chance. Jetzt kennst du alles Wichtige. Starte deine eigene Welt!':reason;
+  $('againBtn').textContent=tut?'Eigene Welt starten':'Gleiche Welt nochmal';
+  if(weekly) submitWeek(true);
+  tut=null; $('coach').hidden=true; $('cArrow').hidden=true; document.body.classList.remove('tutmode');
   $('oTime').textContent=fmtTime(gameT); $('oMax').textContent=maxAnts; $('oDepth').textContent=fmtDepth(maxDepth);
   $('oFood').textContent=collected; $('oKills').textContent=kills; $('oYears').textContent=yearIdx();
   colonyActive=false; setScreen('over'); AU.play('death');
@@ -1628,7 +1692,7 @@ function renderSheet(force){
 }
 list.addEventListener('click',e=>{
   const b=e.target.closest('.item'); if(!b||b.disabled||b.classList.contains('info')) return;
-  if(b.dataset.room){roomType=b.dataset.room;setTool('room');closeSheet();toast(`${ROOMS[roomType].name}: Tippe in erforschte Erde, um den Raum zu planen.`);}
+  if(b.dataset.room){roomType=b.dataset.room;setTool('room');closeSheet();toast(`${ROOMS[roomType].name}: Tippe in die Erde innerhalb der gestrichelten Grenze.`);}
   else if(b.dataset.tool==='fill'){setTool('fill');closeSheet();toast('Zuschütten: Wische über Gänge, um sie mit Erde zu füllen.');}
   else if(b.dataset.tool==='trap'){setTool('trap');closeSheet();toast('Harzfalle: Tippe auf einen Gang oder den Boden draußen (2 Harz).');}
   else if(b.dataset.upg){buyUpg(UPG.find(u=>u.id===b.dataset.upg));}
@@ -1936,7 +2000,7 @@ document.addEventListener('pointerdown',()=>AU.init());
 function rleEnc(a){const out=[];let cur=0,run=0;for(let i=0;i<a.length;i++){const v=a[i]?1:0;if(v===cur)run++;else{out.push(run.toString(36));cur=v;run=1;}}out.push(run.toString(36));return out.join(',');}
 function rleDec(s,a){let i=0,cur=0;for(const p of s.split(',')){const n=parseInt(p,36);if(cur)a.fill(1,i,i+n);i+=n;cur^=1;}}
 function save(){
-  if(over||!colonyActive) return;
+  if(over||!colonyActive||tut) return;
   try{
     const diff=[],mk=[];
     for(let i=0;i<W*H;i++){if(tiles[i]!==orig[i])diff.push(i.toString(36)+':'+tiles[i].toString(36));if(mark[i])mk.push(i.toString(36)+':'+mark[i]);}
@@ -1946,8 +2010,8 @@ function save(){
       goalIdx,res,up,found,cam,zoom,queens,rival,traps:[...traps],gameT,threatT,hungerT,kills,bossKills,deaths,maxAnts,maxDepth,
       hist,attackRival,chestsFound,rainTold,cisternAcc,
       water:[...wet].map(i=>i.toString(36)+':'+Math.round(water[i]*100).toString(36)).join(','),weather:{rain:weather.rain,next:weather.next,end:weather.end,dur:weather.dur},
-      species,wopt,fungT,genVer}));
-    localStorage.setItem(KEY+'-meta',JSON.stringify({species,seed:seedStr,t:Math.round(gameT),ants:ants.length}));
+      species,wopt,fungT,genVer,weekly}));
+    localStorage.setItem(KEY+'-meta',JSON.stringify({species,seed:seedStr,t:Math.round(gameT),ants:ants.length,weekly}));
   }catch(e){}
 }
 function load(){
@@ -1971,7 +2035,7 @@ function load(){
     Object.assign(weather,{rain:false,drain:0,wT:0,fT:0},d.weather||{});
     water.fill(0); wet=new Set(); active=new Set();
     if(d.water) for(const p of d.water.split(',')){const[a,b]=p.split(':');const i=parseInt(a,36);water[i]=parseInt(b,36)/100;if(water[i]>0){wet.add(i);touch(i);}}
-    rainTold=!!d.rainTold; cisternAcc=d.cisternAcc||0; fungT=d.fungT||0; colonyActive=true;
+    rainTold=!!d.rainTold; cisternAcc=d.cisternAcc||0; fungT=d.fungT||0; colonyActive=true; weekly=d.weekly||null; tut=null; lastSubmit=gameT;
     recomputeTerr();
     enemies=[]; corpses=[]; over=false; lastDay=dayIdx(); lastSeason=seasonIdx();
     ants=d.ants.map(([c,age,mx])=>{const q0=queens[0];const a=newAnt(q0.x,q0.y,c);a.px+=rand(-6,6);a.age=age;a.maxAge=mx;return a;});
@@ -1981,7 +2045,7 @@ function load(){
   }catch(e){loading=false;return false;}
 }
 function newGame(str){
-  W=SIZES[wopt.size].W; H=SIZES[wopt.size].H; colonyActive=false; genVer=2; sel=new Set(); orderMarks=[];
+  W=SIZES[wopt.size].W; H=SIZES[wopt.size].H; colonyActive=false; genVer=2; sel=new Set(); orderMarks=[]; lastSubmit=0;
   gen(str||randSeed());
   seedAt=new Map(); ants=[]; eggs=[]; food=10; collected=0; foragers=0; soldiers=0; goalIdx=0;
   res={}; for(const k of RES) res[k]=0; up={}; found={}; particles=[]; floaters=[];
@@ -1994,7 +2058,7 @@ setInterval(()=>{if(!paused)save();},10000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&screen!=='title')save();});
 
 // ---------- screens & menus ----------
-let screen='title', optFrom='title', colonyActive=false;
+let screen='title', optFrom='title', colonyActive=false, tut=null, weekly=null, overMode='';
 const overlay=$('overlay');
 const randSeed=()=>String(100000+Math.floor(Math.random()*900000));
 const getName=()=>{try{return(localStorage.getItem('glutwerk-name')||'').trim();}catch(e){return'';}};
@@ -2005,12 +2069,13 @@ function worldInfo(){
 }
 function setScreen(s){
   screen=s;
-  const menuish=s==='title'||s==='setup'||(s==='options'&&optFrom==='title');
+  const menuish=s==='title'||s==='setup'||s==='week'||(s==='options'&&optFrom==='title');
   $('menuBg').hidden=!menuish; $('titleScr').hidden=s!=='title'; $('setupScr').hidden=s!=='setup';
-  $('optScr').hidden=s!=='options'; $('spScr').hidden=s!=='species';
+  $('optScr').hidden=s!=='options'; $('spScr').hidden=s!=='species'; $('weekScr').hidden=s!=='week';
+  $('coach').hidden=!tut||(s!=='play'); document.body.classList.toggle('tutmode',!!tut); if(!tut||s!=='play') $('cArrow').hidden=true;
   overlay.hidden=s!=='pause'; $('over').hidden=s!=='over';
   paused=s!=='play';
-  if(s!=='play') closeSheet();
+  if(s!=='play'){closeSheet();$('selBar').hidden=true;} else updSelBar();
   last=performance.now();
 }
 function showTitle(){
@@ -2020,6 +2085,10 @@ function showTitle(){
   $('tNew').textContent=m?'Neues Spiel':'Spiel starten';
   $('tGreet').textContent=name?`Willkommen, ${name}! Deine Kolonie wartet.`:'Grab dir eine Kolonie unter der Erde';
   $('tMsg').hidden=true;
+  let td=false; try{td=localStorage.getItem('ameisenbau-tut')==='1';}catch(e){}
+  $('tTutInfo').textContent=td?'Geschafft ✓ · nochmal spielen':'Lerne das Spiel in ein paar Minuten';
+  $('tWeekInfo').textContent=`Woche ${weekNo(isoWeek())} · Bestenliste mit Freunden`;
+  tut=null;
   setScreen('title');
 }
 $('tCont').addEventListener('click',()=>{
@@ -2053,7 +2122,7 @@ $('sGo').addEventListener('click',()=>{
   const b=$('sGo'); if(b.disabled) return;
   b.disabled=true; b.textContent='Welt wird erschaffen …'; AU.play('menu');
   setTimeout(()=>{
-    wopt={...setupOpt};
+    wopt={...setupOpt}; weekly=null; tut=null;
     try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+'-meta');}catch(e){}
     newGame($('sSeed').value.trim()||randSeed());
     b.disabled=false; b.textContent='Weiter';
@@ -2101,6 +2170,138 @@ function startColony(k){
   setScreen('play'); hud(); save(); AU.play('season');
   setTimeout(()=>{toast(SP_TIP[k]);toastT=9;},200);
 }
+// ---------- weekly world ----------
+const DB_URL='https://fqidanxjcwdpjdtngimu.supabase.co', DB_KEY='sb_publishable_BSiWVUEtRP2hE6RL77pI8Q_J57eHlaj';
+let lastSubmit=0, submitting=false;
+function isoWeek(d=new Date()){const t=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y=t.getUTCFullYear();const w=Math.ceil(((t-Date.UTC(y,0,1))/864e5+1)/7);return`${y}-W${String(w).padStart(2,'0')}`;}
+const weekNo=wk=>'KW '+(+String(wk).slice(-2));
+const weekScore=()=>maxAnts*10+maxDepth*2+Math.floor(gameT/60);
+function deviceId(){
+  let id=''; try{id=localStorage.getItem('glutwerk-device')||'';}catch(e){}
+  if(!/^[0-9a-f-]{36}$/i.test(id)){
+    id=crypto.randomUUID?crypto.randomUUID():'10000000-1000-4000-8000-100000000000'.replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
+    try{localStorage.setItem('glutwerk-device',id);}catch(e){}
+  }
+  return id;
+}
+const dbHead={'Content-Type':'application/json',apikey:DB_KEY,Authorization:'Bearer '+DB_KEY};
+async function submitWeek(force){
+  if(!weekly||submitting||(!force&&gameT-lastSubmit<60)) return;
+  lastSubmit=gameT; submitting=true;
+  try{
+    const r=await fetch(DB_URL+'/rest/v1/rpc/ameisenbau_submit',{method:'POST',headers:dbHead,body:JSON.stringify({p_week:weekly,p_device:deviceId(),p_name:getName()||'Anonym',p_species:species,p_ants:maxAnts,p_depth:maxDepth,p_time:Math.floor(gameT)})});
+    if(r.ok){const id=await r.json();try{localStorage.setItem('ameisenbau-week-id-'+weekly,String(id));}catch(e){}}
+  }catch(e){}
+  submitting=false;
+}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function loadBoard(wk){
+  const box=$('wList'); box.innerHTML='<p class="wempty">Bestenliste lädt …</p>';
+  try{
+    const r=await fetch(`${DB_URL}/rest/v1/ameisenbau_week?select=id,player_name,species,max_ants,max_depth,survived,score&week=eq.${wk}&order=score.desc&limit=10`,{headers:dbHead});
+    if(!r.ok) throw 0;
+    const rows=await r.json(); let me=''; try{me=localStorage.getItem('ameisenbau-week-id-'+wk)||'';}catch(e){}
+    if(!rows.length){box.innerHTML='<p class="wempty">Noch niemand hat diese Woche gespielt. Sei die erste Kolonie!</p>';return;}
+    box.innerHTML=`<table class="wlist"><thead><tr><th>#</th><th>Name</th><th>Art</th><th>Ameisen</th><th>Tiefe</th><th>Zeit</th><th>Punkte</th></tr></thead><tbody>${rows.map((w,k)=>`<tr class="${String(w.id)===me?'me':''}${k<3?' top':''}"><td>${k+1}</td><td>${esc(w.player_name)}</td><td>${esc((SPECIES[w.species]||{}).name||w.species)}</td><td>${w.max_ants}</td><td>${fmtDepth(w.max_depth)}</td><td>${fmtTime(w.survived)}</td><td>${w.score}</td></tr>`).join('')}</tbody></table>`;
+  }catch(e){box.innerHTML='<p class="wempty">Die Bestenliste ist gerade nicht erreichbar. Auf Glutwerk funktioniert sie, hier vielleicht nicht.</p>';}
+}
+function openWeek(){
+  const wk=isoWeek();
+  $('wTitle').textContent=`Wochen-Welt · ${weekNo(wk)}`;
+  $('wHint').textContent=`Diese Woche spielen alle dieselbe Welt (Seed „woche-${wk}“, mittelgroß, normal, mit roter Kolonie). Wer schafft die größte Kolonie?`;
+  const n=getName(); $('wNameRow').hidden=!!n; $('wName').value='';
+  const m=readMeta(); $('wWarn').hidden=!m;
+  setScreen('week'); loadBoard(wk);
+}
+$('tWeek').addEventListener('click',()=>{AU.init();AU.play('menu');openWeek();});
+$('wBack').addEventListener('click',()=>{AU.play('menu');showTitle();});
+$('wName').addEventListener('change',e=>{const v=e.target.value.trim().slice(0,20);try{if(v)localStorage.setItem('glutwerk-name',v);}catch(err){}});
+$('wPlay').addEventListener('click',()=>{
+  const v=$('wName').value.trim().slice(0,20); if(v){try{localStorage.setItem('glutwerk-name',v);}catch(e){}}
+  const b=$('wPlay'); if(b.disabled) return; b.disabled=true; b.textContent='Welt wird erschaffen …';
+  setTimeout(()=>{
+    const wk=isoWeek(); wopt={size:'mittel',diff:'normal',weather:'normal',rival:true}; tut=null;
+    try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+'-meta');}catch(e){}
+    newGame('woche-'+wk); weekly=wk;
+    b.disabled=false; b.textContent='Spielen'; openSpecies();
+  },40);
+});
+
+// ---------- tutorial ----------
+const TUT=[
+  {t:'Tippe zweimal auf „Arbeiterin“',el:'#recruitBtn',ok:()=>ants.length+eggs.length>=2},
+  {t:'Warte, bis die Eier schlüpfen',w:()=>queens[0]&&{x:queens[0].x*T+4,y:queens[0].y*T-6},ok:()=>ants.length>=2},
+  {t:'Deine erste Ameise sammelt. Hol 5 Futter',w:()=>{const it=itemList().filter(s=>Math.abs(s.x-entX)<=range()).sort((a,b)=>Math.abs(a.x-entX)-Math.abs(b.x-entX))[0];return it&&{x:it.x*T+4,y:it.y*T-4};},ok:()=>collected>=5},
+  {t:'Wähle „Tunnel“ und zieh über die Erde',el:'[data-tool=dig]',tool:'dig',w:()=>({x:(entX+5)*T+4,y:(surf[entX]+13)*T}),ok:()=>tut.dug>=4},
+  {t:'Tippe „Bauen“ und plane eine Wohnhöhle',el:'[data-tool=build]',ok:()=>chambers.some(c=>c.type==='wohn'&&!c.removed)},
+  {t:'Deine Ameisen graben die Höhle aus',w:()=>{const c=chambers.find(c=>c.type==='wohn'&&!c.removed);return c&&{x:(c.x0+c.w/2)*T,y:c.y0*T-4};},ok:()=>roomsOf('wohn').length>=1},
+  {t:'Tippe bei „Wächter“ auf +',el:'#gPlus',ok:()=>ants.some(a=>a.role==='guard')},
+  {t:'Ein Käfer! Deine Wächterin kämpft',enter:()=>{const x=clamp(entX+12,2,W-3),y=topY(x);enemies.push(mkEnemy('kaefer',0,{tx:x,ty:y,px:x*T+4,py:y*T+5,hp:5,max:5}));tut.spawned=true;AU.play('alarm');},
+    w:()=>{const e=enemies.find(e=>!e.dead);return e&&{x:e.px,y:e.py-8};},ok:()=>kills>=1||(tut.spawned&&!enemies.some(e=>!e.dead))},
+  {t:'Wähle „Befehl“, tippe eine Ameise, dann ein Ziel',el:'[data-tool=cmd]',tool:'cmd',w:()=>ants[0]&&{x:ants[0].px,y:ants[0].py-6},ok:()=>ants.some(a=>a.order)},
+];
+function startTutorial(){
+  AU.init(); AU.play('menu');
+  wopt={size:'klein',diff:'friedlich',weather:'mild',rival:false}; weekly=null;
+  newGame('tutorial'); species='wald'; colonyActive=true;
+  tut={step:-1,dug:0,spawned:false,final:false,waveT:0,wave:0};
+  food=25; for(let i=0;i<16;i++) spawnSeed();
+  setScreen('play'); hud(); tutNext();
+}
+function tutNext(){
+  tut.step++;
+  if(tut.step>=TUT.length){tutFinale();return;}
+  const S=TUT[tut.step]; if(S.enter) S.enter();
+  $('cStep').textContent=`${tut.step+1}/${TUT.length}`; $('cText').textContent=S.t; AU.play('find');
+}
+function tutTick(){
+  if(tut.final){
+    tut.waveT-=.4;
+    if(tut.waveT<=0){tutWave();tut.waveT=Math.max(6,12-tut.wave);}
+    return;
+  }
+  const S=TUT[tut.step]; if(S&&S.ok()) tutNext();
+}
+function tutFinale(){
+  tut.final=true; tut.waveT=4;
+  try{localStorage.setItem('ameisenbau-tut','1');}catch(e){}
+  $('cStep').textContent='✓'; $('cText').textContent='Geschafft! … Moment. Was kommt da?';
+  toast('Du hast alles gelernt! Aber da bebt die Erde …',true); AU.play('season');
+}
+function tutWave(){
+  tut.wave++; const lvl=4+tut.wave*2;
+  $('cText').textContent=tut.wave===1?'Eine riesige Armee greift an! Halte durch, so lange du kannst':`Welle ${tut.wave}: Es werden immer mehr!`;
+  for(let k=0;k<5+tut.wave*2;k++){
+    const side=k%2?1:-1, x=clamp(entX+side*(14+ri(0,20)),2,W-3), y=topY(x);
+    if(walk(x,y)) enemies.push(mkEnemy(k%3===0?'rot':'kaefer',lvl,{tx:x,ty:y,px:x*T+4,py:y*T+5,rp:k*.2}));
+  }
+  for(let k=0;k<Math.min(4,1+tut.wave);k++){const left=k%2===0;enemies.push(mkEnemy('spinne',lvl,{px:clamp(entX+(left?-30-k*3:30+k*3),1,W-2)*T,py:0,dir:left?1:-1,ph:rand(0,6),lt:-1}));}
+  if(tut.wave===2){const left=Math.random()<.5;enemies.push(mkEnemy('baer',lvl,{px:clamp(entX+(left?-50:50),2,W-3)*T,py:0,dir:left?1:-1,ox:entX,lick:0,lt:-1}));}
+  if(tut.wave===3){const dir=1,tx=clamp(entX-40,2,W-3),ty=clamp(surf[entX]+10,surf[tx]+5,H-6);enemies.push(mkEnemy('maulwurf',lvl,{tx,ty,ty2:ty,px:tx*T+4,py:ty*T+4,dir,stepT:0,blocked:0}));}
+  if(tut.wave>=6) for(const q of queens) q.hp-=4;
+  AU.play('alarm'); hud();
+}
+function placeArrow(){
+  const S=tut&&!tut.final?TUT[tut.step]:null, A=$('cArrow');
+  if(!S||!sheet.hidden&&!S.el){A.hidden=true;return;}
+  let x,y,up=false;
+  const useEl=S.el&&!(S.tool&&tool===S.tool)&&!(S.el==='[data-tool=build]'&&!sheet.hidden);
+  if(useEl){
+    const el=document.querySelector(S.el); if(!el){A.hidden=true;return;}
+    const r=el.getBoundingClientRect(); x=r.left+r.width/2; y=r.top-6;
+    if(r.top<120){up=true;y=r.bottom+6;}
+  } else if(S.w){
+    const p=S.w(); if(!p){A.hidden=true;return;}
+    const cr=cv.getBoundingClientRect();
+    x=cr.left+(p.x-cam.x)*scale/dpr; y=cr.top+(p.y-cam.y)*scale/dpr-6;
+    if(x<cr.left||x>cr.right||y<cr.top||y>cr.bottom){A.hidden=true;return;}
+  } else {A.hidden=true;return;}
+  A.hidden=false; A.classList.toggle('up',up);
+  A.style.left=Math.round(x-12)+'px'; A.style.top=Math.round(up?y:y-18)+'px';
+}
+$('tTut').addEventListener('click',startTutorial);
+$('cQuit').addEventListener('click',()=>{tut=null;showTitle();});
+
 // options
 function openOptions(from){
   optFrom=from; $('oSfx').value=opts.sfx; $('oMus').value=opts.music; $('oBorder').checked=!!opts.border; $('oName').value=getName();
@@ -2142,7 +2343,7 @@ function showMenu(){
   setScreen('pause'); worldInfo();
   const n=getName();
   $('pTitle').textContent=n?`Kolonie von ${n}`:'Pause';
-  $('pInfo').textContent=`${SPECIES[species].name} · ${SIZES[wopt.size].adj} Welt · ${DIFFS[wopt.diff].name} · Wetter ${WEATHERS[wopt.weather].name.toLowerCase()}`;
+  $('pInfo').textContent=`${tut?'Tutorial · ':weekly?`Wochen-Welt ${weekNo(weekly)} · ${weekScore()} Punkte · `:''}${SPECIES[species].name} · ${SIZES[wopt.size].adj} Welt · ${DIFFS[wopt.diff].name} · Wetter ${WEATHERS[wopt.weather].name.toLowerCase()}`;
   $('mTime').textContent=fmtTime(gameT); $('mAnts').textContent=ants.length; $('mMax').textContent=maxAnts;
   $('mDepth').textContent=fmtDepth(maxDepth); $('mKills').textContent=kills; $('mDeaths').textContent=deaths;
   requestAnimationFrame(drawChart);
@@ -2151,8 +2352,8 @@ function hideMenu(){if(over)return;AU.init();setScreen('play');}
 $('helpBtn').addEventListener('click',()=>{if(screen==='play')showMenu();});
 $('playBtn').addEventListener('click',hideMenu);
 $('pOpt').addEventListener('click',()=>openOptions('pause'));
-$('pMenu').addEventListener('click',()=>{save();AU.play('menu');showTitle();});
-$('againBtn').addEventListener('click',()=>{newGame(seedStr);openSpecies();});
+$('pMenu').addEventListener('click',()=>{save();if(weekly)submitWeek(true);AU.play('menu');showTitle();});
+$('againBtn').addEventListener('click',()=>{if(overMode==='tut'){openSetup();return;}const wk=weekly;newGame(seedStr);weekly=wk;openSpecies();});
 $('overMenuBtn').addEventListener('click',showTitle);
 
 // ---------- title scene ----------
@@ -2693,7 +2894,7 @@ function step(dt){
   for(let k=floaters.length-1;k>=0;k--){floaters[k].life-=dt;if(floaters[k].life<=0)floaters.splice(k,1);}
   for(let k=orderMarks.length-1;k>=0;k--){orderMarks[k].t-=dt;if(orderMarks[k].t<=0)orderMarks.splice(k,1);}
   histT+=dt; if(histT>=15){histT=0;hist.push([Math.round(gameT),ants.length,food]);if(hist.length>400)hist=hist.filter((_,i)=>i%2===0);}
-  slow+=dt; if(slow>.4){slow=0;checkGoals();hud();}
+  slow+=dt; if(slow>.4){slow=0;checkGoals();hud();if(tut)tutTick();if(weekly&&gameT-lastSubmit>=60)submitWeek(false);}
 }
 function frame(now){
   const dt=clamp((now-last)/1000,0,.05); last=now;
@@ -2704,8 +2905,9 @@ function frame(now){
     for(let s=0;s<speed&&!paused;s++) step(dt);
   }
   if(toastT>0){toastT-=dt;if(toastT<=0)toastEl.classList.remove('show');}
-  const menuish=screen==='title'||screen==='setup'||(screen==='options'&&optFrom==='title');
+  const menuish=screen==='title'||screen==='setup'||screen==='week'||(screen==='options'&&optFrom==='title');
   if(menuish) tsRender(now); else if(tiles) render(gameT);
+  if(tut&&screen==='play') placeArrow();
   requestAnimationFrame(frame);
 }
 

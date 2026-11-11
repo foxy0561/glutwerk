@@ -58,12 +58,15 @@
     P.feld.forEach(u => { u.neu = false; u.angegriffen = false; u.nochmal = false; u.gesperrt = u.frost > 0; if (u.frost > 0) u.frost--; });
     if (ortIs("wiese")) P.feld.forEach(u => heal(u, 1));
     if (ortIs("pilze")) healHero(pi, 2);
+    if (ortIs("becken")) P.feld.forEach(u => { heal(u, 1); u.frost = 0; u.gesperrt = false; });
     if (ortIs("baum")) { P.feld.forEach(u => heal(u, 1)); healHero(pi, 1); }
     if (ortIs("riss") && S.p[foe(pi)].feld.length) { const u = rnd(S.p[foe(pi)].feld); hurt(u, 2); log(`Der Riss trifft ${u.name}.`); }
     P.feld.slice().forEach(u => {
       if (u.pas === "brut" && P.feld.length < R.feldPlaetze) { const a = mkUnit("#ameise", pi); a.neu = false; P.feld.push(a); log("Eine Ameise schlüpft und kann sofort angreifen."); }
       if (u.pas === "honig") healHero(pi, 1);
       if (u.pas === "kuh") P.feld.forEach(x => heal(x, 1));
+      if (u.pas === "nachwuchs" && P.feld.length < R.feldPlaetze) { P.feld.push(mkUnit("#babyguppy", pi)); log("Ein Baby-Guppy schlüpft."); }
+      if (u.pas === "wachstum") { u.max += 1; heal(u, 1); }
     });
     const n = 1 + (ortIs("hafen") ? 1 : 0);
     if (P.ki) for (let i = 0; i < n; i++) draw(pi); else P.zieh = n;   // Spieler zieht selbst vom Stapel
@@ -118,7 +121,8 @@
   }
   function atkDmg(u, a) {
     const beacons = S.p[u.owner].feld.filter(x => x !== u && x.pas === "leuchtfeuer").length;
-    return a[2] + u.plusSchaden + beacons + (ortIs("schmiede") ? 1 : 0) + (ortIs("wueste") && u.flink ? 1 : 0);
+    const schwarm = u.pas === "schwarm" ? S.p[u.owner].feld.filter(x => x !== u && x.id === "kw-neon").length : 0;
+    return a[2] + schwarm + u.plusSchaden + beacons + (ortIs("schmiede") ? 1 : 0) + (ortIs("wueste") && u.flink ? 1 : 0);
   }
   const canAct = u => S.cur === u.owner && !S.p[u.owner].zieh && !u.neu && !u.gesperrt && (!u.angegriffen || u.nochmal);
   function whyNotAct(u) {
@@ -623,7 +627,7 @@
   let lastHand = 0;
 
   function artHTML(id) {
-    if (id[0] === "#") { const m = MARKER[id.slice(1)]; return artSVG(m.art); }
+    if (id[0] === "#") { const m = MARKER[id.slice(1)]; return m.pic ? `<img class="item" src="img/${m.pic}.webp" alt="" style="background:radial-gradient(circle,#2f7f88,#133f48)">` : artSVG(m.art); }
     const c = card(id);
     if (c.cut) return `<img class="cut" src="${c.cut}" alt="">`;
     if (c.img) return `<img src="${FOXY_IMG(c.img)}" alt="" style="object-position:50% 20%">`;
@@ -1037,7 +1041,7 @@
   }
   const saveDecks = d => store("glutwerk-decks", JSON.stringify(d));
   const aktDeck = d => d.liste.find(x => x.id === d.aktiv);
-  const GEGNER_RUECKEN = { Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
+  const GEGNER_RUECKEN = { Klarwasser: "kristall", Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
 
   /* ---- Duell starten (mit Deck-Auswahl) ---- */
   let lastDeckId = null;

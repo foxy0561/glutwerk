@@ -133,6 +133,31 @@ window.WERTE = {
   "kristallhoehle":{ t: "ort", kosten: 3, ort: "hoehle" },
   "altes-tor":     { t: "ort", kosten: 2, ort: "ruinen" },
 
+  /* ---------------- Klarwasser ---------------- */
+  "kw-neon":       { t: "wesen", hp: 2, pas: "schwarm", atk: [["Schwarmbiss", 1, 1]] },
+  "kw-guppy":      { t: "wesen", hp: 2, pas: "nachwuchs", atk: [["Zupfen", 1, 1]] },
+  "kw-cory":       { t: "wesen", hp: 4, waechter: true, atk: [["Wühlen", 1, 1]] },
+  "kw-shrimp":     { t: "wesen", hp: 2, pas: "kuh", atk: [["Zwicken", 0, 1]] },
+  "kw-gourami":    { t: "wesen", hp: 4, atk: [["Schubser", 1, 2], ["Blubberblase", 2, 2, "schild"]] },
+  "kw-loach":      { t: "wesen", hp: 5, atk: [["Schneckenjagd", 2, 3], ["Wirbel", 3, 2, "kette"]] },
+  "kw-pleco":      { t: "wesen", hp: 7, waechter: true, schild: true, atk: [["Saugmaul", 2, 2, "saugen"]] },
+  "kw-puffer":     { t: "wesen", hp: 3, flink: true, atk: [["Knackbiss", 1, 3]] },
+  "kw-betta":      { t: "wesen", hp: 4, atk: [["Flossenschlag", 1, 2], ["Revierkampf", 3, 5]] },
+  "kw-malawi":     { t: "wesen", hp: 6, flink: true, atk: [["Rammen", 2, 3], ["Revierwut", 4, 6]] },
+  "kw-angel":      { t: "wesen", hp: 6, atk: [["Schnappen", 2, 3], ["Jäger", 4, 3, "alle"]] },
+  "kw-gold":       { t: "wesen", hp: 9, pas: "wachstum", atk: [["Rempler", 2, 3]] },
+  "kw-discus":     { t: "wesen", hp: 11, pas: "honig", atk: [["Königsblick", 2, 2, "frost"], ["Diskuswelle", 5, 4, "alle"]] },
+  "kw-root":       { t: "ausr", kosten: 1, plusLeben: 2, billiger: 1 },
+  "kw-holey":      { t: "ausr", kosten: 2, weniger: 1, plusLeben: 1 },
+  "kw-cave":       { t: "zauber", kosten: 1, ziel: "eigenesWesen", schild: true, heile: 2 },
+  "kw-castle":     { t: "ausr", kosten: 2, plusLeben: 3, gibWaechter: true },
+  "kw-wreck":      { t: "zauber", kosten: 2, ziel: "feindWesen", schaden: 3, frost: true },
+  "kw-leaves":     { t: "zauber", kosten: 1, heileAlle: 2 },
+  "kw-vallis":     { t: "zauber", kosten: 0, heileSpieler: 2 },
+  "kw-fern":       { t: "zauber", kosten: 1, ziel: "eigenesWesen", heile: 4 },
+  "kw-strom":      { t: "zauber", kosten: 4, frostAlle: true },
+  "kw-becken":     { t: "ort", kosten: 2, ort: "becken" },
+
   /* ---------------- Wildnis ---------------- */
   "w-schwein":     { t: "wesen", hp: 3, pas: "schaf", atk: [["Rüsselstoß", 1, 1]] },
   "w-huhn":        { t: "wesen", hp: 2, flink: true, atk: [["Picken", 1, 1]] },
@@ -169,6 +194,9 @@ window.PASSIV = {
   honig:         "Rundenbeginn: Du heilst 1 Leben.",
   schaf:         "Wird es besiegt, ziehst du 1 Karte.",
   kuh:           "Rundenbeginn: Deine Wesen heilen 1.",
+  schwarm:       "Macht +1 Schaden für jeden anderen Neonsalmler auf deinem Feld.",
+  nachwuchs:     "Rundenbeginn: Ist Platz, kommt ein Baby-Guppy (1 Leben) dazu.",
+  wachstum:      "Rundenbeginn: bekommt +1 maximales Leben und heilt 1.",
   untot:         "Wird er besiegt, steht er einmal mit 2 Leben wieder auf.",
   stillerZauber: "Deine Zauber kosten 1 Energie weniger.",
 };
@@ -187,6 +215,7 @@ window.ORTE = {
   hafen:       "Jeder zieht zu Rundenbeginn 1 Karte mehr.",
   stadt:       "Alle Angriffe kosten 1 Energie weniger (mind. 1).",
   markt:       "Ausrüstung kostet 1 Energie weniger.",
+  becken:      "Rundenbeginn: Wesen des Spielers am Zug heilen 1 und bekommen kein Frost.",
   wueste:      "Flinke Wesen machen 1 Schaden mehr.",
   dschungel:   "Jeder darf 2 Wesen pro Runde rufen.",
   schnee:      "Wächter nehmen 1 Schaden weniger.",
@@ -200,6 +229,7 @@ window.ORTE = {
 /* Kleine Wesen, die von Karten erschaffen werden */
 window.MARKER = {
   ameise: { name: "Ameise", hp: 2, atk: [["Biss", 1, 1]], art: "antWood", set: "ameisenbau" },
+  babyguppy: { name: "Baby-Guppy", hp: 1, atk: [["Zupfen", 1, 1]], pic: "kw-guppy", set: "klarwasser" },
   freund: { name: "Kiko-Freund", hp: 2, atk: [["Hüpfer", 1, 2]], art: "four", set: "kiko" },
 };
 
@@ -215,6 +245,7 @@ window.GEGNER_DECKS = [
   { name: "Ameisenvolk", deck: ["waldameise", "waldameise", "ernteameise", "ernteameise", "blattschneider", "spinne", "honigtopf", "koenigin", "treiberameise", "gruenling", "gruenling", "kraeuter", "blattlausfarm", "pilzgarten", "funke", "funke", "dolch", "heiltrank", "rivalen", "muenze"] },
   { name: "Turmwacht", deck: ["bolzenturm", "bolzenturm", "kanone-sf", "kanone-sf", "frostkristall", "frostkristall", "blitzspule", "moerser", "leuchtfeuer", "schildtraeger", "wuerfel", "wuerfel", "kristallkern", "kristallkern", "sternblock", "feueratem", "funke", "muenze", "laterne", "burg"] },
   { name: "Nebelwald", deck: ["spinne", "blattschneider", "golem", "drako", "rissbestie", "rissbestie", "kiko", "ernteameise", "waldameise", "phantom", "verband", "gifttrank", "gifttrank", "bombe", "pfotentrank", "grimoire", "fuchsschild", "umhang", "uralter-baum", "heiltrank"] },
+  { name: "Klarwasser", deck: ["kw-neon", "kw-neon", "kw-guppy", "kw-guppy", "kw-cory", "kw-shrimp", "kw-gourami", "kw-loach", "kw-pleco", "kw-betta", "kw-malawi", "kw-angel", "kw-root", "kw-holey", "kw-cave", "kw-castle", "kw-leaves", "kw-fern", "kw-wreck", "kw-becken"] },
   { name: "Wildnis", deck: ["w-schwein", "w-schwein", "w-huhn", "w-kuh", "w-wolf", "w-wolf", "w-zombie", "w-zombie", "w-skelett", "w-hoehlenspinne", "w-drache", "w-spitzhacke", "w-spitzhacke", "w-fackel", "w-eisen", "w-gold", "w-werkbank", "w-diamant", "w-dschungel", "heiltrank"] },
   { name: "Drachenfeuer", deck: ["drako", "kiko", "gruenling", "gruenling", "schaf", "schaf", "rissbestie", "rissbestie", "golem", "phantom", "feueratem", "feueratem", "funke", "funke", "drachenkristall", "kristalltal", "dolch", "heiltrank", "brot", "glut"] },
 ];

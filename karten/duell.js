@@ -44,7 +44,7 @@
   }
   function draw(pi, quiet) {
     const P = S.p[pi];
-    if (!P.deck.length) { P.hp -= 2; ev("h" + pi, "-2", "dmg"); log(`${P.name}: Deck leer, 2 Schaden.`); return; }
+    if (!P.deck.length) return;   // Deck leer: es gibt einfach nichts mehr zu ziehen
     if (P.hand.length >= 9) { P.deck.pop(); if (!quiet) log(`${P.name}: Hand voll, Karte verbrannt.`); return; }
     P.hand.push(P.deck.pop());
   }
@@ -69,7 +69,7 @@
       if (u.pas === "wachstum") { u.max += 1; heal(u, 1); }
     });
     const n = 1 + (ortIs("hafen") ? 1 : 0);
-    if (P.ki) for (let i = 0; i < n; i++) draw(pi); else P.zieh = n;   // Spieler zieht selbst vom Stapel
+    if (P.ki) for (let i = 0; i < n; i++) draw(pi); else P.zieh = Math.min(n, P.deck.length);   // Spieler zieht selbst vom Stapel, aber nur solange noch Karten da sind
     cleanup();
   }
   function takeDraw(pi) {
@@ -109,6 +109,14 @@
         return false;
       });
     });
+    /* Wer gar keine Karten mehr hat (Deck, Hand und Feld leer), kann nichts mehr tun:
+       hat der andere noch Wesen auf dem Feld, gewinnt er sofort. */
+    const leer = S.p.map(P => !P.deck.length && !P.hand.length && !P.feld.length);
+    if (S.over == null && (leer[0] || leer[1])) {
+      if (leer[0] && leer[1]) S.over = 2;
+      else if (leer[1] && S.p[0].feld.length) { S.over = 0; log(`${S.p[1].name} hat keine Karten mehr.`); }
+      else if (leer[0] && S.p[1].feld.length) { S.over = 1; log("Du hast keine Karten mehr."); }
+    }
     if (S.p[0].hp <= 0 || S.p[1].hp <= 0) S.over = S.p[1].hp <= 0 && S.p[0].hp > 0 ? 0 : S.p[0].hp <= 0 && S.p[1].hp > 0 ? 1 : 2;
   }
   const findU = uid => { for (const P of S.p) { const u = P.feld.find(x => x.uid === uid); if (u) return u; } return null; };

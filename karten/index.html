@@ -350,6 +350,7 @@ h2.sec small{font-size:15px;color:var(--muted);letter-spacing:0}
 .zoom .zc{width:min(340px,78vw,calc((100vh - 170px) * .716))}
 .zoom-info{text-align:center;font-size:14px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
 .zoom-info b{color:var(--text)}
+.zoom-dust{width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:4px}.zoom-dust span{font-size:12px;color:var(--muted)}
 .zoom-x{position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);font-size:22px;line-height:1}
 
 .toasts{position:fixed;right:18px;bottom:18px;z-index:120;display:flex;flex-direction:column;gap:10px;align-items:flex-end;pointer-events:none}
@@ -1033,27 +1034,39 @@ function renderProgress() {
 /* ---- Glutstaub ---- */
 const staubGet = () => Math.max(0, parseInt(store("glutwerk-staub") || "0", 10) || 0);
 function staubExtras() {
-  let n = 0, wert = 0;
-  CARDS.forEach(c => { const o = own(c.id), x = Math.max(0, o.n - BEHALTEN(c.r)); n += x; wert += x * STAUB_WERT[c.r]; });
-  return { n, wert };
+  let n = 0;
+  CARDS.forEach(c => { n += Math.max(0, own(c.id).n - 1); });
+  return { n };
 }
-let dustArmed = 0;
+/* Wie viele Kopien einer Karte steckt höchstens in einem deiner Decks? */
+function imDeck(id) {
+  let max = 0, name = "";
+  try {
+    const D = JSON.parse(store("glutwerk-decks") || "null");
+    (D && D.liste || []).forEach(d => { const k = (d.karten || []).filter(x => x === id).length; if (k > max) { max = k; name = d.name; } });
+  } catch (e) {}
+  return { max, name };
+}
+/* Eine einzelne Kopie zu Staub machen (nie die letzte, nie eine, die ein Deck braucht) */
+function staubGrund(id) {
+  const o = own(id), d = imDeck(id);
+  if (o.n < 1) return "Glanzkarten bleiben immer.";
+  if (o.n + o.f <= 1) return "Deine letzte Kopie behältst du.";
+  if (o.n + o.f - 1 < d.max) return `Dein Deck „${d.name}“ braucht ${d.max}×.`;
+  return "";
+}
+function staubEine(id) {
+  const c = byId(id), o = coll.c[id];
+  if (!o || staubGrund(id)) return 0;
+  o.n--; const w = STAUB_WERT[c.r];
+  saveColl(); store("glutwerk-staub", String(staubGet() + w));
+  if (typeof sfx === "function") { audio(); sfx("rare"); }
+  return w;
+}
 function renderDust() {
   const e = staubExtras();
   $("dustBar").innerHTML = `<span class="dv">✦ ${fmt(staubGet())}</span>
-    <span class="dt">Glutstaub · Doppelte Karten werden zu Staub, damit öffnest du Zufalls-Packs. Von jeder Karte bleiben 2 (legendär/mythisch 1), Glanzkarten bleiben immer.</span>
-    <button class="dust-btn" id="dustBtn" ${e.n ? "" : "disabled"}>${e.n ? `${e.n} Doppelte → ✦ ${fmt(e.wert)}` : "Keine Doppelten"}</button>`;
-  $("dustBtn").onclick = () => {
-    if (Date.now() - dustArmed > 3000) { dustArmed = Date.now(); $("dustBtn").textContent = `Sicher? ${e.n} Karten zu Staub`; return; }
-    dustArmed = 0;
-    CARDS.forEach(c => { const o = coll.c[c.id]; if (o && o.n > BEHALTEN(c.r)) o.n = BEHALTEN(c.r); });
-    saveColl(); store("glutwerk-staub", String(staubGet() + e.wert));
-    const r = $("dustBtn").getBoundingClientRect(), f = document.createElement("div");
-    f.className = "dust-fly"; f.textContent = "+" + fmt(e.wert) + " ✦"; f.style.left = r.left + "px"; f.style.top = r.top + "px";
-    document.body.appendChild(f); setTimeout(() => f.remove(), 1300);
-    if (typeof sfx === "function") { audio(); sfx("epic"); }
-    renderAll();
-  };
+    <span class="dt">Glutstaub · Tippe eine Karte an und mach einzelne Kopien zu Staub, damit öffnest du Zufalls-Packs. ${e.n ? `Du hast ${e.n} doppelte Karten.` : "Du hast gerade keine doppelten Karten."}</span>`;
 }
 function renderAll() { renderGlut(); renderEarn(); renderFilters(); renderGrid(); renderProgress(); renderDust(); }
 
@@ -1080,8 +1093,17 @@ function openZoom(id, foil) {
   $("zoomCard").innerHTML = owned(id) ? cardHTML(c, zoomFoil) : lockedHTML(c);
   $("zoomInfo").innerHTML = !owned(id) ? `Noch nicht gefunden · <b>${RARITY[c.r].name}</b>` :
     `<i style="width:100%;color:#c3c9d6">„${esc(c.text)}“</i>Du hast <b>${o.n}× normal</b>${o.f ? ` und <b>${o.f}× Glanz</b>` : ""}` +
-    (o.n && o.f ? ` <button class="chip" id="zoomToggle">${zoomFoil ? "Normal zeigen" : "✦ Glanz zeigen"}</button>` : "");
+    (o.n && o.f ? ` <button class="chip" id="zoomToggle">${zoomFoil ? "Normal zeigen" : "✦ Glanz zeigen"}</button>` : "") +
+    (owned(id) && o.n + o.f > 1 ? (g => `<div class="zoom-dust"><button class="dust-btn" id="zoomDust" ${g ? "disabled" : ""}>1 Kopie zu Staub · +${STAUB_WERT[c.r]} ✦</button>${g ? `<span>${g}</span>` : ""}</div>`)(staubGrund(id)) : "");
   const tg = $("zoomToggle"); if (tg) tg.onclick = ev => { ev.stopPropagation(); openZoom(id, !zoomFoil); };
+  const zd = $("zoomDust"); if (zd) zd.onclick = ev => {
+    ev.stopPropagation();
+    const w = staubEine(id); if (!w) return;
+    const r = zd.getBoundingClientRect(), f = document.createElement("div");
+    f.className = "dust-fly"; f.textContent = "+" + fmt(w) + " ✦"; f.style.left = r.left + "px"; f.style.top = r.top + "px";
+    document.body.appendChild(f); setTimeout(() => f.remove(), 1300);
+    renderAll(); openZoom(id);
+  };
   $("zoom").classList.add("open");
 }
 function closeZoom() { $("zoom").classList.remove("open"); }

@@ -375,7 +375,7 @@ details.help[open] summary{margin-bottom:8px}
     <button class="btn menu" id="tQuit">Verlassen</button>
     <p class="tmsg" id="tMsg" hidden></p>
   </div>
-  <div class="tfoot">Glutwerk · Version 2.3.1</div>
+  <div class="tfoot">Glutwerk · Version 2.3.2</div>
 </div>
 <div class="screen dim" id="setupScr" hidden>
   <div class="card">
@@ -1152,6 +1152,17 @@ function upd(a,dt){
     const n=nestNear(a);
     if(n){a.path=[];a.moving=false;a.vert=0;a.dir=n.x*T+4>a.px?1:-1;if(a.hit<=0){a.hit=.7;hitNest(n,gDmg(a));}return;}
   }
+  if(a.order&&a.order.foe&&!a.carry&&a.job!=='escape'){
+    const f=a.order.foe;
+    if(f==='rival'){ if(!rival.alive){a.order=null;a.job=null;} else if(rivalStrike(a)){a.order.w=240;return;} }
+    else if(f.dead||!enemies.includes(f)){a.order=null;a.job=null;a.path=[];}
+    else{
+      a.fr=(a.fr||0)-dt;
+      if(a.fr<=0){a.fr=.8;let t=enemyTile(f);if(!walk(t%W,(t/W)|0))t=findStand(t%W,(t/W)|0);
+        if(t>=0&&t!==a.order.t){a.order.t=t;const r=bfs(startI(a),i=>i===t?i:-1);if(r&&r.path.length){a.path=r.path;a.job='order';}}}
+    }
+  }
+  if(a.order&&!a.carry&&a.job!=='escape'&&rival.alive&&rivalStrike(a)) return;
   if(a.order&&a.job!=='escape'&&enemies.length){
     let best=null,bd=1e9;
     for(const e of enemies){if(e.dead)continue;const p=enemyPos(e);const d=Math.hypot(p.x-a.px,p.y-a.py)-EN[e.type].rad+10;if(d<bd){bd=d;best=e;}}
@@ -1602,7 +1613,7 @@ function updRival(dt){
   const qx=R.qx*T+4, qy=R.qy*T+5;
   if(ants.some(a=>Math.hypot(a.px-qx,a.py-qy)<64)){
     R.defT-=dt;
-    if(R.defT<=0&&R.ants>0){R.defT=2.5;R.ants--;enemies.push(mkEnemy('rot',1+Math.floor(gameT/420),{tx:R.qx,ty:R.qy,px:qx,py:qy,life:60}));}
+    if(R.defT<=0&&R.ants>0){R.defT=1.5;R.ants--;enemies.push(mkEnemy('rot',1+Math.floor(gameT/420),{tx:R.qx,ty:R.qy,px:qx,py:qy,life:60}));}
   }
 }
 
@@ -1958,6 +1969,13 @@ cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hover=null;});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('wheel',e=>{e.preventDefault();const p=rel(e);zoomAt(p.x,p.y,zoom+(e.deltaY<0?1:-1));},{passive:false});
 
+function foeAt(wx,wy,tol){
+  let best=null,bd=tol*1.6;
+  for(const e of enemies){if(e.dead)continue;const p=enemyPos(e);const d=Math.hypot(p.x-wx,p.y-wy)-EN[e.type].rad*.5;if(d<bd){bd=d;best=e;}}
+  if(rival.alive&&rev[rival.qy*W+rival.qx]){const d=Math.hypot(rival.qx*T+4-wx,rival.qy*T+5-wy);if(d<Math.max(bd,tol*2)){bd=d;best='rival';}}
+  if(!best)for(const n of nests){if(!n.alive||!rev[n.y*W+n.x])continue;if(Math.hypot(n.x*T+4-wx,n.y*T+4-wy)<Math.max(16,tol*1.5))return{nest:n};}
+  return best;
+}
 function findStand(tx,ty){
   for(let r=0;r<=4;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
     if(Math.max(Math.abs(dx),Math.abs(dy))!==r) continue;
@@ -1974,6 +1992,16 @@ function finishCmd(e){
     AU.play('click'); toast(sel.size?`${sel.size} ${sel.size===1?'Ameise':'Ameisen'} ausgewählt. Tippe jetzt auf ein Ziel.`:'Im Rahmen ist keine Ameise.'); updSelBar(); return;
   }
   const tol=Math.max(5,14*dpr/scale);
+  const foe=foeAt(wx,wy,tol);
+  if(foe){
+    if(!sel.size){toast('Wähle zuerst Ameisen aus, dann tippe auf den Gegner.');return;}
+    let t=foe==='rival'?rival.qy*W+rival.qx:foe.nest?findStand(foe.nest.x,foe.nest.y):enemyTile(foe);
+    if(t<0||!walk(t%W,(t/W)|0)) t=findStand(t<0?Math.floor(wx/T):t%W,t<0?Math.floor(wy/T):(t/W)|0);
+    if(t<0){toast('Da kommen deine Ameisen nicht hin.');return;}
+    for(const a of sel){a.order={t,w:240,foe:foe.nest?null:foe};release(a);a.path=[];a.job='order';a.rp=0;}
+    AU.play('click'); toast(`${sel.size} ${sel.size===1?'Ameise greift':'Ameisen greifen'} an!`);
+    return;
+  }
   let best=null,bd=tol; for(const a of ants){const d=Math.hypot(a.px-wx,a.py-wy);if(d<bd){bd=d;best=a;}}
   if(best){sel.has(best)?sel.delete(best):sel.add(best);AU.play('click');updSelBar();return;}
   if(!sel.size){toast('Tippe Ameisen an oder ziehe einen Rahmen um mehrere.');return;}
@@ -2881,7 +2909,7 @@ function render(time){
   }
   for(const qn of queens) drawQueen(qn.x,qn.y,QPAL,{v:qn.hp,m:QMAX},qn.hit);
   if(rival.alive&&rev[rival.qy*W+rival.qx]){
-    for(let k=0;k<Math.min(6,rival.ants);k++){const o={px:(rival.qx-3)*T+4+((Math.sin(time*.7+k*1.9)+1)/2)*6*T,py:rival.qy*T+5,dir:Math.cos(time*.7+k*1.9)>0?1:-1,vert:0,anim:time+k,path:[1],flash:0};drawRedAnt(o);}
+    if(!ants.some(a=>Math.hypot(a.px-rival.qx*T-4,a.py-rival.qy*T-5)<64))for(let k=0;k<Math.min(6,rival.ants);k++){const o={px:(rival.qx-3)*T+4+((Math.sin(time*.7+k*1.9)+1)/2)*6*T,py:rival.qy*T+5,dir:Math.cos(time*.7+k*1.9)>0?1:-1,vert:0,anim:time+k,path:[1],flash:0};drawRedAnt(o);}
     drawQueen(rival.qx,rival.qy,RPAL,{v:rival.hp,m:rival.max},rival.flash);
   }
   const R=range();
@@ -3027,6 +3055,5 @@ showTitle();
 requestAnimationFrame(frame);
 })();
 </script>
-
 </body>
 </html>

@@ -213,6 +213,7 @@ h2.sec small{font-size:15px;color:var(--muted);letter-spacing:0}
 .tc-fx{flex:1;display:flex;align-items:center;padding:2cqw 5cqw;font-size:5.6cqw;line-height:1.35;color:#dfe4ee}
 .tc-art.pic img{position:absolute;inset:6% 10%;width:80%;height:88%;object-fit:contain;filter:drop-shadow(0 1.5cqw 2cqw rgba(0,0,0,.6))}
 .tc-art.ortpic img{inset:-6%;width:112%;height:112%;object-fit:cover;filter:none}
+.tc-art.scene img{inset:0;width:100%;height:100%;object-fit:cover;filter:none;image-rendering:pixelated}
 .tcard.r-mythic .tc-rules{flex:0 0 auto;position:relative;z-index:2}
 .tcard.r-mythic .tc-atk{background:rgba(0,0,0,.45)}
 /* Glanz (Holo) */
@@ -637,15 +638,20 @@ const ART = {
 
 /* ---------- Die Karten (Serie 1) ---------- */
 const CARDS = [
-  { id: "kiko",        set: "kiko",       r: "rare",      pow: 4,  name: "Kiko",               art: "kiko",       text: "Klein, rot und nicht zu stoppen." },
-  { id: "sternblock",  set: "kiko",       r: "common",    pow: 2,  name: "Sternblock",         art: "starblock",  text: "Einmal draufhauen. Lohnt sich immer." },
-  { id: "muenze",      set: "kiko",       r: "common",    pow: 1,  name: "Goldmünze",          art: "coin",       text: "Hundert davon und das Leben lächelt." },
-  { id: "wiesenland",  set: "kiko",       r: "common",    pow: 2,  name: "Wiesenland",         art: "meadow",     text: "Welt 1. Hier fängt jedes Abenteuer an." },
-  { id: "roehre",      set: "kiko",       r: "rare",      pow: 3,  name: "Warp-Röhre",         art: "pipe",       text: "Wo sie hinführt? Spring rein." },
-  { id: "burg",        set: "kiko",       r: "epic",      pow: 6,  name: "Die Burg",           art: "castle",     text: "Das letzte Level wartet hinter diesen Mauern." },
-  { id: "gruenling",   set: "kiko",       r: "common",    pow: 1,  name: "Grünling",           art: "grunling",   text: "Läuft immer geradeaus. Bis jemand draufspringt." },
-  { id: "extraleben",  set: "kiko",       r: "rare",      pow: 3,  name: "Extraleben",         art: "heart",      text: "Noch ein Versuch. Diesmal klappt es." },
-  { id: "vier-freunde", set: "kiko",      r: "epic",      pow: 6,  name: "Vier Freunde",       art: "four",       text: "Ein Gerät, vier Spieler, null Gnade." },
+  { id: "kiko",        set: "kiko",       r: "rare",      pow: 4,  name: "Kiko",               pic: "kiko-kiko", scene: 1, text: "Klein, rot und nicht zu stoppen." },
+  { id: "sternblock",  set: "kiko",       r: "common",    pow: 2,  name: "Sternblock",         pic: "kiko-sternblock", scene: 1, text: "Einmal draufhauen. Lohnt sich immer." },
+  { id: "muenze",      set: "kiko",       r: "common",    pow: 1,  name: "Goldmünze",          pic: "kiko-muenze", scene: 1, text: "Hundert davon und das Leben lächelt." },
+  { id: "wiesenland",  set: "kiko",       r: "common",    pow: 2,  name: "Wiesenland",         pic: "kiko-wiesenland", scene: 1, text: "Welt 1. Hier fängt jedes Abenteuer an." },
+  { id: "roehre",      set: "kiko",       r: "rare",      pow: 3,  name: "Warp-Röhre",         pic: "kiko-roehre", scene: 1, text: "Wo sie hinführt? Spring rein." },
+  { id: "burg",        set: "kiko",       r: "epic",      pow: 6,  name: "Die Burg",           pic: "kiko-burg", scene: 1, text: "Das letzte Level wartet hinter diesen Mauern." },
+  { id: "gruenling",   set: "kiko",       r: "common",    pow: 1,  name: "Grünling",           pic: "kiko-gruenling", scene: 1, text: "Läuft immer geradeaus. Bis jemand draufspringt." },
+  { id: "extraleben",  set: "kiko",       r: "rare",      pow: 3,  name: "Extraleben",         pic: "kiko-extraleben", scene: 1, text: "Noch ein Versuch. Diesmal klappt es." },
+  { id: "vier-freunde", set: "kiko",      r: "epic",      pow: 6,  name: "Vier Freunde",       pic: "kiko-vier-freunde", scene: 1, text: "Ein Gerät, vier Spieler, null Gnade." },
+  { id: "panzerkaefer", set: "kiko",      r: "common",    pow: 2,  name: "Panzerkäfer",        pic: "kiko-kaefer", scene: 1, text: "Draufspringen, dann rutscht er als Panzer weiter." },
+  { id: "stachler",    set: "kiko",       r: "common",    pow: 2,  name: "Stachler",           pic: "kiko-igel", scene: 1, text: "Bloß nicht von oben anfassen." },
+  { id: "flatterling", set: "kiko",       r: "rare",      pow: 3,  name: "Flatterling",        pic: "kiko-fledermaus", scene: 1, text: "Hängt an der Decke und wartet." },
+  { id: "kiko-dino",   set: "kiko",       r: "epic",      pow: 5,  name: "Dino",               pic: "kiko-dino", scene: 1, text: "Aus dem Ei geschlüpft, frisst alles mit der Zunge." },
+  { id: "feuerkoenig", set: "kiko",       r: "legendary", pow: 8,  name: "Feuerkönig",         pic: "kiko-feuerkoenig", scene: 1, text: "Herrscher der Lavaburg. Drei Treffer, dann fällt die Krone." },
   { id: "wuerfel",     set: "kammerwerk", r: "common",    pow: 2,  name: "Testwürfel",         art: "cube",       text: "Er drückt Knöpfe. Er redet nicht." },
   { id: "gel",         set: "kammerwerk", r: "common",    pow: 2,  name: "Sprung-Gel",         art: "gel",        text: "Draufsteigen. Abheben." },
   { id: "portal-b",    set: "kammerwerk", r: "rare",      pow: 4,  name: "Blaues Portal",      art: "portalB",    text: "Rein hier …" },
@@ -910,7 +916,7 @@ function cardHTML(c, foil) {
     <div class="frame"><div class="inner">
       ${mythic ? `<div class="tc-art"><img src="${FOXY_IMG(c.img)}" alt="" draggable="false"></div>` : ""}
       <div class="tc-head"><span class="tc-name" style="font-size:${Math.min(9.6, 100 / c.name.length).toFixed(2)}cqw">${esc(c.name)}</span>${badgeHTML(w)}</div>
-      ${mythic ? `<div class="tc-spacer"></div>` : c.pic ? `<div class="tc-art pic${c.ort ? " ortpic" : ""}" style="background:${c.set === "klarwasser" ? "radial-gradient(ellipse at 50% 0%,#bff3ea55,transparent 60%),linear-gradient(180deg,#2f7f88,#133f48)" : `radial-gradient(circle at 50% 55%,${set.c[1]}55,transparent 70%),linear-gradient(160deg,#20302a,#0f1512)`}"><img src="img/${c.pic}.webp" alt="" draggable="false" loading="lazy"></div>` : `<div class="tc-art" style="background:linear-gradient(135deg,${set.c[0]},${set.c[1]})">${artSVG(c.art)}</div>`}
+      ${mythic ? `<div class="tc-spacer"></div>` : c.pic ? `<div class="tc-art pic${c.ort ? " ortpic" : ""}${c.scene ? " scene" : ""}" style="background:${c.set === "klarwasser" ? "radial-gradient(ellipse at 50% 0%,#bff3ea55,transparent 60%),linear-gradient(180deg,#2f7f88,#133f48)" : `radial-gradient(circle at 50% 55%,${set.c[1]}55,transparent 70%),linear-gradient(160deg,#20302a,#0f1512)`}"><img src="img/${c.pic}.webp" alt="" draggable="false" loading="lazy"></div>` : `<div class="tc-art" style="background:linear-gradient(135deg,${set.c[0]},${set.c[1]})">${artSVG(c.art)}</div>`}
       <div class="tc-type"><span>${TYP[w.t]} · ${esc(set.name)}</span><b>${RARITY[c.r].name}</b></div>
       ${rulesHTML(c, w)}
       <div class="tc-foot"><span>${String(c.no).padStart(2, "0")} / ${CARDS.length}</span><span class="tc-gem"></span></div>

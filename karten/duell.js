@@ -627,11 +627,11 @@
   let lastHand = 0;
 
   function artHTML(id) {
-    if (id[0] === "#") { const m = MARKER[id.slice(1)]; return m.pic ? `<img class="item" src="img/${m.pic}.webp" alt="" style="background:radial-gradient(circle,#2f7f88,#133f48)">` : artSVG(m.art); }
+    if (id[0] === "#") { const m = MARKER[id.slice(1)]; return m.pic ? (m.scene ? `<img src="img/${m.pic}.webp" alt="" style="image-rendering:pixelated">` : `<img class="item" src="img/${m.pic}.webp" alt="" style="background:radial-gradient(circle,#2f7f88,#133f48)">`) : artSVG(m.art); }
     const c = card(id);
     if (c.cut) return `<img class="cut" src="${c.cut}" alt="">`;
     if (c.img) return `<img src="${FOXY_IMG(c.img)}" alt="" style="object-position:50% 20%">`;
-    if (c.pic) return `<img class="${c.ort ? "" : "item"}" src="img/${c.pic}.webp" alt="" style="${c.ort ? "" : "background:radial-gradient(circle,#2d4a3e,#0f1512)"}">`;
+    if (c.pic) return `<img class="${c.ort || c.scene ? "" : "item"}" src="img/${c.pic}.webp" alt="" style="${c.scene ? "image-rendering:pixelated" : c.ort ? "" : "background:radial-gradient(circle,#2d4a3e,#0f1512)"}">`;
     return artSVG(c.art);
   }
   const rcol = id => id[0] === "#" ? "var(--common)" : `var(--${card(id).r})`;
@@ -639,7 +639,7 @@
   /* Alle Effekte eines Wesens: Symbol, Name, was es macht, wie lange */
   function miniArt(id) {
     const c = card(id);
-    if (c.pic) return `<img src="img/${c.pic}.webp" alt="">`;
+    if (c.pic) return `<img src="img/${c.pic}.webp" alt=""${c.scene ? ' style="object-fit:cover;image-rendering:pixelated"' : ""}>`;
     if (c.img) return `<img src="${FOXY_IMG(c.img)}" alt="" style="object-fit:cover">`;
     return artSVG(c.art);
   }
@@ -1041,7 +1041,7 @@
   }
   const saveDecks = d => store("glutwerk-decks", JSON.stringify(d));
   const aktDeck = d => d.liste.find(x => x.id === d.aktiv);
-  const GEGNER_RUECKEN = { Klarwasser: "kristall", Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
+  const GEGNER_RUECKEN = { "Kiko Hüpft": "glut", Klarwasser: "kristall", Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
 
   /* ---- Duell starten (mit Deck-Auswahl) ---- */
   let lastDeckId = null;

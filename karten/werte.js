@@ -46,6 +46,11 @@ window.WERTE = {
   "gruenling":     { t: "wesen", hp: 3, atk: [["Rempler", 1, 1]] },
   "extraleben":    { t: "zauber", kosten: 3, wiederbeleben: true },
   "vier-freunde":  { t: "zauber", kosten: 3, beschwoere: 2 },
+  "panzerkaefer":  { t: "wesen", hp: 3, schild: true, atk: [["Panzerstoß", 1, 2], ["Rutschpanzer", 3, 2, "kette"]] },
+  "stachler":      { t: "wesen", hp: 5, waechter: true, atk: [["Stacheln", 2, 2]] },
+  "flatterling":   { t: "wesen", hp: 3, flink: true, atk: [["Sturzflug", 1, 2], ["Kreischen", 2, 1, "frost"]] },
+  "kiko-dino":     { t: "wesen", hp: 7, atk: [["Zungenschlag", 1, 2, "saugen"], ["Stampfer", 3, 5]] },
+  "feuerkoenig":   { t: "wesen", hp: 11, pas: "untot", atk: [["Feuerball", 2, 3], ["Lavawelle", 5, 3, "alle"]] },
 
   /* ---------------- Kammerwerk ---------------- */
   "wuerfel":       { t: "wesen", hp: 7, waechter: true, atk: [["Schubsen", 1, 1]] },
@@ -230,7 +235,7 @@ window.ORTE = {
 window.MARKER = {
   ameise: { name: "Ameise", hp: 2, atk: [["Biss", 1, 1]], art: "antWood", set: "ameisenbau" },
   babyguppy: { name: "Baby-Guppy", hp: 1, atk: [["Zupfen", 1, 1]], pic: "kw-guppy", set: "klarwasser" },
-  freund: { name: "Kiko-Freund", hp: 2, atk: [["Hüpfer", 1, 2]], art: "four", set: "kiko" },
+  freund: { name: "Kiko-Freund", hp: 2, atk: [["Hüpfer", 1, 2]], art: "four", pic: "kiko-freund", scene: 1, set: "kiko" },
 };
 
 /* Starterdeck: damit kann jeder sofort spielen, auch ohne eigene Karten */
@@ -245,6 +250,7 @@ window.GEGNER_DECKS = [
   { name: "Ameisenvolk", deck: ["waldameise", "waldameise", "ernteameise", "ernteameise", "blattschneider", "spinne", "honigtopf", "koenigin", "treiberameise", "gruenling", "gruenling", "kraeuter", "blattlausfarm", "pilzgarten", "funke", "funke", "dolch", "heiltrank", "rivalen", "muenze"] },
   { name: "Turmwacht", deck: ["bolzenturm", "bolzenturm", "kanone-sf", "kanone-sf", "frostkristall", "frostkristall", "blitzspule", "moerser", "leuchtfeuer", "schildtraeger", "wuerfel", "wuerfel", "kristallkern", "kristallkern", "sternblock", "feueratem", "funke", "muenze", "laterne", "burg"] },
   { name: "Nebelwald", deck: ["spinne", "blattschneider", "golem", "drako", "rissbestie", "rissbestie", "kiko", "ernteameise", "waldameise", "phantom", "verband", "gifttrank", "gifttrank", "bombe", "pfotentrank", "grimoire", "fuchsschild", "umhang", "uralter-baum", "heiltrank"] },
+  { name: "Kiko Hüpft", deck: ["kiko", "gruenling", "gruenling", "panzerkaefer", "panzerkaefer", "stachler", "stachler", "flatterling", "flatterling", "kiko-dino", "feuerkoenig", "sternblock", "sternblock", "muenze", "muenze", "roehre", "extraleben", "vier-freunde", "wiesenland", "heiltrank"] },
   { name: "Klarwasser", deck: ["kw-neon", "kw-neon", "kw-guppy", "kw-guppy", "kw-cory", "kw-shrimp", "kw-gourami", "kw-loach", "kw-pleco", "kw-betta", "kw-malawi", "kw-angel", "kw-root", "kw-holey", "kw-cave", "kw-castle", "kw-leaves", "kw-fern", "kw-wreck", "kw-becken"] },
   { name: "Wildnis", deck: ["w-schwein", "w-schwein", "w-huhn", "w-kuh", "w-wolf", "w-wolf", "w-zombie", "w-zombie", "w-skelett", "w-hoehlenspinne", "w-drache", "w-spitzhacke", "w-spitzhacke", "w-fackel", "w-eisen", "w-gold", "w-werkbank", "w-diamant", "w-dschungel", "heiltrank"] },
   { name: "Drachenfeuer", deck: ["drako", "kiko", "gruenling", "gruenling", "schaf", "schaf", "rissbestie", "rissbestie", "golem", "phantom", "feueratem", "feueratem", "funke", "funke", "drachenkristall", "kristalltal", "dolch", "heiltrank", "brot", "glut"] },

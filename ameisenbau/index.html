@@ -296,7 +296,7 @@ details.help[open] summary{margin-bottom:8px}
           <li><b>Ameisenart</b>: Jede Art ernährt sich anders. Blattschneider schneiden Blätter und züchten damit Pilz, Honigtopfameisen holen Nektar aus Blüten, Treiberameisen jagen Insekten, Ernte- und Waldameisen sammeln Samen.</li>
           <li><b>Ameisen</b> schlüpfen aus Eiern. Arbeiterinnen kosten Futter und teilst du selbst ein: graben, sammeln oder wachen. Im Brut-Menü gibt es Gräberinnen, Trägerinnen und Soldatinnen.</li>
           <li><b>Grabbereich</b>: Gegraben werden kann nur innerhalb der gestrichelten Grenze rund um deine Räume. Baue am Rand neue Räume, vor allem Wachposten, damit der Bereich wächst.</li>
-          <li><b>Wasser</b>: Regen läuft durch die Eingänge, fließt nach unten und sammelt sich an der tiefsten Stelle. Es verdunstet nur sehr langsam. Ameisen kommen nicht hindurch und ertrinken darin, die Königin auch. Baue Eingänge mit einer Grube, schütte Gänge zu oder fange das Wasser mit einer Zisterne auf.</li>
+          <li><b>Wasser</b>: Regen läuft durch die Eingänge, fließt nach unten und sammelt sich an der tiefsten Stelle. Es verdunstet nur sehr langsam. Ameisen kommen nicht hindurch und ertrinken darin, die Königin auch. Steht Wasser an markierten Blöcken, in Räumen oder bei der Königin, schöpfen Gräberinnen es Tropfen für Tropfen ab. Baue Eingänge mit einer Grube, schütte Gänge zu oder fange das Wasser mit einer Zisterne auf.</li>
           <li><b>Wachposten</b>: Dort wohnen bis zu 4 Wächterinnen fest und schützen die Umgebung.</li>
           <li><b>Befehl</b>: Tippe Ameisen an oder ziehe einen Rahmen um sie, dann tippe auf ein Ziel. Sie laufen hin, halten dort 2,5 Minuten die Stellung und kämpfen gegen Feinde in der Nähe. Neue Räume bekommen automatisch einen Gang zum Bau.</li>
           <li><b>Schichten</b>: Oberboden, Lehmboden, Gestein, Tiefengestein und ganz unten die heiße Glutschicht. Dort verbrennen sich Ameisen ohne Hitzepanzer.</li>
@@ -375,7 +375,7 @@ details.help[open] summary{margin-bottom:8px}
     <button class="btn menu" id="tQuit">Verlassen</button>
     <p class="tmsg" id="tMsg" hidden></p>
   </div>
-  <div class="tfoot">Glutwerk · Version 2.3</div>
+  <div class="tfoot">Glutwerk · Version 2.3.1</div>
 </div>
 <div class="screen dim" id="setupScr" hidden>
   <div class="card">
@@ -945,10 +945,11 @@ function invalidateTop(){const lim=(maxSurf+3)>>5;for(const k of[...chunks.keys(
 function evict(){if(chunks.size<=220)return;const arr=[...chunks.entries()].sort((a,b)=>a[1].used-b[1].used);for(let k=0;k<arr.length-160;k++)chunks.delete(arr[k][0]);}
 
 // ---------- pathfinding ----------
-let prev, seen, q, stamp=0;
-function allocPath(){prev=new Int32Array(W*H);seen=new Uint32Array(W*H);q=new Int32Array(W*H);stamp=0;}
+let prev, seen, q, bd, stamp=0;
+const owner=new Map();
+function allocPath(){prev=new Int32Array(W*H);seen=new Uint32Array(W*H);q=new Int32Array(W*H);bd=new Int32Array(W*H);stamp=0;owner.clear();}
 function bfs(start,goal){
-  stamp++; let h=0,t=0; q[t++]=start; seen[start]=stamp; prev[start]=-1;
+  stamp++; let h=0,t=0; q[t++]=start; seen[start]=stamp; prev[start]=-1; bd[start]=0;
   while(h<t){
     const i=q[h++]; const g=goal(i);
     if(g>=0){const path=[];let k=i;while(k!==start){path.push(k);k=prev[k];}path.reverse();return{path,hit:g};}
@@ -956,7 +957,7 @@ function bfs(start,goal){
     for(const[dx,dy]of D4){
       const nx=x+dx,ny=y+dy; if(nx<0||ny<0||nx>=W||ny>=H) continue;
       const ni=ny*W+nx; if(seen[ni]===stamp||!walk(nx,ny)) continue;
-      seen[ni]=stamp; prev[ni]=i; q[t++]=ni;
+      seen[ni]=stamp; prev[ni]=i; bd[ni]=bd[i]+1; q[t++]=ni;
     }
   }
   return null;
@@ -980,7 +981,7 @@ function maxHp(a){
 const gDmg=a=>(a.caste==='sold'?3:1)*(up.acid?2:1)*SP('dmg');
 function release(a){
   if(a.target>=0){
-    if(a.job==='toDig'||a.job==='digging') claimed[a.target]=0;
+    if(a.job==='toDig'||a.job==='digging'||a.job==='toBail'||a.job==='bailing'){if(owner.get(a.target)===a){claimed[a.target]=0;owner.delete(a.target);}}
     if(a.job==='toSeed'||a.job==='pick'){const s=seedAt.get(a.target);if(s)s.claims=Math.max(0,s.claims-1);}
   }
   a.target=-1; a.job=null;
@@ -1014,15 +1015,48 @@ function addItem(o){
 }
 function removeItem(o){for(const t of o.tiles) if(seedAt.get(t)===o) seedAt.delete(t);}
 const itemList=()=>[...new Set(seedAt.values())];
+// a mark may be taken over from an ant that is still far away from it
+let bailAcc=0;
+// standing water ants should scoop away: next to planned digging, inside rooms, or on a queen
+function needsBail(n){
+  if(tiles[n]!==TUN||water[n]<WET) return false;
+  if(chMap[n]>=0||queens.some(q=>q.y*W+q.x===n)) return true;
+  const x=n%W,y=(n/W)|0;
+  for(const[dx,dy]of D4){const X=x+dx,Y=y+dy;if(inW(X,Y)&&mark[Y*W+X])return true;}
+  return false;
+}
+function canTake(n,a,dist){
+  if(!needsBail(n)&&(!mark[n]||!diggable(tiles[n]))) return false;
+  if(!claimed[n]) return true;
+  const o=owner.get(n);
+  if(!o||!ants.includes(o)||o.target!==n) return true;
+  return o!==a&&(o.job==='toDig'||o.job==='toBail')&&o.path.length>dist+5;
+}
+function claimDig(a,n){
+  const o=owner.get(n);
+  if(o&&o!==a&&o.target===n){o.target=-1;o.job=null;o.path=[];o.think=0;}
+  claimed[n]=1; owner.set(n,a); a.target=n; a.job='toDig';
+}
 function findDig(a){
   const r=bfs(startI(a),i=>{
     const x=i%W,y=(i/W)|0;
     for(const[dx,dy]of D4){const nx=x+dx,ny=y+dy;if(!inW(nx,ny))continue;const n=ny*W+nx;
-      if(mark[n]&&diggable(tiles[n])&&!claimed[n]) return n;}
+      if(canTake(n,a,bd[i])) return n;}
     return -1;
   });
   if(!r) return false;
-  a.path=r.path; a.target=r.hit; claimed[r.hit]=1; a.job='toDig'; return true;
+  a.path=r.path; claimDig(a,r.hit); if(tiles[r.hit]===TUN) a.job='toBail'; return true;
+}
+// after a block is done, keep going at the next marked block right there
+function digNext(a,t){
+  const here=startI(a);
+  for(const base of[t,here]){
+    if(base===t&&!walkI(t)) continue;
+    const x=base%W,y=(base/W)|0;
+    for(const[dx,dy]of D4){const nx=x+dx,ny=y+dy;if(!inW(nx,ny))continue;const n=ny*W+nx;
+      if(canTake(n,a,0)){claimDig(a,n);if(tiles[n]===TUN)a.job='toBail';a.path=base===here?[]:[base];return true;}}
+  }
+  return false;
 }
 function findSeed(a){
   const R=range();
@@ -1055,6 +1089,7 @@ function wander(a){
   if(a.role==='guard'&&a.post!=null){const c=chambers[a.post];for(let k=0;k<10;k++){const x=c.x0+ri(0,c.w-1),y=c.y0+ri(0,c.h-1);if(walk(x,y)){target=y*W+x;break;}}}
   else if(a.role==='guard'){for(let k=0;k<6;k++){const y=surf[entX]+ri(1,6);if(walk(entX,y)){target=y*W+entX;break;}}}
   else if(a.role==='forage'&&!winter()&&Math.random()<.6){const x=entX+ri(-3,3),y=topY(x);if(y>=0&&y<surf[x]+1&&walk(x,y))target=y*W+x;}
+  else if(a.role==='dig'&&gameT-(a.lastDig??-99)<30){a.think=1+Math.random();return;}
   else{const list=liveCh();const c=list[ri(0,list.length-1)];
     for(let k=0;k<10&&c;k++){const x=c.x0+ri(0,c.w-1),y=c.y0+ri(0,c.h-1);if(walk(x,y)){target=y*W+x;break;}}}
   if(target<0){a.think=.8;return;}
@@ -1075,7 +1110,7 @@ function openChest(x,y){
 }
 function digTile(i){
   const t=tiles[i], x=i%W, y=(i/W)|0;
-  tiles[i]=TUN; mark[i]=0; claimed[i]=0; if(tut) tut.dug++;
+  tiles[i]=TUN; mark[i]=0; claimed[i]=0; owner.delete(i); if(tut) tut.dug++;
   if(t===WATER){water[i]=1;wet.add(i);}
   touch(i);
   dirtBurst(i,8,t); AU.play('dig',.09);
@@ -1159,7 +1194,20 @@ function upd(a,dt){
     case 'digging':{
       if(!diggable(tiles[a.target])||!mark[a.target]){release(a);break;}
       a.work+=dt; a.pt-=dt; if(a.pt<=0){a.pt=.25;dirtBurst(a.target,1,tiles[a.target]);}
-      if(a.work>=digTime(a.target,a)){const t=a.target;release(a);digTile(t);}
+      if(a.work>=digTime(a.target,a)){const t=a.target;release(a);digTile(t);a.lastDig=gameT;if(a.role==='dig'&&!a.order)digNext(a,t);}
+      return;}
+    case 'toBail':
+      if(water[a.target]<.15){release(a);break;}
+      a.job='bailing'; a.work=0; faceTile(a,a.target);
+      // falls through
+    case 'bailing':{
+      if(water[a.target]<.15){release(a);break;}
+      a.work+=dt; if(a.work<.8) return; a.work=0;
+      const t=a.target, take=Math.min(.35,water[t]);
+      water[t]-=take; if(water[t]<=.002){water[t]=0;wet.delete(t);} touch(t);
+      for(let k=0;k<3;k++) particles.push({x:(t%W)*T+rand(1,7),y:((t/W)|0)*T+rand(0,4),vx:rand(-10,10),vy:rand(-26,-8),life:.4,c:Math.random()<.5?'#7cc6f0':'#4aa3d8'});
+      bailAcc+=take; if(bailAcc>=1){bailAcc-=1;addRes('wasser',1,a.px,a.py-4);hud();}
+      if(water[t]<.15){release(a);a.lastDig=gameT;}
       return;}
     case 'toSeed':
       if(!seedAt.get(a.target)){release(a);break;}

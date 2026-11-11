@@ -128,6 +128,15 @@ h2.sec small{font-size:15px;color:var(--muted);letter-spacing:0}
 .chip em{font-style:normal;font-size:11px;color:var(--muted);font-weight:700}
 .chip.done em{color:#3ddc97}
 .chip-right{margin-left:auto}
+.dust-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 16px;padding:12px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(125,249,255,.08),rgba(178,107,255,.08));border:1px solid rgba(125,249,255,.25)}
+.dust-bar .dv{font-family:Rajdhani,sans-serif;font-weight:700;font-size:22px;color:#bff3ff;text-shadow:0 0 12px rgba(125,249,255,.6)}
+.dust-bar .dt{flex:1;min-width:180px;font-size:13px;color:var(--muted)}
+.dust-btn{padding:9px 14px;border-radius:9px;font-weight:700;font-size:13px;background:linear-gradient(135deg,#3ab8d8,#9a6bff);color:#0a0a1a}
+.dust-btn[disabled]{background:var(--bg2);color:var(--muted);border:1px solid var(--line);cursor:not-allowed}
+.buy-staub{margin-top:-2px;width:100%;padding:8px 10px;border-radius:9px;font-size:13px;font-weight:700;background:rgba(125,249,255,.08);border:1px solid rgba(125,249,255,.35);color:#bff3ff}
+.buy-staub[disabled]{opacity:.45;cursor:not-allowed}
+.dust-fly{position:fixed;z-index:200;pointer-events:none;font-family:Rajdhani,sans-serif;font-weight:700;font-size:30px;color:#bff3ff;text-shadow:0 0 14px #7df9ff;animation:dFly 1.2s ease-out forwards}
+@keyframes dFly{0%{opacity:0;transform:translateY(10px) scale(.7)}20%{opacity:1;transform:translateY(-10px) scale(1.15)}100%{opacity:0;transform:translateY(-60px)}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:20px}
 .grid .slotc{position:relative;cursor:pointer;container-type:inline-size}
 .count{position:absolute;top:-8px;right:-8px;z-index:5;min-width:26px;height:26px;padding:0 7px;border-radius:13px;display:grid;place-items:center;
@@ -450,6 +459,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   </section>
 
   <h2 class="sec">Deine Sammlung <small id="collSub"></small></h2>
+  <div class="dust-bar" id="dustBar"></div>
   <div class="filters" id="filters"></div>
   <div class="grid" id="grid"></div>
 </main>
@@ -480,6 +490,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <div class="toasts" id="toasts"></div>
 
 <script src="werte.js"></script>
+<script src="themen.js"></script>
 <script src="figuren.js"></script>
 <script>
 /* =========================================================
@@ -505,14 +516,17 @@ const RARITY = {
 };
 const RORDER = ["common", "rare", "epic", "legendary", "mythic"];
 
+/* Glutstaub: Doppelte Karten (über die Deck-Anzahl hinaus) werden zu Staub. Mit Staub öffnet man Zufalls-Packs. */
+const STAUB_WERT = { common: 5, rare: 12, epic: 30, legendary: 80, mythic: 200 };
+const BEHALTEN = r => ["legendary", "mythic"].includes(r) ? 1 : 2;   // so viele bleiben immer, damit Decks voll bleiben
 /* Packs: Preis, Chancen pro Karte (in %), garantierte Mindest-Seltenheit der letzten Karte, Glanz-Chance */
 const PACKS = {
   glut:    { name: "Glut-Pack",    price: 100, size: 5, foil: 0.07, guarantee: "rare",
              odds: { common: 62, rare: 27, epic: 8.5, legendary: 2.2, mythic: 0.3 },
-             text: "5 Karten · mind. 1 Seltene" },
+             text: "5 Karten · mind. 1 Seltene", staub: 150 },
   inferno: { name: "Inferno-Pack", price: 350, size: 5, foil: 0.15, guarantee: "epic",
              odds: { common: 28, rare: 40, epic: 23, legendary: 8, mythic: 1 },
-             text: "5 Karten · mind. 1 Epische · doppelte Glanz-Chance" },
+             text: "5 Karten · mind. 1 Epische · doppelte Glanz-Chance", staub: 500 },
 };
 
 const SETS = {
@@ -887,7 +901,10 @@ function lockedHTML(c) {
   </div></div></div>`;
 }
 const FLAME_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>';
-const backHTML = () => `<div class="cback">${FLAME_SVG}<div class="bt">Glutwerk</div></div>`;
+/* Kartenrücken des aktuellen Decks (Designs in themen.js) */
+function aktRuecken() {
+  try { const d = JSON.parse(store("glutwerk-decks") || "null"); const a = d && d.liste.find(x => x.id === d.aktiv); return (a && a.ruecken) || "glut"; } catch (e) { return "glut"; }
+}
 const packHTML = key => `<div class="pack ${key}">
   <div class="pk-top"></div>
   <div class="pk-body"><div class="pk-brand">Glutwerk</div><div class="pk-emblem">${FLAME_SVG}</div>
@@ -945,6 +962,7 @@ function renderShop() {
       <button class="buy" data-buy="${k}" ${g < p.price ? "disabled" : ""}>
         ${g < p.price ? `Noch ${fmt(p.price - g)} Glut` : `${FLAME_SVG} ${fmt(p.price)} · Öffnen`}
       </button>
+      <button class="buy-staub" data-staub="${k}" ${staubGet() < p.staub ? "disabled" : ""}>oder ✦ ${fmt(p.staub)} Glutstaub</button>
     </div>`).join("");
 }
 function renderEarn() {
@@ -980,7 +998,32 @@ function renderProgress() {
   const fan = best.length === 3 ? [best[1], best[0], best[2]] : [byId("kiko"), byId("glutwerk"), byId("drako")];
   $("introFan").innerHTML = fan.map(c => cardHTML(c, !best.length ? c.id === "glutwerk" : own(c.id).f > 0 && own(c.id).n === 0)).join("");
 }
-function renderAll() { renderGlut(); renderEarn(); renderFilters(); renderGrid(); renderProgress(); }
+/* ---- Glutstaub ---- */
+const staubGet = () => Math.max(0, parseInt(store("glutwerk-staub") || "0", 10) || 0);
+function staubExtras() {
+  let n = 0, wert = 0;
+  CARDS.forEach(c => { const o = own(c.id), x = Math.max(0, o.n - BEHALTEN(c.r)); n += x; wert += x * STAUB_WERT[c.r]; });
+  return { n, wert };
+}
+let dustArmed = 0;
+function renderDust() {
+  const e = staubExtras();
+  $("dustBar").innerHTML = `<span class="dv">✦ ${fmt(staubGet())}</span>
+    <span class="dt">Glutstaub · Doppelte Karten werden zu Staub, damit öffnest du Zufalls-Packs. Von jeder Karte bleiben 2 (legendär/mythisch 1), Glanzkarten bleiben immer.</span>
+    <button class="dust-btn" id="dustBtn" ${e.n ? "" : "disabled"}>${e.n ? `${e.n} Doppelte → ✦ ${fmt(e.wert)}` : "Keine Doppelten"}</button>`;
+  $("dustBtn").onclick = () => {
+    if (Date.now() - dustArmed > 3000) { dustArmed = Date.now(); $("dustBtn").textContent = `Sicher? ${e.n} Karten zu Staub`; return; }
+    dustArmed = 0;
+    CARDS.forEach(c => { const o = coll.c[c.id]; if (o && o.n > BEHALTEN(c.r)) o.n = BEHALTEN(c.r); });
+    saveColl(); store("glutwerk-staub", String(staubGet() + e.wert));
+    const r = $("dustBtn").getBoundingClientRect(), f = document.createElement("div");
+    f.className = "dust-fly"; f.textContent = "+" + fmt(e.wert) + " ✦"; f.style.left = r.left + "px"; f.style.top = r.top + "px";
+    document.body.appendChild(f); setTimeout(() => f.remove(), 1300);
+    if (typeof sfx === "function") { audio(); sfx("epic"); }
+    renderAll();
+  };
+}
+function renderAll() { renderGlut(); renderEarn(); renderFilters(); renderGrid(); renderProgress(); renderDust(); }
 
 document.addEventListener("click", e => {
   const s = e.target.closest("[data-set]");
@@ -988,6 +1031,8 @@ document.addEventListener("click", e => {
   if (e.target.closest("#onlyOwned")) { onlyOwned = !onlyOwned; renderFilters(); renderGrid(); return; }
   const b = e.target.closest("[data-buy]");
   if (b && !b.disabled) { buyPack(b.dataset.buy); return; }
+  const sb = e.target.closest("[data-staub]");
+  if (sb && !sb.disabled) { buyPack(sb.dataset.staub, false, true); return; }
   const fb = e.target.closest("[data-free]");
   if (fb && !fb.disabled) { buyPack("glut", true); return; }
   const c = e.target.closest(".grid [data-card]");
@@ -1029,9 +1074,13 @@ function pickCard(r) {
   for (const c of list) { x -= (c.w || 1); if (x <= 0) return c; }
   return list[0];
 }
-function buyPack(key, free) {
+function buyPack(key, free, staub) {
   const p = PACKS[key];
-  if (free) {
+  if (staub) {
+    if (staubGet() < p.staub) return;
+    store("glutwerk-staub", String(staubGet() - p.staub));
+    renderShop();
+  } else if (free) {
     if (!freiOffen()) return;
     store("glutwerk-freepack", heuteLokal());
     renderShop();
@@ -1123,7 +1172,7 @@ function dealCards() {
   rv.innerHTML = op.pulls.map((x, i) => `
     <div class="rslot r-${x.c.r}" data-i="${i}" style="--rot:${(i - 2) * 9}deg">
       <div class="rays"></div>
-      <div class="flipper"><div class="face back">${backHTML()}</div><div class="face front">${cardHTML(x.c, x.foil)}</div></div>
+      <div class="flipper"><div class="face back">${backHTML(aktRuecken())}</div><div class="face front">${cardHTML(x.c, x.foil)}</div></div>
       <div class="rtag ${x.dup ? "dup" : "new"}">${x.isNew ? "Neu!" : x.newFoil ? "Neu: Glanz!" : `+${x.refund} Glut`}</div>
     </div>`).join("");
   rv.classList.add("on");

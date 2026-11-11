@@ -27,7 +27,7 @@
       plusSchaden: 0, billiger: 0, weniger: 0, frost: 0, gesperrt: false, neu: true, angegriffen: false, nochmal: false, equip: [], buffs: [],
     };
   }
-  const mkPlayer = (name, deck, ki) => ({ name, ki, hp: R.leben, deck: shuffle(deck.slice()), hand: [], feld: [], energie: 0, maxE: 0, grab: [], beschworen: 0, verbrannt: false });
+  const mkPlayer = (name, deck, ki) => ({ name, ki, hp: R.leben, deck: shuffle(deck.slice()), hand: [], feld: [], energie: 0, maxE: 0, grab: [], beschworen: 0, verbrannt: false, zieh: 0 });
   const foe = pi => 1 - pi;
   const ortIs = k => S.ort && W[S.ort.id].ort === k;
   const log = t => { S.log.unshift(t); S.log.length = Math.min(S.log.length, 30); };
@@ -35,7 +35,7 @@
 
   function start(deckMe, deckAi, aiName) {
     UID = 0;
-    S = { p: [mkPlayer("Du", deckMe, false), mkPlayer(aiName, deckAi, true)], cur: 0, runde: 0, ort: null, log: [], fx: [], over: null };
+    S = { p: [mkPlayer("Du", deckMe, false), mkPlayer(aiName, deckAi, true)], cur: 0, runde: 0, ort: null, log: [], fx: [], over: null, look: { feld: "glut", ruecken: ["glut", "schatten"] } };
     const first = Math.random() < .5 ? 0 : 1;
     for (let i = 0; i < R.startHand; i++) { draw(first, true); draw(foe(first), true); }
     draw(foe(first), true);
@@ -65,11 +65,19 @@
       if (u.pas === "honig") healHero(pi, 1);
       if (u.pas === "kuh") P.feld.forEach(x => heal(x, 1));
     });
-    draw(pi); if (ortIs("hafen")) draw(pi);
+    const n = 1 + (ortIs("hafen") ? 1 : 0);
+    if (P.ki) for (let i = 0; i < n; i++) draw(pi); else P.zieh = n;   // Spieler zieht selbst vom Stapel
     cleanup();
+  }
+  function takeDraw(pi) {
+    const P = S.p[pi];
+    if (!P.zieh) return false;
+    P.zieh--; draw(pi); cleanup();
+    return true;
   }
   function endTurn() {
     if (S.over != null) return;
+    while (S.p[S.cur].zieh && S.over == null) takeDraw(S.cur);
     if (ortIs("vulkan")) { S.p.forEach(P => P.feld.forEach(u => hurt(u, 1))); log("Der Vulkan brennt."); }
     cleanup();
     if (S.over == null) beginTurn(foe(S.cur));
@@ -112,9 +120,10 @@
     const beacons = S.p[u.owner].feld.filter(x => x !== u && x.pas === "leuchtfeuer").length;
     return a[2] + u.plusSchaden + beacons + (ortIs("schmiede") ? 1 : 0) + (ortIs("wueste") && u.flink ? 1 : 0);
   }
-  const canAct = u => S.cur === u.owner && !u.neu && !u.gesperrt && (!u.angegriffen || u.nochmal);
+  const canAct = u => S.cur === u.owner && !S.p[u.owner].zieh && !u.neu && !u.gesperrt && (!u.angegriffen || u.nochmal);
   function whyNotAct(u) {
     if (S.cur !== u.owner) return "Nicht dein Zug.";
+    if (S.p[u.owner].zieh) return "Zieh zuerst eine Karte von deinem Deck.";
     if (u.neu) return "Gerade gerufen: greift ab nächster Runde an.";
     if (u.gesperrt) return "Eingefroren: kann diese Runde nicht angreifen.";
     if (u.angegriffen && !u.nochmal) return "Hat diese Runde schon angegriffen.";
@@ -181,6 +190,7 @@
   const BURN_ENERGIE = 1;
   function whyNotBurn(pi) {
     if (S.cur !== pi) return "Nicht dein Zug.";
+    if (S.p[pi].zieh) return "Zieh zuerst eine Karte von deinem Deck.";
     if (S.p[pi].verbrannt) return "Du hast diese Runde schon eine Karte verbrannt.";
     return "";
   }
@@ -195,6 +205,7 @@
   function whyNotPlay(pi, id) {
     const w = W[id], P = S.p[pi];
     if (S.cur !== pi) return "Nicht dein Zug.";
+    if (P.zieh) return "Zieh zuerst eine Karte von deinem Deck.";
     if (w.t === "wesen") {
       const maxW = ortIs("dschungel") ? 2 : 1;
       if (P.beschworen >= maxW) return maxW === 1 ? "Nur 1 Wesen pro Runde." : "Schon 2 Wesen in dieser Runde gerufen.";
@@ -466,6 +477,57 @@
 .d-burn.hot{border-style:solid;box-shadow:0 0 30px rgba(255,106,43,.8);transform:scale(1.08)}
 .d-burn.puff{display:flex;animation:puff .8s forwards}
 @keyframes puff{0%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.6) translateY(-20px)}}
+.d-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+.d-pile{position:relative;width:54px;aspect-ratio:63/88;flex-shrink:0;margin:0 8px}
+.d-pile .pl{position:absolute;inset:0;container-type:inline-size}
+.d-pile .pl.l2{transform:translate(2px,-2px)}.d-pile .pl.l3{transform:translate(4px,-4px)}
+.d-pile .pc{position:absolute;right:-8px;bottom:-6px;z-index:3;min-width:22px;height:20px;padding:0 5px;border-radius:10px;display:grid;place-items:center;background:#0b0d12;border:1px solid #3a4252;font-size:11px;font-weight:800;color:#c3c9d6}
+.d-pile.empty{border:2px dashed rgba(255,255,255,.12);border-radius:8px}
+.d-pile.ready{cursor:pointer;animation:pileGlow 1.2s ease-in-out infinite}
+.d-pile.ready .pl.l1{transform:translateY(-6px);transition:transform .2s}
+.d-pile.ready:hover .pl.l1{transform:translateY(-12px) rotate(-3deg)}
+@keyframes pileGlow{50%{filter:drop-shadow(0 0 12px #ffb347) brightness(1.15)}}
+.d-pile .pz{position:absolute;left:50%;top:-24px;transform:translateX(-50%);white-space:nowrap;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#140800;background:linear-gradient(135deg,#ff6a2b,#ffb347);padding:2px 8px;border-radius:6px;box-shadow:0 0 12px rgba(255,106,43,.6)}
+.d-flycard{position:fixed;z-index:215;aspect-ratio:63/88;container-type:inline-size;pointer-events:none;transition:transform .36s cubic-bezier(.5,0,.3,1),opacity .36s}
+.d-flycard .cback{position:absolute;inset:0}
+.d-choose{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(3,4,8,.82);backdrop-filter:blur(5px)}
+.d-choose.open{display:flex}
+.dc-box{width:min(720px,100%);max-height:90vh;overflow:auto;background:#12151d;border:1px solid #2a3040;border-radius:18px;padding:22px}
+.dc-box h3{font-family:Rajdhani,sans-serif;font-size:28px;text-transform:uppercase;margin-bottom:4px}
+.dc-box p{color:#8a93a8;font-size:14px;margin-bottom:16px}
+.dc-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.dc-deck{position:relative;display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;background:#161a24;border:2px solid #252b3a;text-align:left;overflow:hidden;color:#e8ebf2}
+.dc-deck .feld-bg{opacity:.55}
+.dc-deck>*{position:relative}
+.dc-deck:hover:not([disabled]){border-color:#ffb347;transform:translateY(-2px)}
+.dc-deck.akt{border-color:#ff6a2b;box-shadow:0 0 20px rgba(255,106,43,.3)}
+.dc-deck[disabled]{opacity:.45;cursor:not-allowed}
+.dc-back{width:46px;aspect-ratio:63/88;flex-shrink:0;position:relative;container-type:inline-size}
+.dc-deck b{display:block;font-family:Rajdhani,sans-serif;font-size:19px;text-transform:uppercase;line-height:1.1}
+.dc-deck span{font-size:12px;color:#c3c9d6}
+.dc-deck .star{position:absolute;top:8px;right:10px;font-size:11px;font-weight:800;color:#ffb347;letter-spacing:.5px;text-transform:uppercase}
+.dc-foot{display:flex;justify-content:flex-end;margin-top:16px}
+.db-decks{padding:12px 14px;border-bottom:1px solid #252b3a;display:flex;flex-direction:column;gap:10px}
+.db-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.db-tab{padding:6px 10px;border-radius:8px;background:#161a24;border:1px solid #252b3a;font-size:12px;font-weight:700;color:#8a93a8;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.db-tab em{font-style:normal;opacity:.7;margin-left:3px}
+.db-tab.on{color:#fff;border-color:#ff6a2b;background:rgba(255,106,43,.12)}
+.db-tab.add{color:#ffb347;border-style:dashed}
+.db-name{width:100%;padding:9px 12px;border-radius:9px;background:#0b0d12;border:1px solid #252b3a;color:#fff;font:700 16px Rajdhani,sans-serif;letter-spacing:.5px;text-transform:uppercase;outline:none}
+.db-name:focus{border-color:#ff6a2b}
+.db-r2{display:flex;gap:6px}
+.db-r2 .d-btn{flex:1;padding:8px;font-size:13px}
+.db-r2 .d-btn.on{border-color:#ffb347;color:#ffb347}
+.db-look{display:flex;flex-direction:column;gap:6px}
+.db-look>span{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8a93a8}
+.db-sw{display:flex;gap:6px;flex-wrap:wrap}
+.sw-feld{position:relative;width:52px;height:34px;border-radius:7px;overflow:hidden;border:2px solid #252b3a}
+.sw-feld .feld-bg::before{filter:blur(1px) brightness(.8)}
+.sw-feld.on,.sw-back.on{border-color:#ffb347;box-shadow:0 0 10px rgba(255,179,71,.5)}
+.sw-back{position:relative;width:30px;aspect-ratio:63/88;border-radius:5px;container-type:inline-size;border:2px solid transparent}
+.sw-back .cback{position:absolute;inset:0}
+@media (max-width:760px){.d-pile{width:34px;margin:0 4px}.d-pile .pz{font-size:10px;top:-18px;padding:1px 5px}.d-pile .pc{font-size:10px;min-width:18px;height:16px}
+  .d-hero .d-sub{display:none}.d-row{gap:4px}.d-mid{flex-wrap:wrap;gap:6px}.d-turn{font-size:11px}.d-ort.none{font-size:11px;padding:5px 10px}#dQuit{padding:8px 9px;font-size:12px}#dEndT{padding:9px 10px;font-size:13px}}
 .d-tbar{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:26;display:none;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:12px;background:#1a1410;border:1px solid #ffb347;box-shadow:0 8px 24px rgba(0,0,0,.6);font-weight:700;font-size:14px;white-space:nowrap}
 .d-tbar.on{display:flex}
 .d-float{position:fixed;z-index:200;pointer-events:none;font-family:Rajdhani,sans-serif;font-weight:700;font-size:30px;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 12px currentColor;animation:dFloat 1.1s ease-out forwards;transform:translate(-50%,-50%)}
@@ -526,7 +588,8 @@
 .db-close{position:absolute;top:12px;right:14px;z-index:10}
 @media (max-width:760px){
   .deckb.open{flex-direction:column}
-  .db-side{width:auto;max-height:42vh;border-right:none;border-bottom:1px solid #252b3a}
+  .db-side{width:auto;max-height:52vh;overflow:auto;border-right:none;border-bottom:1px solid #252b3a}
+  .db-side .db-list{flex:none;overflow:visible}
   .db-head{padding:10px 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
   .db-head h3{font-size:20px}
   .db-list{padding:6px}
@@ -538,6 +601,7 @@
 
   document.body.insertAdjacentHTML("beforeend", `
   <div class="duel" id="duel">
+    <div class="d-bg" id="dBg"></div>
     <div class="d-row" id="dTop"></div>
     <div class="d-field" id="dfE"></div>
     <div class="d-mid"><div class="d-turn" id="dTurn"></div><div id="dOrt"></div><div class="d-log" id="dLog"></div></div>
@@ -551,7 +615,8 @@
     <div class="d-banner" id="dBanner"></div>
     <div class="d-end" id="dEnd"></div>
   </div>
-  <div class="deckb" id="deckb"></div>`);
+  <div class="deckb" id="deckb"></div>
+  <div class="d-choose" id="dChoose"></div>`);
 
   let sel = null;      // {kind:"hand", hi} oder {kind:"atk", uid, ai}
   let busy = false;    // Animation oder Computer am Zug
@@ -600,6 +665,14 @@
       <div class="u-fx">${b.join("")}</div>
     </div>`;
   }
+  function pileHTML(pi, ready) {
+    const P = S.p[pi], b = (S.look && S.look.ruecken[pi]) || "glut";
+    if (!P.deck.length) return `<div class="d-pile empty" data-pile="${pi}"><span class="pc">0</span></div>`;
+    const layers = Math.min(3, P.deck.length);
+    let h = "";
+    for (let i = layers; i >= 1; i--) h += `<div class="pl l${i}">${backHTML(b)}</div>`;
+    return `<div class="d-pile${ready ? " ready" : ""}" data-pile="${pi}" title="${ready ? "Karte ziehen" : "Deck: " + P.deck.length + " Karten"}">${h}<span class="pc">${P.deck.length}</span>${ready ? '<span class="pz">Ziehen!</span>' : ""}</div>`;
+  }
   function heroHTML(pi) {
     const P = S.p[pi], en = [];
     for (let i = 0; i < Math.max(P.maxE, P.energie); i++) en.push(`<i class="${i < P.energie ? "on" : ""}"></i>`);
@@ -616,7 +689,7 @@
     const tg = targetSet();
     const mark = (ref, ally) => tg && tg.includes(ref) ? ` tgt${ally ? " ally" : ""}` : "";
     $("dTop").innerHTML = heroHTML(1).replace('class="d-hero enemy"', `class="d-hero enemy${mark("h1")}"`) +
-      `<div class="d-ehand">${ai.hand.map(() => "<i></i>").join("")}</div><div class="d-sp"></div><button class="d-btn" id="dQuit">Aufgeben</button>`;
+      `<div class="d-ehand">${ai.hand.map(() => "<i></i>").join("")}</div><div class="d-sp"></div>${pileHTML(1)}<button class="d-btn" id="dQuit">Aufgeben</button>`;
     const slots = (P, pi) => {
       const h = P.feld.map(u => {
         let cls = mark("u" + u.uid, pi === 0 && sel && sel.kind === "hand");
@@ -635,9 +708,9 @@
       $("dOrt").innerHTML = `<div class="d-ort" data-ort="1">${c.pic ? `<img src="img/${c.pic}.webp" alt="">` : artSVG(c.art)}<div><b>${esc(c.name)}</b><span>${esc(ORTE[w.ort])}</span></div></div>`;
     } else $("dOrt").innerHTML = `<div class="d-ort none">Kein Ort · Orte verändern das Spielfeld</div>`;
     $("dLog").innerHTML = S.log.slice(0, 8).map(l => `<div>${esc(l)}</div>`).join("");
-    const anyMove = myTurn && (me.hand.some(id => !whyNotPlay(0, id)) || me.feld.some(u => canAct(u) && u.atk.some(a => atkCost(u, a) <= me.energie)));
+    const anyMove = myTurn && (me.zieh || me.hand.some(id => !whyNotPlay(0, id)) || me.feld.some(u => canAct(u) && u.atk.some(a => atkCost(u, a) <= me.energie)));
     $("dBot").innerHTML = heroHTML(0).replace('class="d-hero me"', `class="d-hero me${mark("h0", true)}"`) +
-      `<div class="d-sp"></div><button class="d-btn hot${!anyMove && myTurn ? " pulse" : ""}" id="dEndT" ${myTurn && !busy ? "" : "disabled"}>Zug beenden</button>`;
+      `<div class="d-sp"></div>${pileHTML(0, myTurn && !busy && me.zieh > 0)}<button class="d-btn hot${!anyMove && myTurn ? " pulse" : ""}" id="dEndT" ${myTurn && !busy ? "" : "disabled"}>Zug beenden</button>`;
     const newCount = Math.max(0, me.hand.length - lastHand);
     $("dHand").innerHTML = me.hand.map((id, hi) => {
       const ok = myTurn && !whyNotPlay(0, id);
@@ -758,6 +831,18 @@
       if (w.t === "ort") banner(card(id).name, "#ffcf9c");
     } else render();
   }
+  function drawClick() {
+    if (!S || busy || S.cur !== 0 || !S.p[0].zieh) return;
+    const pile = document.querySelector('#duel [data-pile="0"]'), hand = $("dHand");
+    const r = pile.getBoundingClientRect(), hr = hand.getBoundingClientRect();
+    const f = document.createElement("div"); f.className = "d-flycard"; f.innerHTML = backHTML(S.look.ruecken[0]);
+    f.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px`;
+    document.body.appendChild(f); busy = true;
+    const tx = hr.left + hr.width / 2 + Math.min(S.p[0].hand.length, 6) * 30 - r.left, ty = hr.top + 20 - r.top;
+    requestAnimationFrame(() => { f.style.transform = `translate(${tx}px,${ty}px) rotate(-8deg) scale(1.6)`; f.style.opacity = ".2"; });
+    if (window.__sfx) window.__sfx("deal");
+    setTimeout(() => { f.remove(); busy = false; takeDraw(0); afterAction(); }, 380);
+  }
   function doBurn(hi) {
     cancelSel();
     if (burn(0, hi)) { if (window.__sfx) window.__sfx("tear"); afterAction(); burnFlash(); } else render();
@@ -780,6 +865,7 @@
       if (ref && tg.includes(ref)) { if (sel.kind === "hand") doPlay(sel.hi, ref); else doAttack(sel.uid, sel.ai, ref); }
       return;
     }
+    if (e.target.closest('[data-pile="0"]')) { drawClick(); return; }
     if (ortEl && S.ort) { openPanel(`<div class="pc">${cardHTML(card(S.ort.id), false)}</div><div class="d-pbox"><h3>${esc(card(S.ort.id).name)}</h3><div class="hint">Gelegt von: ${esc(S.p[S.ort.owner].name)}. Gilt für beide, bis ein neuer Ort kommt.</div><button class="d-btn" id="pX">Zurück</button></div>`); $("pX").onclick = cancelSel; return; }
     if (hc) { showHandCard(+hc.dataset.hi); return; }
     if (uEl) { const u = findU(+uEl.dataset.u); if (u) showUnit(u); }
@@ -921,7 +1007,7 @@
       <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="d-btn" id="eBack">Zurück</button><button class="d-btn hot" id="eAgain">Nochmal</button></div>`;
     $("dEnd").classList.add("open");
     $("eBack").onclick = closeDuel;
-    $("eAgain").onclick = () => { $("dEnd").classList.remove("open"); startDuel(); };
+    $("eAgain").onclick = () => { $("dEnd").classList.remove("open"); startDuel(lastDeckId); };
     if (typeof renderGlut === "function") renderGlut("bump");
   }
   function closeDuel() {
@@ -934,36 +1020,69 @@
      ========================================================= */
   const ownedCount = id => { const o = (typeof own === "function") ? own(id) : { n: 0, f: 0 }; return o.n + o.f; };
   const maxCopies = id => Math.min(ownedCount(id), ["legendary", "mythic"].includes(card(id).r) ? R.maxKopienSelten : R.maxKopien);
-  function loadDeck() {
-    let d = [];
-    try { d = JSON.parse(store("glutwerk-deck") || "[]") || []; } catch (e) { d = []; }
-    const cnt = {};
-    return d.filter(id => W[id] && card(id) && (cnt[id] = (cnt[id] || 0) + 1) <= maxCopies(id));
-  }
-  const saveDeck = d => store("glutwerk-deck", JSON.stringify(d));
   const deckReady = d => d.length === R.deckGroesse;
+  const MAX_DECKS = 8;
+  function cleanDeck(list) { const cnt = {}; return (list || []).filter(id => W[id] && card(id) && (cnt[id] = (cnt[id] || 0) + 1) <= maxCopies(id)); }
+  /* Alle Decks: { aktiv, liste: [{ id, name, karten, feld, ruecken }] } */
+  function loadDecks() {
+    let d = null;
+    try { d = JSON.parse(store("glutwerk-decks") || "null"); } catch (e) { d = null; }
+    if (!d || !Array.isArray(d.liste) || !d.liste.length) {
+      let alt = []; try { alt = JSON.parse(store("glutwerk-deck") || "[]") || []; } catch (e) { alt = []; }
+      d = { aktiv: "d1", liste: [{ id: "d1", name: "Mein Deck", karten: alt, feld: "glut", ruecken: "glut" }] };
+    }
+    d.liste.forEach(x => { x.karten = cleanDeck(x.karten); if (!FELDER[x.feld]) x.feld = "glut"; if (!RUECKEN[x.ruecken]) x.ruecken = "glut"; x.name = String(x.name || "Deck").slice(0, 24); });
+    if (!d.liste.some(x => x.id === d.aktiv)) d.aktiv = d.liste[0].id;
+    return d;
+  }
+  const saveDecks = d => store("glutwerk-decks", JSON.stringify(d));
+  const aktDeck = d => d.liste.find(x => x.id === d.aktiv);
+  const GEGNER_RUECKEN = { Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
 
-  function startDuel() {
-    const mine = loadDeck();
-    const deck = deckReady(mine) ? mine : STARTERDECK;
+  /* ---- Duell starten (mit Deck-Auswahl) ---- */
+  let lastDeckId = null;
+  function startDuel(deckId) {
+    const D = loadDecks(), ready = D.liste.filter(x => deckReady(x.karten));
+    if (deckId === undefined && ready.length >= 2) { openChooser(D); return; }
+    const mine = D.liste.find(x => x.id === deckId) || (deckReady(aktDeck(D).karten) ? aktDeck(D) : ready[0]);
+    const look = mine || aktDeck(D);
+    lastDeckId = mine ? mine.id : null;
     const g = rnd(GEGNER_DECKS);
-    start(deck, g.deck, g.name);
+    start(mine ? mine.karten : STARTERDECK, g.deck, g.name);
+    S.look = { feld: look.feld, ruecken: [look.ruecken, GEGNER_RUECKEN[g.name] || "schatten"] };
+    $("dBg").innerHTML = feldBG(look.feld);
     sel = null; busy = false; lastHand = 0;
+    $("dChoose").classList.remove("open");
     $("duel").classList.add("open"); document.body.style.overflow = "hidden";
     if (typeof audio === "function") audio();
     render();
     banner(S.cur === 0 ? "Du beginnst!" : `${g.name} beginnt`, "#ffb347");
     if (S.cur === 1) setTimeout(runAi, 900);
   }
+  function openChooser(D) {
+    $("dChoose").innerHTML = `<div class="dc-box"><h3>Mit welchem Deck?</h3><p>Dein aktuelles Deck ist markiert. Unvollständige Decks (weniger als ${R.deckGroesse} Karten) kannst du noch nicht spielen.</p>
+      <div class="dc-list">${D.liste.map(x => { const ok = deckReady(x.karten); return `<button class="dc-deck${x.id === D.aktiv ? " akt" : ""}" data-pick="${x.id}" ${ok ? "" : "disabled"}>
+        ${feldBG(x.feld)}<div class="dc-back">${backHTML(x.ruecken)}</div>
+        <div><b>${esc(x.name)}</b><span>${x.karten.length} / ${R.deckGroesse} Karten · ${esc(FELDER[x.feld].name)}</span></div>
+        ${x.id === D.aktiv ? '<span class="star">★ Aktuell</span>' : ""}</button>`; }).join("")}</div>
+      <div class="dc-foot"><button class="d-btn" id="dcX">Abbrechen</button></div></div>`;
+    $("dChoose").classList.add("open");
+    $("dChoose").querySelectorAll("[data-pick]").forEach(b => b.onclick = () => startDuel(b.dataset.pick));
+    $("dcX").onclick = () => $("dChoose").classList.remove("open");
+  }
+  $("dChoose").addEventListener("click", e => { if (e.target === $("dChoose")) $("dChoose").classList.remove("open"); });
 
   /* ---- Baukasten ---- */
-  let dbFilter = "alle", deckDraft = [];
+  let dbFilter = "alle", decks = null, curId = null, deckDraft = [], delArmed = 0;
+  const curDeck = () => decks.liste.find(x => x.id === curId);
   function openBuilder() {
-    deckDraft = loadDeck();
+    decks = loadDecks(); curId = decks.aktiv; deckDraft = curDeck().karten;
     $("deckb").classList.add("open"); document.body.style.overflow = "hidden";
     renderBuilder();
   }
+  function switchDeck(id) { curId = id; deckDraft = curDeck().karten; renderBuilder(); }
   function renderBuilder() {
+    const D = curDeck();
     const cnt = {}; deckDraft.forEach(id => cnt[id] = (cnt[id] || 0) + 1);
     const ok = deckReady(deckDraft);
     const typ = { wesen: 0, zauber: 0, ausr: 0, ort: 0 }; deckDraft.forEach(id => typ[W[id].t]++);
@@ -971,9 +1090,17 @@
       .map(id => { const w = W[id]; return `<div class="db-row" style="--rc:var(--${card(id).r})"><span class="k ${w.t === "wesen" ? "hp" : "en"}">${w.t === "wesen" ? "❤" + w.hp : "⚡" + w.kosten}</span><span class="nm">${esc(card(id).name)}</span><span class="x">${cnt[id]}×</span><button data-rm="${id}">−</button></div>`; }).join("");
     const pool = CARDS.filter(c => W[c.id] && ownedCount(c.id) > 0 && (dbFilter === "alle" || W[c.id].t === dbFilter));
     const chip = (k, l) => `<button class="chip${dbFilter === k ? " on" : ""}" data-dbf="${k}">${l}</button>`;
+    const isAkt = curId === decks.aktiv;
     $("deckb").innerHTML = `
       <div class="db-side">
-        <div class="db-head"><h3>Dein Deck</h3><div class="db-count ${ok ? "ok" : "no"}">${deckDraft.length} / ${R.deckGroesse} Karten${ok ? " ✓" : ""}</div>
+        <div class="db-decks">
+          <div class="db-tabs">${decks.liste.map(x => `<button class="db-tab${x.id === curId ? " on" : ""}" data-deck="${x.id}">${x.id === decks.aktiv ? "★ " : ""}${esc(x.name)}<em>${x.karten.length}/${R.deckGroesse}</em></button>`).join("")}${decks.liste.length < MAX_DECKS ? '<button class="db-tab add" id="dbNew">＋ Neues Deck</button>' : ""}</div>
+          <input class="db-name" id="dbName" value="${esc(D.name)}" maxlength="24" placeholder="Name des Decks">
+          <div class="db-r2"><button class="d-btn${isAkt ? " on" : ""}" id="dbAkt">${isAkt ? "★ Aktuelles Deck" : "☆ Als aktuell wählen"}</button>${decks.liste.length > 1 ? '<button class="d-btn" id="dbDel">Löschen</button>' : ""}</div>
+          <div class="db-look"><span>Spielfeld</span><div class="db-sw">${Object.entries(FELDER).map(([k, f]) => `<button class="sw-feld${D.feld === k ? " on" : ""}" data-feld="${k}" title="${esc(f.name)}">${feldBG(k)}</button>`).join("")}</div>
+            <span>Kartenrücken</span><div class="db-sw">${Object.entries(RUECKEN).map(([k, r]) => `<button class="sw-back${D.ruecken === k ? " on" : ""}" data-back="${k}" title="${esc(r.name)}">${backHTML(k)}</button>`).join("")}</div></div>
+        </div>
+        <div class="db-head"><div class="db-count ${ok ? "ok" : "no"}">${deckDraft.length} / ${R.deckGroesse} Karten${ok ? " ✓" : ""}</div>
           <div class="db-mix">${typ.wesen} Wesen · ${typ.zauber} Zauber · ${typ.ausr} Ausrüstung · ${typ.ort} Orte</div></div>
         <div class="db-list">${rows || `<div class="db-empty">Klick rechts auf Karten, um sie ins Deck zu legen.<br><br>Max. ${R.maxKopien}× pro Karte, legendäre und mythische nur 1×.</div>`}</div>
         <div class="db-foot"><button class="d-btn" id="dbAuto">Auffüllen</button><button class="d-btn" id="dbClear">Leeren</button><button class="d-btn hot" id="dbDone">Fertig</button></div>
@@ -982,14 +1109,32 @@
         <div class="db-filters">${chip("alle", "Alle")}${chip("wesen", "Wesen")}${chip("zauber", "Zauber")}${chip("ausr", "Ausrüstung")}${chip("ort", "Orte")}</div>
         <div class="db-grid">${pool.length ? pool.map(c => { const n = cnt[c.id] || 0, full = n >= maxCopies(c.id) || deckDraft.length >= R.deckGroesse; return `<div class="db-c${full ? " max" : ""}" data-add="${c.id}">${cardHTML(c, false)}${n ? `<span class="in">${n}</span>` : ""}${full ? "" : '<span class="plus">+</span>'}</div>`; }).join("") : `<div class="db-empty" style="grid-column:1/-1">Du hast noch keine Karten dieser Art. Öffne Packs!</div>`}</div>
       </div>`;
-    $("deckb").querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { deckDraft.splice(deckDraft.lastIndexOf(b.dataset.rm), 1); renderBuilder(); });
-    $("deckb").querySelectorAll("[data-add]").forEach(b => b.onclick = () => {
+    const q = sel => $("deckb").querySelectorAll(sel);
+    q("[data-deck]").forEach(b => b.onclick = () => switchDeck(b.dataset.deck));
+    q("[data-feld]").forEach(b => b.onclick = () => { D.feld = b.dataset.feld; saveDecks(decks); renderBuilder(); });
+    q("[data-back]").forEach(b => b.onclick = () => { D.ruecken = b.dataset.back; saveDecks(decks); renderBuilder(); });
+    $("dbName").oninput = () => { D.name = $("dbName").value.slice(0, 24) || "Deck"; saveDecks(decks); const t = $("deckb").querySelector(`[data-deck="${curId}"]`); if (t) t.innerHTML = `${isAkt ? "★ " : ""}${esc(D.name)}<em>${deckDraft.length}/${R.deckGroesse}</em>`; };
+    $("dbAkt").onclick = () => { decks.aktiv = curId; saveDecks(decks); renderBuilder(); };
+    if ($("dbNew")) $("dbNew").onclick = () => {
+      const id = "d" + Date.now().toString(36);
+      decks.liste.push({ id, name: "Deck " + (decks.liste.length + 1), karten: [], feld: "glut", ruecken: "glut" });
+      saveDecks(decks); switchDeck(id); setTimeout(() => { $("dbName").focus(); $("dbName").select(); }, 30);
+    };
+    if ($("dbDel")) $("dbDel").onclick = () => {
+      if (Date.now() - delArmed > 3000) { delArmed = Date.now(); $("dbDel").textContent = "Wirklich löschen?"; return; }
+      delArmed = 0;
+      decks.liste = decks.liste.filter(x => x.id !== curId);
+      if (decks.aktiv === curId) decks.aktiv = decks.liste[0].id;
+      saveDecks(decks); switchDeck(decks.aktiv);
+    };
+    q("[data-rm]").forEach(b => b.onclick = () => { deckDraft.splice(deckDraft.lastIndexOf(b.dataset.rm), 1); saveDecks(decks); renderBuilder(); });
+    q("[data-add]").forEach(b => b.onclick = () => {
       const id = b.dataset.add, n = deckDraft.filter(x => x === id).length;
       if (n >= maxCopies(id) || deckDraft.length >= R.deckGroesse) return;
-      deckDraft.push(id); renderBuilder();
+      deckDraft.push(id); saveDecks(decks); renderBuilder();
     });
-    $("deckb").querySelectorAll("[data-dbf]").forEach(b => b.onclick = () => { dbFilter = b.dataset.dbf; renderBuilder(); });
-    $("dbClear").onclick = () => { deckDraft = []; renderBuilder(); };
+    q("[data-dbf]").forEach(b => b.onclick = () => { dbFilter = b.dataset.dbf; renderBuilder(); });
+    $("dbClear").onclick = () => { deckDraft.length = 0; saveDecks(decks); renderBuilder(); };
     $("dbAuto").onclick = () => {
       // füllt mit den stärksten eigenen Karten auf, ca. 12 Wesen
       const pool = CARDS.filter(c => W[c.id] && ownedCount(c.id)).map(c => c.id);
@@ -1002,18 +1147,19 @@
       const orte = () => deckDraft.filter(x => W[x].t === "ort").length;
       add(id => W[id].t === "wesen"); add(id => W[id].t === "zauber" || W[id].t === "ausr");
       add(id => W[id].t === "ort" && orte() < 2); add(() => true);
-      renderBuilder();
+      saveDecks(decks); renderBuilder();
     };
-    $("dbDone").onclick = () => { saveDeck(deckDraft); $("deckb").classList.remove("open"); document.body.style.overflow = ""; renderArena(); };
+    $("dbDone").onclick = () => { saveDecks(decks); $("deckb").classList.remove("open"); document.body.style.overflow = ""; renderArena(); };
   }
 
   /* ---- Bereich auf der Seite ---- */
   function renderArena() {
     const el = $("arena"); if (!el) return;
-    const d = loadDeck(), ok = deckReady(d);
+    const D = loadDecks(), d = aktDeck(D).karten, ok = deckReady(d), n = D.liste.length;
     const k = "glutwerk-duell-" + new Date().toISOString().slice(0, 10), wins = +store(k) || 0;
-    el.querySelector("#arDeck").innerHTML = ok ? `Dein Deck: <b style="color:#3ddc97">${d.length} / ${R.deckGroesse} ✓</b>` :
-      `Dein Deck: <b style="color:#ffb347">${d.length} / ${R.deckGroesse}</b> · bis es voll ist, spielst du mit dem <b>Starterdeck</b>`;
+    el.querySelector("#arDeck").innerHTML = (ok ? `Aktuelles Deck: <b style="color:#3ddc97">${esc(aktDeck(D).name)} ✓</b>` :
+      `Aktuelles Deck: <b style="color:#ffb347">${esc(aktDeck(D).name)} · ${d.length} / ${R.deckGroesse}</b> · bis es voll ist, spielst du mit dem <b>Starterdeck</b>`) +
+      (n > 1 ? ` <span style="color:var(--muted)">· ${n} Decks</span>` : "");
     el.querySelector("#arWins").textContent = `Siege heute: ${Math.min(wins, R.siegeProTag)} / ${R.siegeProTag} (je +${R.siegGlut} Glut)`;
   }
   window.Duell = { startDuel, openBuilder, renderArena };
@@ -1029,7 +1175,7 @@
     const res = { a: 0, b: 0, d: 0, runden: 0, fehler: 0 };
     for (let i = 0; i < (n || 50); i++) {
       try {
-        start(rnd(GEGNER_DECKS).deck, rnd(GEGNER_DECKS).deck, "KI"); S.p[0].ki = true;
+        start(rnd(GEGNER_DECKS).deck, rnd(GEGNER_DECKS).deck, "KI"); S.p[0].ki = true; while (S.p[0].zieh) takeDraw(0);
         let g = 0;
         while (S.over == null && g++ < 400) {
           let a, s = 0;

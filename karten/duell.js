@@ -24,10 +24,10 @@
     return {
       uid: ++UID, id, owner, name, tok: !!tok, hp: w.hp, max: w.hp, atk: w.atk.map(a => a.slice()),
       waechter: !!w.waechter, flink: !!w.flink, schild: !!w.schild, pas: w.pas || null, foxy: !!w.foxy,
-      plusSchaden: 0, billiger: 0, weniger: 0, frost: 0, gesperrt: false, neu: true, angegriffen: false, nochmal: false, equip: [],
+      plusSchaden: 0, billiger: 0, weniger: 0, frost: 0, gesperrt: false, neu: true, angegriffen: false, nochmal: false, equip: [], buffs: [],
     };
   }
-  const mkPlayer = (name, deck, ki) => ({ name, ki, hp: R.leben, deck: shuffle(deck.slice()), hand: [], feld: [], energie: 0, maxE: 0, grab: [], beschworen: 0 });
+  const mkPlayer = (name, deck, ki) => ({ name, ki, hp: R.leben, deck: shuffle(deck.slice()), hand: [], feld: [], energie: 0, maxE: 0, grab: [], beschworen: 0, verbrannt: false });
   const foe = pi => 1 - pi;
   const ortIs = k => S.ort && W[S.ort.id].ort === k;
   const log = t => { S.log.unshift(t); S.log.length = Math.min(S.log.length, 30); };
@@ -53,7 +53,7 @@
     const P = S.p[pi];
     P.maxE = Math.min(P.maxE + 1, R.maxEnergie);
     P.energie = P.maxE + (ortIs("kristalltal") ? 1 : 0);
-    P.beschworen = 0;
+    P.beschworen = 0; P.verbrannt = false;
     if (ortIs("lavawelt")) { hurtHero(pi, 1); P.energie += 1; }
     P.feld.forEach(u => { u.neu = false; u.angegriffen = false; u.nochmal = false; u.gesperrt = u.frost > 0; if (u.frost > 0) u.frost--; });
     if (ortIs("wiese")) P.feld.forEach(u => heal(u, 1));
@@ -61,7 +61,7 @@
     if (ortIs("baum")) { P.feld.forEach(u => heal(u, 1)); healHero(pi, 1); }
     if (ortIs("riss") && S.p[foe(pi)].feld.length) { const u = rnd(S.p[foe(pi)].feld); hurt(u, 2); log(`Der Riss trifft ${u.name}.`); }
     P.feld.slice().forEach(u => {
-      if (u.pas === "brut" && P.feld.length < R.feldPlaetze) { P.feld.push(mkUnit("#ameise", pi)); log("Eine Ameise schlüpft."); }
+      if (u.pas === "brut" && P.feld.length < R.feldPlaetze) { const a = mkUnit("#ameise", pi); a.neu = false; P.feld.push(a); log("Eine Ameise schlüpft und kann sofort angreifen."); }
       if (u.pas === "honig") healHero(pi, 1);
       if (u.pas === "kuh") P.feld.forEach(x => heal(x, 1));
     });
@@ -177,6 +177,21 @@
     }
     return null;
   }
+  /* Karte von der Hand verbrennen: +1 Energie, 1× pro Runde */
+  const BURN_ENERGIE = 1;
+  function whyNotBurn(pi) {
+    if (S.cur !== pi) return "Nicht dein Zug.";
+    if (S.p[pi].verbrannt) return "Du hast diese Runde schon eine Karte verbrannt.";
+    return "";
+  }
+  function burn(pi, hi) {
+    const P = S.p[pi], id = P.hand[hi];
+    if (!id || whyNotBurn(pi)) return false;
+    P.hand.splice(hi, 1); P.verbrannt = true; P.energie += BURN_ENERGIE;
+    ev("h" + pi, "+" + BURN_ENERGIE + " ⚡", "heal");
+    log(`${P.name} verbrennt ${card(id).name} für ${BURN_ENERGIE} Energie.`);
+    return true;
+  }
   function whyNotPlay(pi, id) {
     const w = W[id], P = S.p[pi];
     if (S.cur !== pi) return "Nicht dein Zug.";
@@ -219,7 +234,7 @@
       log(`${P.name} spielt ${name}.`);
       if (w.brichtSchild && tu && tu.schild) { tu.schild = false; ev("u" + tu.uid, "Schild kaputt!", "shield"); }
       if (w.schaden) { if (tu) hurt(tu, w.schaden); else hurtHero(foe(pi), w.schaden); }
-      if (w.dauerSchaden && tu) { tu.plusSchaden += w.dauerSchaden; ev("u" + tu.uid, "+" + w.dauerSchaden + " ⚔", "heal"); }
+      if (w.dauerSchaden && tu) { tu.plusSchaden += w.dauerSchaden; tu.buffs.push(id); ev("u" + tu.uid, "+" + w.dauerSchaden + " ⚔", "heal"); }
       if (w.sucheTyp) { const k = P.deck.findIndex(x => W[x] && W[x].t === w.sucheTyp); if (k >= 0 && P.hand.length < 9) { P.hand.push(P.deck.splice(k, 1)[0]); log(`${P.name} holt eine Ausrüstung.`); } }
       if (w.schadenAlleFeinde) E.feld.slice().forEach(u => hurt(u, w.schadenAlleFeinde));
       if (w.schadenGegner) hurtHero(foe(pi), w.schadenGegner);
@@ -268,6 +283,15 @@
       if (w.gibFlink && w.t === "zauber" && E.feld.length) { const u = P.feld.filter(u => !u.flink).sort((a, b) => unitVal(b) - unitVal(a))[0]; if (u) return { k: "play", hi: x.hi, t: "u" + u.uid }; }
       if (w.schadenAlleWesen && E.feld.length > P.feld.length + 1) return { k: "play", hi: x.hi };
       if (w.maxEnergie && P.maxE < R.maxEnergie) return { k: "play", hi: x.hi };
+    }
+    // 2b. Karte verbrennen, wenn dadurch ein Angriff möglich wird oder die Hand voll ist
+    if (!P.verbrannt && P.hand.length >= 2) {
+      const useless = P.hand.map((id, hi) => ({ id, hi })).filter(x => W[x.id].t !== "wesen" && whyNotPlay(pi, x.id));
+      const needs = P.feld.some(u => canAct(u) && u.atk.some(a => atkCost(u, a) === P.energie + BURN_ENERGIE));
+      if (useless.length && (needs || P.hand.length >= 6)) {
+        const pick = useless.sort((a, b) => ["common", "rare", "epic", "legendary", "mythic"].indexOf(card(a.id).r) - ["common", "rare", "epic", "legendary", "mythic"].indexOf(card(b.id).r))[0];
+        return { k: "burn", hi: pick.hi };
+      }
     }
     // 3. Angreifen
     const att = aiAttack(pi);
@@ -325,6 +349,7 @@
 .duel{position:fixed;inset:0;z-index:105;display:none;flex-direction:column;overflow:hidden;color:#e8ebf2;
   background:radial-gradient(ellipse 80% 60% at 50% 50%,#1c1510 0%,#0b0a0c 70%),#08090c}
 .duel.open{display:flex}
+.duel{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .duel::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
   background:repeating-linear-gradient(0deg,transparent 0 39px,rgba(255,255,255,.025) 39px 40px),repeating-linear-gradient(90deg,transparent 0 39px,rgba(255,255,255,.025) 39px 40px)}
 .d-row{position:relative;display:flex;align-items:center;gap:12px;padding:8px 14px}
@@ -415,6 +440,32 @@
 .d-banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;pointer-events:none;font-family:Rajdhani,sans-serif;font-weight:700;font-size:clamp(34px,7vw,64px);letter-spacing:3px;text-transform:uppercase;white-space:nowrap;opacity:0}
 .d-banner.go{animation:banner 1.3s ease forwards}
 @keyframes banner{15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%)}}
+.unit .u-fx{position:absolute;top:4px;right:-11px;display:flex;flex-direction:column;gap:3px;z-index:3}
+.fxi{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;line-height:1;background:#0b0d12;border:1.5px solid #3a4252;box-shadow:0 2px 6px rgba(0,0,0,.6);overflow:hidden;flex-shrink:0;cursor:help}
+.fxi img,.fxi svg{width:100%;height:100%;object-fit:contain;background:#1b2230}
+.fxi.frost{border-color:#38bdf8;background:#0c2a3a}.fxi.schild{border-color:#60a5fa}.fxi.waechter{border-color:#d4a017}.fxi.flink{border-color:#22d3ee}
+.fxi.equip{border-color:#ffb347}.fxi.buff{border-color:#ff6a2b}.fxi.pas{border-color:#b26bff}.fxi.nochmal{border-color:#3ddc97}.fxi.neu{opacity:.75}
+.d-tip{position:fixed;z-index:220;display:none;max-width:240px;padding:9px 11px;border-radius:10px;background:#151a24;border:1px solid #3a4252;box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:12.5px;line-height:1.4;color:#c3c9d6;pointer-events:none}
+.d-tip.on{display:block}
+.d-tip b{color:#fff;font-size:13.5px;margin-right:6px}.d-tip em{font-style:normal;font-size:11px;color:#ffb347;font-weight:700}
+.fxlist{display:flex;flex-direction:column;gap:6px;max-height:34vh;overflow:auto}
+.fxrow{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.35;color:#c3c9d6;background:rgba(255,255,255,.04);border-radius:8px;padding:6px 8px}
+.fxrow .fxi{width:26px;height:26px;font-size:14px}
+.fxrow b{color:#fff}.fxrow em{font-style:normal;font-size:11px;color:#ffb347;font-weight:700}
+.d-btn.burn{background:linear-gradient(135deg,#7a1c08,#c2410c);border-color:#ff6a2b;color:#ffe0c8}
+.hcard{touch-action:pan-x}
+.hcard.dragging{opacity:.25}
+.d-ghost{position:fixed;z-index:210;pointer-events:none;container-type:inline-size;filter:drop-shadow(0 18px 24px rgba(0,0,0,.7))}
+.duel.drop-field #dfM,.duel.drop-board .d-field,.duel.drop-board .d-mid{outline:2px dashed rgba(61,220,151,.45);outline-offset:-4px;border-radius:14px}
+#dfM.hot{outline:2px solid #3ddc97!important;background:rgba(61,220,151,.07)}
+.tgt.hover{transform:scale(1.1)!important}
+.d-burn{position:absolute;left:50%;translate:-50% 0;bottom:calc(var(--handH,170px) + 6px);z-index:24;display:none;align-items:center;gap:8px;padding:10px 14px;border-radius:14px;font-size:26px;
+  background:radial-gradient(circle at 30% 50%,rgba(255,106,43,.35),rgba(30,10,4,.92));border:2px dashed #ff6a2b;color:#ffcf9c}
+.d-burn span{font-size:12px;line-height:1.25}.d-burn b{color:#ffb347}
+.d-burn.on{display:flex}
+.d-burn.hot{border-style:solid;box-shadow:0 0 30px rgba(255,106,43,.8);transform:scale(1.08)}
+.d-burn.puff{display:flex;animation:puff .8s forwards}
+@keyframes puff{0%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.6) translateY(-20px)}}
 .d-tbar{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:26;display:none;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:12px;background:#1a1410;border:1px solid #ffb347;box-shadow:0 8px 24px rgba(0,0,0,.6);font-weight:700;font-size:14px;white-space:nowrap}
 .d-tbar.on{display:flex}
 .d-float{position:fixed;z-index:200;pointer-events:none;font-family:Rajdhani,sans-serif;font-weight:700;font-size:30px;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 12px currentColor;animation:dFloat 1.1s ease-out forwards;transform:translate(-50%,-50%)}
@@ -493,6 +544,8 @@
     <div class="d-field" id="dfM"></div>
     <div class="d-row" id="dBot"></div>
     <div class="d-hand" id="dHand"></div>
+    <div class="d-burn" id="dBurn">🔥<span>Hier ablegen: verbrennen<br><b>+1 Energie</b></span></div>
+    <div class="d-tip" id="dTip"></div>
     <div class="d-tbar" id="dTbar"><span id="dTtxt">Wähle ein Ziel</span><button class="d-btn" id="dTcancel">Abbrechen</button></div>
     <div class="d-panel" id="dPanel"></div>
     <div class="d-banner" id="dBanner"></div>
@@ -514,19 +567,37 @@
   }
   const rcol = id => id[0] === "#" ? "var(--common)" : `var(--${card(id).r})`;
 
+  /* Alle Effekte eines Wesens: Symbol, Name, was es macht, wie lange */
+  function miniArt(id) {
+    const c = card(id);
+    if (c.pic) return `<img src="img/${c.pic}.webp" alt="">`;
+    if (c.img) return `<img src="${FOXY_IMG(c.img)}" alt="" style="object-fit:cover">`;
+    return artSVG(c.art);
+  }
+  function fxList(u) {
+    const L = [];
+    if (u.neu) L.push({ ic: "💤", cls: "neu", n: "Gerade gerufen", t: "Kann noch nicht angreifen.", d: "bis zu deinem nächsten Zug" });
+    if (u.gesperrt) L.push({ ic: "❄️", cls: "frost", n: "Eingefroren", t: "Kann nicht angreifen.", d: "diese Runde" });
+    else if (u.frost > 0) L.push({ ic: "❄️", cls: "frost", n: "Eingefroren", t: "Kann nicht angreifen.", d: "nächste Runde" });
+    if (u.schild) L.push({ ic: "🛡️", cls: "schild", n: "Schild", t: "Blockt den nächsten Treffer komplett.", d: "bis zum nächsten Treffer" });
+    if (u.waechter) L.push({ ic: "🏰", cls: "waechter", n: "Wächter", t: "Gegner müssen zuerst dieses Wesen angreifen.", d: "dauerhaft" });
+    if (u.flink) L.push({ ic: "💨", cls: "flink", n: "Flink", t: "Darf den Gegner direkt angreifen, auch wenn Wesen im Weg sind.", d: "dauerhaft" });
+    if (u.nochmal) L.push({ ic: "🔁", cls: "nochmal", n: "Nochmal", t: "Darf diese Runde ein zweites Mal angreifen.", d: "diese Runde" });
+    if (u.pas && PASSIV[u.pas] && !(u.pas === "untot" && u.auferstanden)) L.push({ ic: "✨", cls: "pas", n: "Fähigkeit", t: PASSIV[u.pas], d: u.pas === "untot" ? "einmal" : "dauerhaft" });
+    u.equip.forEach(e => L.push({ img: e, cls: "equip", n: card(e).name, t: fxText(W[e]).replace(/^An ein eigenes Wesen: /, ""), d: "dauerhaft" }));
+    u.buffs.forEach(e => L.push({ img: e, cls: "buff", n: card(e).name, t: fxText(W[e]).replace(/^Ein eigenes Wesen /, ""), d: "dauerhaft" }));
+    return L;
+  }
+  const fxChip = (f, i) => `<span class="fxi ${f.cls}" data-tip="${i}">${f.img ? miniArt(f.img) : f.ic}</span>`;
+  const fxRows = u => fxList(u).map(f => `<div class="fxrow"><span class="fxi ${f.cls}">${f.img ? miniArt(f.img) : f.ic}</span><div><b>${esc(f.n)}</b> <em>${esc(f.d)}</em><br>${esc(f.t)}</div></div>`).join("");
   function unitHTML(u, extra) {
     const best = Math.max(...u.atk.map(a => atkDmg(u, a)));
-    const b = [];
-    if (u.waechter) b.push('<span class="g">Wächter</span>');
-    if (u.flink) b.push('<span class="f">Flink</span>');
-    if (u.schild) b.push('<span class="s">Schild</span>');
-    if (u.frost || u.gesperrt) b.push('<span class="fr">Frost</span>');
-    if (u.equip.length) b.push(`<span class="e">+${u.equip.length} Ausr.</span>`);
+    const b = fxList(u).map(fxChip);
     return `<div class="unit ${extra || ""}${u.schild ? " shielded" : ""}${u.gesperrt ? " frozen" : ""}" data-u="${u.uid}" style="--rc:${rcol(u.id)}">
       <div class="u-art">${artHTML(u.id)}</div>
       <div class="u-name">${esc(u.name)}</div>
       <div class="u-stats"><span class="u-hp${u.hp <= 2 ? " low" : ""}">❤ ${u.hp}</span><span class="u-atk">⚔ ${best}</span></div>
-      <div class="u-badges">${b.join("")}</div>
+      <div class="u-fx">${b.join("")}</div>
     </div>`;
   }
   function heroHTML(pi) {
@@ -573,6 +644,7 @@
       return `<div class="hcard${ok ? "" : " no"}${hi >= me.hand.length - newCount ? " new" : ""}" data-hi="${hi}">${cardHTML(card(id), false)}${ok && W[id].t !== "wesen" ? '<div class="cost-glow"></div>' : ""}</div>`;
     }).join("");
     lastHand = me.hand.length;
+    $("duel").style.setProperty("--handH", $("dHand").offsetHeight + "px");
     $("dQuit").onclick = () => { if (confirmQuit()) finish(1); };
     $("dEndT").onclick = () => { if (!busy && S.cur === 0) { cancelSel(); endTurn(); afterAction(); } };
   }
@@ -644,8 +716,11 @@
     openPanel(`<div class="pc">${cardHTML(c, false)}</div><div class="d-pbox"><h3>${esc(c.name)}</h3>
       ${why ? `<div class="why">${esc(why)}</div>` : `<div class="hint">${w.t === "wesen" ? "Kostenlos rufen (1 Wesen pro Runde). Es kann ab nächster Runde angreifen." : `Kostet ${cardCost(0, id)} Energie.${tgt ? " Danach wählst du ein Ziel." : ""}`}</div>`}
       <button class="d-btn hot" id="pPlay" ${why ? "disabled" : ""}>${w.t === "wesen" ? "Aufs Feld rufen" : "Ausspielen"}</button>
+      <button class="d-btn burn" id="pBurn" ${whyNotBurn(0) ? "disabled" : ""}>🔥 Verbrennen: +${BURN_ENERGIE} Energie</button>
+      <div class="hint">${whyNotBurn(0) || "1× pro Runde. Die Karte ist danach weg. Tipp: Karten kannst du auch aufs Feld ziehen."}</div>
       <button class="d-btn" id="pX">Zurück</button></div>`);
     $("pX").onclick = cancelSel;
+    $("pBurn").onclick = () => doBurn(hi);
     $("pPlay").onclick = () => {
       $("dPanel").classList.remove("open");
       if (tgt) { sel = { kind: "hand", hi }; $("dTtxt").textContent = "Wähle ein Ziel"; $("dTbar").classList.add("on"); render(); return; }
@@ -656,7 +731,7 @@
     const mine = u.owner === 0, P = S.p[0];
     const why = mine ? whyNotAct(u) : "";
     const c = u.tok ? null : card(u.id);
-    const info = `<div class="hint">❤ ${u.hp} / ${u.max}${u.plusSchaden ? ` · +${u.plusSchaden} Schaden` : ""}${u.billiger ? ` · Angriffe -${u.billiger}` : ""}${u.weniger ? ` · nimmt ${u.weniger} weniger` : ""}${u.equip.length ? `<br>Ausrüstung: ${u.equip.map(e => esc(card(e).name)).join(", ")}` : ""}</div>`;
+    const info = `<div class="hint">❤ ${u.hp} / ${u.max}${u.plusSchaden ? ` · +${u.plusSchaden} Schaden` : ""}${u.billiger ? ` · Angriffe -${u.billiger}` : ""}${u.weniger ? ` · nimmt ${u.weniger} weniger` : ""}</div>${fxList(u).length ? `<div class="fxlist">${fxRows(u)}</div>` : ""}`;
     const btns = mine ? u.atk.map((a, i) => {
       const cost = atkCost(u, a), dis = why || P.energie < cost;
       return `<button class="d-abtn" data-ai="${i}" ${dis ? "disabled" : ""}><span class="c">⚡${cost}</span><span class="n">${esc(a[0])}${a[3] ? `<i>${({ frost: "Frost", alle: "Alle", kette: "Kette", saugen: "Saugen", schild: "Schild" })[a[3]]}</i>` : ""}</span><span class="d">${atkDmg(u, a)}</span></button>`;
@@ -683,6 +758,11 @@
       if (w.t === "ort") banner(card(id).name, "#ffcf9c");
     } else render();
   }
+  function doBurn(hi) {
+    cancelSel();
+    if (burn(0, hi)) { if (window.__sfx) window.__sfx("tear"); afterAction(); burnFlash(); } else render();
+  }
+  function burnFlash() { const z = $("dBurn"); z.classList.remove("puff"); void z.offsetWidth; z.classList.add("puff"); }
   async function doAttack(uid, ai, target) {
     cancelSel(); busy = true; render();
     await lunge(uid, target || ("h1"));
@@ -691,7 +771,7 @@
     busy = false; afterAction();
   }
   $("duel").addEventListener("click", e => {
-    if (!S || busy || S.over != null) return;
+    if (!S || busy || S.over != null || justDragged) return;
     if (e.target.closest("#dPanel,#dTbar,#dEnd,#dQuit,#dEndT")) return;
     const uEl = e.target.closest("[data-u]"), hEl = e.target.closest("[data-h]"), hc = e.target.closest(".hcard"), ortEl = e.target.closest("[data-ort]");
     const ref = uEl ? "u" + uEl.dataset.u : hEl ? "h" + hEl.dataset.h : null;
@@ -705,6 +785,83 @@
     if (uEl) { const u = findU(+uEl.dataset.u); if (u) showUnit(u); }
   });
   $("dTcancel").onclick = () => { cancelSel(); render(); };
+
+  /* ---- Tooltip für Effekt-Symbole ---- */
+  $("duel").addEventListener("pointerover", e => {
+    const c = e.target.closest(".fxi[data-tip]"); const tip = $("dTip");
+    if (!c || e.pointerType === "touch") { tip.classList.remove("on"); return; }
+    const u = findU(+c.closest("[data-u]").dataset.u); const f = u && fxList(u)[+c.dataset.tip];
+    if (!f) return;
+    tip.innerHTML = `<b>${esc(f.n)}</b><em>${esc(f.d)}</em><div>${esc(f.t)}</div>`;
+    const r = c.getBoundingClientRect(); tip.classList.add("on");
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    tip.style.left = Math.max(8, Math.min(innerWidth - tw - 8, r.right + 8)) + "px";
+    tip.style.top = Math.max(8, Math.min(innerHeight - th - 8, r.top - 4)) + "px";
+  });
+  $("duel").addEventListener("pointerout", e => { if (e.target.closest(".fxi")) $("dTip").classList.remove("on"); });
+
+  /* ---- Karten aus der Hand ziehen ---- */
+  let drag = null, justDragged = false;
+  $("dHand").addEventListener("pointerdown", e => {
+    const hc = e.target.closest(".hcard");
+    if (!hc || !S || busy || S.cur !== 0 || S.over != null || e.button > 0) return;
+    drag = { hi: +hc.dataset.hi, x: e.clientX, y: e.clientY, el: hc, on: false };
+  });
+  document.addEventListener("pointermove", e => {
+    if (!drag) return;
+    if (!drag.on) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 10) return;
+      drag.on = true; cancelSel();
+      const id = S.p[0].hand[drag.hi], w = W[id];
+      const r = drag.el.getBoundingClientRect();
+      const g = drag.el.cloneNode(true); g.className = "d-ghost"; g.style.width = r.width + "px";
+      document.body.appendChild(g); drag.g = g; drag.ox = e.clientX - r.left; drag.oy = e.clientY - r.top;
+      drag.el.classList.add("dragging");
+      drag.ok = !whyNotPlay(0, id);
+      drag.tgts = drag.ok ? playTargets(0, id) : null;
+      if (drag.ok && drag.tgts) { sel = { kind: "hand", hi: drag.hi }; render(); drag.el = document.querySelector(`#dHand [data-hi="${drag.hi}"]`); drag.el && drag.el.classList.add("dragging"); }
+      if (drag.ok && !drag.tgts) $("duel").classList.add(w.t === "wesen" ? "drop-field" : "drop-board");
+      $("dBurn").classList.toggle("on", !whyNotBurn(0));
+    }
+    drag.g.style.left = (e.clientX - drag.ox) + "px"; drag.g.style.top = (e.clientY - drag.oy) + "px";
+    drag.g.style.transform = `rotate(${Math.max(-12, Math.min(12, (e.clientX - drag.x) / 25))}deg) scale(1.05)`;
+    const over = dropAt(e.clientX, e.clientY);
+    $("dBurn").classList.toggle("hot", over.kind === "burn");
+    $("dfM").classList.toggle("hot", over.kind === "field");
+    document.querySelectorAll("#duel .tgt.hover").forEach(x => x.classList.remove("hover"));
+    if (over.kind === "target") over.el.classList.add("hover");
+  });
+  function dropAt(x, y) {
+    if (drag.g) drag.g.style.display = "none";
+    const el = document.elementFromPoint(x, y);
+    if (drag.g) drag.g.style.display = "";
+    if (!el) return {};
+    if (el.closest("#dBurn") && $("dBurn").classList.contains("on")) return { kind: "burn" };
+    if (!drag.ok) return {};
+    if (drag.tgts) {
+      const t = el.closest("[data-u],[data-h]"); if (!t) return {};
+      const ref = t.dataset.u ? "u" + t.dataset.u : "h" + t.dataset.h;
+      return drag.tgts.includes(ref) ? { kind: "target", ref, el: t } : {};
+    }
+    const w = W[S.p[0].hand[drag.hi]];
+    if (w.t === "wesen") return el.closest("#dfM,#dBot") ? { kind: "field" } : {};
+    return el.closest(".d-field,.d-mid,#dTop,#dBot") ? { kind: "field" } : {};
+  }
+  function endDrag(e, cancel) {
+    if (!drag) return;
+    const d = drag;
+    if (d.on) {
+      const over = cancel ? {} : dropAt(e.clientX, e.clientY);
+      d.g.remove(); $("duel").classList.remove("drop-field", "drop-board"); $("dBurn").classList.remove("on", "hot"); $("dfM").classList.remove("hot");
+      drag = null; justDragged = true; setTimeout(() => justDragged = false, 50);
+      if (over.kind === "burn") doBurn(d.hi);
+      else if (over.kind === "target") doPlay(d.hi, over.ref);
+      else if (over.kind === "field") doPlay(d.hi, null);
+      else { cancelSel(); render(); }
+    } else drag = null;
+  }
+  document.addEventListener("pointerup", e => endDrag(e));
+  document.addEventListener("pointercancel", e => endDrag(e, true));
   $("dPanel").addEventListener("click", e => { if (e.target === $("dPanel")) { cancelSel(); render(); } });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && S && $("duel").classList.contains("open")) { cancelSel(); render(); } });
 
@@ -715,7 +872,12 @@
     for (let guard = 0; guard < 30 && S.cur === 1 && S.over == null; guard++) {
       const a = aiNext();
       if (!a) break;
-      if (a.k === "play") {
+      if (a.k === "burn") {
+        const id = S.p[1].hand[a.hi];
+        if (!burn(1, a.hi)) break;
+        const before = snapshot(); render(); flushFx(before);
+        banner(`🔥 ${card(id).name}`, "#ff8a3c"); if (window.__sfx) window.__sfx("tear");
+      } else if (a.k === "play") {
         const id = S.p[1].hand[a.hi];
         if (!play(1, a.hi, a.t || null)) break;
         const before = snapshot(); render(); flushFx(before);
@@ -871,7 +1033,7 @@
         let g = 0;
         while (S.over == null && g++ < 400) {
           let a, s = 0;
-          while ((a = aiNext()) && s++ < 30 && S.over == null) { if (a.k === "play") { if (!play(S.cur, a.hi, a.t || null)) break; } else if (!attack(a.uid, a.ai, a.t || null)) break; }
+          while ((a = aiNext()) && s++ < 30 && S.over == null) { if (a.k === "burn") { if (!burn(S.cur, a.hi)) break; } else if (a.k === "play") { if (!play(S.cur, a.hi, a.t || null)) break; } else if (!attack(a.uid, a.ai, a.t || null)) break; }
           if (S.over == null) endTurn();
           S.fx.length = 0;
         }

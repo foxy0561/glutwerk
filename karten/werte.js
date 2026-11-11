@@ -165,7 +165,7 @@ window.WERTE = {
 /* Fähigkeiten (passiv) */
 window.PASSIV = {
   leuchtfeuer:   "Deine anderen Wesen machen +1 Schaden.",
-  brut:          "Rundenbeginn: Eine Ameise schlüpft (2 Leben).",
+  brut:          "Rundenbeginn: Eine Ameise schlüpft (2 Leben) und kann sofort angreifen.",
   honig:         "Rundenbeginn: Du heilst 1 Leben.",
   schaf:         "Wird es besiegt, ziehst du 1 Karte.",
   kuh:           "Rundenbeginn: Deine Wesen heilen 1.",

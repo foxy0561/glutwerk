@@ -375,7 +375,7 @@ details.help[open] summary{margin-bottom:8px}
     <button class="btn menu" id="tQuit">Verlassen</button>
     <p class="tmsg" id="tMsg" hidden></p>
   </div>
-  <div class="tfoot">Glutwerk · Version 2.3.3</div>
+  <div class="tfoot">Glutwerk · Version 2.3.5</div>
 </div>
 <div class="screen dim" id="setupScr" hidden>
   <div class="card">
@@ -1643,7 +1643,7 @@ function updWeather(dt){
   }
   if(weather.rain){
     weather.fT-=dt;
-    if(weather.fT<=0){weather.fT=3;openings=[];for(let x=0;x<W;x++)if(tiles[surf[x]*W+x]===TUN)openings.push(x);}
+    if(weather.fT<=0){weather.fT=3;openings=[];for(let x=0;x<W;x++)if(tiles[surf[x]*W+x]===TUN&&!(rival.alive&&Math.abs(x-rival.qx)<=1))openings.push(x);}
     const amt=.3*(weather.heavy?2.2:1)*(up.dach?.4:1)*WEATHERS[wopt.weather].amt*dt;
     for(const x of openings) addRain(surf[x]*W+x,amt);
     if(gameT>=weather.end){weather.rain=false;weather.heavy=false;}
@@ -1977,9 +1977,9 @@ cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('wheel',e=>{e.preventDefault();const p=rel(e);zoomAt(p.x,p.y,zoom+(e.deltaY<0?1:-1));},{passive:false});
 
 function foeAt(wx,wy,tol){
-  let best=null,bd=tol*1.6;
-  for(const e of enemies){if(e.dead)continue;const p=enemyPos(e);const d=Math.hypot(p.x-wx,p.y-wy)-EN[e.type].rad*.5;if(d<bd){bd=d;best=e;}}
-  if(rival.alive&&rev[rival.qy*W+rival.qx]){const d=Math.hypot(rival.qx*T+4-wx,rival.qy*T+5-wy);if(d<Math.max(bd,tol*2)){bd=d;best='rival';}}
+  let best=null,bd=Math.max(10,tol*2);
+  for(const e of enemies){if(e.dead)continue;const p=enemyPos(e);const d=Math.hypot(p.x-wx,(p.y-2)-wy)-EN[e.type].rad*.5;if(d<bd){bd=d;best=e;}}
+  if(rival.alive&&rev[rival.qy*W+rival.qx]){const qx=rival.qx*T+4,qy=rival.qy*T+6;if(wx>qx-28-tol&&wx<qx+28+tol&&wy>qy-10-tol&&wy<qy+5+tol){const d=Math.hypot(qx-2-wx,qy-3-wy);if(!best||d<bd){bd=d;best='rival';}}}
   if(!best)for(const n of nests){if(!n.alive||!rev[n.y*W+n.x])continue;if(Math.hypot(n.x*T+4-wx,n.y*T+4-wy)<Math.max(16,tol*1.5))return{nest:n};}
   return best;
 }
@@ -2005,8 +2005,11 @@ function finishCmd(e){
     let t=foe==='rival'?rival.qy*W+rival.qx:foe.nest?findStand(foe.nest.x,foe.nest.y):enemyTile(foe);
     if(t<0||!walk(t%W,(t/W)|0)) t=findStand(t<0?Math.floor(wx/T):t%W,t<0?Math.floor(wy/T):(t/W)|0);
     if(t<0){toast('Da kommen deine Ameisen nicht hin.');return;}
+    let far=0,blocked=0;for(const a of sel){const r=bfs(startI(a),i=>i===t?i:-1);if(!r)blocked++;else far=Math.max(far,r.path.length);}
+    if(blocked===sel.size){toast('Deine Ameisen finden keinen Weg dorthin. Vielleicht steht Wasser im Weg.',true);return;}
     for(const a of sel){a.order={t,w:240,foe:foe.nest?null:foe};release(a);a.path=[];a.job='order';a.rp=0;}
-    AU.play('click'); toast(`${sel.size} ${sel.size===1?'Ameise greift':'Ameisen greifen'} an!`);
+    orderMarks.push({i:t,t:1.2,red:true}); AU.play('click');
+    const eta=Math.round(far/3);toast(`${sel.size} ${sel.size===1?'Ameise greift':'Ameisen greifen'} an!`+(eta>8?` Sie laufen los und brauchen etwa ${eta>90?Math.round(eta/60)+' Min.':eta+' s'} bis zum Ziel.`:''));
     return;
   }
   let best=null,bd=tol; for(const a of ants){const d=Math.hypot(a.px-wx,a.py-wy);if(d<bd){bd=d;best=a;}}
@@ -2929,7 +2932,7 @@ function render(time){
   ctx.globalAlpha=1;
   const flags=new Set(); for(const a of ants) if(a.order) flags.add(a.order.t);
   for(const i of flags){const x=(i%W)*T+4,y=((i/W)|0)*T+T;P(x,y-11,'#5b3b22',1,11);P(x+1,y-11,'#ffe27a',4,3);P(x+1,y-8,'#e9b443',2,1);}
-  for(const m of orderMarks){const x=(m.i%W)*T+4,y=((m.i/W)|0)*T+5,r=Math.round((1.2-m.t)*14)+3;ctx.strokeStyle=`rgba(255,226,122,${m.t/1.2})`;ctx.lineWidth=1;ctx.strokeRect(x-r+.5,y-r/2+.5,r*2,r);}
+  for(const m of orderMarks){const x=(m.i%W)*T+4,y=((m.i/W)|0)*T+5,r=Math.round((1.2-m.t)*14)+3;ctx.strokeStyle=m.red?`rgba(240,70,60,${m.t/1.2})`:`rgba(255,226,122,${m.t/1.2})`;ctx.lineWidth=1;ctx.strokeRect(x-r+.5,y-r/2+.5,r*2,r);}
   for(const n of nests) if(n.alive&&rev[n.y*W+n.x]&&n.x*T>vL-20&&n.x*T<vR+20&&n.y*T>vT-20&&n.y*T<vB+20) drawNest(n,time);
   for(const a of ants) if(a.px>vL-10&&a.px<vR+10&&a.py>vT-10&&a.py<vB+10) drawAnt(a);
   for(const a of sel){const x=Math.round(a.px),y=Math.round(a.py),c='#ffe27a';P(x-6,y-5,c,3,1);P(x-6,y-5,c,1,3);P(x+4,y-5,c,3,1);P(x+6,y-5,c,1,3);P(x-6,y+3,c,3,1);P(x-6,y+1,c,1,3);P(x+4,y+3,c,3,1);P(x+6,y+1,c,1,3);}

@@ -296,7 +296,7 @@ details.help[open] summary{margin-bottom:8px}
           <li><b>Ameisenart</b>: Jede Art ernährt sich anders. Blattschneider schneiden Blätter und züchten damit Pilz, Honigtopfameisen holen Nektar aus Blüten, Treiberameisen jagen Insekten, Ernte- und Waldameisen sammeln Samen.</li>
           <li><b>Ameisen</b> schlüpfen aus Eiern. Arbeiterinnen kosten Futter und teilst du selbst ein: graben, sammeln oder wachen. Im Brut-Menü gibt es Gräberinnen, Trägerinnen und Soldatinnen.</li>
           <li><b>Grabbereich</b>: Gegraben werden kann nur innerhalb der gestrichelten Grenze rund um deine Räume. Baue am Rand neue Räume, vor allem Wachposten, damit der Bereich wächst.</li>
-          <li><b>Wasser</b>: Regen läuft durch die Eingänge, fließt nach unten und sammelt sich an der tiefsten Stelle. Es verdunstet nur sehr langsam. Ameisen kommen nicht hindurch und ertrinken darin, die Königin auch. Steht Wasser an markierten Blöcken, in Räumen oder bei der Königin, schöpfen Gräberinnen es Tropfen für Tropfen ab. Baue Eingänge mit einer Grube, schütte Gänge zu oder fange das Wasser mit einer Zisterne auf.</li>
+          <li><b>Wasser</b>: Regen läuft durch die Eingänge, fließt nach unten und sammelt sich an der tiefsten Stelle. Es verdunstet nur sehr langsam. Ameisen kommen nicht hindurch und ertrinken darin, die Königin auch. Bei einem Wolkenbruch kommt noch viel mehr. Steht Wasser an markierten Blöcken, in Räumen oder bei der Königin, schöpfen Gräberinnen es Tropfen für Tropfen ab. Baue Eingänge mit einer Grube, schütte Gänge zu oder fange das Wasser mit einer Zisterne auf.</li>
           <li><b>Wachposten</b>: Dort wohnen bis zu 4 Wächterinnen fest und schützen die Umgebung.</li>
           <li><b>Befehl</b>: Tippe Ameisen an oder ziehe einen Rahmen um sie, dann tippe auf ein Ziel. Sie laufen hin, halten dort 2,5 Minuten die Stellung und kämpfen gegen Feinde in der Nähe. Neue Räume bekommen automatisch einen Gang zum Bau.</li>
           <li><b>Schichten</b>: Oberboden, Lehmboden, Gestein, Tiefengestein und ganz unten die heiße Glutschicht. Dort verbrennen sich Ameisen ohne Hitzepanzer.</li>
@@ -375,7 +375,7 @@ details.help[open] summary{margin-bottom:8px}
     <button class="btn menu" id="tQuit">Verlassen</button>
     <p class="tmsg" id="tMsg" hidden></p>
   </div>
-  <div class="tfoot">Glutwerk · Version 2.3.2</div>
+  <div class="tfoot">Glutwerk · Version 2.3.3</div>
 </div>
 <div class="screen dim" id="setupScr" hidden>
   <div class="card">
@@ -782,6 +782,13 @@ function touch(k){
   if(k%W>0) active.add(k-1); if(k%W<W-1) active.add(k+1);
 }
 function addWater(i,amt){if(tiles[i]!==TUN)return;water[i]=Math.min(1,water[i]+amt);if(water[i]>0)wet.add(i);touch(i);}
+function addRain(i,amt){
+  for(let k=0;k<12&&amt>1e-4&&i<W*H;k++){
+    if(tiles[i]!==TUN) return;
+    const take=Math.min(amt,1-water[i]); if(take>0){water[i]+=take;wet.add(i);touch(i);amt-=take;}
+    i+=W;
+  }
+}
 function simWater(){
   const cells=[...active].filter(i=>water[i]>0).sort((a,b)=>b-a);
   active=new Set();
@@ -1622,7 +1629,7 @@ function updWeather(dt){
   const d=dayIdx();
   if(d!==lastDay){
     lastDay=d;
-    if(!weather.rain&&!weather.next&&Math.random()<season().rain*WEATHERS[wopt.weather].chance){weather.next=gameT+rand(5,DAY*.5);weather.dur=rand(25,50);}
+    if(!weather.rain&&!weather.next&&Math.random()<season().rain*WEATHERS[wopt.weather].chance){weather.next=gameT+rand(5,DAY*.5);weather.dur=rand(40,80);weather.heavy=Math.random()<.25*WEATHERS[wopt.weather].chance;}
     const si=seasonIdx();
     if(si!==lastSeason){
       if(lastSeason!==-1){toast(`${SEASONS[si].name} beginnt. ${SEASONS[si].msg}`);AU.play('season');}
@@ -1632,14 +1639,14 @@ function updWeather(dt){
   if(!weather.rain&&weather.next&&gameT>=weather.next){
     weather.rain=true; weather.end=gameT+weather.dur; weather.next=0; weather.fT=0;
     if(!rainTold){rainTold=true;toast('Es regnet! Wasser läuft durch die Eingänge in den Bau und sammelt sich an der tiefsten Stelle. Ameisen kommen nicht durch Wasser. Eine Zisterne fängt es auf.',true);}
-    else toast(up.dach?'Es regnet. Die Lehmkuppel hält das meiste Wasser draußen.':'Es regnet! Wasser läuft in die Eingänge.');
+    else toast(weather.heavy?(up.dach?'Wolkenbruch! Die Lehmkuppel hält einiges ab, aber es kommt viel Wasser.':'Wolkenbruch! Sehr viel Wasser läuft in die Eingänge.'):(up.dach?'Es regnet. Die Lehmkuppel hält das meiste Wasser draußen.':'Es regnet! Wasser läuft in die Eingänge.'),weather.heavy);
   }
   if(weather.rain){
     weather.fT-=dt;
     if(weather.fT<=0){weather.fT=3;openings=[];for(let x=0;x<W;x++)if(tiles[surf[x]*W+x]===TUN)openings.push(x);}
-    const amt=.08*(up.dach?.4:1)*WEATHERS[wopt.weather].amt*dt;
-    for(const x of openings) addWater(surf[x]*W+x,amt);
-    if(gameT>=weather.end) weather.rain=false;
+    const amt=.3*(weather.heavy?2.2:1)*(up.dach?.4:1)*WEATHERS[wopt.weather].amt*dt;
+    for(const x of openings) addRain(surf[x]*W+x,amt);
+    if(gameT>=weather.end){weather.rain=false;weather.heavy=false;}
   }
 }
 function updDangers(dt){
@@ -2139,7 +2146,7 @@ function save(){
       ants:ants.map(a=>[a.caste,Math.round(a.age),Math.round(a.maxAge)]),eggs:eggs.map(e=>[e.c,e.t]),
       goalIdx,res,up,found,cam,zoom,queens,rival,traps:[...traps],gameT,threatT,hungerT,kills,bossKills,deaths,maxAnts,maxDepth,
       hist,attackRival,chestsFound,rainTold,cisternAcc,
-      water:[...wet].map(i=>i.toString(36)+':'+Math.round(water[i]*100).toString(36)).join(','),weather:{rain:weather.rain,next:weather.next,end:weather.end,dur:weather.dur},
+      water:[...wet].map(i=>i.toString(36)+':'+Math.round(water[i]*100).toString(36)).join(','),weather:{rain:weather.rain,next:weather.next,end:weather.end,dur:weather.dur,heavy:!!weather.heavy},
       species,wopt,fungT,genVer,weekly,nests:nests.map(n=>[n.x,n.y,n.type,Math.round(n.hp),n.alive?1:0])}));
     localStorage.setItem(KEY+'-meta',JSON.stringify({species,seed:seedStr,t:Math.round(gameT),ants:ants.length,weekly}));
   }catch(e){}
@@ -2949,7 +2956,7 @@ function render(time){
   const skyB=(maxSurf+2)*T;
   if(vT<skyB){
     const md=(v,m)=>((v%m)+m)%m;
-    if(weather.rain){ctx.fillStyle='rgba(170,200,230,.6)';for(let k=0;k<180;k++){const x=vL+md(k*97.31+gameT*30,vw),y=md(k*57.7+gameT*230,skyB);if(y<surf[clamp((x/T)|0,0,W-1)]*T)ctx.fillRect(x,y,1,4);}}
+    if(weather.rain){ctx.fillStyle='rgba(170,200,230,.6)';for(let k=0;k<(weather.heavy?420:180);k++){const x=vL+md(k*97.31+gameT*30,vw),y=md(k*57.7+gameT*230,skyB);if(y<surf[clamp((x/T)|0,0,W-1)]*T)ctx.fillRect(x,y,1,4);}}
     else if(winter()){ctx.fillStyle='rgba(255,255,255,.85)';for(let k=0;k<140;k++){const x=vL+md(k*97.31+Math.sin(gameT*.8+k)*6+gameT*5,vw),y=md(k*37.7+gameT*18,skyB);if(y<surf[clamp((x/T)|0,0,W-1)]*T)ctx.fillRect(x,y,1,1);}}
     const Lt=light();
     if(Lt<1){

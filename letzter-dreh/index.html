@@ -84,17 +84,18 @@ button:disabled{cursor:not-allowed}
 .phone.used{filter:brightness(.6)}
 
 .door{position:absolute;background:linear-gradient(90deg,#2d2a28,#45403b 50%,#2a2624);border:6px solid #1a1715;box-shadow:inset 0 0 40px rgba(0,0,0,.7)}
-.L .door{left:960px;top:150px;width:230px;height:450px} .P .door{left:600px;top:330px;width:170px;height:670px}
+.L .door{left:960px;top:150px;width:230px;height:450px}
+.L .doorgap{left:966px;top:600px;width:218px} .P .doorgap{left:606px;top:1000px;width:158px} .P .door{left:600px;top:330px;width:170px;height:670px}
 .door::before{content:"";position:absolute;inset:0;background:var(--noise),radial-gradient(ellipse at 40% 80%,rgba(110,55,20,.5),transparent 50%);mix-blend-mode:multiply;opacity:.9}
 .door .hatch{position:absolute;left:22%;right:22%;top:46%;height:40px;background:#161311;border:3px solid #0d0b0a;transition:transform .5s;transform-origin:50% 0}
 .door.open .hatch{transform:scaleY(.1)}
 .door .hatchlight{position:absolute;left:22%;right:22%;top:46%;height:40px;background:#ffcf7a;opacity:0;transition:opacity .5s;box-shadow:0 0 30px #ffb03a}
 .door.open .hatchlight{opacity:.85}
 .door .knob{position:absolute;left:12%;top:52%;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#b9aa98,#4a3f36)}
-.door .gap{position:absolute;left:0;right:0;bottom:-10px;height:4px;background:#ffcf7a;box-shadow:0 0 18px 4px rgba(255,190,90,.55);overflow:hidden}
-.door .gap i{position:absolute;top:0;bottom:0;width:30%;background:#000;left:-35%}
+.doorgap{position:absolute;height:4px;background:#ffcf7a;box-shadow:0 0 18px 4px rgba(255,190,90,.55);overflow:hidden}
+.doorgap i{position:absolute;top:0;bottom:0;width:30%;background:#000;left:-35%}
 @keyframes walk{0%{left:-35%}45%,60%{left:35%}100%{left:105%}}
-.door{cursor:pointer;transform-origin:0 50%;backface-visibility:hidden}
+.door{cursor:pointer;transform-origin:100% 50%;backface-visibility:hidden}
 .opening{position:absolute;overflow:hidden;opacity:0;transition:opacity .4s;background:radial-gradient(ellipse at 50% 60%,#fff3d6,#ffcf7a 40%,#a8682a 80%);box-shadow:0 0 80px 30px rgba(255,200,120,.35)}
 .L .opening{left:960px;top:150px;width:230px;height:450px} .P .opening{left:600px;top:330px;width:170px;height:670px}
 .opening.on{opacity:1}
@@ -110,6 +111,10 @@ button:disabled{cursor:not-allowed}
 .exbtn:hover,.exbtn:focus-visible{transform:scale(1.03)}
 .extime{height:4px;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
 .extime i{display:block;height:100%;background:var(--red);transform-origin:0 50%}
+.bigfig.near{opacity:1;height:120vh;bottom:-10vh;aspect-ratio:1;border-radius:50%;overflow:hidden;filter:none;-webkit-mask:radial-gradient(circle,#000 45%,transparent 70%);mask:radial-gradient(circle,#000 45%,transparent 70%)}
+.bigfig.near svg{width:100%;height:100%}
+.jumpface{position:fixed;inset:0;z-index:40;pointer-events:none;transform:scale(1.55)}
+.jumpface svg{width:100%;height:100%}
 .subt{position:fixed;left:50%;bottom:calc(16% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;max-width:min(90vw,700px);text-align:center;pointer-events:none;
   font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,32px);color:#ffdccf;text-shadow:0 0 12px #000,0 0 24px #000,0 2px 0 #000}
 .displays.off .seg,.displays.off .meter i{opacity:.08;text-shadow:none;box-shadow:none}
@@ -544,7 +549,8 @@ html.calm .neon span{animation:none}
           <path d="M78 12 l2 60 M92 10 l1 62 M106 12 l2 58 M120 10 l1 62 M72 52 l56 -28"/>
           <path d="M148 12 l2 58 M162 10 l1 40"/></g></svg>
         <div class="opening" id="opening"><svg class="fig" viewBox="0 0 120 300" preserveAspectRatio="xMidYMax meet"><path d="M60 8c13 0 22 10 22 24 0 12-7 22-16 25 20 4 34 14 38 32l10 70c1 8-4 12-9 12l-4 0 2 120H17l2-120-4 0c-5 0-10-4-9-12l10-70c4-18 18-28 38-32-9-3-16-13-16-25 0-14 9-24 22-24z" fill="#050303"/></svg></div>
-        <div class="door" id="door" role="button" tabindex="0" aria-label="An die Tür klopfen"><div class="slit"><i></i><i></i><b class="barrel"></b><span class="shutter"></span></div><div class="hatchlight"></div><div class="hatch"></div><div class="knob"></div><div class="gap"><i></i></div></div>
+        <div class="door" id="door" role="button" tabindex="0" aria-label="An die Tür klopfen"><div class="slit"><i></i><i></i><b class="barrel"></b><span class="shutter"></span></div><div class="hatchlight"></div><div class="hatch"></div><div class="knob"></div></div>
+        <div class="doorgap" id="doorgap"><i></i></div>
       </div>
     </div>
     <div class="par" id="pFloor"><div class="floor"><div class="puddle" style="left:900px;top:90px;width:260px;height:50px"></div></div></div>
@@ -790,7 +796,7 @@ function startDrone(){
 // shadow under the door: comes when he walks up, stays while he is there, leaves only when he goes
 let shadowTimer=0,shadowHere=false;
 function shadow(state){
-  const i=document.querySelector('#door .gap i');if(!i) return;
+  const i=document.querySelector('#doorgap i');if(!i) return;
   clearTimeout(shadowTimer);
   if(state==='come'){shadowHere=true;i.style.transition='left 1s ease-out';i.style.left='35%';}
   else{
@@ -1842,7 +1848,7 @@ function spare(paid,door,op,disp){
   // he takes what you had, doubles the rest, gives one more day and leaves
   S.debt=Math.max(10,(S.debt-paid)*2);S.money=0;S.puls=1;
   door.getAnimations().forEach(a=>a.cancel());
-  door.animate([{transform:'perspective(900px) rotateY(-78deg)'},{transform:'perspective(900px) rotateY(0deg)'}],{duration:reduce?10:900,easing:'ease-in'});
+  door.animate([{transform:'perspective(900px) rotateY(78deg)'},{transform:'perspective(900px) rotateY(0deg)'}],{duration:reduce?10:900,easing:'ease-in'});
   setTimeout(()=>{op.classList.remove('on');thunk();setTimeout(thunk,240);stepSound(4);shadow('go');},reduce?20:900);
   disp.classList.remove('off');panCam(0,900);
   dying=false;S.started=true;S.inShop=false;startDay();applySet();clearMarks();
@@ -1863,7 +1869,7 @@ function debtDeath(){
   T(4300,()=>{thunk();setTimeout(thunk,260);});
   // 3) the door swings open, light, his silhouette
   T(5000,()=>{panCam(CAMRANGE[mode][1],900);creak();op.classList.add('on');
-    door.animate([{transform:'perspective(900px) rotateY(0deg)'},{transform:'perspective(900px) rotateY(-78deg)'}],{duration:calm?10:1300,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+    door.animate([{transform:'perspective(900px) rotateY(0deg)'},{transform:'perspective(900px) rotateY(78deg)'}],{duration:calm?10:1300,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
     flickerUntil=performance.now()+300;});
   T(6800,()=>say('»Zahltag.«',1600));
   T(8500,()=>say('»Lass sehen, was du hast.«',2300));
@@ -1882,28 +1888,77 @@ function debtDeath(){
   // 5) one last word
   T(15600,()=>askExcuse(paid,calm,door,op,disp));
 }
+function scream(){
+  if(muted||SET.sfx<=0||!AC) return;
+  try{const t=AC.currentTime,out=AC.createGain();out.gain.setValueAtTime(.0001,t);out.gain.exponentialRampToValueAtTime(.5*SET.sfx,t+.03);out.gain.exponentialRampToValueAtTime(.0001,t+1.3);out.connect(AC.destination);
+    [430,463,612,890].forEach((f,i)=>{const o=AC.createOscillator(),v=AC.createOscillator(),vg=AC.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f*1.3,t);o.frequency.exponentialRampToValueAtTime(f*.7,t+1.2);
+      v.frequency.value=9+i*3;vg.gain.value=f*.05;v.connect(vg).connect(o.frequency);const g=AC.createGain();g.gain.value=.12;o.connect(g).connect(out);o.start(t);v.start(t);o.stop(t+1.3);v.stop(t+1.3);});
+    const n=noiseNode(1.3,x=>Math.pow(1-x,.6)),f=AC.createBiquadFilter(),g=AC.createGain();f.type='bandpass';f.frequency.setValueAtTime(2500,t);f.frequency.exponentialRampToValueAtTime(900,t+1.2);f.Q.value=1.2;g.gain.value=.9;n.connect(f).connect(g).connect(out);n.start(t);
+    const sub=AC.createOscillator(),sg=AC.createGain();sub.frequency.setValueAtTime(70,t);sub.frequency.exponentialRampToValueAtTime(30,t+.8);sg.gain.setValueAtTime(.8*SET.sfx,t);sg.gain.exponentialRampToValueAtTime(.001,t+.9);sub.connect(sg).connect(AC.destination);sub.start(t);sub.stop(t+.9);
+  }catch(e){}
+}
+function breathClose(vol){
+  if(muted||SET.sfx<=0||!AC) return;
+  try{const n=noiseNode(1.6,x=>Math.sin(Math.PI*x)*(x<.45?1:.7)),f=AC.createBiquadFilter(),g=AC.createGain();f.type='lowpass';f.frequency.value=700;g.gain.value=vol*SET.sfx;n.connect(f).connect(g).connect(AC.destination);n.start();}catch(e){}
+}
+function scrapeDrag(){
+  if(muted||SET.sfx<=0||!AC) return;
+  try{const n=noiseNode(1.4,x=>.6+.4*Math.sin(x*70)),f=AC.createBiquadFilter(),g=AC.createGain();f.type='bandpass';f.frequency.value=380;f.Q.value=1.5;g.gain.setValueAtTime(.35*SET.sfx,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+1.4);n.connect(f).connect(g).connect(AC.destination);n.start();}catch(e){}
+}
+const FACE_SVG=`<svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="eg"><stop offset="0" stop-color="#fffbe8"/><stop offset=".35" stop-color="#ffd36a"/><stop offset="1" stop-color="#ff8a1a" stop-opacity="0"/></radialGradient></defs>
+  <rect width="400" height="400" fill="#020101"/>
+  <path d="M200 30c-95 0-150 70-150 170 0 120 70 200 150 200s150-80 150-200C350 100 295 30 200 30z" fill="#0a0606"/>
+  <ellipse cx="148" cy="190" rx="40" ry="24" fill="url(#eg)"/><ellipse cx="252" cy="190" rx="40" ry="24" fill="url(#eg)"/>
+  <ellipse cx="148" cy="190" rx="7" ry="13" fill="#100404"/><ellipse cx="252" cy="190" rx="7" ry="13" fill="#100404"/>
+  <path d="M120 300 Q200 335 280 300" stroke="#3a1612" stroke-width="4" fill="none"/></svg>`;
 function debtFinish(calm,door,op,disp){
-  const T=(t,f)=>setTimeout(f,calm?t*.8:t);
-  T(0,()=>{
-    $('subt').hidden=true;
-    const bf=document.createElement('div');bf.className='bigfig';bf.innerHTML=op.querySelector('.fig').outerHTML;document.body.appendChild(bf);
-    requestAnimationFrame(()=>bf.classList.add('go'));debtDeath.bf=bf;
-    const df=op.querySelector('.fig');df.style.transition='opacity .5s';df.style.opacity='0';
-    stepSound(3);chainRattle();
-    let gap=520;const beat=()=>{if(!debtDeath.alive)return;beep(55,.14,'sine',.2);setTimeout(()=>beep(46,.12,'sine',.16),140);gap=Math.max(200,gap*.82);setTimeout(beat,gap);};
-    debtDeath.alive=true;beat();
-    if(!calm){let a=0;debtDeath.tr=setInterval(()=>{a=Math.min(5,a+.2);$('stage').style.translate=`${(Math.random()-.5)*a}px ${(Math.random()-.5)*a}px`;},50);}
+  const T=(t,f)=>setTimeout(f,calm?t*.85:t);
+  const stage=$('stage'),fig=op.querySelector('.fig');
+  const kill=[];
+  // 1) everything goes out. even the light behind the door.
+  T(0,()=>{$('subt').hidden=true;bulbDead=true;glassPop();op.classList.remove('on');fig.style.opacity='0';
+    $('cab').classList.add('deadc');beep(40,.6,'sine',.12);});
+  // 2) silence. then breathing, closer each time
+  T(1400,()=>breathClose(.08));
+  T(3000,()=>{breathClose(.16);stepSound(1);});
+  // 3) the bulb flickers on for a moment: he is in the room
+  const flash=(scale,ms)=>{
+    bulbDead=false;flickerUntil=0;
+    const bf=document.createElement('div');bf.className='bigfig near';bf.style.transform=`translate(-50%,0) scale(${scale})`;bf.innerHTML=FACE_SVG;document.body.appendChild(bf);kill.push(bf);
+    beep(1800,.03,'square',.03);
+    setTimeout(()=>{bulbDead=true;bf.remove();},ms);
+  };
+  T(4400,()=>flash(.55,140));
+  T(5600,()=>{breathClose(.26);});
+  T(6900,()=>flash(.95,110));
+  T(7900,()=>{breathClose(.4);});
+  // 4) jumpscare
+  T(8900,()=>{
+    bulbDead=false;
+    const face=document.createElement('div');face.className='jumpface';face.innerHTML=FACE_SVG;document.body.appendChild(face);kill.push(face);
+    scream();
+    if(!calm){
+      const f=document.createElement('div');f.className='shotflash';f.style.background='#ffefe0';document.body.appendChild(f);setTimeout(()=>f.remove(),500);
+      face.animate([{transform:'scale(1.9)'},{transform:'scale(1.5) translate(1%,-1%)'},{transform:'scale(1.6) translate(-1%,1%)'},{transform:'scale(1.55)'}],{duration:500,iterations:2});
+      let k=0;const tr=setInterval(()=>{stage.style.translate=`${(Math.random()-.5)*26}px ${(Math.random()-.5)*26}px`;if(++k>18){clearInterval(tr);stage.style.translate='';}},40);
+    }
   });
-  T(2300,()=>{
-    // instant black, silence
-    debtDeath.alive=false;if(debtDeath.tr)clearInterval(debtDeath.tr);$('stage').style.translate='';
+  // 5) the chain yanks you towards the door
+  T(10000,()=>{
+    kill.forEach(e=>e.remove());bulbDead=true;
+    chainRattle();scrapeDrag();setTimeout(chainRattle,400);
+    if(!calm)$('world').animate([{transform:`translateX(${-cam}px)`},{transform:`translateX(${-cam-260}px) translateY(30%) rotate(14deg)`}],{duration:1100,easing:'cubic-bezier(.6,0,.9,.5)',fill:'forwards'});
+  });
+  T(11200,()=>{
+    door.animate([{transform:'perspective(900px) rotateY(78deg)'},{transform:'perspective(900px) rotateY(0deg)'}],{duration:120,fill:'forwards'});
+    beep(45,.6,'square',.3);beep(90,.3,'square',.15);
     const bl=document.createElement('div');bl.className='bleed black';bl.style.opacity='1';document.body.appendChild(bl);debtDeath.bl=bl;
-    beep(60,.08,'square',.12);
   });
-  T(3700,()=>{
+  T(13200,()=>{
     die('schuld',()=>{
-      [debtDeath.bf,debtDeath.bl].forEach(e=>e&&e.remove());
-      door.getAnimations().forEach(a=>a.cancel());op.classList.remove('on');op.querySelector('.fig').style.opacity='';disp.classList.remove('off');
+      [debtDeath.bf,debtDeath.bl].forEach(e=>e&&e.remove());kill.forEach(e=>e.remove());
+      $('world').getAnimations().forEach(a=>a.cancel());door.getAnimations().forEach(a=>a.cancel());
+      bulbDead=false;$('cab').classList.remove('deadc');fig.style.opacity='';disp.classList.remove('off');
       shadow('go');cam=0;$('world').style.transform='translateX(0px)';applySet();
     });
   });
@@ -2176,7 +2231,7 @@ function die(cause,onStart){
   dying=false;stopHiss();
   saveBest();S.started=false;clearSave();
   const scenes={
-    schuld:['Am nächsten Morgen pendelt die Glühbirne wieder.','Der Automat blinkt. Die Schüssel ist voll.','Jemand Neues wacht davor auf.'],
+    schuld:['Etwas schleift dich über den Beton.','Eine Tür. Eine Treppe. Noch eine Tür.','Am nächsten Morgen pendelt die Glühbirne wieder. Die Schüssel ist voll.','Jemand Neues wacht vor dem Automaten auf.'],
     strom:['Deine Hand klebt am Gehäuse. Du kannst nicht loslassen.','Der Automat singt. Ein hoher, heller Ton.','Dann platzt die Glühbirne.','Im Dunkeln knackt der Lautsprecher.','»Er gehört mir. Und jetzt du auch.«'],
     schuss:['Ein Knall.','Du liegst auf dem Rücken. Über dir pendelt die Glühbirne.','Jeder Atemzug ist schwerer als der letzte.','Hinter der Tür: das Klicken, als er nachlädt.','»Ich hab gesagt, hör auf zu klopfen.«','Dann nur noch Stille.']
   };

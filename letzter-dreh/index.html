@@ -101,6 +101,12 @@ button:disabled{cursor:not-allowed}
 .opening.on{opacity:1}
 .opening .fig{position:absolute;left:10%;width:80%;bottom:0;height:92%;transform:translateY(100%);transition:transform 1.4s cubic-bezier(.3,.7,.3,1)}
 .opening.on .fig{transform:translateY(0)}
+.fig .head{transform-box:fill-box;transform-origin:50% 100%;animation:ftilt 5s ease-in-out infinite alternate}
+@keyframes ftilt{0%{transform:rotate(-4deg)}60%{transform:rotate(14deg)}100%{transform:rotate(18deg)}}
+.fig .fingers{animation:ftwitch 1.3s steps(2) infinite}
+@keyframes ftwitch{50%{transform:translateY(1.5px)}}
+html.calm .fig .head,html.calm .fig .fingers{animation:none}
+.opening.on~.doorgap,.doorgap.hide{opacity:0;transition:opacity .3s}
 .bigfig{position:fixed;left:50%;bottom:-6vh;height:150vh;aspect-ratio:120/300;transform:translate(-50%,75%) scale(.6);z-index:37;pointer-events:none;opacity:0;
   filter:drop-shadow(0 0 30px rgba(255,190,110,.35))}
 .bigfig.go{transition:transform 2.1s cubic-bezier(.55,0,.9,.7),opacity .4s;transform:translate(-50%,0) scale(1.3);opacity:1}
@@ -113,7 +119,7 @@ button:disabled{cursor:not-allowed}
 .extime i{display:block;height:100%;background:var(--red);transform-origin:0 50%}
 .bigfig.near{opacity:1;height:120vh;bottom:-10vh;aspect-ratio:1;border-radius:50%;overflow:hidden;filter:none;-webkit-mask:radial-gradient(circle,#000 45%,transparent 70%);mask:radial-gradient(circle,#000 45%,transparent 70%)}
 .bigfig.near svg{width:100%;height:100%}
-.jumpface{position:fixed;inset:0;z-index:40;pointer-events:none;transform:scale(1.55)}
+.jumpface{position:fixed;inset:0;z-index:40;pointer-events:none;transform:scale(1.2);background:#020101}
 .jumpface svg{width:100%;height:100%}
 .peephole{position:absolute;left:50%;top:31%;width:18px;height:18px;margin-left:-9px;border-radius:50%;padding:0;cursor:zoom-in;
   background:radial-gradient(circle,#0a0807 0 35%,#8a7a5a 40%,#c9b88a 55%,#5a4a30 75%);box-shadow:0 2px 3px rgba(0,0,0,.7);z-index:2}
@@ -140,6 +146,9 @@ button:disabled{cursor:not-allowed}
 .blind.l::after{background:radial-gradient(ellipse 40% 70% at 30% 50%,rgba(70,0,0,.35),transparent 70%)}
 .blind.r::after{background:radial-gradient(ellipse 40% 70% at 70% 50%,rgba(70,0,0,.35),transparent 70%)}
 @keyframes blindpulse{50%{opacity:.25}}
+.blind.patch::after{display:none}
+.blind.l.patch{background:linear-gradient(90deg,#000 0,#000 34%,rgba(0,0,0,.8) 42%,rgba(0,0,0,.4) 50%,transparent 60%)}
+.blind.r.patch{background:linear-gradient(270deg,#000 0,#000 34%,rgba(0,0,0,.8) 42%,rgba(0,0,0,.4) 50%,transparent 60%)}
 .boot .seg{color:var(--led-grn)!important}
 .subt{position:fixed;left:50%;bottom:calc(16% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;max-width:min(90vw,700px);text-align:center;pointer-events:none;
   font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,32px);color:#ffdccf;text-shadow:0 0 12px #000,0 0 24px #000,0 2px 0 #000}
@@ -574,7 +583,16 @@ html.calm .neon span{animation:none}
           <path d="M8 10 l2 60 M22 12 l1 60 M36 8 l2 62 M50 10 l1 60 M2 50 l56 -26"/>
           <path d="M78 12 l2 60 M92 10 l1 62 M106 12 l2 58 M120 10 l1 62 M72 52 l56 -28"/>
           <path d="M148 12 l2 58 M162 10 l1 40"/></g></svg>
-        <div class="opening" id="opening"><svg class="fig" viewBox="0 0 120 300" preserveAspectRatio="xMidYMax meet"><path d="M60 8c13 0 22 10 22 24 0 12-7 22-16 25 20 4 34 14 38 32l10 70c1 8-4 12-9 12l-4 0 2 120H17l2-120-4 0c-5 0-10-4-9-12l10-70c4-18 18-28 38-32-9-3-16-13-16-25 0-14 9-24 22-24z" fill="#050303"/></svg></div>
+        <div class="opening" id="opening"><svg class="fig" viewBox="0 0 120 300" preserveAspectRatio="xMidYMax meet"><defs><filter id="fglow" x="-2" y="-2" width="5" height="5"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+<g fill="#030202" stroke="#030202" stroke-linecap="round" stroke-linejoin="round">
+<path stroke="none" d="M46 58 Q61 50 77 59 Q88 68 90 108 L95 228 Q97 262 101 298 L92 288 L86 299 L77 287 L69 299 L60 288 L52 299 L44 287 L36 299 L29 289 L22 297 Q25 262 28 228 L33 108 Q35 68 46 58Z"/>
+<path fill="none" stroke-width="7" d="M44 64 Q27 92 24 142 Q21 196 18 242"/><path fill="none" stroke-width="7" d="M79 64 Q95 94 98 144 Q101 198 104 244"/>
+<g class="fingers" fill="none" stroke-width="2.4"><path d="M18 242 L10 268 L7 284"/><path d="M18 242 L14 272 L13 290"/><path d="M19 242 L20 273 L21 291"/><path d="M20 242 L26 270 L29 283"/>
+<path d="M104 244 L112 270 L115 286"/><path d="M104 244 L108 274 L109 292"/><path d="M103 244 L102 275 L101 293"/><path d="M102 244 L96 272 L93 285"/></g>
+<g class="head"><path stroke="none" d="M54 52 L57 40 Q48 34 49 20 Q51 4 63 3 Q76 3 77 19 Q78 34 68 41 L70 53Z"/>
+<ellipse cx="57" cy="22" rx="3.2" ry="2" fill="#ffd36a" stroke="none" filter="url(#fglow)"/><ellipse cx="70" cy="23" rx="2.8" ry="1.8" fill="#ffd36a" stroke="none" filter="url(#fglow)"/>
+<ellipse cx="57" cy="22" rx="1.6" ry="1.1" fill="#fff6d8" stroke="none"/><ellipse cx="70" cy="23" rx="1.4" ry="1" fill="#fff6d8" stroke="none"/>
+<path fill="none" stroke="#4a1a14" stroke-width=".9" d="M55 31 Q63 36 72 31"/></g></g></svg></div>
         <div class="door" id="door" role="button" tabindex="0" aria-label="An die Tür klopfen"><div class="slit"><i></i><i></i><b class="barrel"></b><span class="shutter"></span></div><div class="hatchlight"></div><div class="hatch"></div><div class="knob"></div><button class="peephole" id="peephole" type="button" aria-label="Durch den Türspion schauen"></button></div>
         <div class="doorgap" id="doorgap"><i></i></div>
       </div>
@@ -737,7 +755,8 @@ const CHARMS = [
   {id:'trost',  n:'Trostpreis',         d:'Drehs ohne Gewinn geben deinen Einsatz zurück.', base:9},
   {id:'zocker', n:'Zockerherz',         d:'Riskieren klappt zu 60 % statt 50 %.', base:11},
   {id:'handschuh',n:'Gummihandschuhe',  d:'Beim Rütteln halb so oft ein Stromschlag.', base:13},
-  {id:'adrenalin',n:'Adrenalinspritze', d:'Sofort +1 Puls (max. 5). Stapelbar.', base:10, stack:true}
+  {id:'adrenalin',n:'Adrenalinspritze', d:'Sofort +1 Puls (max. 5). Stapelbar.', base:10, stack:true},
+  {id:'klappe',  n:'Augenklappe',       d:'Die blinde Seite pocht nicht mehr. Halluzinationen kommen nur halb so oft.', base:9}
 ];
 const ROWS=[[0,1,2],[3,4,5],[6,7,8]], DIAG=[[0,4,8],[6,4,2]], COLS=[[0,3,6],[1,4,7],[2,5,8]];
 const DAYS=3;
@@ -987,7 +1006,7 @@ function popMoney(n){
   p.classList.remove('show');void p.offsetWidth;p.classList.add('show');
 }
 function render(){
-  $('blind').className='blind'+(S&&S.eyeLost?' '+S.eyeLost:'');
+  $('blind').className='blind'+(S&&S.eyeLost?' '+S.eyeLost+(has('klappe')?' patch':''):'');
   $('dMoney').textContent=fmt(S.money);
   $('dDebt').textContent=fmt(S.debt);
   $('dDay').textContent=`${S.day}/${DAYS}`;
@@ -1980,7 +1999,7 @@ function spare(paid,door,op,disp){
   S.debt=Math.max(10,(S.debt-paid)*2);S.money=0;S.puls=1;
   door.getAnimations().forEach(a=>a.cancel());
   door.animate([{transform:'perspective(900px) rotateY(78deg)'},{transform:'perspective(900px) rotateY(0deg)'}],{duration:reduce?10:900,easing:'ease-in'});
-  setTimeout(()=>{op.classList.remove('on');thunk();setTimeout(thunk,240);stepSound(4);shadow('go');},reduce?20:900);
+  setTimeout(()=>{op.classList.remove('on');$('doorgap').classList.remove('hide');thunk();setTimeout(thunk,240);stepSound(4);shadow('go');},reduce?20:900);
   disp.classList.remove('off');panCam(0,900);
   dying=false;S.started=true;S.inShop=false;startDay();applySet();clearMarks();
   setMsg(`»EIN TAG.« SCHULD ${fmt(S.debt)}`,'bad');render();
@@ -1999,7 +2018,7 @@ function debtDeath(){
   T(3500,()=>keysJingle());
   T(4300,()=>{thunk();setTimeout(thunk,260);});
   // 3) the door swings open, light, his silhouette
-  T(5000,()=>{panCam(CAMRANGE[mode][1],900);creak();op.classList.add('on');
+  T(5000,()=>{panCam(CAMRANGE[mode][1],900);creak();op.classList.add('on');$('doorgap').classList.add('hide');
     door.animate([{transform:'perspective(900px) rotateY(0deg)'},{transform:'perspective(900px) rotateY(78deg)'}],{duration:calm?10:1300,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
     flickerUntil=performance.now()+300;});
   T(6800,()=>say('»Zahltag.«',1600));
@@ -2036,12 +2055,22 @@ function scrapeDrag(){
   if(muted||SET.sfx<=0||!AC) return;
   try{const n=noiseNode(1.4,x=>.6+.4*Math.sin(x*70)),f=AC.createBiquadFilter(),g=AC.createGain();f.type='bandpass';f.frequency.value=380;f.Q.value=1.5;g.gain.setValueAtTime(.35*SET.sfx,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+1.4);n.connect(f).connect(g).connect(AC.destination);n.start();}catch(e){}
 }
-const FACE_SVG=`<svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="eg"><stop offset="0" stop-color="#fffbe8"/><stop offset=".35" stop-color="#ffd36a"/><stop offset="1" stop-color="#ff8a1a" stop-opacity="0"/></radialGradient></defs>
+const FACE_SVG=`<svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"><defs><radialGradient id="eg"><stop offset="0" stop-color="#fffbe8"/><stop offset=".35" stop-color="#ffd36a"/><stop offset="1" stop-color="#ff8a1a" stop-opacity="0"/></radialGradient>
+  <radialGradient id="so"><stop offset=".35" stop-color="#010000"/><stop offset="1" stop-color="#010000" stop-opacity="0"/></radialGradient><radialGradient id="sk" cx="50%" cy="38%" r="60%"><stop offset="0" stop-color="#1a1210"/><stop offset="1" stop-color="#060404"/></radialGradient></defs>
   <rect width="400" height="400" fill="#020101"/>
-  <path d="M200 30c-95 0-150 70-150 170 0 120 70 200 150 200s150-80 150-200C350 100 295 30 200 30z" fill="#0a0606"/>
-  <ellipse cx="148" cy="190" rx="40" ry="24" fill="url(#eg)"/><ellipse cx="252" cy="190" rx="40" ry="24" fill="url(#eg)"/>
-  <ellipse cx="148" cy="190" rx="7" ry="13" fill="#100404"/><ellipse cx="252" cy="190" rx="7" ry="13" fill="#100404"/>
-  <path d="M120 300 Q200 335 280 300" stroke="#3a1612" stroke-width="4" fill="none"/></svg>`;
+  <g transform="rotate(-9 200 210)">
+  <path d="M200 0 C130 0 104 70 108 160 C112 250 150 340 176 392 Q200 410 224 392 C250 340 288 250 292 160 C296 70 270 0 200 0Z" fill="url(#sk)"/>
+  <ellipse cx="146" cy="272" rx="34" ry="60" fill="url(#so)" opacity=".7"/><ellipse cx="254" cy="272" rx="34" ry="60" fill="url(#so)" opacity=".7"/>
+  <ellipse cx="160" cy="178" rx="64" ry="48" fill="url(#so)"/><ellipse cx="242" cy="182" rx="60" ry="46" fill="url(#so)"/>
+  <ellipse cx="160" cy="176" rx="34" ry="20" fill="url(#eg)"/><ellipse cx="242" cy="180" rx="30" ry="18" fill="url(#eg)"/>
+  <ellipse cx="160" cy="176" rx="5" ry="12" fill="#100404"/><ellipse cx="242" cy="180" rx="4" ry="11" fill="#100404"/>
+  <path d="M128 318 Q200 360 280 312" stroke="#4a1a14" stroke-width="3" fill="none"/>
+  <g stroke="#2a0e0a" stroke-width="2.4">${Array.from({length:13},(_,i)=>{const t=i/12,x=128+152*t,y=318+(1-Math.pow(2*t-1,2))*38-t*6;return `<line x1="${x}" y1="${y-6}" x2="${x}" y2="${y+6}"/>`;}).join('')}</g>
+  </g>
+  <g fill="none" stroke="#040202" stroke-linecap="round" stroke-linejoin="round">
+    ${[[150,-1],[192,-1],[236,-1],[280,-1],[146,1],[190,1],[236,1],[282,1]].map(([y,d],i)=>{const x0=d<0?-30:430,k=d<0?1:-1,j=(i%4)*6;
+      return `<path stroke-width="9" d="M${x0} ${y} L${x0+k*(70+j)} ${y+6} L${x0+k*(118+j)} ${y-10} L${x0+k*(146+j)} ${y+8}"/><path stroke-width="4" d="M${x0+k*(146+j)} ${y+8} L${x0+k*(160+j)} ${y+22}"/><circle cx="${x0+k*(70+j)}" cy="${y+6}" r="7" fill="#040202" stroke="none"/><circle cx="${x0+k*(118+j)}" cy="${y-10}" r="6" fill="#040202" stroke="none"/>`;}).join('')}
+  </g></svg>`;
 function debtFinish(calm,door,op,disp){
   const T=(t,f)=>setTimeout(f,calm?t*.85:t);
   const stage=$('stage'),fig=op.querySelector('.fig');
@@ -2070,7 +2099,7 @@ function debtFinish(calm,door,op,disp){
     scream();
     if(!calm){
       const f=document.createElement('div');f.className='shotflash';f.style.background='#ffefe0';document.body.appendChild(f);setTimeout(()=>f.remove(),500);
-      face.animate([{transform:'scale(1.9)'},{transform:'scale(1.5) translate(1%,-1%)'},{transform:'scale(1.6) translate(-1%,1%)'},{transform:'scale(1.55)'}],{duration:500,iterations:2});
+      face.animate([{transform:'scale(1.6)'},{transform:'scale(1.15) translate(1%,-1%)'},{transform:'scale(1.25) translate(-1%,1%)'},{transform:'scale(1.2)'}],{duration:500,iterations:2});
       let k=0;const tr=setInterval(()=>{stage.style.translate=`${(Math.random()-.5)*26}px ${(Math.random()-.5)*26}px`;if(++k>18){clearInterval(tr);stage.style.translate='';}},40);
     }
   });
@@ -2089,7 +2118,7 @@ function debtFinish(calm,door,op,disp){
     die('schuld',()=>{
       [debtDeath.bf,debtDeath.bl].forEach(e=>e&&e.remove());kill.forEach(e=>e.remove());
       $('world').getAnimations().forEach(a=>a.cancel());door.getAnimations().forEach(a=>a.cancel());
-      bulbDead=false;$('cab').classList.remove('deadc');fig.style.opacity='';disp.classList.remove('off');
+      bulbDead=false;$('cab').classList.remove('deadc');fig.style.opacity='';$('doorgap').classList.remove('hide');disp.classList.remove('off');
       shadow('go');cam=0;$('world').style.transform='translateX(0px)';applySet();
     });
   });
@@ -2307,7 +2336,7 @@ const HALLS={
 setInterval(()=>{
   if(!S||!S.started||!uiFree()||S.spinning||S.shaking) return;
   const h=hallLevel();if(!h) return;
-  if(Math.random()<(h===1?.03:.08)){
+  if(Math.random()<(h===1?.03:.08)*(has('klappe')?.5:1)){
     const pool=h===1?['eyes','whisper','shadow','bowl']:['eyes','whisper','shadow','bowl','fakewin','warp','beat','knock'];
     HALLS[pool[Math.floor(Math.random()*pool.length)]]();
   }
@@ -2387,8 +2416,11 @@ function deathSheet(cause){
 }
 
 function makeOffers(){
-  const pool=CHARMS.filter(c=>(c.stack||!has(c.id))&&!(c.id==='adrenalin'&&S.puls>=5));
+  const pool=CHARMS.filter(c=>(c.stack||!has(c.id))&&!(c.id==='adrenalin'&&S.puls>=5)&&!(c.id==='klappe'&&!S.eyeLost));
+  if(S.eyeLost&&!has('klappe')){const k=pool.findIndex(c=>c.id==='klappe');if(k>0){const [x]=pool.splice(k,1);pool.unshift(x);}}
+  const first=S.eyeLost&&!has('klappe')?pool.shift():null;
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  if(first)pool.unshift(first);
   S.offers=pool.slice(0,3).map(c=>({c,sold:false}));
 }
 let shopTitle='',shopNote='';

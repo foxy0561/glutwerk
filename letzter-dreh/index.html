@@ -115,6 +115,32 @@ button:disabled{cursor:not-allowed}
 .bigfig.near svg{width:100%;height:100%}
 .jumpface{position:fixed;inset:0;z-index:40;pointer-events:none;transform:scale(1.55)}
 .jumpface svg{width:100%;height:100%}
+.peephole{position:absolute;left:50%;top:31%;width:18px;height:18px;margin-left:-9px;border-radius:50%;padding:0;cursor:zoom-in;
+  background:radial-gradient(circle,#0a0807 0 35%,#8a7a5a 40%,#c9b88a 55%,#5a4a30 75%);box-shadow:0 2px 3px rgba(0,0,0,.7);z-index:2}
+.peephole:hover{box-shadow:0 0 10px rgba(255,210,140,.6)}
+.peepview{position:fixed;inset:0;z-index:44;background:#000;display:grid;place-items:center;cursor:pointer}
+.pv-lens{position:relative;width:min(86vmin,640px);aspect-ratio:1;border-radius:50%;overflow:hidden;
+  -webkit-mask:radial-gradient(circle,#000 52%,transparent 71%);mask:radial-gradient(circle,#000 52%,transparent 71%);transform:scale(1.08)}
+.pv-lens svg{position:absolute;inset:0;width:100%;height:100%}
+.pv-scene{filter:blur(.6px) saturate(.8);transform:scale(1.15);transform-origin:50% 45%}
+.pv-eye,.pv-knife{opacity:0}
+.pv-eye.on{opacity:1;animation:eyein .25s ease-out}
+@keyframes eyein{from{transform:scale(.3);opacity:0}}
+.pv-eye.on .lid{animation:lid 3s infinite 1.2s} .pv-eye.on .lid2{animation:lid2 3s infinite 1.2s}
+@keyframes lid{0%,90%,100%{transform:translateY(0)}95%{transform:translateY(200px)}}
+@keyframes lid2{0%,90%,100%{transform:translateY(0)}95%{transform:translateY(-200px)}}
+.pv-knife.on{opacity:1;animation:stab .38s cubic-bezier(.7,0,1,.5) forwards}
+@keyframes stab{0%{transform:scale(.08)}100%{transform:scale(4.5)}}
+.pv-hint{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;color:#6a5a4e;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+.blind{position:fixed;inset:0;z-index:29;pointer-events:none;opacity:0;transition:opacity 1.5s}
+.blind.l,.blind.r{opacity:1}
+.blind.l{background:linear-gradient(90deg,#000 0,#000 22%,rgba(2,0,0,.93) 30%,rgba(5,0,0,.78) 37%,rgba(8,0,0,.55) 44%,rgba(8,0,0,.3) 51%,rgba(8,0,0,.12) 57%,transparent 64%)}
+.blind.r{background:linear-gradient(270deg,#000 0,#000 22%,rgba(2,0,0,.93) 30%,rgba(5,0,0,.78) 37%,rgba(8,0,0,.55) 44%,rgba(8,0,0,.3) 51%,rgba(8,0,0,.12) 57%,transparent 64%)}
+.blind.l::after,.blind.r::after{content:"";position:absolute;inset:0;animation:blindpulse 5s ease-in-out infinite}
+.blind.l::after{background:radial-gradient(ellipse 40% 70% at 30% 50%,rgba(70,0,0,.35),transparent 70%)}
+.blind.r::after{background:radial-gradient(ellipse 40% 70% at 70% 50%,rgba(70,0,0,.35),transparent 70%)}
+@keyframes blindpulse{50%{opacity:.25}}
+.boot .seg{color:var(--led-grn)!important}
 .subt{position:fixed;left:50%;bottom:calc(16% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;max-width:min(90vw,700px);text-align:center;pointer-events:none;
   font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,32px);color:#ffdccf;text-shadow:0 0 12px #000,0 0 24px #000,0 2px 0 #000}
 .displays.off .seg,.displays.off .meter i{opacity:.08;text-shadow:none;box-shadow:none}
@@ -549,7 +575,7 @@ html.calm .neon span{animation:none}
           <path d="M78 12 l2 60 M92 10 l1 62 M106 12 l2 58 M120 10 l1 62 M72 52 l56 -28"/>
           <path d="M148 12 l2 58 M162 10 l1 40"/></g></svg>
         <div class="opening" id="opening"><svg class="fig" viewBox="0 0 120 300" preserveAspectRatio="xMidYMax meet"><path d="M60 8c13 0 22 10 22 24 0 12-7 22-16 25 20 4 34 14 38 32l10 70c1 8-4 12-9 12l-4 0 2 120H17l2-120-4 0c-5 0-10-4-9-12l10-70c4-18 18-28 38-32-9-3-16-13-16-25 0-14 9-24 22-24z" fill="#050303"/></svg></div>
-        <div class="door" id="door" role="button" tabindex="0" aria-label="An die Tür klopfen"><div class="slit"><i></i><i></i><b class="barrel"></b><span class="shutter"></span></div><div class="hatchlight"></div><div class="hatch"></div><div class="knob"></div></div>
+        <div class="door" id="door" role="button" tabindex="0" aria-label="An die Tür klopfen"><div class="slit"><i></i><i></i><b class="barrel"></b><span class="shutter"></span></div><div class="hatchlight"></div><div class="hatch"></div><div class="knob"></div><button class="peephole" id="peephole" type="button" aria-label="Durch den Türspion schauen"></button></div>
         <div class="doorgap" id="doorgap"><i></i></div>
       </div>
     </div>
@@ -642,6 +668,30 @@ html.calm .neon span{animation:none}
 <div class="bookov" id="bookOv" hidden>
   <div class="book" id="book"><div class="pages"><div class="page left pg" id="pgL"></div><div class="page right pg" id="pgR"></div></div></div>
   <div class="bknav"><button type="button" id="bkPrev" aria-label="Zurückblättern">‹</button><span id="bkNum"></span><button type="button" id="bkNext" aria-label="Weiterblättern">›</button><button type="button" id="bkClose">Zuklappen</button></div>
+</div>
+<div class="blind" id="blind"></div>
+<div class="peepview" id="peepview" hidden>
+  <div class="pv-lens" id="pvLens">
+    <svg class="pv-scene" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+      <defs><radialGradient id="pvb" cx="62%" cy="18%" r="60%"><stop offset="0" stop-color="#6a5232"/><stop offset=".45" stop-color="#2a2016"/><stop offset="1" stop-color="#0b0806"/></radialGradient></defs>
+      <rect width="400" height="400" fill="url(#pvb)"/>
+      <path d="M0 0 L120 70 L120 330 L0 400Z" fill="#1d1712"/><path d="M400 0 L300 60 L300 340 L400 400Z" fill="#15110d"/>
+      <g fill="#3a2e22" stroke="#120d09" stroke-width="2">
+        <path d="M130 330 H300 V305 H130Z"/><path d="M150 305 H300 V282 H150Z"/><path d="M170 282 H300 V261 H170Z"/><path d="M190 261 H300 V242 H190Z"/>
+        <path d="M208 242 H300 V225 H208Z"/><path d="M224 225 H300 V210 H224Z"/><path d="M238 210 H300 V197 H238Z"/><path d="M250 197 H300 V186 H250Z"/></g>
+      <path d="M128 332 L250 180" stroke="#5a4a38" stroke-width="5"/><path d="M128 300 L250 160" stroke="#3a2e22" stroke-width="3"/>
+      <line x1="250" y1="0" x2="250" y2="70" stroke="#000" stroke-width="2"/><circle id="pvBulb" cx="250" cy="78" r="9" fill="#ffd27a"/>
+      <text x="150" y="150" fill="#7a2a1a" font-family="monospace" font-size="18" transform="rotate(-6 150 150)" opacity=".7">B-3</text>
+    </svg>
+    <svg class="pv-eye" id="pvEye" viewBox="0 0 400 400"><rect width="400" height="400" fill="#120806"/>
+      <ellipse cx="200" cy="200" rx="230" ry="130" fill="#e9dccb"/>
+      <g stroke="#b2402a" stroke-width="1.5" fill="none" opacity=".7"><path d="M10 190 C60 180 80 210 120 200"/><path d="M390 210 C340 230 320 195 280 205"/><path d="M40 260 C90 240 110 260 140 240"/></g>
+      <circle cx="200" cy="200" r="92" fill="#5a3a1a"/><circle cx="200" cy="200" r="92" fill="none" stroke="#2a1608" stroke-width="10"/>
+      <circle class="pupil" cx="200" cy="200" r="42" fill="#050302"/><circle cx="172" cy="172" r="14" fill="#fff" opacity=".8"/>
+      <rect class="lid" x="-20" y="-200" width="440" height="200" fill="#120806"/><rect class="lid2" x="-20" y="400" width="440" height="200" fill="#120806"/></svg>
+    <svg class="pv-knife" id="pvKnife" viewBox="0 0 400 400"><path d="M200 120 L228 200 L214 330 L186 330 L172 200Z" fill="#c9cfd4"/><path d="M200 120 L214 200 L200 330Z" fill="#fff" opacity=".6"/><rect x="178" y="330" width="44" height="80" rx="6" fill="#2a1a10"/></svg>
+  </div>
+  <div class="pv-hint">Tippen zum Zurücktreten</div>
 </div>
 <div class="subt" id="subt" hidden></div>
 <div class="cine" id="cine" hidden><div class="cinetext" id="cineText"></div><div class="cinehint">Tippen ▸</div></div>
@@ -821,7 +871,7 @@ function clockTick(dt){
   if(running) S.time=(S.time||0)+dt;
   const frac=isFinite(ms)?Math.min(1,(S&&S.time||0)/ms):0;
   const mins=Math.min(359,Math.floor(frac*360));
-  $('dClockT').textContent=isFinite(ms)?`0${Math.floor(mins/60)}:${String(mins%60).padStart(2,'0')}`:'--:--';
+  if(!booting)$('dClockT').textContent=isFinite(ms)?`0${Math.floor(mins/60)}:${String(mins%60).padStart(2,'0')}`:'--:--';
   const late=running&&frac>.85;
   $('dClock').classList.toggle('late',late);
   $('dClock').classList.toggle('stopped',!isFinite(ms));
@@ -846,7 +896,7 @@ const maxBet = () => has('schlitz')?5:3;
 const mult = () => 1 + (S.charms.hebel||0);
 const fmt = n => n.toLocaleString('de-DE');
 let dying=false;
-const uiFree=()=>!dying&&$('ov').hidden&&$('cine').hidden&&$('bookOv').hidden&&$('menu').hidden;
+const uiFree=()=>!dying&&!booting&&$('peepview').hidden&&$('ov').hidden&&$('cine').hidden&&$('bookOv').hidden&&$('menu').hidden;
 function stopHiss(){if(typeof hiss!=='undefined'&&hiss){hiss.stop();hiss=null;}}
 const broke=()=>S.money<=0&&S.credits===0&&!S.pending;
 function price(c){
@@ -937,6 +987,7 @@ function popMoney(n){
   p.classList.remove('show');void p.offsetWidth;p.classList.add('show');
 }
 function render(){
+  $('blind').className='blind'+(S&&S.eyeLost?' '+S.eyeLost:'');
   $('dMoney').textContent=fmt(S.money);
   $('dDebt').textContent=fmt(S.debt);
   $('dDay').textContent=`${S.day}/${DAYS}`;
@@ -1379,7 +1430,7 @@ function autoPull(){
 
 /* ---------- game flow ---------- */
 function freshState(){
-  return {level:1,day:1,money:15,debt:debtFor(1),spinsLeft:0,credits:0,charms:{},pending:0,doubles:0,spinning:false,grid:[],won:0,spinsTotal:0,offers:[],rerolls:0,puls:3,shakesToday:0,loanToday:false,lastBet:0,shaking:false,borrowed:0};
+  return {level:1,day:1,money:15,debt:debtFor(1),spinsLeft:0,credits:0,charms:{},pending:0,doubles:0,spinning:false,grid:[],won:0,spinsTotal:0,offers:[],rerolls:0,puls:3,shakesToday:0,loanToday:false,lastBet:0,shaking:false,borrowed:0,eyeLost:null,peeks:0};
 }
 function newGame(){
   dying=false;
@@ -1666,6 +1717,86 @@ function signNote(get,cost,onSigned){
     },S.puls>0?900:0);
   };
 }
+/* ---------- peephole ---------- */
+const peepState={canLeave:false,timers:[]};
+function peep(){
+  if(!uiFree()||S.spinning||S.shaking||loanBusy) return;
+  S.peeks=(S.peeks||0)+1;
+  const pv=$('peepview'),eye=$('pvEye'),knife=$('pvKnife');
+  eye.classList.remove('on');knife.classList.remove('on');pv.hidden=false;peepState.canLeave=false;
+  thunk();beep(900,.03,'square',.02);
+  const at=(t,f)=>peepState.timers.push(setTimeout(f,t));
+  at(400,()=>{peepState.canLeave=true;});
+  // what is behind the door this time?
+  const r=Math.random(),knifeChance=S.eyeLost?0:Math.min(.35,.06+S.peeks*.03),eyeChance=.3;
+  const bulb=$('pvBulb');const fl=setInterval(()=>bulb.setAttribute('opacity',Math.random()<.15?.2:1),120);peepState.timers.push({iv:fl});
+  if(r<knifeChance){
+    at(1500,()=>{peepState.canLeave=false;beep(70,.3,'sine',.08);breathClose(.25);});
+    at(2300,()=>{knife.classList.add('on');beep(4000,.05,'triangle',.05);});
+    at(2650,()=>{stabEye();});
+  }else if(r<knifeChance+eyeChance){
+    at(1200+Math.random()*1500,()=>{eye.classList.add('on');beep(55,.4,'sine',.2);beep(40,.6,'sine',.15);
+      [0,450,900,1350].forEach(t=>setTimeout(()=>beep(52,.13,'sine',.14),t));});
+  }
+  at(9000,()=>{if(!pv.hidden&&peepState.canLeave)leavePeep();});
+}
+function leavePeep(){
+  peepState.timers.forEach(t=>t.iv?clearInterval(t.iv):clearTimeout(t));peepState.timers=[];
+  $('peepview').hidden=true;$('pvEye').classList.remove('on');$('pvKnife').classList.remove('on');thunk();
+}
+function stabEye(){
+  leavePeep();
+  const side=Math.random()<.5?'l':'r';
+  scream();beep(60,.4,'square',.2);
+  const f=document.createElement('div');f.className='bleed black';f.style.opacity='1';f.style.background='#3a0000';document.body.appendChild(f);
+  if(!SET.calm&&!reduce){let k=0;const tr=setInterval(()=>{$('stage').style.translate=`${(Math.random()-.5)*14}px ${(Math.random()-.5)*14}px`;if(++k>16){clearInterval(tr);$('stage').style.translate='';}},45);}
+  setTimeout(()=>{f.style.background='#000';},300);
+  setTimeout(()=>{
+    S.eyeLost=side;S.puls=Math.max(1,S.puls-1);render();
+    f.style.transition='opacity 2.5s';f.style.opacity='0';setTimeout(()=>f.remove(),2600);
+    [0,700,1400].forEach(t=>setTimeout(()=>breathClose(.2),t));
+    setMsg(side==='l'?'DEIN LINKES AUGE · −1 PULS':'DEIN RECHTES AUGE · −1 PULS','bad');
+    setTimeout(()=>say('»Neugier kostet auch.«',2200),2400);
+  },1600);
+}
+
+/* ---------- thunderstorm outside: power cuts, the machine reboots ---------- */
+let booting=false,nextThunder=performance.now()+45000+Math.random()*40000;
+function thunder(vol){
+  if(muted||SET.sfx<=0||!AC) return;
+  try{const t=AC.currentTime,n=noiseNode(4.5,x=>(x<.04?x/.04:1)*Math.pow(1-x,1.6)*(.6+.4*Math.sin(x*18))),f=AC.createBiquadFilter(),g=AC.createGain();
+    f.type='lowpass';f.frequency.setValueAtTime(900,t);f.frequency.exponentialRampToValueAtTime(110,t+1.2);g.gain.value=vol*SET.sfx;n.connect(f).connect(g).connect(AC.destination);n.start(t);}catch(e){}
+}
+const BOOT=['PWR FAIL','RESET...','BIOS v2.31 (C)1987','CHK RAM 0000-3FFF','RAM OK 16K','ROM CRC 9F2E OK','REEL 1 HOME','REEL 2 HOME','REEL 3 HOME','HOPPER OK','LOAD STATE','SYSTEM OK'];
+function powerCut(){
+  booting=true;
+  const disp=document.querySelector('.displays'),cab=$('cab'),msg=$('msg'),oldMsg=msg.textContent,oldCls=msg.className;
+  thunder(.5);
+  const g=$('doorgap');if(!SET.calm&&!reduce){g.animate([{background:'#fff',boxShadow:'0 0 40px 10px #cfe0ff'},{background:'#ffcf7a'}],{duration:500});}
+  setTimeout(()=>{bulbDead=true;beep(180,.5,'sine',.05);disp.classList.add('off');cab.classList.add('deadc');msg.textContent='';},250);
+  const ids=['dDebt','dMoney','dDay','dSpins','dClockT'];const hex='0123456789ABCDEF';
+  let iv=null,line=0,lineIv=null;
+  setTimeout(()=>{
+    thunk();beep(1200,.04,'square',.03);bulbDead=false;flickerUntil=performance.now()+700;
+    cab.classList.remove('deadc');disp.classList.remove('off');disp.classList.add('boot');
+    iv=setInterval(()=>{ids.forEach(id=>{$(id).textContent=Array.from({length:id==='dClockT'?5:4},()=>hex[Math.floor(Math.random()*16)]).join('');});
+      if(Math.random()<.5)beep(2000+Math.random()*2000,.008,'square',.012);},45);
+    msg.className='msg good';
+    lineIv=setInterval(()=>{msg.textContent=BOOT[Math.min(line,BOOT.length-1)];line++;beep(900,.02,'square',.02);if(line>=BOOT.length)clearInterval(lineIv);},150);
+  },1500);
+  setTimeout(()=>{
+    clearInterval(iv);clearInterval(lineIv);disp.classList.remove('boot');
+    bulbDead=false;flickerUntil=performance.now()+500;beep(520,.08,'square',.03);setTimeout(()=>beep(780,.1,'square',.03),90);
+    booting=false;render();msg.textContent=oldMsg||'MÜNZE EINWERFEN';msg.className=oldCls;
+  },1500+BOOT.length*150+400);
+}
+setInterval(()=>{
+  const now=performance.now();
+  if(now<nextThunder||!S||!S.started||!uiFree()||S.spinning||S.shaking||booting) return;
+  nextThunder=now+40000+Math.random()*70000;
+  if(Math.random()<.35) powerCut(); else thunder(.18+Math.random()*.15);
+},1000);
+
 function closeSlit(){$('door').classList.remove('peek');scrape();setTimeout(()=>{stepSound(3);shadow('go');},900);}
 function bang(){
   if(muted||SET.sfx<=0) return;
@@ -2384,6 +2515,8 @@ $('endBtn').onclick=endDay;
 $('tray').onclick=collect;
 $('tray').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();collect();}});
 $('door').onclick=knock;
+$('peephole').addEventListener('click',e=>{e.stopPropagation();peep();});
+$('peepview').addEventListener('click',()=>{if(peepState.canLeave)leavePeep();});
 $('door').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();knock();}});
 $('bookProp').onclick=openBook;
 $('bkPrev').onclick=()=>flip(-1);$('bkNext').onclick=()=>flip(1);$('bkClose').onclick=closeBook;

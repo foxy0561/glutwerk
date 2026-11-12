@@ -103,6 +103,13 @@ button:disabled{cursor:not-allowed}
 .bigfig{position:fixed;left:50%;bottom:-6vh;height:150vh;aspect-ratio:120/300;transform:translate(-50%,75%) scale(.6);z-index:37;pointer-events:none;opacity:0;
   filter:drop-shadow(0 0 30px rgba(255,190,110,.35))}
 .bigfig.go{transition:transform 2.1s cubic-bezier(.55,0,.9,.7),opacity .4s;transform:translate(-50%,0) scale(1.3);opacity:1}
+.excuses{position:fixed;left:50%;bottom:calc(8% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:41;width:min(92vw,560px);display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.exhead{font-family:var(--f-hand);font-size:26px;color:#e8dcc0;text-align:center;text-shadow:0 2px 8px #000}
+.exbtn{background:linear-gradient(#e8dcc0,#cdbd9a);color:#2a2018;font-family:var(--f-hand);font-size:22px;padding:10px 16px;border-radius:3px;box-shadow:0 6px 14px rgba(0,0,0,.7);text-align:left;transition:transform .12s}
+.exbtn:nth-child(3){transform:rotate(.6deg)} .exbtn:nth-child(4){transform:rotate(-.5deg)}
+.exbtn:hover,.exbtn:focus-visible{transform:scale(1.03)}
+.extime{height:4px;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
+.extime i{display:block;height:100%;background:var(--red);transform-origin:0 50%}
 .subt{position:fixed;left:50%;bottom:calc(16% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;max-width:min(90vw,700px);text-align:center;pointer-events:none;
   font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,32px);color:#ffdccf;text-shadow:0 0 12px #000,0 0 24px #000,0 2px 0 #000}
 .displays.off .seg,.displays.off .meter i{opacity:.08;text-shadow:none;box-shadow:none}
@@ -1501,7 +1508,15 @@ function cutscene(lines,done){
   next();
 }
 const playerName=()=>{try{return(localStorage.getItem('glutwerk-name')||'').trim().slice(0,16).replace(/[<>]/g,'');}catch(e){return'';}};
-const INTRO=[
+const SB_URL='https://fqidanxjcwdpjdtngimu.supabase.co',SB_KEY='sb_publishable_BSiWVUEtRP2hE6RL77pI8Q_J57eHlaj';
+let deathCount=null,myNumber=null;
+function sbRpc(fn,body){
+  try{return fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})})
+    .then(r=>r.ok?r.json():null).catch(()=>null);}catch(e){return Promise.resolve(null);}
+}
+function loadDeathCount(){return sbRpc('ld_death_count').then(n=>{if(typeof n==='number'){deathCount=n;if(!$('menu').hidden)updateMenuFoot();}});}
+function recordDeath(cause){myNumber=deathCount!==null?deathCount+1:null;sbRpc('ld_record_death',{p_cause:cause,p_level:S.level||1}).then(n=>{if(typeof n==='number'){deathCount=n;myNumber=n;}});}
+function introLines(){return [
   'Kalter Beton unter dir. Über dir pendelt eine Glühbirne.',
   'Du weißt nicht, wie du hierher gekommen bist.',
   'Um deinen Knöchel liegt eine Kette. Sie führt zum Fuß eines alten Spielautomaten.',
@@ -1512,7 +1527,7 @@ const INTRO=[
   '»Er ist dein Freund. Ich bin es nicht.«',
   'Neben dir steht ein Tisch. Darauf ein altes Telefon und eine Blechschüssel mit 15 Münzen.',
   '»Und wenn du mehr brauchst, klopf. Dreimal. Nicht öfter.«'
-];
+].flatMap(l=>l==='»Du schuldest mir 40 Münzen. Ich gebe dir drei Tage.«'&&deathCount!==null?[`»Du bist Nummer ${fmt(deathCount+1)}. Die anderen haben nicht bezahlt.«`,l]:[l]);}
 const LEVEL_SCENES={
   2:['Der Lautsprecher knackt.','»Brav. Du hast bezahlt.«','»Aber Schulden wachsen. Das ist ihre Natur.«','Die Kette ruckt. Jemand zieht sie von draußen ein Stück ein.'],
   3:['Im Licht des Automaten siehst du die Kratzer in der Wand zum ersten Mal richtig.','Striche. Jemand hat hier Tage gezählt.','Die letzte Fünfergruppe ist nicht fertig.','»Du bist nicht der Erste an diesem Automaten. Nur der Hartnäckigste.«'],
@@ -1793,10 +1808,50 @@ function creak(){
 }
 function chainRattle(){for(let i=0;i<12;i++)setTimeout(()=>{beep(1700+Math.random()*1500,.04,'triangle',.03);beep(400+Math.random()*200,.03,'square',.015);},i*55+Math.random()*30);}
 function panCam(to,ms){const from=cam,t0=performance.now();const st=n=>{const k=Math.min(1,(n-t0)/ms),e=k*k*(3-2*k);cam=from+(to-from)*e;$('world').style.transform=`translateX(${-cam}px)`;if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);}
+const EXCUSES=[
+  {t:'»Morgen hab ich alles. Versprochen.«',no:'»Das hat der Letzte auch gesagt.«'},
+  {t:'»Ich kann für dich arbeiten.«',no:'»Du arbeitest schon für mich.«'},
+  {t:'»Bitte. Nur noch einen Tag.«',no:'»Bitten kostet extra.«'}
+];
+function askExcuse(paid,calm,door,op,disp){
+  $('subt').hidden=true;
+  if(S.excuseUsed){say('»Keine Ausreden mehr.«',1500);setTimeout(()=>debtFinish(calm,door,op,disp),1700);return;}
+  const lucky=Math.floor(Math.random()*3);let done=false;
+  const box=document.createElement('div');box.className='excuses';
+  box.innerHTML=`<div class="exhead">Sag etwas.</div>${EXCUSES.map((e,i)=>`<button type="button" class="exbtn" data-i="${i}">${e.t}</button>`).join('')}<div class="extime"><i></i></div>`;
+  document.body.appendChild(box);
+  const bar=box.querySelector('.extime i');bar.animate([{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:9000,fill:'forwards'});
+  [0,700,1400,2100,2800,3500,4200,4900,5600,6300,7000,7700,8400].forEach(t=>setTimeout(()=>{if(!done)beep(52,.12,'sine',.12);},t));
+  const pick=i=>{
+    if(done)return;done=true;box.remove();
+    if(i===null){say('»Nichts zu sagen? Dachte ich mir.«',1800);setTimeout(()=>debtFinish(calm,door,op,disp),2000);return;}
+    S.excuseUsed=true;
+    setTimeout(()=>{
+      if(i===lucky){
+        say('»…«',1100);
+        setTimeout(()=>say('»Ein Tag. Einer.«',1600),1300);
+        setTimeout(()=>say('»Und du schuldest mir das Doppelte.«',2200),3100);
+        setTimeout(()=>spare(paid,door,op,disp),5600);
+      }else{say(EXCUSES[i].no,1900);setTimeout(()=>debtFinish(calm,door,op,disp),2100);}
+    },500);
+  };
+  box.addEventListener('click',e=>{const b=e.target.closest('.exbtn');if(b){beep(300,.05,'square',.03);pick(+b.dataset.i);}});
+  setTimeout(()=>pick(null),9000);
+}
+function spare(paid,door,op,disp){
+  // he takes what you had, doubles the rest, gives one more day and leaves
+  S.debt=Math.max(10,(S.debt-paid)*2);S.money=0;S.puls=1;
+  door.getAnimations().forEach(a=>a.cancel());
+  door.animate([{transform:'perspective(900px) rotateY(-78deg)'},{transform:'perspective(900px) rotateY(0deg)'}],{duration:reduce?10:900,easing:'ease-in'});
+  setTimeout(()=>{op.classList.remove('on');thunk();setTimeout(thunk,240);stepSound(4);shadow('go');},reduce?20:900);
+  disp.classList.remove('off');panCam(0,900);
+  dying=false;S.started=true;S.inShop=false;startDay();applySet();clearMarks();
+  setMsg(`»EIN TAG.« SCHULD ${fmt(S.debt)}`,'bad');render();
+}
 function debtDeath(){
   dying=true;stopHiss();S.started=false;clearSave();
   const calm=reduce||SET.calm,door=$('door'),op=$('opening'),disp=document.querySelector('.displays');
-  const owed=Math.max(0,S.debt-S.money);
+  const owed=Math.max(0,S.debt-S.money),paid=S.money;
   // 1) the machine powers down
   beep(220,.8,'sine',.06);setTimeout(()=>beep(110,.9,'sine',.05),250);
   if(drone){try{drone.gain.setTargetAtTime(0,AC.currentTime,.8);}catch(e){}}
@@ -1824,8 +1879,12 @@ function debtDeath(){
   });
   T(11400,()=>say(`»${fmt(owed)} zu wenig.«`,2000));
   T(13600,()=>say('»Ich hab dir drei Tage gegeben.«',2200));
-  // 5) he comes closer
-  T(15900,()=>{
+  // 5) one last word
+  T(15600,()=>askExcuse(paid,calm,door,op,disp));
+}
+function debtFinish(calm,door,op,disp){
+  const T=(t,f)=>setTimeout(f,calm?t*.8:t);
+  T(0,()=>{
     $('subt').hidden=true;
     const bf=document.createElement('div');bf.className='bigfig';bf.innerHTML=op.querySelector('.fig').outerHTML;document.body.appendChild(bf);
     requestAnimationFrame(()=>bf.classList.add('go'));debtDeath.bf=bf;
@@ -1835,13 +1894,13 @@ function debtDeath(){
     debtDeath.alive=true;beat();
     if(!calm){let a=0;debtDeath.tr=setInterval(()=>{a=Math.min(5,a+.2);$('stage').style.translate=`${(Math.random()-.5)*a}px ${(Math.random()-.5)*a}px`;},50);}
   });
-  T(18200,()=>{
+  T(2300,()=>{
     // instant black, silence
     debtDeath.alive=false;if(debtDeath.tr)clearInterval(debtDeath.tr);$('stage').style.translate='';
     const bl=document.createElement('div');bl.className='bleed black';bl.style.opacity='1';document.body.appendChild(bl);debtDeath.bl=bl;
     beep(60,.08,'square',.12);
   });
-  T(19600,()=>{
+  T(3700,()=>{
     die('schuld',()=>{
       [debtDeath.bf,debtDeath.bl].forEach(e=>e&&e.remove());
       door.getAnimations().forEach(a=>a.cancel());op.classList.remove('on');op.querySelector('.fig').style.opacity='';disp.classList.remove('off');
@@ -2113,6 +2172,7 @@ function payday(interest){
   }
 }
 function die(cause,onStart){
+  recordDeath(cause);
   dying=false;stopHiss();
   saveBest();S.started=false;clearSave();
   const scenes={
@@ -2132,11 +2192,12 @@ function deathSheet(cause){
       <span class="t">Insgesamt gewonnen</span><span class="a">${fmt(S.won)}</span>
       <span class="t">Geliehen</span><span class="a">${fmt(S.borrowed)}</span>
       <span class="t">Bestes Level</span><span class="a">${loadBest()}</span>
+      ${myNumber?`<span class="t">Du warst Gefangener</span><span class="a">Nr. ${fmt(myNumber)}</span>`:''}
     </div>
     <div class="shopfoot"><button class="ghost" id="toMenu" type="button">Hauptmenü</button><button class="big" id="again" type="button">Neues Leben</button></div>`,'death');
   $('toMenu').onclick=()=>{closeOv();showMenu();};
   melody([392,330,262,196,131],220,'sawtooth');
-  $('again').onclick=()=>{newGame();cutscene(INTRO.slice(3),()=>setMsg('MÜNZE EINWERFEN'));};
+  $('again').onclick=()=>{newGame();cutscene(introLines().slice(3),()=>setMsg('MÜNZE EINWERFEN'));};
 }
 
 function makeOffers(){
@@ -2173,6 +2234,12 @@ function drawShop(){
 /* ---------- main menu ---------- */
 function menuTag(id,title,sub,cls=''){return `<button class="mtag ${cls}" type="button" data-act="${id}"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</button>`;}
 function chime(){beep(1900+Math.random()*700,.05,'triangle',.025);setTimeout(()=>beep(2600+Math.random()*500,.06,'triangle',.015),50);}
+function updateMenuFoot(){
+  const best=loadBest();
+  const a=best?`Am weitesten gekommen: Level ${best}.`:'Noch niemand ist hier rausgekommen.';
+  const b=deathCount!==null?` ${fmt(deathCount)} Gefangene sind in diesem Keller gestorben.`:'';
+  $('mfoot').textContent=a+b;
+}
 function showMenu(){
   stopHiss();
   closeOv();$('cine').hidden=true;$('bookOv').hidden=true;
@@ -2182,14 +2249,14 @@ function showMenu(){
     +menuTag('book','Tagebuch','Einstellungen & Regeln','rust')
     +menuTag('help','Steuerung','So spielst du');
   const best=loadBest();
-  $('mfoot').textContent=best?`Am weitesten gekommen: Level ${best}`:'Noch niemand ist hier rausgekommen.';
+  updateMenuFoot();
   $('mpanel').hidden=true;$('menu').hidden=false;
   const f=$('tags').querySelector('.mtag');f&&f.focus({preventScroll:true});
 }
 function hideMenu(){$('menu').hidden=true;
   const from=cam;if(reduce){cam=0;}else{const t0=performance.now();const st=n=>{const k=Math.min(1,(n-t0)/700);cam=from*(1-k*k*(3-2*k));$('world').style.transform=`translateX(${-cam}px)`;if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);}
   $('world').style.transform=`translateX(${-cam}px)`;}
-function startNew(){hideMenu();startDrone();newGame();cutscene(INTRO,()=>setMsg('MÜNZE EINWERFEN'));}
+function startNew(){hideMenu();startDrone();newGame();cutscene(introLines(),()=>setMsg('MÜNZE EINWERFEN'));}
 function menuPanel(html){$('mpanel').innerHTML=`<div class="paperbox">${html}</div>`;$('mpanel').hidden=false;rustle();
   const b=$('mpanel').querySelector('button');b&&b.focus();}
 function menuAct(act,el){
@@ -2253,7 +2320,7 @@ function saveBest(){try{if(S.level>loadBest())localStorage.setItem('ld_best',S.l
 /* ---------- wiring ---------- */
 S=freshState();S.spinsLeft=10;
 S.grid=['seven','gem','clover','bell','seven','cherry','lemon','clover','seven'];
-[0,1,2].forEach(restStrip);setLever(0);fit();render();showMenu();
+[0,1,2].forEach(restStrip);setLever(0);fit();render();showMenu();loadDeathCount();
 requestAnimationFrame(roomLoop);requestAnimationFrame(deskLoop);
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fit);
 $('bRed').onclick=()=>gamble('r');

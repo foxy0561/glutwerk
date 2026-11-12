@@ -213,7 +213,8 @@ h2.sec small{font-size:15px;color:var(--muted);letter-spacing:0}
 .tc-fx{flex:1;display:flex;align-items:center;padding:2cqw 5cqw;font-size:5.6cqw;line-height:1.35;color:#dfe4ee}
 .tc-art.pic img{position:absolute;inset:6% 10%;width:80%;height:88%;object-fit:contain;filter:drop-shadow(0 1.5cqw 2cqw rgba(0,0,0,.6))}
 .tc-art.ortpic img{inset:-6%;width:112%;height:112%;object-fit:cover;filter:none}
-.tc-art.scene img{inset:0;width:100%;height:100%;object-fit:cover;filter:none;image-rendering:pixelated}
+.tc-art.scene img{inset:0;width:100%;height:100%;object-fit:cover;filter:none}
+.tc-art.scene.px img{image-rendering:pixelated}
 .tcard.r-mythic .tc-rules{flex:0 0 auto;position:relative;z-index:2}
 .tcard.r-mythic .tc-atk{background:rgba(0,0,0,.45)}
 /* Glanz (Holo) */
@@ -540,6 +541,7 @@ const SETS = {
   drako:      { name: "Drako",       c: ["#7b2ff7", "#f107a3"] },
   glutwerk:   { name: "Glutwerk",    c: ["#ff6a2b", "#ffb347"] },
   klarwasser: { name: "Klarwasser",  c: ["#1d6f7a", "#7fd6c8"] },
+  "letzter-dreh": { name: "Letzter Dreh", c: ["#6b0f16", "#d4a24a"] },
   wildnis:    { name: "Wildnis",     c: ["#3a7a3a", "#c9a46a"] },
   thyrvenna:  { name: "Thyrvenna",   c: ["#2d4a3e", "#c9a46a"] },
   foxy:       { name: "Foxy",        c: ["#ff6ad5", "#7df9ff"] },
@@ -639,20 +641,20 @@ const ART = {
 
 /* ---------- Die Karten (Serie 1) ---------- */
 const CARDS = [
-  { id: "kiko",        set: "kiko",       r: "rare",      pow: 4,  name: "Kiko",               pic: "kiko-kiko", scene: 1, text: "Klein, rot und nicht zu stoppen." },
-  { id: "sternblock",  set: "kiko",       r: "common",    pow: 2,  name: "Sternblock",         pic: "kiko-sternblock", scene: 1, text: "Einmal draufhauen. Lohnt sich immer." },
-  { id: "muenze",      set: "kiko",       r: "common",    pow: 1,  name: "Goldmünze",          pic: "kiko-muenze", scene: 1, text: "Hundert davon und das Leben lächelt." },
-  { id: "wiesenland",  set: "kiko",       r: "common",    pow: 2,  name: "Wiesenland",         pic: "kiko-wiesenland", scene: 1, text: "Welt 1. Hier fängt jedes Abenteuer an." },
-  { id: "roehre",      set: "kiko",       r: "rare",      pow: 3,  name: "Warp-Röhre",         pic: "kiko-roehre", scene: 1, text: "Wo sie hinführt? Spring rein." },
-  { id: "burg",        set: "kiko",       r: "epic",      pow: 6,  name: "Die Burg",           pic: "kiko-burg", scene: 1, text: "Das letzte Level wartet hinter diesen Mauern." },
-  { id: "gruenling",   set: "kiko",       r: "common",    pow: 1,  name: "Grünling",           pic: "kiko-gruenling", scene: 1, text: "Läuft immer geradeaus. Bis jemand draufspringt." },
-  { id: "extraleben",  set: "kiko",       r: "rare",      pow: 3,  name: "Extraleben",         pic: "kiko-extraleben", scene: 1, text: "Noch ein Versuch. Diesmal klappt es." },
-  { id: "vier-freunde", set: "kiko",      r: "epic",      pow: 6,  name: "Vier Freunde",       pic: "kiko-vier-freunde", scene: 1, text: "Ein Gerät, vier Spieler, null Gnade." },
-  { id: "panzerkaefer", set: "kiko",      r: "common",    pow: 2,  name: "Panzerkäfer",        pic: "kiko-kaefer", scene: 1, text: "Draufspringen, dann rutscht er als Panzer weiter." },
-  { id: "stachler",    set: "kiko",       r: "common",    pow: 2,  name: "Stachler",           pic: "kiko-igel", scene: 1, text: "Bloß nicht von oben anfassen." },
-  { id: "flatterling", set: "kiko",       r: "rare",      pow: 3,  name: "Flatterling",        pic: "kiko-fledermaus", scene: 1, text: "Hängt an der Decke und wartet." },
-  { id: "kiko-dino",   set: "kiko",       r: "epic",      pow: 5,  name: "Dino",               pic: "kiko-dino", scene: 1, text: "Aus dem Ei geschlüpft, frisst alles mit der Zunge." },
-  { id: "feuerkoenig", set: "kiko",       r: "legendary", pow: 8,  name: "Feuerkönig",         pic: "kiko-feuerkoenig", scene: 1, text: "Herrscher der Lavaburg. Drei Treffer, dann fällt die Krone." },
+  { id: "kiko",        set: "kiko",       r: "rare",      pow: 4,  name: "Kiko",               pic: "kiko-kiko", scene: "px", text: "Klein, rot und nicht zu stoppen." },
+  { id: "sternblock",  set: "kiko",       r: "common",    pow: 2,  name: "Sternblock",         pic: "kiko-sternblock", scene: "px", text: "Einmal draufhauen. Lohnt sich immer." },
+  { id: "muenze",      set: "kiko",       r: "common",    pow: 1,  name: "Goldmünze",          pic: "kiko-muenze", scene: "px", text: "Hundert davon und das Leben lächelt." },
+  { id: "wiesenland",  set: "kiko",       r: "common",    pow: 2,  name: "Wiesenland",         pic: "kiko-wiesenland", scene: "px", text: "Welt 1. Hier fängt jedes Abenteuer an." },
+  { id: "roehre",      set: "kiko",       r: "rare",      pow: 3,  name: "Warp-Röhre",         pic: "kiko-roehre", scene: "px", text: "Wo sie hinführt? Spring rein." },
+  { id: "burg",        set: "kiko",       r: "epic",      pow: 6,  name: "Die Burg",           pic: "kiko-burg", scene: "px", text: "Das letzte Level wartet hinter diesen Mauern." },
+  { id: "gruenling",   set: "kiko",       r: "common",    pow: 1,  name: "Grünling",           pic: "kiko-gruenling", scene: "px", text: "Läuft immer geradeaus. Bis jemand draufspringt." },
+  { id: "extraleben",  set: "kiko",       r: "rare",      pow: 3,  name: "Extraleben",         pic: "kiko-extraleben", scene: "px", text: "Noch ein Versuch. Diesmal klappt es." },
+  { id: "vier-freunde", set: "kiko",      r: "epic",      pow: 6,  name: "Vier Freunde",       pic: "kiko-vier-freunde", scene: "px", text: "Ein Gerät, vier Spieler, null Gnade." },
+  { id: "panzerkaefer", set: "kiko",      r: "common",    pow: 2,  name: "Panzerkäfer",        pic: "kiko-kaefer", scene: "px", text: "Draufspringen, dann rutscht er als Panzer weiter." },
+  { id: "stachler",    set: "kiko",       r: "common",    pow: 2,  name: "Stachler",           pic: "kiko-igel", scene: "px", text: "Bloß nicht von oben anfassen." },
+  { id: "flatterling", set: "kiko",       r: "rare",      pow: 3,  name: "Flatterling",        pic: "kiko-fledermaus", scene: "px", text: "Hängt an der Decke und wartet." },
+  { id: "kiko-dino",   set: "kiko",       r: "epic",      pow: 5,  name: "Dino",               pic: "kiko-dino", scene: "px", text: "Aus dem Ei geschlüpft, frisst alles mit der Zunge." },
+  { id: "feuerkoenig", set: "kiko",       r: "legendary", pow: 8,  name: "Feuerkönig",         pic: "kiko-feuerkoenig", scene: "px", text: "Herrscher der Lavaburg. Drei Treffer, dann fällt die Krone." },
   { id: "wuerfel",     set: "kammerwerk", r: "common",    pow: 2,  name: "Testwürfel",         art: "cube",       text: "Er drückt Knöpfe. Er redet nicht." },
   { id: "gel",         set: "kammerwerk", r: "common",    pow: 2,  name: "Sprung-Gel",         art: "gel",        text: "Draufsteigen. Abheben." },
   { id: "portal-b",    set: "kammerwerk", r: "rare",      pow: 4,  name: "Blaues Portal",      art: "portalB",    text: "Rein hier …" },
@@ -748,6 +750,23 @@ const CARDS = [
   { id: "kw-fern",     set: "klarwasser", r: "rare",      pow: 2,  name: "Javafarn",           pic: "kw-fern",    text: "Unkaputtbar." },
   { id: "kw-strom",    set: "klarwasser", r: "epic",      pow: 6,  name: "Stromausfall",       art: "kw_strom",   text: "Filter aus. Heizung aus. Licht aus." },
   { id: "kw-becken",   set: "klarwasser", r: "rare",      pow: 3,  name: "Bepflanztes Becken", art: "kw_becken",  text: "Grün, klar und voller Leben." },
+  { id: "ld-automat",  set: "letzter-dreh", r: "epic",      pow: 6,  name: "Der Automat",          pic: "ld-automat",  scene: "foto", text: "Er nimmt jede Münze. Zurück gibt er selten." },
+  { id: "ld-glaeubiger", set: "letzter-dreh", r: "legendary", pow: 8, name: "Der Gläubiger",        pic: "ld-aim",      scene: "foto", text: "Zwei Läufe im Schlitz. Die Schuld wird fällig." },
+  { id: "ld-augen",    set: "letzter-dreh", r: "rare",      pow: 3,  name: "Augen im Schlitz",     pic: "ld-peek",     scene: "foto", text: "Jemand sieht dir beim Verlieren zu." },
+  { id: "ld-schatten", set: "letzter-dreh", r: "common",    pow: 2,  name: "Schatten an der Tür",  pic: "ld-schatten", scene: "foto", text: "Das Licht unter der Tür bricht ab. Jemand steht da." },
+  { id: "ld-777",      set: "letzter-dreh", r: "epic",      pow: 6,  name: "Dreifach Sieben",      pic: "ld-r-seven",  scene: "foto", text: "Neun Siebenen. Das passiert nie. Oder?" },
+  { id: "ld-schaedel", set: "letzter-dreh", r: "rare",      pow: 4,  name: "Schädelreihe",         pic: "ld-r-skull",  scene: "foto", text: "Der Automat lacht nicht. Aber er grinst." },
+  { id: "ld-joker",    set: "letzter-dreh", r: "rare",      pow: 3,  name: "Joker im Ärmel",       pic: "ld-r-joker",  scene: "foto", text: "Ersetzt jedes Symbol. Und jede Hoffnung." },
+  { id: "ld-risiko",   set: "letzter-dreh", r: "common",    pow: 2,  name: "Rot oder Schwarz",     pic: "ld-risiko",   scene: "foto", text: "Fünfzig Prozent. Klingt fair." },
+  { id: "ld-strom",    set: "letzter-dreh", r: "rare",      pow: 4,  name: "Stromschlag",          pic: "ld-strom",    scene: "foto", text: "Nicht am Automaten rütteln." },
+  { id: "ld-licht",    set: "letzter-dreh", r: "common",    pow: 2,  name: "Die Glühbirne",        pic: "ld-birne",    scene: "foto", text: "Sie pendelt. Und flackert. Und pendelt." },
+  { id: "ld-telefon",  set: "letzter-dreh", r: "rare",      pow: 3,  name: "Anruf von draußen",    pic: "ld-telefon",  scene: "foto", text: "Eine Nummer wählen. Wer nimmt hier ab?" },
+  { id: "ld-schale",   set: "letzter-dreh", r: "common",    pow: 1,  name: "Münzschale",           pic: "ld-schale",   scene: "foto", text: "Fünfzehn Münzen. Mehr hast du nicht." },
+  { id: "ld-tagebuch", set: "letzter-dreh", r: "common",    pow: 1,  name: "Tagebuch",             pic: "ld-tagebuch", scene: "foto", text: "Die Seiten davor hat jemand anderes geschrieben." },
+  { id: "ld-striche",  set: "letzter-dreh", r: "common",    pow: 1,  name: "Strichliste",          pic: "ld-striche",  scene: "foto", text: "Zwölf Tage. Oder zwölf Versuche." },
+  { id: "ld-klappe",   set: "letzter-dreh", r: "rare",      pow: 3,  name: "Die Klappe",           pic: "ld-klappe",   scene: "foto", text: "Ein Tablett wird durchgeschoben. Für einen Preis." },
+  { id: "ld-hebel",    set: "letzter-dreh", r: "rare",      pow: 3,  name: "Schwerer Hebel",       pic: "ld-hebel",    scene: "foto", text: "Ziehen. Loslassen. Hoffen." },
+  { id: "ld-zelle",    set: "letzter-dreh", r: "epic",      pow: 5,  name: "Die Zelle",            pic: "ld-zelle",    scene: "foto", ort: 1, text: "Kalter Beton. Ein Automat. Eine Tür ohne Klinke." },
   { id: "w-schwein",   set: "wildnis",    r: "common",    pow: 1,  name: "Schwein",            art: "w_schwein",  text: "Grunzt, wühlt, frisst alles." },
   { id: "w-huhn",      set: "wildnis",    r: "common",    pow: 1,  name: "Huhn",               pic: "w-huhn",     text: "Schneller, als es aussieht." },
   { id: "w-kuh",       set: "wildnis",    r: "common",    pow: 2,  name: "Kuh",                pic: "w-kuh",      text: "Frische Milch für alle." },
@@ -869,6 +888,7 @@ function fxText(w) {
   if (w.dauerSchaden) t.push(`Ein eigenes Wesen macht dauerhaft +${w.dauerSchaden} Schaden.`);
   if (w.sucheTyp) t.push("Hole eine Ausrüstung aus deinem Deck auf die Hand.");
   if (w.schadenGegner) t.push(`${w.schadenGegner} Schaden an den Gegner.`);
+  if (w.gluecksspiel) t.push(`50 %: ${w.gluecksspiel[0]} Schaden an den Gegner. Sonst ${w.gluecksspiel[1]} Schaden an dich.`);
   if (w.frostAlle) t.push("Kein gegnerisches Wesen kann nächste Runde angreifen.");
   if (w.gibFlink && w.t === "zauber") t.push("Ein eigenes Wesen wird Flink.");
   if (w.schadenAlleFeinde) t.push(`${w.schadenAlleFeinde} Schaden an alle gegnerischen Wesen.`);
@@ -917,7 +937,7 @@ function cardHTML(c, foil) {
     <div class="frame"><div class="inner">
       ${mythic ? `<div class="tc-art"><img src="${FOXY_IMG(c.img)}" alt="" draggable="false"></div>` : ""}
       <div class="tc-head"><span class="tc-name" style="font-size:${Math.min(9.6, 100 / c.name.length).toFixed(2)}cqw">${esc(c.name)}</span>${badgeHTML(w)}</div>
-      ${mythic ? `<div class="tc-spacer"></div>` : c.pic ? `<div class="tc-art pic${c.ort ? " ortpic" : ""}${c.scene ? " scene" : ""}" style="background:${c.set === "klarwasser" ? "radial-gradient(ellipse at 50% 0%,#bff3ea55,transparent 60%),linear-gradient(180deg,#2f7f88,#133f48)" : `radial-gradient(circle at 50% 55%,${set.c[1]}55,transparent 70%),linear-gradient(160deg,#20302a,#0f1512)`}"><img src="img/${c.pic}.webp" alt="" draggable="false" loading="lazy"></div>` : `<div class="tc-art" style="background:linear-gradient(135deg,${set.c[0]},${set.c[1]})">${artSVG(c.art)}</div>`}
+      ${mythic ? `<div class="tc-spacer"></div>` : c.pic ? `<div class="tc-art pic${c.ort ? " ortpic" : ""}${c.scene ? " scene" + (c.scene === "px" ? " px" : "") : ""}" style="background:${c.set === "klarwasser" ? "radial-gradient(ellipse at 50% 0%,#bff3ea55,transparent 60%),linear-gradient(180deg,#2f7f88,#133f48)" : `radial-gradient(circle at 50% 55%,${set.c[1]}55,transparent 70%),linear-gradient(160deg,#20302a,#0f1512)`}"><img src="img/${c.pic}.webp" alt="" draggable="false" loading="lazy"></div>` : `<div class="tc-art" style="background:linear-gradient(135deg,${set.c[0]},${set.c[1]})">${artSVG(c.art)}</div>`}
       <div class="tc-type"><span>${TYP[w.t]} · ${esc(set.name)}</span><b>${RARITY[c.r].name}</b></div>
       ${rulesHTML(c, w)}
       <div class="tc-foot"><span>${String(c.no).padStart(2, "0")} / ${CARDS.length}</span><span class="tc-gem"></span></div>

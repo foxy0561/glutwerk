@@ -28,6 +28,7 @@
     schnee:   { name: "Schneeland",    bild: "img/w-schnee.webp",    farbe: "#0c1420" },
     hoehle:   { name: "Kristallhöhle", bild: "img/w-tiefe.webp",     farbe: "#0e0a1c" },
     lava:     { name: "Lavawelt",      bild: "img/w-lavawelt.webp",  farbe: "#1c0604" },
+    zelle:    { name: "Die Zelle",     bild: "img/ld-zelle.webp",    farbe: "#0e0a0a" },
   };
 
   /* Kartenrücken als HTML */

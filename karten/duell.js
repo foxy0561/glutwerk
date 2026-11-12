@@ -64,11 +64,13 @@
     P.feld.slice().forEach(u => {
       if (u.pas === "brut" && P.feld.length < R.feldPlaetze) { const a = mkUnit("#ameise", pi); a.neu = false; P.feld.push(a); log("Eine Ameise schlüpft und kann sofort angreifen."); }
       if (u.pas === "honig") healHero(pi, 1);
+      if (u.pas === "schuld") { hurtHero(foe(pi), 1); log(`${u.name} treibt 1 Leben Schulden ein.`); }
       if (u.pas === "kuh") P.feld.forEach(x => heal(x, 1));
       if (u.pas === "nachwuchs" && P.feld.length < R.feldPlaetze) { P.feld.push(mkUnit("#babyguppy", pi)); log("Ein Baby-Guppy schlüpft."); }
       if (u.pas === "wachstum") { u.max += 1; heal(u, 1); }
     });
-    const n = 1 + (ortIs("hafen") ? 1 : 0);
+    if (ortIs("zelle")) hurtHero(pi, 1);
+    const n = 1 + (ortIs("hafen") ? 1 : 0) + (ortIs("zelle") ? 1 : 0);
     if (P.ki) for (let i = 0; i < n; i++) draw(pi); else P.zieh = Math.min(n, P.deck.length);   // Spieler zieht selbst vom Stapel, aber nur solange noch Karten da sind
     cleanup();
   }
@@ -261,6 +263,11 @@
       if (w.sucheTyp) { const k = P.deck.findIndex(x => W[x] && W[x].t === w.sucheTyp); if (k >= 0 && P.hand.length < 9) { P.hand.push(P.deck.splice(k, 1)[0]); log(`${P.name} holt eine Ausrüstung.`); } }
       if (w.schadenAlleFeinde) E.feld.slice().forEach(u => hurt(u, w.schadenAlleFeinde));
       if (w.schadenGegner) hurtHero(foe(pi), w.schadenGegner);
+      if (w.gluecksspiel) {
+        const [gew, verl] = w.gluecksspiel;
+        if (Math.random() < 0.5) { hurtHero(foe(pi), gew); log(`${P.name} gewinnt: ${gew} Schaden am Gegner!`); }
+        else { hurtHero(pi, verl); log(`${P.name} verliert: ${verl} Schaden an sich selbst.`); }
+      }
       if (w.frostAlle) E.feld.forEach(u => { u.frost = 1; ev("u" + u.uid, "Frost", "frost"); });
       if (w.entfrosten && tu) { tu.frost = 0; tu.gesperrt = false; }
       if (w.gibFlink && tu) { tu.flink = true; ev("u" + tu.uid, "Flink!", "heal"); }
@@ -635,11 +642,11 @@
   let lastHand = 0;
 
   function artHTML(id) {
-    if (id[0] === "#") { const m = MARKER[id.slice(1)]; return m.pic ? (m.scene ? `<img src="img/${m.pic}.webp" alt="" style="image-rendering:pixelated">` : `<img class="item" src="img/${m.pic}.webp" alt="" style="background:radial-gradient(circle,#2f7f88,#133f48)">`) : artSVG(m.art); }
+    if (id[0] === "#") { const m = MARKER[id.slice(1)]; return m.pic ? (m.scene ? `<img src="img/${m.pic}.webp" alt="" style="${m.scene === "px" ? "image-rendering:pixelated" : ""}">` : `<img class="item" src="img/${m.pic}.webp" alt="" style="background:radial-gradient(circle,#2f7f88,#133f48)">`) : artSVG(m.art); }
     const c = card(id);
     if (c.cut) return `<img class="cut" src="${c.cut}" alt="">`;
     if (c.img) return `<img src="${FOXY_IMG(c.img)}" alt="" style="object-position:50% 20%">`;
-    if (c.pic) return `<img class="${c.ort || c.scene ? "" : "item"}" src="img/${c.pic}.webp" alt="" style="${c.scene ? "image-rendering:pixelated" : c.ort ? "" : "background:radial-gradient(circle,#2d4a3e,#0f1512)"}">`;
+    if (c.pic) return `<img class="${c.ort || c.scene ? "" : "item"}" src="img/${c.pic}.webp" alt="" style="${c.scene === "px" ? "image-rendering:pixelated" : c.ort ? "" : "background:radial-gradient(circle,#2d4a3e,#0f1512)"}">`;
     return artSVG(c.art);
   }
   const rcol = id => id[0] === "#" ? "var(--common)" : `var(--${card(id).r})`;
@@ -647,7 +654,7 @@
   /* Alle Effekte eines Wesens: Symbol, Name, was es macht, wie lange */
   function miniArt(id) {
     const c = card(id);
-    if (c.pic) return `<img src="img/${c.pic}.webp" alt=""${c.scene ? ' style="object-fit:cover;image-rendering:pixelated"' : ""}>`;
+    if (c.pic) return `<img src="img/${c.pic}.webp" alt=""${c.scene ? ` style="object-fit:cover${c.scene === "px" ? ";image-rendering:pixelated" : ""}"` : ""}>`;
     if (c.img) return `<img src="${FOXY_IMG(c.img)}" alt="" style="object-fit:cover">`;
     return artSVG(c.art);
   }
@@ -1049,7 +1056,7 @@
   }
   const saveDecks = d => store("glutwerk-decks", JSON.stringify(d));
   const aktDeck = d => d.liste.find(x => x.id === d.aktiv);
-  const GEGNER_RUECKEN = { "Kiko Hüpft": "glut", Klarwasser: "kristall", Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
+  const GEGNER_RUECKEN = { "Letzter Dreh": "schatten", "Kiko Hüpft": "glut", Klarwasser: "kristall", Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
 
   /* ---- Duell starten (mit Deck-Auswahl) ---- */
   let lastDeckId = null;

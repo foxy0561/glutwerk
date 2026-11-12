@@ -1001,10 +1001,15 @@ function syncCoins(){
   else if(have>want){let k=have-want;while(k-->0&&coins.length){let hi=0;coins.forEach((c,i)=>{if(c.y<coins[hi].y)hi=i;});coins.splice(hi,1);}}
 }
 let lastClinkT=0;
+function coinClink(v){
+  // short, bright metal hit: two inharmonic partials, very fast decay
+  const vol=Math.min(.05,v/7000);const f=2600+Math.random()*1400;
+  beep(f,.03,'triangle',vol);beep(f*1.53,.02,'sine',vol*.7);if(v>400)beep(f*.5,.05,'triangle',vol*.5);
+}
 function coinStep(dt,silent){
-  const b=D.bowl,g=900;
+  const b=D.bowl,g=1600;
   for(const c of coins){c.vy+=g*dt;c.x+=c.vx*dt;c.y+=c.vy*dt;c.vx*=.995;}
-  for(let it=0;it<3;it++){
+  for(let it=0;it<8;it++){
     for(let i=0;i<coins.length;i++){const c=coins[i];
       // stay inside the bowl ellipse once inside (open at the top)
       if(c.y>b.cy-b.ry*1.4){
@@ -1012,26 +1017,29 @@ function coinStep(dt,silent){
         if(d>1&&(c.y>b.cy-b.ry*.2||Math.abs(c.x-b.cx)>b.rx*.7)){
           const nx=ex/d,ny=ey/d;c.x=b.cx+nx*(b.rx-CR);c.y=b.cy+ny*(b.ry-CR*.6);
           const nlen=Math.hypot(nx/(b.rx),ny/(b.ry)),Nx=nx/b.rx/nlen,Ny=ny/b.ry/nlen,vn=c.vx*Nx+c.vy*Ny;
-          if(vn>0){if(!silent&&vn>140&&performance.now()-lastClinkT>45){lastClinkT=performance.now();beep(2400+Math.random()*900,.035,'triangle',Math.min(.04,vn/9000));}
-            c.vx-=1.35*vn*Nx;c.vy-=1.35*vn*Ny;c.vx*=.85;}
+          if(vn>0){if(!silent&&vn>120&&performance.now()-lastClinkT>35){lastClinkT=performance.now();coinClink(vn);}
+            if(vn>200)c.a+=(Math.random()-.5)*.9;
+            const tx=-Ny,ty=Nx,vt=c.vx*tx+c.vy*ty;
+            c.vx-=1.38*vn*Nx;c.vy-=1.38*vn*Ny;c.vx-=.45*vt*tx;c.vy-=.45*vt*ty;}
         }
       }
-      for(let j=i+1;j<coins.length;j++){const o=coins[j],dx=o.x-c.x,dy=(o.y-c.y)*1.6,dd=Math.hypot(dx,dy);
-        if(dd>0&&dd<CR*2){const p=(CR*2-dd)/2,nx=dx/dd,ny=dy/dd;c.x-=nx*p;c.y-=ny*p/1.6;o.x+=nx*p;o.y+=ny*p/1.6;
-          const rv=(o.vx-c.vx)*nx+(o.vy-c.vy)*ny;if(rv<0){const imp=rv*.6;c.vx+=imp*nx;c.vy+=imp*ny;o.vx-=imp*nx;o.vy-=imp*ny;
-            if(!silent&&rv<-160&&performance.now()-lastClinkT>45){lastClinkT=performance.now();beep(2800+Math.random()*1200,.03,'triangle',.02);}}}}
+      for(let j=i+1;j<coins.length;j++){const o=coins[j],dx=o.x-c.x,dy=(o.y-c.y)*1.4,dd=Math.hypot(dx,dy);
+        if(dd>0&&dd<CR*2){const p=(CR*2-dd)/2,nx=dx/dd,ny=dy/dd;c.x-=nx*p;c.y-=ny*p/1.4;o.x+=nx*p;o.y+=ny*p/1.4;
+          const rv=(o.vx-c.vx)*nx+(o.vy-c.vy)*ny;if(rv<0){const imp=rv*.68;c.vx+=imp*nx;c.vy+=imp*ny;o.vx-=imp*nx;o.vy-=imp*ny;
+            if(rv<-180){c.a+=(Math.random()-.5)*.7;o.a+=(Math.random()-.5)*.7;}
+            if(!silent&&rv<-130&&performance.now()-lastClinkT>35){lastClinkT=performance.now();coinClink(-rv);}}}}
     }
   }
-  for(const c of coins){c.vx*=.96;if(Math.abs(c.vy)<4)c.vy*=.5;}
+  for(const c of coins){if(Math.abs(c.vy)<25&&Math.abs(c.vx)<25){c.vx*=.6;c.vy*=.6;}}
 }
 function bowlScreenPoint(){const r=$('desk').getBoundingClientRect(),b=D.bowl;return {x:r.left+b.cx/D.w*r.width,y:r.top+(b.cy-b.ry)/D.h*r.height};}
 function toDesk(e){const r=$('desk').getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*D.w,y:(e.clientY-r.top)/r.height*D.h};}
-function coinArrive(){coinArriving=Math.max(0,coinArriving-1);const b=D.bowl;spawnCoin(b.cx+(Math.random()-.5)*b.rx*.8,b.cy-b.ry-10,(Math.random()-.5)*80,120+Math.random()*80);}
+function coinArrive(){coinArriving=Math.max(0,coinArriving-1);const b=D.bowl;spawnCoin(b.cx+(Math.random()-.5)*b.rx*.8,b.cy-b.ry-10,(Math.random()-.5)*120,320+Math.random()*160);}
 /* --- rope + handset physics --- */
 function physStep(dt){
   const g=1100,seg=12;
   // handset two points (verlet) unless on cradle
-  if(!hs.on){
+  if(!hs.on&&!hs.snapping){
     for(const k of ['a','b']){const p=hs[k],pp=hs['p'+k];const vx=(p.x-pp.x)*.99,vy=(p.y-pp.y)*.99;pp.x=p.x;pp.y=p.y;p.x+=vx;p.y+=vy+g*dt*dt;}
     if(hs.grab){const p=hs[hs.grab.end];p.x=hs.grab.x;p.y=hs.grab.y;hs['p'+hs.grab.end].x=p.x;hs['p'+hs.grab.end].y=p.y;}
   }
@@ -1141,7 +1149,8 @@ function drawPhone(c){
   c.strokeStyle='rgba(255,230,190,.12)';c.lineWidth=1.5;c.stroke();
   // cradle prongs
   const cr=cradle();
-  [[cr.a.x,cr.a.y],[cr.b.x,cr.b.y]].forEach(([x,y])=>{c.fillStyle='#16120f';c.beginPath();c.moveTo(x-9,y+20);c.lineTo(x-6,y+4);c.lineTo(x+6,y+4);c.lineTo(x+9,y+20);c.fill();});
+  const glow=!hs.on&&hs.grab&&nearCradle();
+  [[cr.a.x,cr.a.y],[cr.b.x,cr.b.y]].forEach(([x,y])=>{c.fillStyle=glow?'#6a5a3a':'#16120f';c.beginPath();c.moveTo(x-9,y+20);c.lineTo(x-6,y+4);c.lineTo(x+6,y+4);c.lineTo(x+9,y+20);c.fill();});
   // dial plate
   const dc=dialCenter();
   c.save();c.translate(dc.x,dc.y);c.scale(1,DSY);
@@ -1246,9 +1255,7 @@ function deskHit(p){
         a.fc.animate([{left:a.fc.style.left,top:a.fc.style.top},{left:t.x+'px',top:t.y+'px'}],{duration:240,easing:'ease-in'}).onfinish=()=>{a.fc.remove();coinHeld=0;coinArriving++;coinArrive();};}
     }else if(a.type==='hand'){
       hs.grab=null;
-      const cr=cradle();
-      if(Math.hypot(hs.a.x-cr.a.x,hs.a.y-cr.a.y)<34&&Math.hypot(hs.b.x-cr.b.x,hs.b.y-cr.b.y)<34){hangUp(false);}
-      else if(Math.hypot((hs.a.x+hs.b.x)/2-(cr.a.x+cr.b.x)/2,(hs.a.y+hs.b.y)/2-(cr.a.y+cr.b.y)/2)<30){hangUp(false);}
+      if(nearCradle()) snapToCradle();
     }else if(a.type==='dial'){
       dial.drag=null;dial.digit=dial.rot>=maxRot(a.k)-.08?(a.k+1)%10:null;
       dial.pulses=dial.digit===null?0:(dial.digit||10);
@@ -1258,6 +1265,21 @@ function deskHit(p){
   };
   cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
 })();
+function nearCradle(){
+  const cr=cradle(),mx=(cr.a.x+cr.b.x)/2,my=(cr.a.y+cr.b.y)/2;
+  // any part of the handset close to the cradle counts
+  return [hs.a,hs.b,{x:(hs.a.x+hs.b.x)/2,y:(hs.a.y+hs.b.y)/2}].some(p=>Math.hypot(p.x-mx,p.y-my)<75);
+}
+function snapToCradle(){
+  // glide the handset onto the cradle, then click it in
+  const cr=cradle(),fa={...hs.a},fb={...hs.b},t0=performance.now(),dur=reduce?1:180;
+  hs.snapping=true;
+  const st=n=>{const k=Math.min(1,(n-t0)/dur),e=k*k*(3-2*k);
+    hs.a.x=fa.x+(cr.a.x-fa.x)*e;hs.a.y=fa.y+(cr.a.y-fa.y)*e;hs.b.x=fb.x+(cr.b.x-fb.x)*e;hs.b.y=fb.y+(cr.b.y-fb.y)*e;
+    hs.pa={...hs.a};hs.pb={...hs.b};
+    if(k<1)requestAnimationFrame(st);else{hs.snapping=false;hangUp(false);}};
+  requestAnimationFrame(st);
+}
 function overSlotXY(x,y){const r=$('slot').getBoundingClientRect(),p=30;return x>r.left-p&&x<r.right+p&&y>r.top-p&&y<r.bottom+p;}
 let deskLast=0;
 function deskLoop(t){

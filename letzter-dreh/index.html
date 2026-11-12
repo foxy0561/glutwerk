@@ -814,7 +814,9 @@ const spinsPerDay = () => 10 + (has('muenzen')?3:0);
 const maxBet = () => has('schlitz')?5:3;
 const mult = () => 1 + (S.charms.hebel||0);
 const fmt = n => n.toLocaleString('de-DE');
-const uiFree=()=>$('ov').hidden&&$('cine').hidden&&$('bookOv').hidden&&$('menu').hidden;
+let dying=false;
+const uiFree=()=>!dying&&$('ov').hidden&&$('cine').hidden&&$('bookOv').hidden&&$('menu').hidden;
+function stopHiss(){if(typeof hiss!=='undefined'&&hiss){hiss.stop();hiss=null;}}
 const broke=()=>S.money<=0&&S.credits===0&&!S.pending;
 function price(c){
   const lv = 1 + 0.75*(S.level-1);
@@ -1349,6 +1351,7 @@ function freshState(){
   return {level:1,day:1,money:15,debt:debtFor(1),spinsLeft:0,credits:0,charms:{},pending:0,doubles:0,spinning:false,grid:[],won:0,spinsTotal:0,offers:[],rerolls:0,puls:3,shakesToday:0,loanToday:false,lastBet:0,shaking:false,borrowed:0};
 }
 function newGame(){
+  dying=false;
   S=freshState();S.started=true;if(D){coins.length=0;coinArriving=0;settleCoins(S.money);}
   const w=weights();S.grid=Array.from({length:9},()=>roll(w));
   [0,1,2].forEach(restStrip);
@@ -1675,6 +1678,7 @@ function glassPop(){if(muted||SET.sfx<=0||!AC)return;try{
   for(let i=0;i<10;i++){const t=AC.currentTime+.05+Math.random()*.6,o=AC.createOscillator(),og=AC.createGain();o.type='triangle';o.frequency.value=3000+Math.random()*3000;og.gain.setValueAtTime(.04*SET.sfx,t);og.gain.exponentialRampToValueAtTime(.0001,t+.08);o.connect(og).connect(AC.destination);o.start(t);o.stop(t+.1);}
   beep(60,.4,'sine',.2);}catch(e){}}
 function electroDeath(){
+  dying=true;stopHiss();
   S.started=false;clearSave();S.spinning=true;loanBusy=true;
   const calm=reduce||SET.calm, stage=$('stage'), cab=$('cab');
   if(drone) drone.gain.value=0;
@@ -1724,6 +1728,7 @@ function electroDeath(){
   },5600);
 }
 function shoot(){
+  dying=true;stopHiss();
   loanBusy=true;S.started=false;clearSave();
   const d=$('door');
   setMsg('»ICH HAB DICH GEWARNT.«','bad');
@@ -1956,6 +1961,7 @@ function payday(interest){
   }
 }
 function die(cause,onStart){
+  dying=false;stopHiss();
   saveBest();S.started=false;clearSave();
   const scenes={
     schuld:['Der Automat wird still.','[schritte]','Ein Schlüssel dreht sich im Schloss.',`»${fmt(Math.max(0,S.debt-S.money))} zu wenig.«`,'»Ich hab dir drei Tage gegeben.«','Das Licht geht aus.'],
@@ -2016,6 +2022,7 @@ function drawShop(){
 function menuTag(id,title,sub,cls=''){return `<button class="mtag ${cls}" type="button" data-act="${id}"><b>${title}</b>${sub?`<small>${sub}</small>`:''}</button>`;}
 function chime(){beep(1900+Math.random()*700,.05,'triangle',.025);setTimeout(()=>beep(2600+Math.random()*500,.06,'triangle',.015),50);}
 function showMenu(){
+  stopHiss();
   closeOv();$('cine').hidden=true;$('bookOv').hidden=true;
   const sv=loadSave();
   $('tags').innerHTML=(sv?menuTag('cont','Weiterspielen',`Level ${sv.level} · Tag ${sv.day}`):'')
@@ -2109,7 +2116,7 @@ $('bkPrev').onclick=()=>flip(-1);$('bkNext').onclick=()=>flip(1);$('bkClose').on
 $('bookOv').addEventListener('click',e=>{if(e.target===$('bookOv'))closeBook();});
 addEventListener('resize',()=>{if(!$('bookOv').hidden)renderBook();});
 applySet();
-$('muteBtn').onclick=()=>{muted=!muted;$('muteBtn').textContent='Ton: '+(muted?'aus':'an');applySet();};
+$('muteBtn').onclick=()=>{muted=!muted;$('muteBtn').textContent='Ton: '+(muted?'aus':'an');if(muted)stopHiss();else if(!hs.on)liftSound();applySet();};
 document.addEventListener('keydown',e=>{
   if(!$('bookOv').hidden){
     if(e.key==='Escape'||e.key==='b'||e.key==='B')closeBook();

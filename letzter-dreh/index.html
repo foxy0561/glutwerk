@@ -94,7 +94,18 @@ button:disabled{cursor:not-allowed}
 .door .gap{position:absolute;left:0;right:0;bottom:-10px;height:4px;background:#ffcf7a;box-shadow:0 0 18px 4px rgba(255,190,90,.55);overflow:hidden}
 .door .gap i{position:absolute;top:0;bottom:0;width:30%;background:#000;left:-35%}
 @keyframes walk{0%{left:-35%}45%,60%{left:35%}100%{left:105%}}
-.door{cursor:pointer}
+.door{cursor:pointer;transform-origin:0 50%;backface-visibility:hidden}
+.opening{position:absolute;overflow:hidden;opacity:0;transition:opacity .4s;background:radial-gradient(ellipse at 50% 60%,#fff3d6,#ffcf7a 40%,#a8682a 80%);box-shadow:0 0 80px 30px rgba(255,200,120,.35)}
+.L .opening{left:960px;top:150px;width:230px;height:450px} .P .opening{left:600px;top:330px;width:170px;height:670px}
+.opening.on{opacity:1}
+.opening .fig{position:absolute;left:10%;width:80%;bottom:0;height:92%;transform:translateY(100%);transition:transform 1.4s cubic-bezier(.3,.7,.3,1)}
+.opening.on .fig{transform:translateY(0)}
+.bigfig{position:fixed;left:50%;bottom:-6vh;height:150vh;aspect-ratio:120/300;transform:translate(-50%,75%) scale(.6);z-index:37;pointer-events:none;opacity:0;
+  filter:drop-shadow(0 0 30px rgba(255,190,110,.35))}
+.bigfig.go{transition:transform 2.1s cubic-bezier(.55,0,.9,.7),opacity .4s;transform:translate(-50%,0) scale(1.3);opacity:1}
+.subt{position:fixed;left:50%;bottom:calc(16% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;max-width:min(90vw,700px);text-align:center;pointer-events:none;
+  font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,32px);color:#ffdccf;text-shadow:0 0 12px #000,0 0 24px #000,0 2px 0 #000}
+.displays.off .seg,.displays.off .meter i{opacity:.08;text-shadow:none;box-shadow:none}
 .door .slit{position:absolute;left:26%;right:26%;top:12%;height:30px;background:#030202;overflow:hidden;box-shadow:0 0 0 4px #1a1715,inset 0 0 10px #000}
 .door .slit i{position:absolute;top:50%;width:12px;height:7px;margin-top:-3px;border-radius:50%;background:#ffd36a;box-shadow:0 0 10px 3px rgba(255,190,70,.8);opacity:0;transition:opacity .4s .45s}
 .door .slit i:nth-of-type(1){left:28%} .door .slit i:nth-of-type(2){right:28%}
@@ -525,6 +536,7 @@ html.calm .neon span{animation:none}
           <path d="M8 10 l2 60 M22 12 l1 60 M36 8 l2 62 M50 10 l1 60 M2 50 l56 -26"/>
           <path d="M78 12 l2 60 M92 10 l1 62 M106 12 l2 58 M120 10 l1 62 M72 52 l56 -28"/>
           <path d="M148 12 l2 58 M162 10 l1 40"/></g></svg>
+        <div class="opening" id="opening"><svg class="fig" viewBox="0 0 120 300" preserveAspectRatio="xMidYMax meet"><path d="M60 8c13 0 22 10 22 24 0 12-7 22-16 25 20 4 34 14 38 32l10 70c1 8-4 12-9 12l-4 0 2 120H17l2-120-4 0c-5 0-10-4-9-12l10-70c4-18 18-28 38-32-9-3-16-13-16-25 0-14 9-24 22-24z" fill="#050303"/></svg></div>
         <div class="door" id="door" role="button" tabindex="0" aria-label="An die Tür klopfen"><div class="slit"><i></i><i></i><b class="barrel"></b><span class="shutter"></span></div><div class="hatchlight"></div><div class="hatch"></div><div class="knob"></div><div class="gap"><i></i></div></div>
       </div>
     </div>
@@ -618,6 +630,7 @@ html.calm .neon span{animation:none}
   <div class="book" id="book"><div class="pages"><div class="page left pg" id="pgL"></div><div class="page right pg" id="pgR"></div></div></div>
   <div class="bknav"><button type="button" id="bkPrev" aria-label="Zurückblättern">‹</button><span id="bkNum"></span><button type="button" id="bkNext" aria-label="Weiterblättern">›</button><button type="button" id="bkClose">Zuklappen</button></div>
 </div>
+<div class="subt" id="subt" hidden></div>
 <div class="cine" id="cine" hidden><div class="cinetext" id="cineText"></div><div class="cinehint">Tippen ▸</div></div>
 <div class="ov" id="ov" hidden><div class="sheet" id="sheet"></div></div>
 
@@ -1764,6 +1777,78 @@ function electroDeath(){
     die('strom',()=>{bulbDead=false;cab.classList.remove('deadc');S.spinning=false;loanBusy=false;applySet();[0,1,2].forEach(restStrip);setLever(0);render();});
   },5600);
 }
+function say(text,ms){
+  const el=$('subt');el.hidden=false;el.textContent='';let k=0;
+  const iv=setInterval(()=>{el.textContent=text.slice(0,++k);if(k%3===0)beep(100+Math.random()*30,.05,'sawtooth',.025);if(k>=text.length)clearInterval(iv);},reduce?1:34);
+  setTimeout(()=>{if(el.textContent.startsWith(text.slice(0,3)))el.hidden=true;},ms);
+}
+function keysJingle(){for(let i=0;i<7;i++)setTimeout(()=>beep(3200+Math.random()*2400,.05,'triangle',.025),i*90+Math.random()*60);}
+function creak(){
+  if(muted||SET.sfx<=0||!AC) return;
+  try{const o=AC.createOscillator(),g=AC.createGain(),l=AC.createOscillator(),lg=AC.createGain(),f=AC.createBiquadFilter();
+    o.type='sawtooth';o.frequency.setValueAtTime(140,AC.currentTime);o.frequency.linearRampToValueAtTime(90,AC.currentTime+1.3);
+    l.frequency.value=23;lg.gain.value=40;l.connect(lg).connect(o.frequency);f.type='bandpass';f.frequency.value=700;f.Q.value=3;
+    g.gain.setValueAtTime(0,AC.currentTime);g.gain.linearRampToValueAtTime(.06*SET.sfx,AC.currentTime+.2);g.gain.linearRampToValueAtTime(0,AC.currentTime+1.4);
+    o.connect(f).connect(g).connect(AC.destination);o.start();l.start();o.stop(AC.currentTime+1.5);l.stop(AC.currentTime+1.5);}catch(e){}
+}
+function chainRattle(){for(let i=0;i<12;i++)setTimeout(()=>{beep(1700+Math.random()*1500,.04,'triangle',.03);beep(400+Math.random()*200,.03,'square',.015);},i*55+Math.random()*30);}
+function panCam(to,ms){const from=cam,t0=performance.now();const st=n=>{const k=Math.min(1,(n-t0)/ms),e=k*k*(3-2*k);cam=from+(to-from)*e;$('world').style.transform=`translateX(${-cam}px)`;if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);}
+function debtDeath(){
+  dying=true;stopHiss();S.started=false;clearSave();
+  const calm=reduce||SET.calm,door=$('door'),op=$('opening'),disp=document.querySelector('.displays');
+  const owed=Math.max(0,S.debt-S.money);
+  // 1) the machine powers down
+  beep(220,.8,'sine',.06);setTimeout(()=>beep(110,.9,'sine',.05),250);
+  if(drone){try{drone.gain.setTargetAtTime(0,AC.currentTime,.8);}catch(e){}}
+  disp.classList.add('off');setMsg('Z A H L T A G','bad');$('cab').classList.remove('lit');
+  const T=(t,f)=>setTimeout(f,calm?t*.8:t);
+  // 2) footsteps, keys, lock
+  T(900,()=>{stepSound(6);shadow('come');});
+  T(3500,()=>keysJingle());
+  T(4300,()=>{thunk();setTimeout(thunk,260);});
+  // 3) the door swings open, light, his silhouette
+  T(5000,()=>{panCam(CAMRANGE[mode][1],900);creak();op.classList.add('on');
+    door.animate([{transform:'perspective(900px) rotateY(0deg)'},{transform:'perspective(900px) rotateY(-78deg)'}],{duration:calm?10:1300,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+    flickerUntil=performance.now()+300;});
+  T(6800,()=>say('»Zahltag.«',1600));
+  T(8500,()=>say('»Lass sehen, was du hast.«',2300));
+  // 4) he takes everything out of the bowl
+  T(9300,()=>{
+    let left=S.money;const per=Math.max(1,Math.ceil(left/18));
+    const iv=setInterval(()=>{
+      if(left<=0){clearInterval(iv);return;}
+      left=Math.max(0,left-per);S.money=left;$('dMoney').textContent=fmt(left);
+      if(coins.length){coins.splice(Math.floor(Math.random()*coins.length),1);}
+      coinClink(250);
+    },110);
+  });
+  T(11400,()=>say(`»${fmt(owed)} zu wenig.«`,2000));
+  T(13600,()=>say('»Ich hab dir drei Tage gegeben.«',2200));
+  // 5) he comes closer
+  T(15900,()=>{
+    $('subt').hidden=true;
+    const bf=document.createElement('div');bf.className='bigfig';bf.innerHTML=op.querySelector('.fig').outerHTML;document.body.appendChild(bf);
+    requestAnimationFrame(()=>bf.classList.add('go'));debtDeath.bf=bf;
+    const df=op.querySelector('.fig');df.style.transition='opacity .5s';df.style.opacity='0';
+    stepSound(3);chainRattle();
+    let gap=520;const beat=()=>{if(!debtDeath.alive)return;beep(55,.14,'sine',.2);setTimeout(()=>beep(46,.12,'sine',.16),140);gap=Math.max(200,gap*.82);setTimeout(beat,gap);};
+    debtDeath.alive=true;beat();
+    if(!calm){let a=0;debtDeath.tr=setInterval(()=>{a=Math.min(5,a+.2);$('stage').style.translate=`${(Math.random()-.5)*a}px ${(Math.random()-.5)*a}px`;},50);}
+  });
+  T(18200,()=>{
+    // instant black, silence
+    debtDeath.alive=false;if(debtDeath.tr)clearInterval(debtDeath.tr);$('stage').style.translate='';
+    const bl=document.createElement('div');bl.className='bleed black';bl.style.opacity='1';document.body.appendChild(bl);debtDeath.bl=bl;
+    beep(60,.08,'square',.12);
+  });
+  T(19600,()=>{
+    die('schuld',()=>{
+      [debtDeath.bf,debtDeath.bl].forEach(e=>e&&e.remove());
+      door.getAnimations().forEach(a=>a.cancel());op.classList.remove('on');op.querySelector('.fig').style.opacity='';disp.classList.remove('off');
+      shadow('go');cam=0;$('world').style.transform='translateX(0px)';applySet();
+    });
+  });
+}
 function shoot(){
   dying=true;stopHiss();
   loanBusy=true;S.started=false;clearSave();
@@ -2024,14 +2109,14 @@ function payday(interest){
       cutscene(levelScene(S.level),()=>openShop(`Level ${S.level}`,'Neue Schuld. Durch die Klappe wird ein Tablett geschoben. '));
     };
   }else{
-    die('schuld');
+    debtDeath();
   }
 }
 function die(cause,onStart){
   dying=false;stopHiss();
   saveBest();S.started=false;clearSave();
   const scenes={
-    schuld:['Der Automat wird still.','[schritte]','Ein Schlüssel dreht sich im Schloss.',`»${fmt(Math.max(0,S.debt-S.money))} zu wenig.«`,'»Ich hab dir drei Tage gegeben.«','Das Licht geht aus.'],
+    schuld:['Am nächsten Morgen pendelt die Glühbirne wieder.','Der Automat blinkt. Die Schüssel ist voll.','Jemand Neues wacht davor auf.'],
     strom:['Deine Hand klebt am Gehäuse. Du kannst nicht loslassen.','Der Automat singt. Ein hoher, heller Ton.','Dann platzt die Glühbirne.','Im Dunkeln knackt der Lautsprecher.','»Er gehört mir. Und jetzt du auch.«'],
     schuss:['Ein Knall.','Du liegst auf dem Rücken. Über dir pendelt die Glühbirne.','Jeder Atemzug ist schwerer als der letzte.','Hinter der Tür: das Klicken, als er nachlädt.','»Ich hab gesagt, hör auf zu klopfen.«','Dann nur noch Stille.']
   };

@@ -1880,11 +1880,8 @@ function knock(){
   if(anger===6){setMsg('»HÖR AUF ZU KLOPFEN.«','bad');steps(2);return;}
   if(anger===8){
     setMsg('»LETZTE WARNUNG.«','bad');
-    shadow('come');d.classList.add('aim');scrape();loanBusy=true;
-    setTimeout(()=>{
-      bang();warningShotFx();
-      setTimeout(()=>{d.classList.remove('aim');scrape();loanBusy=false;setMsg('»DIE NÄCHSTE GEHT NICHT IN DIE DECKE.«','bad');},2200);
-    },900);
+    shadow('come');d.classList.add('peek');scrape();
+    setTimeout(()=>{if(!d.classList.contains('aim')){d.classList.remove('peek');scrape();}},1600);
     return;
   }
   if(anger>4) return;
@@ -2632,7 +2629,7 @@ function shoot(){
   shadow('come');d.classList.remove('peek');d.classList.add('aim');scrape();
   if(drone) drone.gain.value=0;
   setTimeout(()=>{
-    bang();
+    bang();ringingEars(9);
     const f=document.createElement('div');f.className='shotflash';if(SET.calm)f.style.opacity='.4';document.body.appendChild(f);setTimeout(()=>f.remove(),600);
     if(!reduce&&!SET.calm)$('stage').animate([{translate:'0 0'},{translate:'-14px 8px'},{translate:'12px -6px'},{translate:'-6px 4px'},{translate:'0 0'}],{duration:380});
     const calm=reduce||SET.calm;

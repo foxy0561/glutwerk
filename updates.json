@@ -1,9 +1,13 @@
 {
  "games": {
   "karten/": {
-   "last": "2026-11-13T03:19:18+01:00",
-   "n14": 22,
+   "last": "2026-11-13T03:20:16+01:00",
+   "n14": 23,
    "items": [
+    {
+     "d": "2026-11-13",
+     "t": "Jeder Reiter oben hat eine eigene weiche Farbe"
+    },
     {
      "d": "2026-11-13",
      "t": "Reiter Erfolge oben entfernt, Karten direkt neben Spiele"
@@ -47,10 +51,6 @@
     {
      "d": "2026-11-11",
      "t": "Glutstaub, mehrere Decks mit Namen, Spielfeld und Kartenrücken, Deckauswahl, sichtbarer Deckstapel zum Ziehen"
-    },
-    {
-     "d": "2026-11-11",
-     "t": "Karten ziehen, Verbrennen für Energie, Effekt-Symbole mit Tooltip, Ameisen greifen sofort an"
     }
    ]
   },
@@ -291,5 +291,5 @@
    ]
   }
  },
- "stand": "2026-11-13T02:19+00:00"
+ "stand": "2026-11-13T02:20+00:00"
 }

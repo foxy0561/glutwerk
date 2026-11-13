@@ -1,9 +1,13 @@
 {
  "games": {
   "karten/": {
-   "last": "2026-11-13T01:48:53+01:00",
-   "n14": 19,
+   "last": "2026-11-13T02:17:49+01:00",
+   "n14": 20,
    "items": [
+    {
+     "d": "2026-11-13",
+     "t": "Karten-Tab (alle Karten, Duell, Deck-Baukasten) und Minecraft-Seite"
+    },
     {
      "d": "2026-11-13",
      "t": "Letzter Dreh aktualisiert (Kassierer, Zahltag, Türspion, Messer, Gewitter, neue Bilder)"
@@ -47,10 +51,6 @@
     {
      "d": "2026-11-10",
      "t": "15 Wildnis-Karten mit neuen Bildern von foxy0561"
-    },
-    {
-     "d": "2026-11-10",
-     "t": "Neues Set Wildnis (19 Karten: Tiere, Monster, Gegenstände, Biome) und Computer-Deck Wildnis"
     }
    ]
   },
@@ -291,5 +291,5 @@
    ]
   }
  },
- "stand": "2026-11-13T01:08+00:00"
+ "stand": "2026-11-13T01:17+00:00"
 }

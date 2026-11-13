@@ -408,6 +408,11 @@ html.calm .cine::before,html.calm .eyes,html.calm .cam .led{animation:none}
 
 .panel{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:linear-gradient(#24090f,#140508);border-radius:10px;padding:8px 10px;border:1px solid #3b1820}
 .slotbox{display:flex;flex-direction:column;align-items:center;gap:5px}
+.slotrow{display:flex;align-items:center;gap:6px}
+.ejbtn{width:24px;height:24px;border-radius:50%;padding:0;font-size:13px;font-weight:700;color:#2a1a10;display:grid;place-items:center;
+  background:radial-gradient(circle at 40% 30%,#d8d0c4,#8a8278);box-shadow:0 3px 0 #1a0a0c,inset 0 1px 0 rgba(255,255,255,.5);transition:transform .08s,box-shadow .08s}
+.ejbtn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 #1a0a0c}
+.ejbtn:disabled{filter:brightness(.5)}
 .coinslot{width:58px;height:58px;border-radius:10px;background:radial-gradient(circle at 50% 40%,#b8b0ba,#5d5462);display:grid;place-items:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.35),0 3px 0 #0a0204;position:relative;transition:transform .12s,box-shadow .12s}
 .coinslot::before{content:"";width:8px;height:38px;border-radius:4px;background:#0a0204;box-shadow:inset 0 0 0 1px #000}
 .coinslot::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse at 70% 80%,rgba(90,50,20,.55),transparent 50%)}
@@ -455,6 +460,15 @@ html.calm .cine::before,html.calm .eyes,html.calm .cam .led{animation:none}
 .lever .knob:active{cursor:grabbing}
 
 .desk{position:absolute;z-index:6;touch-action:none}
+.notepad{position:absolute;z-index:7;width:54px;height:66px;padding:6px 5px 4px;border-radius:2px;transform:rotate(-7deg) skewX(-10deg);cursor:pointer;text-align:left;overflow:hidden;
+  background:repeating-linear-gradient(#e9e0c8 0 8px,#cfc3a6 8px 9px);box-shadow:2px 4px 6px rgba(0,0,0,.6);font-family:var(--f-hand);font-size:9px;line-height:9px;color:#2a2a6a;white-space:pre-wrap}
+.notepad::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:#6a1a12}
+.notepad::after{content:"";position:absolute;right:-14px;top:16px;width:46px;height:4px;background:linear-gradient(90deg,#d8b04a 80%,#2a2018 80%);transform:rotate(-38deg)}
+.notepad:hover{filter:brightness(1.15)}
+.L .notepad{left:196px;top:448px} .P .notepad{left:186px;top:1124px}
+.padsheet textarea{width:100%;min-height:240px;resize:vertical;border:0;outline:0;background:repeating-linear-gradient(transparent 0 31px,rgba(80,90,160,.35) 31px 32px);
+  font-family:var(--f-hand);font-size:24px;line-height:32px;color:#1f2a6a;padding:4px 2px;position:relative;z-index:1;user-select:text;-webkit-user-select:text}
+.pz-pad{max-width:min(90vw,420px);font-family:var(--f-hand);font-size:18px;color:#cdbfb2;background:rgba(232,220,192,.08);border-left:3px solid #6a1a12;padding:4px 10px;white-space:pre-wrap;max-height:4.6em;overflow:auto}
 .purse{position:absolute;z-index:6;touch-action:none;cursor:grab;width:150px;height:130px}
 .L .purse{left:240px;top:368px} .P .purse{left:170px;top:1040px}
 .table{position:absolute;z-index:5;pointer-events:none}
@@ -662,7 +676,7 @@ html.calm .neon span{animation:none}
         <div class="msg" id="msg">MÜNZE EINWERFEN</div>
         <div class="panel">
           <div class="slotbox">
-            <div class="coinslot" id="slot" aria-label="Münzschlitz"></div>
+            <div class="slotrow"><div class="coinslot" id="slot" aria-label="Münzschlitz"></div><button class="ejbtn" id="ejBtn" type="button" aria-label="Münzen zurückgeben" title="Münzen zurück">↩</button></div>
             <div class="leds" id="leds"></div>
             <div class="tinylbl">Einsatz</div>
           </div>
@@ -690,6 +704,7 @@ html.calm .neon span{animation:none}
     </div>
 
     <div class="table"><div class="tleg back" style="left:44px"></div><div class="tleg back" style="right:44px"></div><div class="surf"></div><div class="shade"></div><div class="front"></div><div class="tleg" style="left:14px"></div><div class="tleg" style="right:14px"></div></div>
+    <button class="notepad" id="notepad" type="button" aria-label="Notizblock"><span id="padText"></span></button>
     <canvas class="desk" id="desk" aria-label="Tisch mit Münzschüssel und Telefon"></canvas>
 
     <div class="dark" id="dark"></div>
@@ -1080,6 +1095,7 @@ function render(){
   $('dPuls').innerHTML='♥'.repeat(Math.max(0,S.puls))+'<i>'+'♥'.repeat(Math.max(0,3-S.puls))+'</i>';
   const pct=Math.max(0,Math.min(100,Math.round((S.money+S.pending+S.credits)/S.debt*100)));
   $('dBar').style.width=pct+'%';$('dPct').textContent=pct+'%';
+  $('ejBtn').disabled=!S.credits||S.spinning;
   $('leds').innerHTML=Array.from({length:maxBet()},(_,i)=>`<i class="${i<S.credits?'on':''}"></i>`).join('');
   const canRisk=S.pending>0&&S.doubles<3&&!S.spinning;
   $('bRed').disabled=$('bBlack').disabled=!canRisk;
@@ -1094,6 +1110,17 @@ function render(){
 }
 
 /* ---------- coins: purse → slot ---------- */
+function ejectCoins(){
+  if(!S||!S.credits||S.spinning||S.shaking||!uiFree()) return;
+  const n=S.credits;S.credits=0;S.money+=n;
+  beep(500,.05,'square',.04);setTimeout(()=>beep(300,.06,'square',.04),70);
+  // the coins rattle out of the slot and drop back into the bowl
+  const room=Math.max(0,Math.min(CAP,S.money)-coins.length-coinArriving),k=Math.min(n,room);coinArriving+=k;
+  const bp=bowlScreenPoint(),r=$('slot').getBoundingClientRect();
+  for(let i=0;i<n;i++)flyCoin(r,{left:bp.x-6,top:bp.y-6,width:12,height:12},i<k?coinArrive:null,i*120);
+  for(let i=0;i<n;i++)setTimeout(clink,i*120+60);
+  setMsg(`${n} ${n===1?'MÜNZE':'MÜNZEN'} ZURÜCK`);render();
+}
 function canInsert(){return S && !S.spinning && !S.shaking && S.spinsLeft>0 && S.credits<maxBet() && S.money>0 && uiFree();}
 function insertCoin(){
   if(!canInsert()){
@@ -1154,8 +1181,11 @@ function hangUp(silent){const c=cradle();hs.on=true;hs.a={...c.a};hs.b={...c.b};
 function liftSound(){
   beep(260,.05,'square',.05);
   if(muted||SET.sfx<=0||!AC||hiss) return;
-  try{const n=noiseNode(2,()=>1);n.loop=true;const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=1100;f.Q.value=.8;const g=AC.createGain();g.gain.value=.025*SET.sfx;
-    n.connect(f).connect(g).connect(AC.destination);n.start();hiss={stop(){try{n.stop()}catch(e){}}};}catch(e){}
+  try{const n=noiseNode(2,()=>1);n.loop=true;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=700;const g=AC.createGain();
+    // a quiet line hum that fades down after a few seconds
+    g.gain.setValueAtTime(.0001,AC.currentTime);g.gain.linearRampToValueAtTime(.007*SET.sfx,AC.currentTime+.3);g.gain.linearRampToValueAtTime(.0025*SET.sfx,AC.currentTime+4);
+    n.connect(f).connect(g).connect(AC.destination);n.start();
+    hiss={g,stop(){try{n.stop()}catch(e){}},duck(){try{g.gain.cancelScheduledValues(AC.currentTime);g.gain.linearRampToValueAtTime(.0004*SET.sfx,AC.currentTime+.2);}catch(e){}}};}catch(e){}
 }
 /* --- coins --- */
 function inBowl(x,y,pad=0){const b=D.bowl;const dx=(x-b.cx)/(b.rx+pad),dy=(y-b.cy)/(b.ry+pad);return dx*dx+dy*dy<=1;}
@@ -1261,6 +1291,7 @@ function onDigit(d){
 function phoneLine(text,cls){if(PZ.open){PZ.say(text,cls);}else setMsg(text.toUpperCase(),cls);}
 function ringTone(n,done){for(let i=0;i<n;i++){setTimeout(()=>{beep(425,.9,'sine',.035);},i*1500);}setTimeout(done,n*1500);}
 function callNumber(n){
+  if(hiss&&hiss.duck)hiss.duck();
   if(n==='0561'){
     ringTone(2,()=>{
       [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.18,'triangle',.025),i*140));
@@ -1897,6 +1928,22 @@ function stabEye(){
   },1600);
 }
 
+/* ---------- notepad (stays across deaths) ---------- */
+const NOTES_KEY='ld_notes';
+function loadNotes(){try{return localStorage.getItem(NOTES_KEY)||''}catch(e){return ''}}
+function saveNotes(t){try{localStorage.setItem(NOTES_KEY,t)}catch(e){}}
+function showPad(){const t=loadNotes();$('padText').textContent=t.slice(0,60);}
+function openNotes(){
+  if(!uiFree()&&!(PZ&&PZ.open)) return;
+  rustle();
+  openOv(`<h2>Notizblock</h2><p class="sub">Neben dem Telefon. Jemand hat schon Seiten herausgerissen. Was du hier aufschreibst, bleibt, auch wenn du stirbst.</p>
+    <textarea id="padArea" spellcheck="false" maxlength="600" placeholder="Nummern, Hinweise, …"></textarea>
+    <div class="shopfoot"><span></span><button class="big" id="padClose" type="button">Hinlegen</button></div>`,'paper padsheet');
+  const a=$('padArea');a.value=loadNotes();a.focus();
+  a.addEventListener('input',()=>{saveNotes(a.value);showPad();if(Math.random()<.4)beep(5200+Math.random()*1500,.01,'triangle',.008);});
+  $('padClose').onclick=()=>{saveNotes(a.value);showPad();closeOv();rustle();};
+}
+
 /* ---------- phone close-up ---------- */
 function openPhoneZoom(){
   if(!uiFree()||PZ.open) return;
@@ -1904,7 +1951,7 @@ function openPhoneZoom(){
   if(hs.on){hs.on=false;hs.a={x:hs.a.x+10,y:hs.a.y-40};hs.b={x:hs.b.x-10,y:hs.b.y-40};hs.pa={...hs.a};hs.pb={...hs.b};liftSound();}
   dial.digits='';
   const w=document.createElement('div');w.className='phonezoom';w.id='phonezoom';
-  w.innerHTML=`<div class="pz-strip" id="pzStrip"></div><canvas id="pzDial" width="1000" height="1000" aria-label="Wählscheibe"></canvas><div class="pz-say" id="pzSay">Finger in ein Loch, im Uhrzeigersinn bis zum Anschlag drehen, loslassen. Nach der letzten Ziffer kurz warten.</div><button class="ghost" id="pzHang" type="button">Auflegen</button>`;
+  w.innerHTML=`<div class="pz-strip" id="pzStrip"></div><canvas id="pzDial" width="1000" height="1000" aria-label="Wählscheibe"></canvas>${loadNotes().trim()?`<div class="pz-pad">${loadNotes().trim().replace(/[<>&]/g,'')}</div>`:''}<div class="pz-say" id="pzSay">Finger in ein Loch, im Uhrzeigersinn bis zum Anschlag drehen, loslassen. Nach der letzten Ziffer kurz warten.</div><button class="ghost" id="pzHang" type="button">Auflegen</button>`;
   document.body.appendChild(w);
   const cv=$('pzDial'),c=cv.getContext('2d');
   PZ.show=()=>{$('pzStrip').textContent=dial.digits?dial.digits.split('').join(' '):'– – –';};
@@ -2784,6 +2831,9 @@ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fit);
 $('bRed').onclick=()=>gamble('r');
 $('bBlack').onclick=()=>gamble('b');
 $('endBtn').onclick=endDay;
+$('ejBtn').onclick=ejectCoins;
+$('notepad').onclick=openNotes;
+showPad();
 $('tray').onclick=collect;
 $('tray').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();collect();}});
 $('door').onclick=knock;
@@ -2806,6 +2856,7 @@ document.addEventListener('keydown',e=>{
   if(!$('menu').hidden){if(e.key==='Escape')$('mpanel').hidden=true;return;}
   if((e.key==='b'||e.key==='B')&&uiFree()){openBook();return;}
   if(e.key==='Escape'&&uiFree()){showMenu();return;}
+  if(e.target&&e.target.tagName==='TEXTAREA') return;
   if(!uiFree()||e.repeat) return;
   if(e.target.closest&&e.target.closest('button,[tabindex]')&&(e.key===' '||e.key==='Enter')) return;
   if(e.code==='Space'){e.preventDefault();autoPull();}

@@ -54,6 +54,16 @@
     }
    ]
   },
+  "kammerwerk/": {
+   "last": "2026-11-08T19:00:10+01:00",
+   "n14": 1,
+   "items": [
+    {
+     "d": "2026-11-08",
+     "t": "Ameisenbau und Kammerwerk hinzugefügt"
+    }
+   ]
+  },
   "drako/": {
    "last": "2026-11-09T05:40:40+01:00",
    "n14": 10,
@@ -100,9 +110,29 @@
     }
    ]
   },
+  "riftward/": {
+   "last": "2026-11-08T22:18:19+01:00",
+   "n14": 1,
+   "items": [
+    {
+     "d": "2026-11-08",
+     "t": "Riftward hinzugefügt, Screenshots mit Überblenden, Supabase-Wachhalte-Action"
+    }
+   ]
+  },
+  "shardfall/": {
+   "last": "2026-11-08T22:42:05+01:00",
+   "n14": 1,
+   "items": [
+    {
+     "d": "2026-11-08",
+     "t": "Shardfall (in Entwicklung) hinzugefügt, Hinweis bei Riftward, Name auch für Shardfall"
+    }
+   ]
+  },
   "ameisenbau/": {
    "last": "2026-11-11T03:33:39+01:00",
-   "n14": 8,
+   "n14": 9,
    "items": [
     {
      "d": "2026-11-11",
@@ -135,6 +165,10 @@
     {
      "d": "2026-11-08",
      "t": "v2.0 · Hauptmenü, Welt-Einstellungen und 5 Ameisenarten"
+    },
+    {
+     "d": "2026-11-08",
+     "t": "Ameisenbau und Kammerwerk hinzugefügt"
     }
    ]
   },
@@ -203,15 +237,59 @@
    ]
   },
   "https://foxy0561.github.io/Kiko-H-pft/": {
-   "last": "2026-11-08T16:56:01+01:00",
-   "n14": 1,
+   "last": "2026-11-08T15:56:01+00:00",
+   "n14": 10,
    "items": [
     {
      "d": "2026-11-08",
      "t": "Lauf-Animation genutzt, Sprung-Bilder richtig zugeordnet"
+    },
+    {
+     "d": "2026-11-08",
+     "t": "Foxy so groß wie ihre Trefferfläche, 3-fach interne Auflösung; Werfen, Tragen, Sitzen"
+    },
+    {
+     "d": "2026-11-08",
+     "t": "Animationen für Springen, Fallen, Ducken, Sterben und Jubeln"
+    },
+    {
+     "d": "2026-11-08",
+     "t": "Foxy scharf statt weich (36 px klein, 44 px groß)"
+    },
+    {
+     "d": "2026-11-08",
+     "t": "Geheime Figur Foxy (nur mit Spielernamen foxy0561)"
+    },
+    {
+     "d": "2026-10-30",
+     "t": "Neu-laden-Knopf klein und quadratisch mit Pfeil-Symbol"
+    },
+    {
+     "d": "2026-10-30",
+     "t": "P-Knopf, Decken- und Wandröhren, Röhren lassen Items/Gegner heraus, Neu-laden-Knopf"
+    },
+    {
+     "d": "2026-10-30",
+     "t": "Türen, Schalterblöcke rot/blau, Boss im Sternblock, Ei platzt sofort aus Blöcken"
+    },
+    {
+     "d": "2026-10-30",
+     "t": "Hopsi duckt sich, frisst sichtbar und spuckt Panzer aus, Absteigen mit W/↑, Springen nur Leertaste, große Münzen bleiben nach Checkpoint"
+    },
+    {
+     "d": "2026-10-30",
+     "t": "Figuren-Bildschirm ohne Verschieben, Dino-Ei knackt auf, weicherer Flattersprung"
+    },
+    {
+     "d": "2026-10-28",
+     "t": "Übergänge, Gegner-Animationen, Boss-Phase 2, neue Sounds, Gamepad-Belegung, Aussehen, Reittier Hopsi, neue Gegner"
+    },
+    {
+     "d": "2026-10-25",
+     "t": "Aus Röhren herauskommen mit Animation"
     }
    ]
   }
  },
- "stand": "2026-11-13T01:06+00:00"
+ "stand": "2026-11-13T01:08+00:00"
 }

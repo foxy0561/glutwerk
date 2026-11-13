@@ -183,9 +183,13 @@
    ]
   },
   "letzter-dreh/": {
-   "last": "2026-11-13T02:56:13+01:00",
-   "n14": 22,
+   "last": "2026-11-13T10:30:20+01:00",
+   "n14": 23,
    "items": [
+    {
+     "d": "2026-11-13",
+     "t": "Schuss aus der Tür ist immer tödlich, Ohrenklingeln nur als Effekt beim Sterben"
+    },
     {
      "d": "2026-11-13",
      "t": "Warnschuss mit Ohrenklingeln, frierende Hände zum Reiben, Augen gewöhnen sich ans Dunkel, höhere Schuld bei viel Restgeld"
@@ -229,10 +233,6 @@
     {
      "d": "2026-11-13",
      "t": "Kassierer nimmt bei viel zu viel Geld einen Teil ab, Gier-Steuer am Zahltag"
-    },
-    {
-     "d": "2026-11-13",
-     "t": "Schädel kosten Geld (Minus möglich), Kassierer schaut bei Besuchen durch den Schlitz"
     }
    ]
   },
@@ -291,5 +291,5 @@
    ]
   }
  },
- "stand": "2026-11-13T09:16+00:00"
+ "stand": "2026-11-13T09:30+00:00"
 }

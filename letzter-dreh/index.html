@@ -1468,7 +1468,7 @@ function newGame(){
   setMsg('MÜNZE EINWERFEN');
   render();
 }
-function startDay(){S.spinsLeft=spinsPerDay();S.shakesToday=0;S.loanToday=false;S.time=0;}
+function startDay(){S.spinsLeft=spinsPerDay();S.shakesToday=0;S.loanToday=false;S.time=0;S.greedToday=false;}
 function clearMarks(){document.querySelectorAll('.sym.win,.sym.cursed').forEach(e=>e.classList.remove('win','cursed'));$('cab').classList.remove('lit');}
 function resetCard(){$('card').className='card back';$('card').textContent='?';}
 
@@ -1515,11 +1515,11 @@ function resolve(bet,fromShake){
   }
   render();
 }
-function takeMoney(n){
+function takeMoney(n,toDoor){
   if(n<=0) return;
   S.money-=n;popMoney(-n);
-  // coins jump out of the bowl and get sucked into the slot
-  const k=Math.min(n,coins.length,12),slot=$('slot').getBoundingClientRect();
+  // coins jump out of the bowl: into the slot, or through the slit in the door
+  const k=Math.min(n,coins.length,toDoor?20:12),slot=(toDoor?document.querySelector('#door .slit'):$('slot')).getBoundingClientRect();
   for(let i=0;i<k;i++){
     let hi=0;coins.forEach((c,j)=>{if(c.y<coins[hi].y)hi=j;});const c=coins.splice(hi,1)[0];if(!c)break;
     const r=$('desk').getBoundingClientRect();
@@ -1556,6 +1556,19 @@ function collect(){
   rects.forEach((r,i)=>flyCoin(r,target,i<n?coinArrive:null,i*55));
   S.money+=amt;S.won+=amt;popMoney(amt);S.pending=0;S.doubles=0;
   melody([660,880],70);setMsg(`+${fmt(amt)} EINGESTECKT`,'good');resetCard();clearMarks();render();
+  setTimeout(greedCheck,1800);
+}
+const greedLimit=()=>Math.max(200,S.debt*6);
+function greedCheck(){
+  if(!S||!S.started||S.greedToday||S.money<=greedLimit()||!uiFree()||S.spinning||S.shaking||loanBusy) return;
+  S.greedToday=true;
+  steps(3);
+  const cut=Math.floor((S.money-S.debt*3)*.4);
+  setTimeout(()=>{
+    if(!S.started) return;
+    say('»Das ist zu viel Glück für einen Keller.«',2400);
+    setTimeout(()=>{if(!S.started)return;say('»Das gehört mir.«',1800);takeMoney(cut,true);setMsg(`»DAS NEHM ICH.« −${fmt(cut)}`,'bad');render();},2600);
+  },3*420+900);
 }
 
 function gamble(color){
@@ -2250,7 +2263,7 @@ function bookPages(){
     <label class="opt" for="tmN"><input type="radio" name="timer" id="tmN" value="normal" ${SET.timer==='normal'?'checked':''}> normal · 4 Minuten pro Tag</label>
     <label class="opt" for="tmH"><input type="radio" name="timer" id="tmH" value="hart" ${SET.timer==='hart'?'checked':''}> hart · 2½ Minuten</label>
     <p class="stuck">Um 06:00 ist der Tag vorbei. Egal wie viele Drehs noch übrig sind.</p>`);
-  P.push(`<h3>Regeln</h3><p>8 Linien: 3 quer, 3 runter, 2 über Kreuz. Alle 9 gleich = alles ×10. 3 Schädel irgendwo = Fluch: Einsatz ×3 weg, jede volle Schädel-Linie ×5 extra. Geld kann ins Minus gehen.</p>
+  P.push(`<h3>Regeln</h3><p>8 Linien: 3 quer, 3 runter, 2 über Kreuz. Alle 9 gleich = alles ×10. 3 Schädel irgendwo = Fluch: Einsatz ×3 weg, jede volle Schädel-Linie ×5 extra. Geld kann ins Minus gehen.</p><p>Wer zu viel hat, wird geschröpft. Er nimmt sich, was er für zu viel hält.</p>
     <div class="pt">${keys.map(k=>`<span class="e">${SYMS[k].e}</span><span>${SYMS[k].n}</span><span>${fmt(symValue(k)*(S?mult():1))}</span>`).join('')}</div>
     <p style="margin-top:8px">pro Linie und Münze.</p>`);
   P.push(`<h3>Talismane</h3>${owned.length?'<ul>'+owned.map(c=>`<li>${c.n}${c.stack?' ×'+S.charms[c.id]:''}: ${c.d}</li>`).join('')+'</ul>':'<p class="stuck">Noch nichts. Das Tablett kommt zwischen den Tagen durch die Klappe.</p>'}`);
@@ -2388,15 +2401,18 @@ function closeOv(){ $('ov').hidden=true; }
 
 function payday(interest){
   if(S.money>=S.debt){
-    const left=S.money-S.debt;
+    let left=S.money-S.debt;
+    const cap=debtFor(S.level+1)*2,tax=left>cap?Math.floor((left-cap)*.7):0;left-=tax;
     $('door').classList.add('open');shadow('come');
     openOv(`<h2>Zahltag</h2>
       <div class="ledger">
         ${interest?`<span class="t">Zinsen</span><span class="a">+${fmt(interest)}</span>`:''}
         <span class="t">Dein Geld</span><span class="a">${fmt(S.money)}</span>
         <span class="t">Schuld</span><span class="a" style="color:var(--red)">−${fmt(S.debt)}</span>
+        ${tax?`<span class="t">Gier-Steuer</span><span class="a" style="color:var(--red)">−${fmt(tax)}</span>`:''}
         <span class="t">Bleibt dir</span><span class="a" style="color:var(--gold)">${fmt(left)}</span>
       </div>
+      ${tax?`<p class="voiceline">»So viel Glück hat keiner. Entweder du betrügst, oder du hast Glück. Beides gehört mir.«</p>`:''}
       <p>Die Klappe in der Tür öffnet sich. Eine Hand nimmt das Geld. Nächstes Mal will er <b style="color:var(--red)">${fmt(debtFor(S.level+1))}</b>.</p>
       <button class="big" id="goOn" type="button">Weiterleben</button>`);
     melody([523,659,784,1046],120);

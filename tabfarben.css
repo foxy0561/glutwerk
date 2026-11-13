@@ -1,0 +1,8 @@
+/* Glutwerk · jede Seite oben hat ihre eigene, weiche Farbe */
+[data-tab="spiele"]{--tf:#ffa36b}
+[data-tab="karten"]{--tf:#c9a2ff}
+[data-tab="minecraft"]{--tf:#86d99a}
+[data-tab="foxy"]{--tf:#ff9fcf}
+.nav a[data-tab],.gw-nav a[data-tab]{color:color-mix(in srgb,var(--tf) 62%,#8a93a8)}
+.nav a[data-tab]:hover,.gw-nav a[data-tab]:hover{color:var(--tf);background:color-mix(in srgb,var(--tf) 9%,transparent)}
+.nav a[data-tab].active,.gw-nav a[data-tab].on{color:var(--tf);background:color-mix(in srgb,var(--tf) 14%,#161a24);box-shadow:inset 0 -2px 0 var(--tf)}

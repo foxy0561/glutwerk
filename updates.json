@@ -183,9 +183,13 @@
    ]
   },
   "letzter-dreh/": {
-   "last": "2026-11-13T10:30:20+01:00",
-   "n14": 23,
+   "last": "2026-11-13T10:35:16+01:00",
+   "n14": 24,
    "items": [
+    {
+     "d": "2026-11-13",
+     "t": "Hals der Silhouette fest am Körper"
+    },
     {
      "d": "2026-11-13",
      "t": "Schuss aus der Tür ist immer tödlich, Ohrenklingeln nur als Effekt beim Sterben"
@@ -229,10 +233,6 @@
     {
      "d": "2026-11-13",
      "t": "Umschauen sanfter und weniger weit, Türspion lässt sich leicht bewegen"
-    },
-    {
-     "d": "2026-11-13",
-     "t": "Kassierer nimmt bei viel zu viel Geld einen Teil ab, Gier-Steuer am Zahltag"
     }
    ]
   },
@@ -291,5 +291,5 @@
    ]
   }
  },
- "stand": "2026-11-13T09:30+00:00"
+ "stand": "2026-11-13T09:35+00:00"
 }

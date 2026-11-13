@@ -466,9 +466,15 @@ html.calm .cine::before,html.calm .eyes,html.calm .cam .led{animation:none}
 .notepad::after{content:"";position:absolute;right:-14px;top:16px;width:46px;height:4px;background:linear-gradient(90deg,#d8b04a 80%,#2a2018 80%);transform:rotate(-38deg)}
 .notepad:hover{filter:brightness(1.15)}
 .L .notepad{left:196px;top:448px} .P .notepad{left:186px;top:1124px}
-.padsheet textarea{width:100%;min-height:240px;resize:vertical;border:0;outline:0;background:repeating-linear-gradient(transparent 0 31px,rgba(80,90,160,.35) 31px 32px);
+.padwrap{position:relative;z-index:1;width:min(100%,calc((100vh - 300px) * .79));margin:0 auto;aspect-ratio:600/760;background:#efe6cf repeating-linear-gradient(transparent 0 calc(100% / 19 - 1px),rgba(80,90,160,.35) calc(100% / 19 - 1px) calc(100% / 19));
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.15),0 4px 10px rgba(0,0,0,.35);border-top:10px solid #6a1a12;touch-action:none}
+.padwrap canvas{display:block;width:100%;height:100%;touch-action:none}
+.padtools{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.padtools .ghost[aria-pressed="true"]{background:#5a3a1c;border-color:#c99a4a}
+.padsheet .padtools .big{margin-left:auto}
+.unused-old-textarea{
   font-family:var(--f-hand);font-size:24px;line-height:32px;color:#1f2a6a;padding:4px 2px;position:relative;z-index:1;user-select:text;-webkit-user-select:text}
-.pz-pad{max-width:min(90vw,420px);font-family:var(--f-hand);font-size:18px;color:#cdbfb2;background:rgba(232,220,192,.08);border-left:3px solid #6a1a12;padding:4px 10px;white-space:pre-wrap;max-height:4.6em;overflow:auto}
+.pz-pad{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:max(12px,env(safe-area-inset-top,0px));width:min(26vw,150px);aspect-ratio:600/760;background:#efe6cf;border-top:6px solid #6a1a12;transform:rotate(-4deg);box-shadow:0 6px 12px rgba(0,0,0,.6)}
 .purse{position:absolute;z-index:6;touch-action:none;cursor:grab;width:150px;height:130px}
 .L .purse{left:240px;top:368px} .P .purse{left:170px;top:1040px}
 .table{position:absolute;z-index:5;pointer-events:none}
@@ -1930,19 +1936,49 @@ function stabEye(){
 }
 
 /* ---------- notepad (stays across deaths) ---------- */
-const NOTES_KEY='ld_notes';
+const NOTES_KEY='ld_notes',DRAW_KEY='ld_notes_draw';
 function loadNotes(){try{return localStorage.getItem(NOTES_KEY)||''}catch(e){return ''}}
-function saveNotes(t){try{localStorage.setItem(NOTES_KEY,t)}catch(e){}}
-function showPad(){const t=loadNotes();$('padText').textContent=t.slice(0,60);}
+function loadDrawing(){try{return localStorage.getItem(DRAW_KEY)||''}catch(e){return ''}}
+function saveDrawing(d){try{localStorage.setItem(DRAW_KEY,d)}catch(e){}}
+function showPad(){
+  const d=loadDrawing(),pad=$('notepad');
+  pad.style.backgroundImage=d?`url(${d}),repeating-linear-gradient(#e9e0c8 0 8px,#cfc3a6 8px 9px)`:'';
+  pad.style.backgroundSize=d?'100% 100%,auto':'';
+  $('padText').textContent=d?'':loadNotes().slice(0,60);
+}
+const PAD_W=600,PAD_H=760;
 function openNotes(){
   if(!uiFree()&&!(PZ&&PZ.open)) return;
   rustle();
-  openOv(`<h2>Notizblock</h2><p class="sub">Neben dem Telefon. Jemand hat schon Seiten herausgerissen. Was du hier aufschreibst, bleibt, auch wenn du stirbst.</p>
-    <textarea id="padArea" spellcheck="false" maxlength="600" placeholder="Nummern, Hinweise, …"></textarea>
-    <div class="shopfoot"><span></span><button class="big" id="padClose" type="button">Hinlegen</button></div>`,'paper padsheet');
-  const a=$('padArea');a.value=loadNotes();a.focus();
-  a.addEventListener('input',()=>{saveNotes(a.value);showPad();if(Math.random()<.4)beep(5200+Math.random()*1500,.01,'triangle',.008);});
-  $('padClose').onclick=()=>{saveNotes(a.value);showPad();closeOv();rustle();};
+  openOv(`<h2>Notizblock</h2><p class="sub">Neben dem Telefon. Zeichne mit Maus oder Finger. Was du hier aufschreibst, bleibt, auch wenn du stirbst.</p>
+    <div class="padwrap"><canvas id="padCv" width="${PAD_W}" height="${PAD_H}" aria-label="Zeichenfläche"></canvas></div>
+    <div class="padtools"><button class="ghost" id="padPen" type="button" aria-pressed="true">✎ Stift</button><button class="ghost" id="padRub" type="button" aria-pressed="false">▭ Radierer</button><button class="ghost" id="padTear" type="button">Seite abreißen</button><button class="big" id="padClose" type="button">Hinlegen</button></div>`,'paper padsheet');
+  const cv=$('padCv'),c=cv.getContext('2d');
+  const old=loadDrawing();
+  if(old){const im=new Image();im.onload=()=>c.drawImage(im,0,0,PAD_W,PAD_H);im.src=old;}
+  else if(loadNotes().trim()){c.fillStyle='#1f2a6a';c.font='600 46px Caveat, cursive';loadNotes().split('\n').slice(0,14).forEach((l,i)=>c.fillText(l,16,52+i*52));}
+  let mode='pen',last=null,dirty=false;
+  const setMode=m=>{mode=m;$('padPen').setAttribute('aria-pressed',m==='pen');$('padRub').setAttribute('aria-pressed',m==='rub');cv.style.cursor=m==='pen'?'crosshair':'cell';};
+  setMode('pen');
+  const pos=e=>{const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*PAD_W,y:(e.clientY-r.top)/r.height*PAD_H,t:performance.now()};};
+  const stroke=(a,b)=>{
+    c.lineCap='round';c.lineJoin='round';
+    if(mode==='rub'){c.globalCompositeOperation='destination-out';c.lineWidth=34;}
+    else{c.globalCompositeOperation='source-over';c.strokeStyle='#1f2a6a';const sp=Math.hypot(b.x-a.x,b.y-a.y)/Math.max(1,b.t-a.t);c.lineWidth=Math.max(2.2,6-sp*2);}
+    c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.globalCompositeOperation='source-over';
+  };
+  cv.addEventListener('pointerdown',e=>{e.preventDefault();cv.setPointerCapture(e.pointerId);last=pos(e);stroke(last,{...last,x:last.x+.1});dirty=true;});
+  cv.addEventListener('pointermove',e=>{if(!last)return;const p=pos(e);stroke(last,p);last=p;dirty=true;
+    if(Math.random()<.25)beep(mode==='pen'?5200+Math.random()*1500:900+Math.random()*300,.01,'triangle',.007);});
+  const up=()=>{if(!last)return;last=null;if(dirty){saveDrawing(cv.toDataURL('image/png'));showPad();dirty=false;}};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  $('padPen').onclick=()=>setMode('pen');
+  $('padRub').onclick=()=>setMode('rub');
+  $('padTear').onclick=()=>{
+    c.clearRect(0,0,PAD_W,PAD_H);saveDrawing('');try{localStorage.removeItem(NOTES_KEY)}catch(e){}showPad();rustle();
+    if(!muted&&SET.sfx>0&&AC){try{const n=noiseNode(.4,x=>Math.pow(1-x,2)*(.5+.5*Math.random())),f=AC.createBiquadFilter(),g=AC.createGain();f.type='highpass';f.frequency.value=1800;g.gain.value=.25*SET.sfx;n.connect(f).connect(g).connect(AC.destination);n.start();}catch(e){}}
+  };
+  $('padClose').onclick=()=>{up();closeOv();rustle();};
 }
 
 /* ---------- phone close-up ---------- */
@@ -1952,7 +1988,7 @@ function openPhoneZoom(){
   if(hs.on){hs.on=false;hs.a={x:hs.a.x+10,y:hs.a.y-40};hs.b={x:hs.b.x-10,y:hs.b.y-40};hs.pa={...hs.a};hs.pb={...hs.b};liftSound();}
   dial.digits='';
   const w=document.createElement('div');w.className='phonezoom';w.id='phonezoom';
-  w.innerHTML=`<div class="pz-strip" id="pzStrip"></div><canvas id="pzDial" width="1000" height="1000" aria-label="Wählscheibe"></canvas>${loadNotes().trim()?`<div class="pz-pad">${loadNotes().trim().replace(/[<>&]/g,'')}</div>`:''}<div class="pz-say" id="pzSay">Finger in ein Loch, im Uhrzeigersinn bis zum Anschlag drehen, loslassen. Nach der letzten Ziffer kurz warten.</div><button class="ghost" id="pzHang" type="button">Auflegen</button>`;
+  w.innerHTML=`<div class="pz-strip" id="pzStrip"></div><canvas id="pzDial" width="1000" height="1000" aria-label="Wählscheibe"></canvas>${loadDrawing()?`<img class="pz-pad" src="${loadDrawing()}" alt="Deine Notizen">`:''}<div class="pz-say" id="pzSay">Finger in ein Loch, im Uhrzeigersinn bis zum Anschlag drehen, loslassen. Nach der letzten Ziffer kurz warten.</div><button class="ghost" id="pzHang" type="button">Auflegen</button>`;
   document.body.appendChild(w);
   const cv=$('pzDial'),c=cv.getContext('2d');
   PZ.show=()=>{$('pzStrip').textContent=dial.digits?dial.digits.split('').join(' '):'– – –';};

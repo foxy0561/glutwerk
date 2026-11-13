@@ -288,21 +288,28 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 .badge-new.upd{background:var(--browser);box-shadow:0 0 14px rgba(61,220,151,.55)}
 @keyframes pulse{50%{transform:scale(1.07)}}
 .card-news{font-size:13px;color:var(--text);background:rgba(255,106,43,.08);border-left:3px solid var(--accent);padding:6px 10px;border-radius:4px}
-.news{margin-bottom:40px}
-.news h2{font-family:Rajdhani,sans-serif;font-size:28px;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
-.news-list{display:flex;flex-direction:column;gap:8px}
-.news-item{
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;
-}
-.news-date{font-size:12px;color:var(--muted);min-width:78px}
-.news-game{font-family:Rajdhani,sans-serif;font-weight:700;font-size:17px;text-transform:uppercase;color:var(--accent)}
-.news-text{font-size:14px;flex:1;min-width:180px}
-.news-item .btn{padding:6px 12px;font-size:13px}
 
-/* Beliebteste Spiele (Top 3) */
-.info-row{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start;margin-bottom:40px}
-.info-row .news{margin-bottom:0}
+/* Seitenaufbau: Spiele links, Seitenleiste (Beliebt + Updates) rechts */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start}
+.main-col{min-width:0}
+.side{position:sticky;top:84px;display:flex;flex-direction:column;gap:18px;max-height:calc(100vh - 100px)}
+.side .top{flex:none}
+/* Update-Fenster */
+.upd{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 6px 10px 18px;display:flex;flex-direction:column;min-height:0}
+.upd h2{font-family:Rajdhani,sans-serif;font-size:22px;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;padding-right:12px}
+.upd h2 svg{width:20px;height:20px;color:var(--accent)}
+.upd-sub{font-size:12px;color:var(--muted);margin:2px 12px 12px 0}
+.upd-list{overflow-y:auto;padding-right:10px;display:flex;flex-direction:column;gap:2px;min-height:0;scrollbar-width:thin;scrollbar-color:#3a4050 transparent}
+.upd-day{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:10px 0 4px}
+.upd-day:first-child{margin-top:0}
+.upd-it{display:grid;grid-template-columns:4px 1fr;gap:10px;padding:8px 8px 8px 0;border-radius:8px;cursor:pointer;text-align:left;background:none;border:none;color:inherit;font:inherit;width:100%}
+.upd-it:hover{background:rgba(255,255,255,.04)}
+.upd-it i{border-radius:4px;background:linear-gradient(var(--c1),var(--c2))}
+.upd-g{font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;color:var(--text);display:flex;gap:6px;align-items:baseline}
+.upd-g small{font-family:Inter,sans-serif;font-weight:400;font-size:11px;color:var(--muted);text-transform:none}
+.upd-t{font-size:13px;color:#c3c9d6;line-height:1.4;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.upd-it.open .upd-t{-webkit-line-clamp:unset}
+.upd-more{display:none;margin:8px 12px 4px 0;padding:8px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);font:600 13px Inter,sans-serif;cursor:pointer}
 .top{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
 .top h2{font-family:Rajdhani,sans-serif;font-size:22px;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px}
 .top h2 svg{width:20px;height:20px;color:var(--accent)}
@@ -320,7 +327,13 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 .top-title{display:block;font-family:Rajdhani,sans-serif;font-weight:700;font-size:17px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .top-count{display:block;font-size:12px;color:var(--muted)}
 .top-empty{font-size:13px;color:var(--muted);line-height:1.5;padding:6px 2px}
-@media (max-width:900px){.info-row{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static;max-height:none;order:-1;margin-bottom:28px}
+  .upd-list{max-height:none}
+  .upd.kurz .upd-list > :nth-child(n+5){display:none}
+  .upd.kurz .upd-more{display:block}
+}
 
 /* Gerade online */
 .live-badge{position:absolute;right:10px;bottom:10px;z-index:2;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 9px;border-radius:6px;background:rgba(11,13,18,.88);backdrop-filter:blur(6px);color:#bdf5d9}
@@ -433,11 +446,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <main>
   <section class="hero" id="hero"></section>
 
-  <div class="info-row">
-    <section class="news" id="news"></section>
-    <aside class="top" id="top"></aside>
-  </div>
-
+  <div class="layout">
+  <div class="main-col">
   <div class="toolbar">
     <h2>Alle Spiele <small id="count"></small></h2>
     <div class="toolbar-right">
@@ -452,6 +462,12 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   </div>
 
   <div class="grid" id="grid"></div>
+  </div>
+  <aside class="side">
+    <section class="top" id="top"></section>
+    <section class="upd" id="updates"></section>
+  </aside>
+  </div>
 </main>
 
 <footer id="footer"></footer>
@@ -793,20 +809,73 @@ function status(g) {
 }
 const fmtDate = d => { const [y, m, t] = d.split("-"); return `${t}.${m}.${y}`; };
 
-function renderNews() {
-  const items = [];
-  GAMES.forEach(g => (g.news || []).forEach(n => items.push({ g, ...n })));
-  items.sort((a, b) => b.date.localeCompare(a.date));
-  if (!items.length) { $("news").style.display = "none"; return; }
-  $("news").innerHTML = `<h2>Was ist neu</h2><div class="news-list">` +
-    items.slice(0, 5).map(i => `
-      <div class="news-item">
-        <span class="news-date">${fmtDate(i.date)}</span>
-        <span class="news-game">${esc(i.g.title)}</span>
-        <span class="news-text">${esc(i.text)}</span>
-        ${i.g.url && i.g.type !== "soon" ? actionHTML(i.g) : ""}
-      </div>`).join("") + `</div>`;
+/* ---- Updates: kommen automatisch aus updates.json (wird bei jedem Push neu erzeugt) ---- */
+let UPD = {};
+const gKey = g => g.url || "";
+function lastUpdate(g) {
+  const u = UPD[gKey(g)], d = [g.added, g.updated, ...(g.news || []).map(n => n.date)].filter(Boolean);
+  let t = Math.max(0, ...d.map(x => new Date(x + "T12:00:00").getTime()));
+  if (u && u.last) t = Math.max(t, new Date(u.last).getTime());
+  return t;
 }
+/* Sortierung: zuletzt aktualisiert zuerst, oft aktualisierte bekommen einen Bonus, eingestellte ganz nach hinten */
+function updScore(g) {
+  const u = UPD[gKey(g)];
+  return (g.ended ? -1e15 : 0) + lastUpdate(g) + Math.min(20, u ? u.n14 : 0) * 6 * 3600e3;
+}
+function relDay(d) {
+  const t = Math.round((new Date(today() + "T12:00:00") - new Date(d + "T12:00:00")) / 864e5);
+  return t <= 0 ? "Heute" : t === 1 ? "Gestern" : t < 7 ? `Vor ${t} Tagen` : fmtDate(d);
+}
+function renderNews() {
+  const items = [], seen = new Set();
+  const add = (g, d, t) => { const k = g.title + d + t; if (!seen.has(k)) { seen.add(k); items.push({ g, d, t }); } };
+  GAMES.forEach(g => {
+    const u = UPD[gKey(g)];
+    if (u) u.items.forEach(i => add(g, i.d, i.t));
+    (g.news || []).forEach(n => add(g, n.date, n.text));
+  });
+  const K = UPD["karten/"];
+  if (K) K.items.forEach(i => add({ title: "Karten", karten: true, colors: ["#b26bff", "#ff6ad5"] }, i.d, i.t));
+  items.sort((a, b) => b.d.localeCompare(a.d));
+  // Alles vom selben Spiel am selben Tag zu einem Eintrag zusammenfassen
+  const grp = [];
+  items.forEach(i => {
+    const last = grp.find(x => x.d === i.d && x.g.title === i.g.title);
+    if (last) last.ts.push(i.t); else grp.push({ g: i.g, d: i.d, ts: [i.t] });
+  });
+  const list = grp.slice(0, 30);
+  if (!list.length) { $("updates").style.display = "none"; return; }
+  let day = "";
+  const rows = list.map(i => {
+    const head = i.d !== day ? `<div class="upd-day">${relDay(i.d)}</div>` : "";
+    day = i.d;
+    const c = i.g.colors || ["#ff6a2b", "#ffb347"];
+    const vm = i.ts.map(t => (t.match(/^v([\d.]+) · /) || [])[1]).filter(Boolean)[0];
+    const txt = i.ts.map(t => t.replace(/^v[\d.]+ · /, ""));
+    return head + `<button class="upd-it" style="--c1:${c[0]};--c2:${c[1]}" ${i.g.karten ? 'data-karten="1"' : `data-upd="${esc(i.g.title)}"`} title="${i.g.karten ? "Zum Karten-Tab" : "Spiel öffnen"}">
+      <i></i><span><span class="upd-g">${esc(i.g.title)}${vm ? `<small>v${esc(vm)}</small>` : ""}${i.ts.length > 1 ? `<small>${i.ts.length} Änderungen</small>` : ""}</span>
+      <span class="upd-t">${txt.length > 1 ? txt.map(t => "• " + esc(t)).join("<br>") : esc(txt[0])}</span></span></button>`;
+  }).join("");
+  $("updates").className = "upd kurz";
+  $("updates").innerHTML = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Updates</h2>
+    <div class="upd-sub">Was sich in den Spielen getan hat</div>
+    <div class="upd-list">${rows}</div><button class="upd-more" type="button">Alle Updates zeigen</button>`;
+}
+$("updates").addEventListener("click", e => {
+  if (e.target.closest(".upd-more")) { $("updates").classList.remove("kurz"); return; }
+  const it = e.target.closest(".upd-it"); if (!it) return;
+  if (it.dataset.karten) { location.href = "karten/"; return; }
+  const t = it.querySelector(".upd-t");
+  // Erst ganz aufklappen, wenn der Text abgeschnitten ist, beim zweiten Klick das Spiel öffnen
+  if (!it.classList.contains("open") && t.scrollHeight > t.clientHeight + 2) { it.classList.add("open"); return; }
+  const g = GAMES.find(x => x.title === it.dataset.upd);
+  if (g) document.querySelector(`#grid [data-play="${CSS.escape(g.title)}"],#grid [data-dl="${CSS.escape(g.title)}"]`)?.click();
+});
+fetch("updates.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : {}).then(d => {
+  UPD = (d && d.games) || {};
+  renderNews(); renderGrid();
+}).catch(() => {});
 
 /* ---- Geräte & Spielmodus ---- */
 const ICONS = {
@@ -866,7 +935,7 @@ function renderHero() {
 }
 
 function renderGrid() {
-  const list = GAMES.filter(g =>
+  const list = GAMES.slice().sort((a, b) => updScore(b) - updScore(a)).filter(g =>
     (filter === "all" || g.type === filter) &&
     (!only.mobile || (g.platforms || []).includes("mobile")) &&
     (!only.multi || (g.modes || []).includes("multi")) &&

@@ -1,0 +1,217 @@
+{
+ "games": {
+  "karten/": {
+   "last": "2026-11-13T01:48:53+01:00",
+   "n14": 19,
+   "items": [
+    {
+     "d": "2026-11-13",
+     "t": "Letzter Dreh aktualisiert (Kassierer, Zahltag, Türspion, Messer, Gewitter, neue Bilder)"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Schrift und Bilder lassen sich nicht mehr markieren (wie in Letzter Dreh)"
+    },
+    {
+     "d": "2026-11-12",
+     "t": "Letzter-Dreh-Set mit Bildern direkt aus dem Spiel"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "Einzelne Kopien in der Kartenansicht zu Staub machen statt alle Doppelten"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "Leeres Deck muss nicht mehr ziehen, Sieg wenn der Gegner keine Karten mehr hat"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "Kiko Hüpft mit Original-Pixelgrafik aus dem Spiel"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "Klarwasser-Set mit Original-Sprites aus dem Spiel"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "Glutstaub, mehrere Decks mit Namen, Spielfeld und Kartenrücken, Deckauswahl, sichtbarer Deckstapel zum Ziehen"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "Karten ziehen, Verbrennen für Energie, Effekt-Symbole mit Tooltip, Ameisen greifen sofort an"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "Wildnis-Bilder sauberer freigestellt (Grün-Hintergrund)"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "15 Wildnis-Karten mit neuen Bildern von foxy0561"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "Neues Set Wildnis (19 Karten: Tiere, Monster, Gegenstände, Biome) und Computer-Deck Wildnis"
+    }
+   ]
+  },
+  "drako/": {
+   "last": "2026-11-09T05:40:40+01:00",
+   "n14": 10,
+   "items": [
+    {
+     "d": "2026-11-09",
+     "t": "Hochschleudern ohne Mitspringen und ohne Vorab-Schlag"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Hochschleudern durch Gedrueckthalten des Angriffs"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Kampfsystem wie in Spyro: A New Beginning"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Kampf naeher an Spyro: A New Beginning"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Spezial-Atem ohne Abklingzeit, nur Energie begrenzt"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Energie-System, Zielhilfe, neue Spezial-Atems"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Spezial-Atem fuer jedes Element (Mausrad-Klick)"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Zieltor erst nach Drachen-Gespraech, Unterwasser-Dash, detailliertere Modelle"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Rueckweg aus der Hauptwelt landet vor dem Tor statt neben dem Loch"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "Drako zu Glutwerk hinzugefuegt (ueberarbeitet)"
+    }
+   ]
+  },
+  "ameisenbau/": {
+   "last": "2026-11-11T03:33:39+01:00",
+   "n14": 8,
+   "items": [
+    {
+     "d": "2026-11-11",
+     "t": "v2.3.5 · Angriffsbefehl mit Wegprüfung, größere Trefferfläche"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "v2.3.3 · Stärkerer Regen und Wolkenbrüche"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "v2.3.2 · Gegner per Befehl angreifen, rote Kriegerinnen als echte Gegner"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "v2.3.1 · Graben in der Tiefe repariert"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "v2.3 · Zerstörbare Käfernester, Steine abbauen, schwächerer Maulwurf"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "v2.2 · Wochen-Welt mit Bestenliste, Tutorial-Welt, runde Gänge"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "v2.1 · Welt im Ameisenmaßstab, große Blätter, Befehle per Klick"
+    },
+    {
+     "d": "2026-11-08",
+     "t": "v2.0 · Hauptmenü, Welt-Einstellungen und 5 Ameisenarten"
+    }
+   ]
+  },
+  "klarwasser/": {
+   "last": "2026-11-11T00:00:38+01:00",
+   "n14": 1,
+   "items": [
+    {
+     "d": "2026-11-11",
+     "t": "v1.1 · Neues Aquarium-Spiel auf Glutwerk"
+    }
+   ]
+  },
+  "letzter-dreh/": {
+   "last": "2026-11-13T02:02:42+01:00",
+   "n14": 18,
+   "items": [
+    {
+     "d": "2026-11-13",
+     "t": "Notizblock zum Zeichnen statt Tippen"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Umschauen auch beim Stromausfall, schwarze Anzeigen"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Münz-Rückgabeknopf, leiseres Telefonrauschen, Notizblock neben dem Telefon"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Nach oben/unten schauen, Auge gewöhnt sich ein, Telefon-Nahansicht mit Nummern (0561, 110, 112, 911)"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Ersatzauge kaufen und selbst einsetzen"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Umschauen sanfter und weniger weit, Türspion lässt sich leicht bewegen"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Kassierer nimmt bei viel zu viel Geld einen Teil ab, Gier-Steuer am Zahltag"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Schädel kosten Geld (Minus möglich), Kassierer schaut bei Besuchen durch den Schlitz"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Gruseligere Silhouette und Jumpscare-Gesicht, Lichtspalt verschwindet bei offener Tür, Augenklappe"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Türspion (Auge/Messer, halbe Sicht), Gewitter mit Stromausfall und Neustart des Automaten"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Tür öffnet rechts, Lichtspalt bleibt am Boden, neuer Zahltag-Tod mit Jumpscare"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Letzte Ausrede am Zahltag, globaler Gefangenen-Zähler"
+    }
+   ]
+  },
+  "https://foxy0561.github.io/Kiko-H-pft/": {
+   "last": "2026-11-08T16:56:01+01:00",
+   "n14": 1,
+   "items": [
+    {
+     "d": "2026-11-08",
+     "t": "Lauf-Animation genutzt, Sprung-Bilder richtig zugeordnet"
+    }
+   ]
+  }
+ },
+ "stand": "2026-11-13T01:06+00:00"
+}

@@ -1,9 +1,13 @@
 {
  "games": {
   "karten/": {
-   "last": "2026-11-13T03:20:16+01:00",
-   "n14": 23,
+   "last": "2026-11-13T10:16:13+01:00",
+   "n14": 24,
    "items": [
+    {
+     "d": "2026-11-13",
+     "t": "Seiten laden sich selbst neu, wenn online eine neuere Version liegt"
+    },
     {
      "d": "2026-11-13",
      "t": "Jeder Reiter oben hat eine eigene weiche Farbe"
@@ -47,10 +51,6 @@
     {
      "d": "2026-11-11",
      "t": "Klarwasser-Set mit Original-Sprites aus dem Spiel"
-    },
-    {
-     "d": "2026-11-11",
-     "t": "Glutstaub, mehrere Decks mit Namen, Spielfeld und Kartenrücken, Deckauswahl, sichtbarer Deckstapel zum Ziehen"
     }
    ]
   },
@@ -291,5 +291,5 @@
    ]
   }
  },
- "stand": "2026-11-13T02:20+00:00"
+ "stand": "2026-11-13T09:16+00:00"
 }

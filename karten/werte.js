@@ -67,6 +67,11 @@ window.WERTE = {
   "ld-klappe":     { t: "zauber", kosten: 1, sucheTyp: "ausr" },
   "ld-hebel":      { t: "ausr", kosten: 2, plusSchaden: 2 },
   "ld-zelle":      { t: "ort", kosten: 2, ort: "zelle" },
+  "ld-kassierer":  { t: "wesen", hp: 11, atk: [["Kassieren", 2, 3, "saugen"], ["Zahltag", 6, 7]] },
+  "ld-zahltag":    { t: "zauber", kosten: 5, schadenAlleFeinde: 3, frostAlle: true },
+  "ld-tuerspion":  { t: "zauber", kosten: 1, ziel: "feindWesen", schaden: 1, frost: true },
+  "ld-messer":     { t: "zauber", kosten: 2, ziel: "feindWesen", schaden: 4 },
+  "ld-gewitter":   { t: "zauber", kosten: 2, frostAlle: true },
   "feuerkoenig":   { t: "wesen", hp: 11, pas: "untot", atk: [["Feuerball", 2, 3], ["Lavawelle", 5, 3, "alle"]] },
 
   /* ---------------- Kammerwerk ---------------- */
@@ -269,7 +274,7 @@ window.GEGNER_DECKS = [
   { name: "Ameisenvolk", deck: ["waldameise", "waldameise", "ernteameise", "ernteameise", "blattschneider", "spinne", "honigtopf", "koenigin", "treiberameise", "gruenling", "gruenling", "kraeuter", "blattlausfarm", "pilzgarten", "funke", "funke", "dolch", "heiltrank", "rivalen", "muenze"] },
   { name: "Turmwacht", deck: ["bolzenturm", "bolzenturm", "kanone-sf", "kanone-sf", "frostkristall", "frostkristall", "blitzspule", "moerser", "leuchtfeuer", "schildtraeger", "wuerfel", "wuerfel", "kristallkern", "kristallkern", "sternblock", "feueratem", "funke", "muenze", "laterne", "burg"] },
   { name: "Nebelwald", deck: ["spinne", "blattschneider", "golem", "drako", "rissbestie", "rissbestie", "kiko", "ernteameise", "waldameise", "phantom", "verband", "gifttrank", "gifttrank", "bombe", "pfotentrank", "grimoire", "fuchsschild", "umhang", "uralter-baum", "heiltrank"] },
-  { name: "Letzter Dreh", deck: ["ld-automat", "ld-glaeubiger", "ld-augen", "ld-augen", "ld-schatten", "ld-schatten", "ld-schatten", "ld-777", "ld-schaedel", "ld-joker", "ld-risiko", "ld-risiko", "ld-strom", "ld-licht", "ld-telefon", "ld-schale", "ld-tagebuch", "ld-striche", "ld-hebel", "ld-zelle"] },
+  { name: "Letzter Dreh", deck: ["ld-automat", "ld-glaeubiger", "ld-augen", "ld-augen", "ld-schatten", "ld-schatten", "ld-kassierer", "ld-777", "ld-schaedel", "ld-joker", "ld-risiko", "ld-risiko", "ld-strom", "ld-licht", "ld-telefon", "ld-messer", "ld-gewitter", "ld-zahltag", "ld-hebel", "ld-zelle"] },
   { name: "Kiko Hüpft", deck: ["kiko", "gruenling", "gruenling", "panzerkaefer", "panzerkaefer", "stachler", "stachler", "flatterling", "flatterling", "kiko-dino", "feuerkoenig", "sternblock", "sternblock", "muenze", "muenze", "roehre", "extraleben", "vier-freunde", "wiesenland", "heiltrank"] },
   { name: "Klarwasser", deck: ["kw-neon", "kw-neon", "kw-guppy", "kw-guppy", "kw-cory", "kw-shrimp", "kw-gourami", "kw-loach", "kw-pleco", "kw-betta", "kw-malawi", "kw-angel", "kw-root", "kw-holey", "kw-cave", "kw-castle", "kw-leaves", "kw-fern", "kw-wreck", "kw-becken"] },
   { name: "Wildnis", deck: ["w-schwein", "w-schwein", "w-huhn", "w-kuh", "w-wolf", "w-wolf", "w-zombie", "w-zombie", "w-skelett", "w-hoehlenspinne", "w-drache", "w-spitzhacke", "w-spitzhacke", "w-fackel", "w-eisen", "w-gold", "w-werkbank", "w-diamant", "w-dschungel", "heiltrank"] },

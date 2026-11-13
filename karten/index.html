@@ -414,6 +414,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
     <a href="../minecraft/">Minecraft</a>
     <a href="../thyrvenna/" data-en="Foxy's World">Foxys Welt</a>
     <a href="./" class="active" data-en="Cards">Karten</a>
+    <a href="../erfolge/" data-en="Achievements">Erfolge</a>
   </nav>
   <div id="langSlot" style="display:contents"></div>
   <a class="glut-chip" id="glutChip" href="#verdienen" title="Deine Glut-Punkte" data-en-title="Your Glut points">
@@ -1098,7 +1099,7 @@ function renderDust() {
   $("dustBar").innerHTML = `<span class="dv">✦ ${fmt(staubGet())}</span>
     <span class="dt">${L("Glutstaub · Tippe eine Karte an und mach einzelne Kopien zu Staub, damit öffnest du Zufalls-Packs.", "Glut dust · tap a card and turn single copies into dust to open random packs.")} ${e.n ? L(`Du hast ${e.n} doppelte Karten.`, `You have ${e.n} duplicates.`) : L("Du hast gerade keine doppelten Karten.", "You have no duplicates right now.")}</span>`;
 }
-function renderAll() { renderGlut(); renderEarn(); renderFilters(); renderGrid(); renderProgress(); renderDust(); }
+function renderAll() { renderGlut(); renderEarn(); renderFilters(); renderGrid(); renderProgress(); renderDust(); if (window.glutwerkErfolg && CARDS.every(c => owned(c.id))) glutwerkErfolg("gw-alle-karten"); }
 
 document.addEventListener("click", e => {
   const s = e.target.closest("[data-set]");
@@ -1278,6 +1279,7 @@ function flip(s) {
   const col = { common: "#cfd6e4", rare: "#4da3ff", epic: "#b26bff", legendary: "#ffc443", mythic: "#ff6ad5" }[x.c.r];
   setTimeout(() => {
     sfx(x.c.r);
+    if (window.glutwerkErfolg) { if (x.foil) glutwerkErfolg("gw-glanz"); if (x.c.r === "mythic") glutwerkErfolg("gw-mythisch"); }
     if (x.c.r === "common") burst(cx, cy, col, 14, 3);
     if (x.c.r === "rare") burst(cx, cy, col, 40, 5);
     if (x.c.r === "epic") { burst(cx, cy, col, 80, 7); burst(cx, cy, "#fff", 20, 5); }
@@ -1426,5 +1428,6 @@ window.__sfx = sfx;
 </script>
 <script src="duell.js"></script>
 <script src="../daily.js" data-karten="./"></script>
+<script src="../erfolge.js"></script>
 </body>
 </html>

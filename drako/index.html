@@ -2063,4 +2063,5 @@ let fpsA=.016,fpsT=0,last=performance.now();
 if(st==='play'){upd(dt);late(dt)}else if(st==='menu'){t+=dt;if(editing){const p=pl.p;dr.position.set(p.x,p.y+.12,p.z);dr.rotation.y=t*.7;dr.visible=true;torso.position.y=Math.sin(t*2)*.03;sun.position.set(p.x+30,p.y+50,p.z+20);sun.target.position.copy(p);cam.position.set(p.x+1,p.y+2.1,p.z+6.2);cam.lookAt(p.x-1.5,p.y+1.2,p.z)}else{cam.position.set(Math.sin(t*.2)*26,13,Math.cos(t*.2)*26);cam.lookAt(0,3,0)}cry.forEach((q,i)=>{q.m.rotation.y=t*2})}
 if(st!=='play')fireSound(false);pu(dt);ambient(dt);skyDome.position.copy(cam.position);rd.render(sc,cam)})();
 }
-</script></body></html>
+</script><script src="../erfolge.js"></script>
+</body></html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glutwerk-Erfolge</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="../lang.js"></script>
+<script src="../noselect.js"></script>
+<style>
+:root{
+  --bg:#0b0d12;--bg2:#12151d;--card:#161a24;--line:#252b3a;
+  --text:#e8ebf2;--muted:#8a93a8;--accent:#ff6a2b;--accent2:#ffb347;
+  --leicht:#aab3c5;--mittel:#4da3ff;--schwer:#b26bff;--legendaer:#ffc443;--komplett:#ff6ad5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100vh;
+  background-image:radial-gradient(ellipse 70% 45% at 50% -8%,rgba(255,196,67,.16),transparent 70%),radial-gradient(ellipse 50% 40% at 90% 10%,rgba(178,107,255,.1),transparent 70%),
+  linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:auto,auto,40px 40px,40px 40px}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:24px;padding:14px 32px;background:rgba(11,13,18,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:26px;letter-spacing:2px;text-transform:uppercase}
+.logo-mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;box-shadow:0 0 20px rgba(255,106,43,.5)}
+.logo-mark svg{width:20px;height:20px}
+.logo span{color:var(--accent)}
+.nav{display:flex;gap:4px}
+.nav a{padding:8px 14px;border-radius:7px;font-weight:600;font-size:14px;color:var(--muted);transition:color .15s,background .15s;white-space:nowrap}
+.nav a:hover{color:var(--text)}
+.nav a.active{color:var(--text);background:var(--card);box-shadow:inset 0 -2px 0 var(--accent)}
+.glut-chip{margin-left:auto;display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:8px;background:linear-gradient(135deg,rgba(255,106,43,.16),rgba(255,179,71,.08));border:1px solid rgba(255,106,43,.45);font-family:Rajdhani,sans-serif;font-weight:700;font-size:19px;color:var(--accent2)}
+.glut-chip svg{width:17px;height:17px;color:var(--accent)}
+
+main{max-width:1180px;margin:0 auto;padding:32px}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;padding:30px 34px;border-radius:20px;margin-bottom:26px;
+  background:radial-gradient(circle at 85% 40%,rgba(255,196,67,.22),transparent 55%),linear-gradient(135deg,#1c1710,#141824);border:1px solid rgba(255,196,67,.3)}
+.hero .label{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--legendaer)}
+.hero h1{font-family:Rajdhani,sans-serif;font-size:clamp(38px,6vw,58px);line-height:.95;text-transform:uppercase;margin:6px 0 10px}
+.hero p{color:#c3c9d6;max-width:560px;line-height:1.5}
+.stufen{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.stufen span{font-size:12.5px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.stufen b{color:var(--c)}
+.ring{width:170px;height:170px;position:relative;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .in{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .in b{display:block;font-family:Rajdhani,sans-serif;font-size:40px;line-height:1}
+.ring .in small{color:var(--muted);font-size:12px}
+.ring .in em{display:block;font-style:normal;color:var(--accent2);font-weight:700;font-size:13px;margin-top:4px}
+
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.chip{display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;background:var(--card);border:1px solid var(--line);font-size:13.5px;font-weight:600;color:#c3c9d6}
+.chip .dot{width:10px;height:10px;border-radius:3px}
+.chip em{font-style:normal;color:var(--muted);font-weight:500}
+.chip.on{color:var(--text);border-color:var(--accent);background:rgba(255,106,43,.12)}
+
+.game{margin-bottom:30px}
+.ghead{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.ghead i{width:6px;height:30px;border-radius:4px;background:linear-gradient(var(--c1),var(--c2))}
+.ghead h2{font-family:Rajdhani,sans-serif;font-size:26px;text-transform:uppercase;letter-spacing:1px}
+.ghead .gp{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+.gbar{width:120px;height:6px;border-radius:4px;background:#232838;overflow:hidden}
+.gbar b{display:block;height:100%;background:linear-gradient(90deg,var(--c1),var(--c2))}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.er{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:14px;background:var(--card);border:1px solid var(--line);overflow:hidden}
+.er .ic{width:46px;height:46px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:22px;background:#1f2432;border:1px solid #2c3346;filter:grayscale(1);opacity:.55}
+.er .tx{min-width:0;flex:1}
+.er b{display:block;font-size:15px;margin-bottom:3px}
+.er p{font-size:13px;color:var(--muted);line-height:1.4}
+.er .meta{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11.5px}
+.er .st{font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--c)}
+.er .gl{margin-left:auto;font-weight:700;color:#6b7387}
+.er.got{border-color:color-mix(in srgb,var(--c) 45%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--c) 10%,var(--card)),var(--card))}
+.er.got .ic{filter:none;opacity:1;background:linear-gradient(135deg,var(--c1),var(--c2));border:none;box-shadow:0 0 18px color-mix(in srgb,var(--c) 40%,transparent)}
+.er.got .gl{color:var(--accent2)}
+.er.got .date{color:var(--muted)}
+.er.secret b{letter-spacing:2px}
+.er.secret .ic{font-size:20px}
+.er.komplett{grid-column:1/-1}
+.er.komplett.got{background:linear-gradient(135deg,rgba(255,106,213,.16),rgba(125,249,255,.08));border-color:rgba(255,106,213,.6)}
+.hint{color:var(--muted);font-size:13px;margin:-8px 0 14px}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:30px 16px 40px}
+@media (max-width:640px){
+  header{gap:8px;padding:10px 12px;flex-wrap:wrap;row-gap:8px}
+  .logo{font-size:20px}.logo-mark{width:30px;height:30px}
+  .logo>div:last-child{display:none}
+  .nav{order:10;width:100%;justify-content:space-between;gap:2px}
+  .nav a{flex:1;text-align:center;font-size:12px;padding:7px 4px}
+  main{padding:20px 16px}
+  .hero{grid-template-columns:1fr;padding:22px;justify-items:start}
+  .ring{width:140px;height:140px;justify-self:center}
+  .ghead .gbar{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="../">
+    <div class="logo-mark"><svg viewBox="0 0 24 24" fill="#140800"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg></div>
+    <div>Glut<span>werk</span></div>
+  </a>
+  <nav class="nav">
+    <a href="../" data-en="Games">Spiele</a>
+    <a href="../minecraft/">Minecraft</a>
+    <a href="../thyrvenna/" data-en="Foxy's World">Foxys Welt</a>
+    <a href="../karten/" data-en="Cards">Karten</a>
+    <a href="./" class="active" data-en="Achievements">Erfolge</a>
+  </nav>
+  <div id="langSlot" style="display:contents"></div>
+  <a class="glut-chip" href="../karten/" title="Glut-Punkte" data-en-title="Glut points">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>
+    <b id="glutVal">0</b>
+  </a>
+</header>
+
+<main>
+  <section class="hero">
+    <div>
+      <div class="label" data-en="All games">Alle Spiele</div>
+      <h1 data-en="Achieve&shy;ments">Erfolge</h1>
+      <p data-en="Every game has its own achievements. Each one gives you Glut, harder ones more. Some are secret: you only find out what they are once you have them.">Jedes Spiel hat eigene Erfolge. Jeder bringt dir Glut, schwere mehr. Manche sind geheim: Was dahintersteckt, erfährst du erst, wenn du sie hast.</p>
+      <div class="stufen" id="stufen"></div>
+    </div>
+    <div class="ring" id="ring"></div>
+  </section>
+  <div class="filters" id="filters"></div>
+  <div id="games"></div>
+</main>
+<footer data-en="Achievements are saved on this device, like your Glut and cards.">Erfolge werden auf diesem Gerät gespeichert, so wie deine Glut und Karten.</footer>
+
+<script src="../erfolge.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const STUFE = {
+  leicht: [L("Leicht", "Easy"), "var(--leicht)"], mittel: [L("Mittel", "Medium"), "var(--mittel)"],
+  schwer: [L("Schwer", "Hard"), "var(--schwer)"], legendaer: [L("Legendär", "Legendary"), "var(--legendaer)"],
+  komplett: [L("Komplett", "Complete"), "var(--komplett)"],
+};
+const ICON = { leicht: "🥉", mittel: "🥈", schwer: "🥇", legendaer: "👑", komplett: "💎" };
+let filter = "alle";
+function glut() { try { return +localStorage.getItem("glutwerk-glut") || 0; } catch (e) { return 0; } }
+window.renderGlut = () => { $("glutVal").textContent = glut().toLocaleString(EN ? "en-US" : "de-DE"); };
+const fmtD = t => new Date(t).toLocaleDateString(EN ? "en-US" : "de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+function render() {
+  const E = Erfolge.liste, S = Erfolge.spiele, got = Erfolge.freigeschaltet();
+  const have = E.filter(e => got[e.id]).length;
+  const earned = E.filter(e => got[e.id]).reduce((a, e) => a + Erfolge.glutFor(e), 0);
+  const total = E.reduce((a, e) => a + Erfolge.glutFor(e), 0);
+  const p = have / E.length, R = 70, C = 2 * Math.PI * R;
+  $("ring").innerHTML = `<svg viewBox="0 0 170 170"><circle cx="85" cy="85" r="${R}" stroke="#232838" stroke-width="12" fill="none"/>
+    <circle cx="85" cy="85" r="${R}" stroke="url(#rg)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="${C * p} ${C}"/>
+    <defs><linearGradient id="rg"><stop offset="0" stop-color="#ff6a2b"/><stop offset="1" stop-color="#ffc443"/></linearGradient></defs></svg>
+    <div class="in"><div><b>${have}</b><small>${L("von", "of")} ${E.length}</small><em>${earned.toLocaleString()} / ${total.toLocaleString()} Glut</em></div></div>`;
+  $("stufen").innerHTML = ["leicht", "mittel", "schwer", "legendaer", "komplett"].map(k => `<span style="--c:${STUFE[k][1]}">${ICON[k]} ${STUFE[k][0]} <b>+${Erfolge.glutFor(k === "komplett" ? { komplett: true } : { stufe: k })}</b></span>`).join("");
+  const chip = (k, label, c) => {
+    const l = k === "alle" ? E : E.filter(e => e.spiel === k), h = l.filter(e => got[e.id]).length;
+    return `<button class="chip${filter === k ? " on" : ""}" data-f="${k}">${c ? `<span class="dot" style="background:linear-gradient(135deg,${c[0]},${c[1]})"></span>` : ""}${esc(label)} <em>${h}/${l.length}</em></button>`;
+  };
+  $("filters").innerHTML = chip("alle", L("Alle", "All")) + Object.entries(S).map(([k, s]) => chip(k, s.name, s.c)).join("");
+  $("games").innerHTML = Object.entries(S).filter(([k]) => filter === "alle" || filter === k).map(([k, s]) => {
+    const l = E.filter(e => e.spiel === k), h = l.filter(e => got[e.id]).length;
+    const geheim = l.filter(e => e.geheim && !got[e.id]).length;
+    const cards = l.slice().sort((a, b) => (!!a.komplett) - (!!b.komplett)).map(e => {
+      const g = got[e.id], hidden = e.geheim && !g, st = e.komplett ? "komplett" : e.stufe;
+      return `<div class="er${g ? " got" : ""}${hidden ? " secret" : ""}${e.komplett ? " komplett" : ""}" style="--c:${STUFE[st][1]};--c1:${s.c[0]};--c2:${s.c[1]}">
+        <div class="ic">${hidden ? "🔒" : g && e.geheim ? "🗝️" : ICON[st]}</div>
+        <div class="tx"><b>${hidden ? "???" : esc(Erfolge.nameOf(e))}</b>
+          <p>${hidden ? L("Geheimer Erfolg. Was dahintersteckt, erfährst du, wenn du ihn freischaltest.", "Secret achievement. You'll find out what it is when you unlock it.") : esc(Erfolge.descOf(e))}</p>
+          <div class="meta"><span class="st">${STUFE[st][0]}${e.geheim ? " · " + L("Geheim", "Secret") : ""}</span>${g ? `<span class="date">✓ ${fmtD(g)}</span>` : ""}<span class="gl">+${Erfolge.glutFor(e)} Glut</span></div></div></div>`;
+    }).join("");
+    return `<section class="game" style="--c1:${s.c[0]};--c2:${s.c[1]}"><div class="ghead"><i></i><h2>${esc(s.name)}</h2>
+      <div class="gp"><span>${h} / ${l.length}${geheim ? ` · ${geheim} ${L("geheim", "secret")}` : ""}</span><div class="gbar"><b style="width:${h / l.length * 100}%"></b></div></div></div>
+      <div class="list">${cards}</div></section>`;
+  }).join("");
+  renderGlut();
+}
+$("filters").addEventListener("click", e => { const b = e.target.closest("[data-f]"); if (b) { filter = b.dataset.f; render(); } });
+addEventListener("storage", e => { if (e.key === "glutwerk-erfolge" || e.key === "glutwerk-glut") render(); });
+Erfolge.pruefen(); render();
+setInterval(() => { if (Erfolge.pruefen()) render(); }, 5000);
+</script>
+</body>
+</html>

@@ -1013,6 +1013,7 @@
     S.done = true; S.over = winner; busy = false; cancelSel();
     let rw = "";
     if (winner === 0) {
+      store("glutwerk-duell-siege", String((+store("glutwerk-duell-siege") || 0) + 1)); if (window.Erfolge) Erfolge.pruefen();
       const k = "glutwerk-duell-" + new Date().toISOString().slice(0, 10);
       const n = +store(k) || 0;
       if (n < R.siegeProTag) {

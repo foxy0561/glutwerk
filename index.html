@@ -396,7 +396,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   .tab{flex:1;padding:8px 6px;font-size:13px}
   header{flex-wrap:wrap;row-gap:8px}
   .nav{order:10;width:100%;justify-content:space-between}
-  .nav a{flex:1;text-align:center}
+  .nav a{flex:1;text-align:center;font-size:12.5px;padding:7px 3px}
+  .nav{gap:0}
   .glut-chip{padding:7px 9px;font-size:16px}
   .fb-btn span,#newTabBtn{display:none}
   .player-bar{gap:8px;padding:8px 10px}
@@ -423,6 +424,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
     <a href="minecraft/">Minecraft</a>
     <a href="thyrvenna/" data-en="Foxy's World">Foxys Welt</a>
     <a href="karten/" data-en="Cards">Karten</a>
+    <a href="erfolge/" data-en="Achievements">Erfolge</a>
   </nav>
   <label class="search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -1222,6 +1224,7 @@ function sendFeedback() {
   }).then(r => {
     if (!r.ok) throw 0;
     store("glutwerk-fb-last", String(Date.now()));
+    if (window.glutwerkErfolg) glutwerkErfolg("gw-feedback");
     $("fbModal").querySelector(".modal").innerHTML =
       `<div class="fb-done"><div class="big">${fbKind === "Lob" ? "❤️" : fbKind === "Idee" ? "💡" : "🛠️"}</div><h3>${L("Danke!", "Thank you!")}</h3>
        <p style="color:var(--muted);margin:6px 0 20px">${L("Deine Nachricht ist angekommen.", "Your message arrived.")}</p>
@@ -1393,5 +1396,6 @@ setInterval(() => { if (document.visibilityState === "visible") loadOnline(); },
 renderGrid();
 </script>
 <script src="daily.js"></script>
+<script src="erfolge.js"></script>
 </body>
 </html>

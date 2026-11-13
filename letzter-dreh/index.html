@@ -1335,13 +1335,13 @@ function callNumber(n){
     ringTone(2,()=>{
       [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.18,'triangle',.025),i*140));
       if(!S.foxy){
-        S.foxy=true;
+        S.foxy=true;(window.glutwerkErfolg||function(){})('ld-foxy');
         phoneLine('»Hey… hier ist Foxy. Ich kann dich nicht rausholen. Aber ich lass dir was da. Halt durch.«','good');
         setTimeout(()=>{S.money+=10;S.puls=Math.min(5,S.puls+1);popMoney(10);render();clink();},1800);
       }else phoneLine('»Du schon wieder? Ich hab nichts mehr. Halt durch, okay?«','good');
     });
   }
-  else if(['110','112','911','999','0110','0112','0911'].includes(n)){ringTone(1,()=>{phoneLine('»Hier unten hört dich niemand.«','bad');beep(90,.5,'sawtooth',.03);});}
+  else if(['110','112','911','999','0110','0112','0911'].includes(n)){(window.glutwerkErfolg||function(){})('ld-notruf');ringTone(1,()=>{phoneLine('»Hier unten hört dich niemand.«','bad');beep(90,.5,'sawtooth',.03);});}
   else if(n==='666'||n==='0666'){ringTone(3,()=>{phoneLine('»Nette Nummer.«','bad');beep(70,.6,'sawtooth',.03);});}
   else if(n==='1987'){ringTone(1,()=>{phoneLine('…rauschen… »User 07… letzter Login… hilf mir…«','bad');whisperSound();});}
   else if(n==='0000'){phoneLine('Nur Rauschen. Irgendwo atmet jemand.','bad');breathClose(.12);}
@@ -1651,7 +1651,7 @@ function resolve(bet,fromShake){
     const n=r.wins.length;
     setMsg(r.jackpot?`JACKPOT · ${fmt(r.total)}`:`${n} ${n===1?'LINIE':'LINIEN'} · +${fmt(r.total)}`,'good');
     pourCoins(r.total);
-    if(r.jackpot) celebrate(r.total);
+    if(r.jackpot){celebrate(r.total);(window.glutwerkErfolg||function(){})('ld-jackpot');}
     melody(r.jackpot?[523,659,784,1046,1318]:[523,784],r.jackpot?110:80);
   }else{
     if(fromShake) setMsg('GERÜTTELT · IMMER NOCH NICHTS');
@@ -1918,7 +1918,7 @@ function signNote(get,cost,onSigned){
     // how shaky was the hand? sum of direction changes per length
     let turn=0,l=0;strokes.forEach(st=>{for(let i=2;i<st.length;i++){const a=Math.atan2(st[i-1].y-st[i-2].y,st[i-1].x-st[i-2].x),b=Math.atan2(st[i].y-st[i-1].y,st[i].x-st[i-1].x);turn+=Math.abs(Math.atan2(Math.sin(b-a),Math.cos(b-a)));l+=Math.hypot(st[i].x-st[i-1].x,st[i].y-st[i-1].y);}});
     const shaky=turn/Math.max(1,l)*100;
-    rustle();onSigned();
+    rustle();onSigned();(window.glutwerkErfolg||function(){})('ld-schein');
     setTimeout(()=>{
       if(shaky>9){setMsg('»ZITTRIG. GUT SO.«','bad');beep(130,.12,'sawtooth',.03);setTimeout(()=>beep(110,.12,'sawtooth',.03),160);setTimeout(()=>beep(95,.2,'sawtooth',.03),320);}
       else setMsg('»SAUBER. HILFT DIR NICHT.«','bad');
@@ -1969,7 +1969,7 @@ function stabEye(){
   if(!SET.calm&&!reduce){let k=0;const tr=setInterval(()=>{$('stage').style.translate=`${(Math.random()-.5)*14}px ${(Math.random()-.5)*14}px`;if(++k>16){clearInterval(tr);$('stage').style.translate='';}},45);}
   setTimeout(()=>{f.style.background='#000';},300);
   setTimeout(()=>{
-    S.eyeLost=side;S.puls=Math.max(1,S.puls-1);render();lensHit('blood');
+    S.eyeLost=side;S.puls=Math.max(1,S.puls-1);render();(window.glutwerkErfolg||function(){})('ld-auge');lensHit('blood');
     f.style.transition='opacity 2.5s';f.style.opacity='0';setTimeout(()=>f.remove(),2600);
     [0,700,1400].forEach(t=>setTimeout(()=>breathClose(.2),t));
     setMsg(side==='l'?'DEIN LINKES AUGE · −1 PULS':'DEIN RECHTES AUGE · −1 PULS','bad');
@@ -2131,7 +2131,7 @@ function insertEye(done){
   }
   function finish(){
     doneFlag=true;$('stage').style.translate='';squelch(.5);beep(70,.3,'sine',.25);
-    S.eyeLost=null;S.eyeAdjust=60000;render();
+    S.eyeLost=null;S.eyeAdjust=60000;render();(window.glutwerkErfolg||function(){})('ld-ersatzauge');
     w.classList.add('ok');help.textContent='';
     const f=document.createElement('div');f.className='bleed black';f.style.opacity='1';document.body.appendChild(f);
     setTimeout(()=>{w.remove();f.style.transition='opacity 2.2s';f.style.opacity='0';setTimeout(()=>f.remove(),2300);
@@ -2497,7 +2497,7 @@ function askExcuse(paid,calm,door,op,disp){
 }
 function spare(paid,door,op,disp){
   // he takes what you had, doubles the rest, gives one more day and leaves
-  S.debt=Math.max(10,(S.debt-paid)*2);S.money=0;S.puls=1;
+  S.debt=Math.max(10,(S.debt-paid)*2);S.money=0;S.puls=1;(window.glutwerkErfolg||function(){})('ld-ausrede');
   door.getAnimations().forEach(a=>a.cancel());
   door.animate([{transform:'perspective(900px) rotateY(78deg)'},{transform:'perspective(900px) rotateY(0deg)'}],{duration:reduce?10:900,easing:'ease-in'});
   setTimeout(()=>{op.classList.remove('on');$('doorgap').classList.remove('hide');thunk();setTimeout(thunk,240);stepSound(4);shadow('go');},reduce?20:900);
@@ -2893,7 +2893,7 @@ function payday(interest){
   }
 }
 function die(cause,onStart){
-  recordDeath(cause);
+  recordDeath(cause);(window.glutwerkErfolg||function(){})('ld-tod-'+cause);
   dying=false;stopHiss();
   saveBest();S.started=false;clearSave();
   const scenes={
@@ -3103,4 +3103,5 @@ document.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('dblclick',e=>e.preventDefault());
 </script>
 
+<script src="../erfolge.js"></script>
 </body></html>

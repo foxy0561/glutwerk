@@ -1536,7 +1536,7 @@ function hitNest(n,d){
     const k=n.type==='skorpion';
     addFood(k?25:15,n.x*T+4,n.y*T); res.knochen+=2; found.knochen=(found.knochen||0)+2; if(k){res.kristall+=2;found.kristall=(found.kristall||0)+2;}
     for(let j=0;j<16;j++) particles.push({x:n.x*T+rand(-6,10),y:n.y*T+rand(0,7),vx:rand(-24,24),vy:rand(-36,-8),life:rand(.5,1),c:k?'#8a2a12':'#2a3a24'});
-    toast(`${k?'Skorpionnest':'Käfernest'} zerstört! Von dort kommt nichts mehr. Beute: ${k?'25 Futter, 2 Knochen, 2 Kristall':'15 Futter, 2 Knochen'}.`); AU.play('chest'); hud();
+    (window.glutwerkErfolg||function(){})('ab-nest');toast(`${k?'Skorpionnest':'Käfernest'} zerstört! Von dort kommt nichts mehr. Beute: ${k?'25 Futter, 2 Knochen, 2 Kristall':'15 Futter, 2 Knochen'}.`); AU.play('chest'); hud();
   }
 }
 function updNests(dt){
@@ -1656,7 +1656,7 @@ function updDangers(dt){
   if(hungerT>=MEAL){
     hungerT=0; hungerWarned=false;
     if(food>=need){food-=need;if(need)floater(queens[0]?queens[0].x*T-8:entX*T,(queens[0]?queens[0].y:surf[entX])*T-4,`−${need}`,RESC.futter);}
-    else{food=0;if(ants.length){killAnt(ants[ri(0,ants.length-1)],'hunger');toast('Hunger! Eine Ameise ist verhungert.',true);}else if(queens[0]){queens[0].hp-=2;toast('Die Königin hungert!',true);}}
+    else{food=0;if(ants.length){killAnt(ants[ri(0,ants.length-1)],'hunger');if(!tut)(window.glutwerkErfolg||function(){})('ab-hunger');toast('Hunger! Eine Ameise ist verhungert.',true);}else if(queens[0]){queens[0].hp-=2;toast('Die Königin hungert!',true);}}
     hud();
   }
   if(DF('threat')){
@@ -1694,6 +1694,7 @@ function updDangers(dt){
 }
 function gameOver(reason){
   if(over) return;
+  (window.glutwerkErfolg||function(){})(tut?'ab-tutorial':'ab-ende');
   over=true;
   overMode=tut?'tut':'';
   $('overTitle').style.color=tut?'var(--seed)':'';
@@ -1736,6 +1737,9 @@ const GOALS=[
 const goals=()=>GOALS.filter(g=>!g[2]||g[2]());
 function checkGoals(){
   let changed=false;
+  if(!tut&&!over){const ge=(window.glutwerkErfolg||function(){});
+    if(chestsFound>=1)ge('ab-truhe');if(dayIdx()>=SDAYS*4)ge('ab-winter');if(bossKills>=1)ge('ab-boss');if(queens.length>=2)ge('ab-koenigin');
+    if(ants.length>=50)ge('ab-50');if(ants.length>=100)ge('ab-100');if(maxDepth>=layerD(6))ge('ab-glut');if(wopt.rival&&!rival.alive)ge('ab-rot');}
   const G=goals();
   while(goalIdx<G.length&&G[goalIdx][1]()){toast(`Ziel geschafft: ${G[goalIdx][0]}`);AU.play('find');goalIdx++;changed=true;}
   if(changed) hud();
@@ -3065,5 +3069,6 @@ showTitle();
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../erfolge.js"></script>
 </body>
 </html>

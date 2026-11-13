@@ -6,6 +6,7 @@
 <title>Glutwerk-Erfolge</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="../lang.js"></script>
+<script>if (/fenster=1/.test(location.search)) document.documentElement.classList.add("fenster");</script>
 <script src="../noselect.js"></script>
 <style>
 :root{
@@ -79,6 +80,11 @@ main{max-width:1180px;margin:0 auto;padding:32px}
 .er.komplett{grid-column:1/-1}
 .er.komplett.got{background:linear-gradient(135deg,rgba(255,106,213,.16),rgba(125,249,255,.08));border-color:rgba(255,106,213,.6)}
 .hint{color:var(--muted);font-size:13px;margin:-8px 0 14px}
+/* Im Fenster auf der Startseite: ohne Kopfleiste und Fußzeile */
+html.fenster header,html.fenster footer{display:none}
+html.fenster main{padding:22px 24px 30px}
+html.fenster .hero{padding-right:70px}
+html.fenster body{background-attachment:fixed}
 footer{text-align:center;color:var(--muted);font-size:13px;padding:30px 16px 40px}
 @media (max-width:640px){
   header{gap:8px;padding:10px 12px;flex-wrap:wrap;row-gap:8px}
@@ -101,10 +107,10 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:30px 16px 40p
   </a>
   <nav class="nav">
     <a href="../" data-en="Games">Spiele</a>
+    <a href="./" class="active" data-en="Achievements">Erfolge</a>
     <a href="../minecraft/">Minecraft</a>
     <a href="../thyrvenna/" data-en="Foxy's World">Foxys Welt</a>
     <a href="../karten/" data-en="Cards">Karten</a>
-    <a href="./" class="active" data-en="Achievements">Erfolge</a>
   </nav>
   <div id="langSlot" style="display:contents"></div>
   <a class="glut-chip" href="../karten/" title="Glut-Punkte" data-en-title="Glut points">
@@ -178,6 +184,7 @@ function render() {
 }
 $("filters").addEventListener("click", e => { const b = e.target.closest("[data-f]"); if (b) { filter = b.dataset.f; render(); } });
 addEventListener("storage", e => { if (e.key === "glutwerk-erfolge" || e.key === "glutwerk-glut") render(); });
+window.erfRender = render;
 Erfolge.pruefen(); render();
 setInterval(() => { if (Erfolge.pruefen()) render(); }, 5000);
 </script>

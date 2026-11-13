@@ -141,6 +141,7 @@ footer a{color:var(--purple2)}
   .dl-row,.req{justify-content:center}
 }
 </style>
+<script src="../lang.js"></script>
 <script src="../noselect.js"></script>
 </head>
 <body>
@@ -153,11 +154,12 @@ footer a{color:var(--purple2)}
     <div>Glut<span>werk</span></div>
   </a>
   <nav class="nav">
-    <a href="../">Spiele</a>
+    <a href="../" data-en="Games">Spiele</a>
     <a href="./" class="active">Minecraft</a>
-    <a href="../thyrvenna/">Foxys Welt</a>
-    <a href="../karten/">Karten</a>
+    <a href="../thyrvenna/" data-en="Foxy's World">Foxys Welt</a>
+    <a href="../karten/" data-en="Cards">Karten</a>
   </nav>
+  <div id="langSlot" style="margin-left:auto"></div>
 </header>
 
 <main>
@@ -165,94 +167,94 @@ footer a{color:var(--purple2)}
   <section class="hero">
     <div class="hero-icon"><img src="foxy-launcher.png" alt="Foxy Launcher"></div>
     <div class="hero-text">
-      <div class="badge" id="versionBadge">Neueste Version wird geladen…</div>
-      <div class="kicker">Minecraft-Launcher</div>
+      <div class="badge" id="versionBadge" data-en="Loading the latest version…">Neueste Version wird geladen…</div>
+      <div class="kicker" data-en="Minecraft launcher">Minecraft-Launcher</div>
       <h1>Foxy Launcher</h1>
-      <p class="tagline">Mein eigener Minecraft-Launcher: Mods, Shader, Resourcepacks und Modpacks mit einem Klick installieren, mit Freunden online sein und Profile teilen.</p>
+      <p class="tagline" data-en="My own Minecraft launcher: install mods, shaders, resource packs and modpacks with one click, be online with friends and share profiles.">Mein eigener Minecraft-Launcher: Mods, Shader, Resourcepacks und Modpacks mit einem Klick installieren, mit Freunden online sein und Profile teilen.</p>
       <div class="dl-row">
         <button class="btn btn-dl" id="dlBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>
           Download
         </button>
-        <div class="dl-meta" id="dlMeta">Für Windows (64 Bit)</div>
+        <div class="dl-meta" id="dlMeta" data-en="For Windows (64-bit)">Für Windows (64 Bit)</div>
       </div>
       <div class="req">
         <span>Windows 10 / 11</span>
         <span>Minecraft Java Edition</span>
-        <span>Microsoft-Konto</span>
-        <span>Updates automatisch</span>
+        <span data-en="Microsoft account">Microsoft-Konto</span>
+        <span data-en="Automatic updates">Updates automatisch</span>
       </div>
     </div>
   </section>
 
   <!-- ===== Funktionen ===== -->
   <section>
-    <h2>Was er kann</h2>
+    <h2 data-en="What it does">Was er kann</h2>
     <div class="features">
       <div class="feature">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
         <h3>Mods & Shader</h3>
-        <p>Mods, Shader und Resourcepacks von Modrinth und CurseForge suchen und installieren. Abhängigkeiten werden automatisch mitgeladen.</p>
+        <p data-en="Search and install mods, shaders and resource packs from Modrinth and CurseForge. Dependencies are loaded automatically.">Mods, Shader und Resourcepacks von Modrinth und CurseForge suchen und installieren. Abhängigkeiten werden automatisch mitgeladen.</p>
       </div>
       <div class="feature">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8l9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg></div>
         <h3>Modpacks</h3>
-        <p>Ganze Modpacks von Modrinth und CurseForge mit einem Klick als eigenes Profil installieren.</p>
+        <p data-en="Install whole modpacks from Modrinth and CurseForge as their own profile with one click.">Ganze Modpacks von Modrinth und CurseForge mit einem Klick als eigenes Profil installieren.</p>
       </div>
       <div class="feature">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
-        <h3>Alle Loader</h3>
-        <p>Vanilla, Fabric, Forge und NeoForge mit genau der Version, die du brauchst. Versionen wechseln geht jederzeit.</p>
+        <h3 data-en="All loaders">Alle Loader</h3>
+        <p data-en="Vanilla, Fabric, Forge and NeoForge in exactly the version you need. Switch versions any time.">Vanilla, Fabric, Forge und NeoForge mit genau der Version, die du brauchst. Versionen wechseln geht jederzeit.</p>
       </div>
       <div class="feature">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
-        <h3>Dein Konto</h3>
-        <p>Mit deinem Microsoft-Konto direkt im Launcher anmelden, mit deinem echten Skin als Profilbild.</p>
+        <h3 data-en="Your account">Dein Konto</h3>
+        <p data-en="Sign in with your Microsoft account right in the launcher, with your real skin as profile picture.">Mit deinem Microsoft-Konto direkt im Launcher anmelden, mit deinem echten Skin als Profilbild.</p>
       </div>
       <div class="feature">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.8"/><path d="M2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5M16 14.6c3 .2 6 1.8 6 5.4"/></svg></div>
-        <h3>Freunde</h3>
-        <p>Freunde hinzufügen, sehen wer gerade online ist oder Minecraft spielt, und Profile miteinander teilen.</p>
+        <h3 data-en="Friends">Freunde</h3>
+        <p data-en="Add friends, see who is online or playing Minecraft, and share profiles with each other.">Freunde hinzufügen, sehen wer gerade online ist oder Minecraft spielt, und Profile miteinander teilen.</p>
       </div>
       <div class="feature">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></div>
-        <h3>Immer aktuell</h3>
-        <p>Der Launcher aktualisiert sich selbst. Einmal installieren, Updates kommen automatisch.</p>
+        <h3 data-en="Always up to date">Immer aktuell</h3>
+        <p data-en="The launcher updates itself. Install once, updates come automatically.">Der Launcher aktualisiert sich selbst. Einmal installieren, Updates kommen automatisch.</p>
       </div>
     </div>
   </section>
 
   <!-- ===== Was ist neu (wird live von GitHub geladen) ===== -->
   <section>
-    <h2>Was ist neu</h2>
-    <div class="releases" id="releases"><div class="loading">Neuigkeiten werden geladen…</div></div>
+    <h2 data-en="What's new">Was ist neu</h2>
+    <div class="releases" id="releases"><div class="loading" data-en="Loading news…">Neuigkeiten werden geladen…</div></div>
   </section>
 </main>
 
 <footer>
-  Foxy Launcher ist ein Fanprojekt und nicht offiziell mit Mojang oder Microsoft verbunden. ·
-  <a href="https://github.com/foxy0561/Foxy-Launcher-Releases/releases" target="_blank" rel="noopener">Alle Versionen auf GitHub</a>
+  <span data-en="Foxy Launcher is a fan project and not officially affiliated with Mojang or Microsoft.">Foxy Launcher ist ein Fanprojekt und nicht offiziell mit Mojang oder Microsoft verbunden.</span> ·
+  <a href="https://github.com/foxy0561/Foxy-Launcher-Releases/releases" target="_blank" rel="noopener" data-en="All versions on GitHub">Alle Versionen auf GitHub</a>
 </footer>
 
 <!-- Download-Hinweis -->
 <div class="modal-wrap" id="dlModal">
   <div class="modal">
-    <h3>Foxy Launcher installieren</h3>
-    <p>Windows zeigt bei kleinen Hobby-Programmen eine Warnung an, das ist normal. So installierst du den Launcher trotzdem:</p>
+    <h3 data-en="Install Foxy Launcher">Foxy Launcher installieren</h3>
+    <p data-en="Windows shows a warning for small hobby programs, that is normal. Here is how to install the launcher anyway:">Windows zeigt bei kleinen Hobby-Programmen eine Warnung an, das ist normal. So installierst du den Launcher trotzdem:</p>
     <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-text">Lade die Datei herunter und starte sie mit Doppelklick.</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-text">Wenn ein blaues Fenster kommt, klicke auf <b>„Weitere Informationen“</b>.
-        <div class="fake-win">Der Computer wurde durch Windows geschützt<br><u>Weitere Informationen</u></div>
+      <div class="step"><div class="step-num">1</div><div class="step-text" data-en="Download the file and start it with a double click.">Lade die Datei herunter und starte sie mit Doppelklick.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><span data-en="If a blue window appears, click <b>“More info”</b>.">Wenn ein blaues Fenster kommt, klicke auf <b>„Weitere Informationen“</b>.</span>
+        <div class="fake-win" data-en="Windows protected your PC<br><u>More info</u>">Der Computer wurde durch Windows geschützt<br><u>Weitere Informationen</u></div>
       </div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-text">Dann auf <b>„Trotzdem ausführen“</b> klicken und der Installation folgen. Das musst du nur einmal machen, Updates kommen danach von allein.
-        <div class="fake-win">App: Foxy Launcher Setup<div class="row"><span class="wbtn hl">Trotzdem ausführen</span><span class="wbtn">Nicht ausführen</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><span data-en="Then click <b>“Run anyway”</b> and follow the installer. You only need to do this once, updates come by themselves after that.">Dann auf <b>„Trotzdem ausführen“</b> klicken und der Installation folgen. Das musst du nur einmal machen, Updates kommen danach von allein.</span>
+        <div class="fake-win">App: Foxy Launcher Setup<div class="row"><span class="wbtn hl" data-en="Run anyway">Trotzdem ausführen</span><span class="wbtn" data-en="Don't run">Nicht ausführen</span></div></div>
       </div></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" id="dlCancel">Abbrechen</button>
+      <button class="btn btn-ghost" id="dlCancel" data-en="Cancel">Abbrechen</button>
       <a class="btn btn-dl" id="dlGo" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>
-        Jetzt downloaden
+        <span data-en="Download now">Jetzt downloaden</span>
       </a>
     </div>
   </div>
@@ -268,7 +270,7 @@ const RELEASES_PAGE = `https://github.com/${REPO}/releases/latest`;
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-const fmtDate = iso => new Date(iso).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+const fmtDate = iso => new Date(iso).toLocaleDateString(window.EN ? "en-US" : "de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
 const fmtSize = b => (b / 1048576).toFixed(1).replace(".", ",") + " MB";
 
 let downloadUrl = RELEASES_PAGE;   // Rückfall: Release-Seite, falls GitHub nicht antwortet
@@ -284,7 +286,7 @@ function bullets(body) {
 
 function renderReleases(list) {
   if (!list.length) {
-    $("releases").innerHTML = `<div class="loading">Noch keine Versionen veröffentlicht.</div>`;
+    $("releases").innerHTML = `<div class="loading">${L("Noch keine Versionen veröffentlicht.", "No versions published yet.")}</div>`;
     return;
   }
   $("releases").innerHTML = list.map((r, i) => {
@@ -295,11 +297,11 @@ function renderReleases(list) {
       <article class="release${i === 0 ? " latest" : ""}">
         <div class="release-head">
           <h3>${esc(r.tag_name || r.name)}</h3>
-          ${i === 0 ? `<span class="new">AKTUELL</span>` : ""}
+          ${i === 0 ? `<span class="new">${L("AKTUELL", "LATEST")}</span>` : ""}
           <span class="date">${fmtDate(r.published_at)}</span>
         </div>
         <ul>${shown.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
-        ${rest.length ? `<details><summary>${rest.length} ${rest.length === 1 ? "weitere Änderung" : "weitere Änderungen"}</summary><ul style="margin-top:8px">${rest.map(t => `<li>${esc(t)}</li>`).join("")}</ul></details>` : ""}
+        ${rest.length ? `<details><summary>${rest.length} ${rest.length === 1 ? L("weitere Änderung", "more change") : L("weitere Änderungen", "more changes")}</summary><ul style="margin-top:8px">${rest.map(t => `<li>${esc(t)}</li>`).join("")}</ul></details>` : ""}
       </article>`;
   }).join("");
 }
@@ -316,12 +318,12 @@ async function loadReleases() {
     const exe = (latest.assets || []).find(a => /setup\.exe$/i.test(a.name)) || (latest.assets || []).find(a => /\.(exe|msi)$/i.test(a.name));
     if (exe) {
       downloadUrl = exe.browser_download_url;
-      $("dlMeta").innerHTML = `<b>${esc(latest.tag_name)}</b> · ${fmtSize(exe.size)} · ${fmtDate(latest.published_at)}<br>Für Windows (64 Bit)`;
+      $("dlMeta").innerHTML = `<b>${esc(latest.tag_name)}</b> · ${fmtSize(exe.size)} · ${fmtDate(latest.published_at)}<br>${L("Für Windows (64 Bit)", "For Windows (64-bit)")}`;
     }
-    $("versionBadge").textContent = `Version ${String(latest.tag_name).replace(/^v/i, "")} verfügbar`;
+    $("versionBadge").textContent = L(`Version ${String(latest.tag_name).replace(/^v/i, "")} verfügbar`, `Version ${String(latest.tag_name).replace(/^v/i, "")} available`);
   } catch (e) {
-    $("versionBadge").textContent = "Neueste Version auf GitHub";
-    $("releases").innerHTML = `<div class="loading">Neuigkeiten konnten gerade nicht geladen werden. <a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener" style="color:var(--purple2)">Auf GitHub ansehen →</a></div>`;
+    $("versionBadge").textContent = L("Neueste Version auf GitHub", "Latest version on GitHub");
+    $("releases").innerHTML = `<div class="loading">${L("Neuigkeiten konnten gerade nicht geladen werden.", "News could not be loaded right now.")} <a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener" style="color:var(--purple2)">${L("Auf GitHub ansehen →", "View on GitHub →")}</a></div>`;
   }
 }
 

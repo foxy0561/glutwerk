@@ -10,6 +10,7 @@
   const rnd = a => a[Math.floor(Math.random() * a.length)];
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const card = id => CARDS.find(c => c.id === id);
+  const Lx = (de, en) => (window.L ? window.L(de, en) : de);
   function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 
   /* =========================================================
@@ -35,17 +36,17 @@
 
   function start(deckMe, deckAi, aiName) {
     UID = 0;
-    S = { p: [mkPlayer("Du", deckMe, false), mkPlayer(aiName, deckAi, true)], cur: 0, runde: 0, ort: null, log: [], fx: [], over: null, look: { feld: "glut", ruecken: ["glut", "schatten"] } };
+    S = { p: [mkPlayer(Lx("Du", "You"), deckMe, false), mkPlayer(aiName, deckAi, true)], cur: 0, runde: 0, ort: null, log: [], fx: [], over: null, look: { feld: "glut", ruecken: ["glut", "schatten"] } };
     const first = Math.random() < .5 ? 0 : 1;
     for (let i = 0; i < R.startHand; i++) { draw(first, true); draw(foe(first), true); }
     draw(foe(first), true);
-    log(first === 0 ? "Du beginnst." : `${aiName} beginnt.`);
+    log(first === 0 ? Lx("Du beginnst.", "You go first.") : Lx(`${aiName} beginnt.`, `${aiName} goes first.`));
     beginTurn(first);
   }
   function draw(pi, quiet) {
     const P = S.p[pi];
     if (!P.deck.length) return;   // Deck leer: es gibt einfach nichts mehr zu ziehen
-    if (P.hand.length >= 9) { P.deck.pop(); if (!quiet) log(`${P.name}: Hand voll, Karte verbrannt.`); return; }
+    if (P.hand.length >= 9) { P.deck.pop(); if (!quiet) log(Lx(`${P.name}: Hand voll, Karte verbrannt.`, `${P.name}: hand full, card burned.`)); return; }
     P.hand.push(P.deck.pop());
   }
   function beginTurn(pi) {
@@ -60,13 +61,13 @@
     if (ortIs("pilze")) healHero(pi, 2);
     if (ortIs("becken")) P.feld.forEach(u => { heal(u, 1); u.frost = 0; u.gesperrt = false; });
     if (ortIs("baum")) { P.feld.forEach(u => heal(u, 1)); healHero(pi, 1); }
-    if (ortIs("riss") && S.p[foe(pi)].feld.length) { const u = rnd(S.p[foe(pi)].feld); hurt(u, 2); log(`Der Riss trifft ${u.name}.`); }
+    if (ortIs("riss") && S.p[foe(pi)].feld.length) { const u = rnd(S.p[foe(pi)].feld); hurt(u, 2); log(Lx(`Der Riss trifft ${u.name}.`, `The rift hits ${u.name}.`)); }
     P.feld.slice().forEach(u => {
-      if (u.pas === "brut" && P.feld.length < R.feldPlaetze) { const a = mkUnit("#ameise", pi); a.neu = false; P.feld.push(a); log("Eine Ameise schlüpft und kann sofort angreifen."); }
+      if (u.pas === "brut" && P.feld.length < R.feldPlaetze) { const a = mkUnit("#ameise", pi); a.neu = false; P.feld.push(a); log(Lx("Eine Ameise schlüpft und kann sofort angreifen.", "An ant hatches and can attack right away.")); }
       if (u.pas === "honig") healHero(pi, 1);
-      if (u.pas === "schuld") { hurtHero(foe(pi), 1); log(`${u.name} treibt 1 Leben Schulden ein.`); }
+      if (u.pas === "schuld") { hurtHero(foe(pi), 1); log(Lx(`${u.name} treibt 1 Leben Schulden ein.`, `${u.name} collects 1 HP of debt.`)); }
       if (u.pas === "kuh") P.feld.forEach(x => heal(x, 1));
-      if (u.pas === "nachwuchs" && P.feld.length < R.feldPlaetze) { P.feld.push(mkUnit("#babyguppy", pi)); log("Ein Baby-Guppy schlüpft."); }
+      if (u.pas === "nachwuchs" && P.feld.length < R.feldPlaetze) { P.feld.push(mkUnit("#babyguppy", pi)); log(Lx("Ein Baby-Guppy schlüpft.", "A baby guppy is born.")); }
       if (u.pas === "wachstum") { u.max += 1; heal(u, 1); }
     });
     if (ortIs("zelle")) hurtHero(pi, 1);
@@ -83,7 +84,7 @@
   function endTurn() {
     if (S.over != null) return;
     while (S.p[S.cur].zieh && S.over == null) takeDraw(S.cur);
-    if (ortIs("vulkan")) { S.p.forEach(P => P.feld.forEach(u => hurt(u, 1))); log("Der Vulkan brennt."); }
+    if (ortIs("vulkan")) { S.p.forEach(P => P.feld.forEach(u => hurt(u, 1))); log(Lx("Der Vulkan brennt.", "The volcano burns.")); }
     cleanup();
     if (S.over == null) beginTurn(foe(S.cur));
   }
@@ -93,7 +94,7 @@
   function healHero(pi, n) { const P = S.p[pi], b = P.hp; P.hp = Math.min(R.leben, P.hp + healAmt(n)); if (P.hp > b) ev("h" + pi, "+" + (P.hp - b), "heal"); }
   function hurt(u, n) {
     if (n <= 0) return 0;
-    if (u.schild) { u.schild = false; ev("u" + u.uid, "Schild!", "shield"); return 0; }
+    if (u.schild) { u.schild = false; ev("u" + u.uid, Lx("Schild!", "Shield!"), "shield"); return 0; }
     n = Math.max(0, n - (ortIs("burg") ? 1 : 0) - (ortIs("schnee") && u.waechter ? 1 : 0) - u.weniger);
     u.hp -= n; ev("u" + u.uid, "-" + n, "dmg");
     return n;
@@ -103,8 +104,8 @@
     S.p.forEach((P, pi) => {
       P.feld = P.feld.filter(u => {
         if (u.hp > 0) return true;
-        if (u.pas === "untot" && !u.auferstanden) { u.auferstanden = true; u.hp = 2; ev("u" + u.uid, "Steht auf!", "heal"); log(`${u.name} steht wieder auf!`); return true; }
-        log(`${u.name} wurde besiegt.`);
+        if (u.pas === "untot" && !u.auferstanden) { u.auferstanden = true; u.hp = 2; ev("u" + u.uid, Lx("Steht auf!", "Rises!"), "heal"); log(Lx(`${u.name} steht wieder auf!`, `${u.name} gets back up!`)); return true; }
+        log(Lx(`${u.name} wurde besiegt.`, `${u.name} was defeated.`));
         if (!u.tok) P.grab.push(u.id);
         if (u.pas === "schaf") draw(pi);
         if (ortIs("ruinen") && !u.tok) draw(pi);
@@ -116,8 +117,8 @@
     const leer = S.p.map(P => !P.deck.length && !P.hand.length && !P.feld.length);
     if (S.over == null && (leer[0] || leer[1])) {
       if (leer[0] && leer[1]) S.over = 2;
-      else if (leer[1] && S.p[0].feld.length) { S.over = 0; log(`${S.p[1].name} hat keine Karten mehr.`); }
-      else if (leer[0] && S.p[1].feld.length) { S.over = 1; log("Du hast keine Karten mehr."); }
+      else if (leer[1] && S.p[0].feld.length) { S.over = 0; log(Lx(`${S.p[1].name} hat keine Karten mehr.`, `${S.p[1].name} has no cards left.`)); }
+      else if (leer[0] && S.p[1].feld.length) { S.over = 1; log(Lx("Du hast keine Karten mehr.", "You have no cards left.")); }
     }
     if (S.p[0].hp <= 0 || S.p[1].hp <= 0) S.over = S.p[1].hp <= 0 && S.p[0].hp > 0 ? 0 : S.p[0].hp <= 0 && S.p[1].hp > 0 ? 1 : 2;
   }
@@ -136,11 +137,11 @@
   }
   const canAct = u => S.cur === u.owner && !S.p[u.owner].zieh && !u.neu && !u.gesperrt && (!u.angegriffen || u.nochmal);
   function whyNotAct(u) {
-    if (S.cur !== u.owner) return "Nicht dein Zug.";
-    if (S.p[u.owner].zieh) return "Zieh zuerst eine Karte von deinem Deck.";
-    if (u.neu) return "Gerade gerufen: greift ab nächster Runde an.";
-    if (u.gesperrt) return "Eingefroren: kann diese Runde nicht angreifen.";
-    if (u.angegriffen && !u.nochmal) return "Hat diese Runde schon angegriffen.";
+    if (S.cur !== u.owner) return Lx("Nicht dein Zug.", "Not your turn.");
+    if (S.p[u.owner].zieh) return Lx("Zieh zuerst eine Karte von deinem Deck.", "Draw a card from your deck first.");
+    if (u.neu) return Lx("Gerade gerufen: greift ab nächster Runde an.", "Just summoned: attacks from next turn.");
+    if (u.gesperrt) return Lx("Eingefroren: kann diese Runde nicht angreifen.", "Frozen: can't attack this turn.");
+    if (u.angegriffen && !u.nochmal) return Lx("Hat diese Runde schon angegriffen.", "Already attacked this turn.");
     return "";
   }
   function atkTargets(u, a) {
@@ -163,18 +164,18 @@
     if (a[3] === "alle") {
       if (E.feld.length) E.feld.slice().forEach(x => dealt += hurt(x, d));
       else { hurtHero(foe(u.owner), d); dealt = d; }
-      log(`${u.name}: ${a[0]} trifft alle.`);
+      log(Lx(`${u.name}: ${a[0]} trifft alle.`, `${u.name}: ${a[0]} hits everyone.`));
     } else if (target[0] === "h") {
-      hurtHero(foe(u.owner), d); dealt = d; log(`${u.name}: ${a[0]} trifft ${E.name} (${d}).`);
+      hurtHero(foe(u.owner), d); dealt = d; log(Lx(`${u.name}: ${a[0]} trifft ${E.name} (${d}).`, `${u.name}: ${a[0]} hits ${E.name} (${d}).`));
     } else {
       const t = findU(+target.slice(1));
       dealt = hurt(t, d);
-      log(`${u.name}: ${a[0]} trifft ${t.name} (${dealt}).`);
-      if (a[3] === "frost") { t.frost = 1; ev("u" + t.uid, "Frost", "frost"); }
+      log(Lx(`${u.name}: ${a[0]} trifft ${t.name} (${dealt}).`, `${u.name}: ${a[0]} hits ${t.name} (${dealt}).`));
+      if (a[3] === "frost") { t.frost = 1; ev("u" + t.uid, Lx("Frost", "Frozen"), "frost"); }
       if (a[3] === "kette") { const o = E.feld.filter(x => x !== t); if (o.length) hurt(rnd(o), 1); }
     }
     if (a[3] === "saugen" && dealt) heal(u, dealt);
-    if (a[3] === "schild") { u.schild = true; ev("u" + u.uid, "Schild", "shield"); }
+    if (a[3] === "schild") { u.schild = true; ev("u" + u.uid, Lx("Schild", "Shield"), "shield"); }
     cleanup();
     return true;
   }
@@ -203,9 +204,9 @@
   /* Karte von der Hand verbrennen: +1 Energie, 1× pro Runde */
   const BURN_ENERGIE = 1;
   function whyNotBurn(pi) {
-    if (S.cur !== pi) return "Nicht dein Zug.";
-    if (S.p[pi].zieh) return "Zieh zuerst eine Karte von deinem Deck.";
-    if (S.p[pi].verbrannt) return "Du hast diese Runde schon eine Karte verbrannt.";
+    if (S.cur !== pi) return Lx("Nicht dein Zug.", "Not your turn.");
+    if (S.p[pi].zieh) return Lx("Zieh zuerst eine Karte von deinem Deck.", "Draw a card from your deck first.");
+    if (S.p[pi].verbrannt) return Lx("Du hast diese Runde schon eine Karte verbrannt.", "You already burned a card this turn.");
     return "";
   }
   function burn(pi, hi) {
@@ -213,25 +214,25 @@
     if (!id || whyNotBurn(pi)) return false;
     P.hand.splice(hi, 1); P.verbrannt = true; P.energie += BURN_ENERGIE;
     ev("h" + pi, "+" + BURN_ENERGIE + " ⚡", "heal");
-    log(`${P.name} verbrennt ${card(id).name} für ${BURN_ENERGIE} Energie.`);
+    log(Lx(`${P.name} verbrennt ${card(id).name} für ${BURN_ENERGIE} Energie.`, `${P.name} burns ${card(id).name} for ${BURN_ENERGIE} energy.`));
     return true;
   }
   function whyNotPlay(pi, id) {
     const w = W[id], P = S.p[pi];
-    if (S.cur !== pi) return "Nicht dein Zug.";
-    if (P.zieh) return "Zieh zuerst eine Karte von deinem Deck.";
+    if (S.cur !== pi) return Lx("Nicht dein Zug.", "Not your turn.");
+    if (P.zieh) return Lx("Zieh zuerst eine Karte von deinem Deck.", "Draw a card from your deck first.");
     if (w.t === "wesen") {
       const maxW = ortIs("dschungel") ? 2 : 1;
-      if (P.beschworen >= maxW) return maxW === 1 ? "Nur 1 Wesen pro Runde." : "Schon 2 Wesen in dieser Runde gerufen.";
-      if (P.feld.length >= R.feldPlaetze) return "Dein Feld ist voll.";
+      if (P.beschworen >= maxW) return maxW === 1 ? Lx("Nur 1 Wesen pro Runde.", "Only 1 creature per turn.") : Lx("Schon 2 Wesen in dieser Runde gerufen.", "Already summoned 2 creatures this turn.");
+      if (P.feld.length >= R.feldPlaetze) return Lx("Dein Feld ist voll.", "Your field is full.");
       return "";
     }
-    if (P.energie < cardCost(pi, id)) return "Nicht genug Energie.";
+    if (P.energie < cardCost(pi, id)) return Lx("Nicht genug Energie.", "Not enough energy.");
     const t = playTargets(pi, id);
-    if (t && !t.length) return w.t === "ausr" || w.ziel === "eigenesWesen" ? "Du brauchst ein eigenes Wesen." : "Kein Ziel da.";
-    if (w.wiederbeleben && (!P.grab.length || P.feld.length >= R.feldPlaetze)) return P.grab.length ? "Dein Feld ist voll." : "Noch kein Wesen besiegt.";
-    if (w.beschwoere && P.feld.length >= R.feldPlaetze) return "Dein Feld ist voll.";
-    if (w.t === "ort" && S.ort && S.ort.id === id) return "Dieser Ort liegt schon.";
+    if (t && !t.length) return w.t === "ausr" || w.ziel === "eigenesWesen" ? Lx("Du brauchst ein eigenes Wesen.", "You need a creature of your own.") : Lx("Kein Ziel da.", "No target.");
+    if (w.wiederbeleben && (!P.grab.length || P.feld.length >= R.feldPlaetze)) return P.grab.length ? Lx("Dein Feld ist voll.", "Your field is full.") : Lx("Noch kein Wesen besiegt.", "No creature defeated yet.");
+    if (w.beschwoere && P.feld.length >= R.feldPlaetze) return Lx("Dein Feld ist voll.", "Your field is full.");
+    if (w.t === "ort" && S.ort && S.ort.id === id) return Lx("Dieser Ort liegt schon.", "This place is already in play.");
     return "";
   }
   function play(pi, hi, target) {
@@ -244,42 +245,42 @@
     const name = card(id).name, E = S.p[foe(pi)];
     const tu = target && target[0] === "u" ? findU(+target.slice(1)) : null;
     if (w.t === "wesen") {
-      const u = mkUnit(id, pi); P.feld.push(u); P.beschworen++; log(`${P.name} ruft ${name}.`);
+      const u = mkUnit(id, pi); P.feld.push(u); P.beschworen++; log(Lx(`${P.name} ruft ${name}.`, `${P.name} summons ${name}.`));
       if (w.beimSpielen) { P.feld.forEach(x => heal(x, w.beimSpielen.heileAlle)); for (let i = 0; i < w.beimSpielen.ziehe; i++) draw(pi); }
     } else if (w.t === "ort") {
-      S.ort = { id, owner: pi }; log(`${P.name} wählt den Ort ${name}.`);
+      S.ort = { id, owner: pi }; log(Lx(`${P.name} wählt den Ort ${name}.`, `${P.name} picks the place ${name}.`));
     } else if (w.t === "ausr") {
       tu.plusSchaden += (w.plusSchaden || 0) + (tu.foxy ? (w.foxySchaden || 0) : 0) + (ortIs("tiefe") ? 1 : 0);
       tu.billiger += w.billiger || 0; tu.weniger += w.weniger || 0;
       if (w.plusLeben) { tu.max += w.plusLeben; tu.hp += w.plusLeben; ev("u" + tu.uid, "+" + w.plusLeben, "heal"); }
       if (w.gibFlink) tu.flink = true;
       if (w.gibWaechter) tu.waechter = true;
-      tu.equip.push(id); log(`${tu.name} trägt jetzt ${name}.`);
+      tu.equip.push(id); log(Lx(`${tu.name} trägt jetzt ${name}.`, `${tu.name} now carries ${name}.`));
     } else {
-      log(`${P.name} spielt ${name}.`);
-      if (w.brichtSchild && tu && tu.schild) { tu.schild = false; ev("u" + tu.uid, "Schild kaputt!", "shield"); }
+      log(Lx(`${P.name} spielt ${name}.`, `${P.name} plays ${name}.`));
+      if (w.brichtSchild && tu && tu.schild) { tu.schild = false; ev("u" + tu.uid, Lx("Schild kaputt!", "Shield broken!"), "shield"); }
       if (w.schaden) { if (tu) hurt(tu, w.schaden); else hurtHero(foe(pi), w.schaden); }
       if (w.dauerSchaden && tu) { tu.plusSchaden += w.dauerSchaden; tu.buffs.push(id); ev("u" + tu.uid, "+" + w.dauerSchaden + " ⚔", "heal"); }
-      if (w.sucheTyp) { const k = P.deck.findIndex(x => W[x] && W[x].t === w.sucheTyp); if (k >= 0 && P.hand.length < 9) { P.hand.push(P.deck.splice(k, 1)[0]); log(`${P.name} holt eine Ausrüstung.`); } }
+      if (w.sucheTyp) { const k = P.deck.findIndex(x => W[x] && W[x].t === w.sucheTyp); if (k >= 0 && P.hand.length < 9) { P.hand.push(P.deck.splice(k, 1)[0]); log(Lx(`${P.name} holt eine Ausrüstung.`, `${P.name} fetches an equipment card.`)); } }
       if (w.schadenAlleFeinde) E.feld.slice().forEach(u => hurt(u, w.schadenAlleFeinde));
       if (w.schadenGegner) hurtHero(foe(pi), w.schadenGegner);
       if (w.gluecksspiel) {
         const [gew, verl] = w.gluecksspiel;
-        if (Math.random() < 0.5) { hurtHero(foe(pi), gew); log(`${P.name} gewinnt: ${gew} Schaden am Gegner!`); }
-        else { hurtHero(pi, verl); log(`${P.name} verliert: ${verl} Schaden an sich selbst.`); }
+        if (Math.random() < 0.5) { hurtHero(foe(pi), gew); log(Lx(`${P.name} gewinnt: ${gew} Schaden am Gegner!`, `${P.name} wins: ${gew} damage to the opponent!`)); }
+        else { hurtHero(pi, verl); log(Lx(`${P.name} verliert: ${verl} Schaden an sich selbst.`, `${P.name} loses: ${verl} damage to themselves.`)); }
       }
-      if (w.frostAlle) E.feld.forEach(u => { u.frost = 1; ev("u" + u.uid, "Frost", "frost"); });
+      if (w.frostAlle) E.feld.forEach(u => { u.frost = 1; ev("u" + u.uid, Lx("Frost", "Frozen"), "frost"); });
       if (w.entfrosten && tu) { tu.frost = 0; tu.gesperrt = false; }
-      if (w.gibFlink && tu) { tu.flink = true; ev("u" + tu.uid, "Flink!", "heal"); }
+      if (w.gibFlink && tu) { tu.flink = true; ev("u" + tu.uid, Lx("Flink!", "Swift!"), "heal"); }
       if (w.schadenAlleWesen) S.p.forEach(Q => Q.feld.slice().forEach(u => hurt(u, w.schadenAlleWesen)));
       if (w.heile) { if (tu) heal(tu, w.heile); else healHero(pi, w.heile); }
       if (w.heileAlle) P.feld.forEach(u => heal(u, w.heileAlle));
       if (w.heileSpieler) healHero(pi, w.heileSpieler);
-      if (w.schild && tu) { tu.schild = true; ev("u" + tu.uid, "Schild", "shield"); }
-      if (w.frost && tu) { tu.frost = 1; ev("u" + tu.uid, "Frost", "frost"); }
-      if (w.zurueck && tu) { const Q = S.p[tu.owner]; Q.feld = Q.feld.filter(x => x !== tu); if (!tu.tok) { if (Q.hand.length < 9) Q.hand.push(tu.id); } ev("u" + tu.uid, "Zurück!", "shield"); }
-      if (w.nochmal && tu) { tu.nochmal = true; ev("u" + tu.uid, "Nochmal!", "heal"); }
-      if (w.wiederbeleben) { const back = P.grab.pop(); P.feld.push(mkUnit(back, pi)); log(`${card(back).name} ist zurück!`); }
+      if (w.schild && tu) { tu.schild = true; ev("u" + tu.uid, Lx("Schild", "Shield"), "shield"); }
+      if (w.frost && tu) { tu.frost = 1; ev("u" + tu.uid, Lx("Frost", "Frozen"), "frost"); }
+      if (w.zurueck && tu) { const Q = S.p[tu.owner]; Q.feld = Q.feld.filter(x => x !== tu); if (!tu.tok) { if (Q.hand.length < 9) Q.hand.push(tu.id); } ev("u" + tu.uid, Lx("Zurück!", "Returned!"), "shield"); }
+      if (w.nochmal && tu) { tu.nochmal = true; ev("u" + tu.uid, Lx("Nochmal!", "Again!"), "heal"); }
+      if (w.wiederbeleben) { const back = P.grab.pop(); P.feld.push(mkUnit(back, pi)); log(Lx(`${card(back).name} ist zurück!`, `${card(back).name} is back!`)); }
       if (w.beschwoere) for (let i = 0; i < w.beschwoere && P.feld.length < R.feldPlaetze; i++) P.feld.push(mkUnit("#freund", pi));
       if (w.energie) P.energie += w.energie;
       if (w.maxEnergie) { P.maxE = Math.min(R.maxEnergie, P.maxE + w.maxEnergie); P.energie += w.maxEnergie; }
@@ -627,9 +628,9 @@
     <div class="d-field" id="dfM"></div>
     <div class="d-row" id="dBot"></div>
     <div class="d-hand" id="dHand"></div>
-    <div class="d-burn" id="dBurn">🔥<span>Hier ablegen: verbrennen<br><b>+1 Energie</b></span></div>
+    <div class="d-burn" id="dBurn">🔥<span>${Lx("Hier ablegen: verbrennen<br><b>+1 Energie</b>", "Drop here to burn<br><b>+1 energy</b>")}</span></div>
     <div class="d-tip" id="dTip"></div>
-    <div class="d-tbar" id="dTbar"><span id="dTtxt">Wähle ein Ziel</span><button class="d-btn" id="dTcancel">Abbrechen</button></div>
+    <div class="d-tbar" id="dTbar"><span id="dTtxt">${Lx("Wähle ein Ziel", "Pick a target")}</span><button class="d-btn" id="dTcancel">${Lx("Abbrechen", "Cancel")}</button></div>
     <div class="d-panel" id="dPanel"></div>
     <div class="d-banner" id="dBanner"></div>
     <div class="d-end" id="dEnd"></div>
@@ -660,16 +661,16 @@
   }
   function fxList(u) {
     const L = [];
-    if (u.neu) L.push({ ic: "💤", cls: "neu", n: "Gerade gerufen", t: "Kann noch nicht angreifen.", d: "bis zu deinem nächsten Zug" });
-    if (u.gesperrt) L.push({ ic: "❄️", cls: "frost", n: "Eingefroren", t: "Kann nicht angreifen.", d: "diese Runde" });
-    else if (u.frost > 0) L.push({ ic: "❄️", cls: "frost", n: "Eingefroren", t: "Kann nicht angreifen.", d: "nächste Runde" });
-    if (u.schild) L.push({ ic: "🛡️", cls: "schild", n: "Schild", t: "Blockt den nächsten Treffer komplett.", d: "bis zum nächsten Treffer" });
-    if (u.waechter) L.push({ ic: "🏰", cls: "waechter", n: "Wächter", t: "Gegner müssen zuerst dieses Wesen angreifen.", d: "dauerhaft" });
-    if (u.flink) L.push({ ic: "💨", cls: "flink", n: "Flink", t: "Darf den Gegner direkt angreifen, auch wenn Wesen im Weg sind.", d: "dauerhaft" });
-    if (u.nochmal) L.push({ ic: "🔁", cls: "nochmal", n: "Nochmal", t: "Darf diese Runde ein zweites Mal angreifen.", d: "diese Runde" });
-    if (u.pas && PASSIV[u.pas] && !(u.pas === "untot" && u.auferstanden)) L.push({ ic: "✨", cls: "pas", n: "Fähigkeit", t: PASSIV[u.pas], d: u.pas === "untot" ? "einmal" : "dauerhaft" });
-    u.equip.forEach(e => L.push({ img: e, cls: "equip", n: card(e).name, t: fxText(W[e]).replace(/^An ein eigenes Wesen: /, ""), d: "dauerhaft" }));
-    u.buffs.forEach(e => L.push({ img: e, cls: "buff", n: card(e).name, t: fxText(W[e]).replace(/^Ein eigenes Wesen /, ""), d: "dauerhaft" }));
+    if (u.neu) L.push({ ic: "💤", cls: "neu", n: Lx("Gerade gerufen", "Just summoned"), t: Lx("Kann noch nicht angreifen.", "Can't attack yet."), d: Lx("bis zu deinem nächsten Zug", "until your next turn") });
+    if (u.gesperrt) L.push({ ic: "❄️", cls: "frost", n: Lx("Eingefroren", "Frozen"), t: Lx("Kann nicht angreifen.", "Can't attack."), d: Lx("diese Runde", "this turn") });
+    else if (u.frost > 0) L.push({ ic: "❄️", cls: "frost", n: Lx("Eingefroren", "Frozen"), t: Lx("Kann nicht angreifen.", "Can't attack."), d: Lx("nächste Runde", "next turn") });
+    if (u.schild) L.push({ ic: "🛡️", cls: "schild", n: Lx("Schild", "Shield"), t: Lx("Blockt den nächsten Treffer komplett.", "Fully blocks the next hit."), d: Lx("bis zum nächsten Treffer", "until the next hit") });
+    if (u.waechter) L.push({ ic: "🏰", cls: "waechter", n: Lx("Wächter", "Guardian"), t: Lx("Gegner müssen zuerst dieses Wesen angreifen.", "Enemies must attack this creature first."), d: Lx("dauerhaft", "permanent") });
+    if (u.flink) L.push({ ic: "💨", cls: "flink", n: Lx("Flink", "Swift"), t: Lx("Darf den Gegner direkt angreifen, auch wenn Wesen im Weg sind.", "May attack the opponent directly, even with creatures in the way."), d: Lx("dauerhaft", "permanent") });
+    if (u.nochmal) L.push({ ic: "🔁", cls: "nochmal", n: Lx("Nochmal", "Again"), t: Lx("Darf diese Runde ein zweites Mal angreifen.", "May attack a second time this turn."), d: Lx("diese Runde", "this turn") });
+    if (u.pas && PASSIV[u.pas] && !(u.pas === "untot" && u.auferstanden)) L.push({ ic: "✨", cls: "pas", n: Lx("Fähigkeit", "Ability"), t: PASSIV[u.pas], d: u.pas === "untot" ? Lx("einmal", "once") : Lx("dauerhaft", "permanent") });
+    u.equip.forEach(e => L.push({ img: e, cls: "equip", n: card(e).name, t: fxText(W[e]).replace(/^An ein eigenes Wesen: |^On one of your creatures: /, ""), d: Lx("dauerhaft", "permanent") }));
+    u.buffs.forEach(e => L.push({ img: e, cls: "buff", n: card(e).name, t: fxText(W[e]).replace(/^Ein eigenes Wesen |^One of your creatures /, ""), d: Lx("dauerhaft", "permanent") }));
     return L;
   }
   const fxChip = (f, i) => `<span class="fxi ${f.cls}" data-tip="${i}">${f.img ? miniArt(f.img) : f.ic}</span>`;
@@ -690,7 +691,7 @@
     const layers = Math.min(3, P.deck.length);
     let h = "";
     for (let i = layers; i >= 1; i--) h += `<div class="pl l${i}">${backHTML(b)}</div>`;
-    return `<div class="d-pile${ready ? " ready" : ""}" data-pile="${pi}" title="${ready ? "Karte ziehen" : "Deck: " + P.deck.length + " Karten"}">${h}<span class="pc">${P.deck.length}</span>${ready ? '<span class="pz">Ziehen!</span>' : ""}</div>`;
+    return `<div class="d-pile${ready ? " ready" : ""}" data-pile="${pi}" title="${ready ? Lx("Karte ziehen", "Draw a card") : "Deck: " + P.deck.length + Lx(" Karten", " cards")}">${h}<span class="pc">${P.deck.length}</span>${ready ? '<span class="pz">' + Lx("Ziehen!", "Draw!") + '</span>' : ""}</div>`;
   }
   function heroHTML(pi) {
     const P = S.p[pi], en = [];
@@ -699,7 +700,7 @@
       <div class="d-ava">${pi ? "😈" : "🦊"}</div>
       <div><div class="d-hn">${esc(P.name)}</div>
         <div class="d-hp"><div class="d-hpbar"><i style="width:${Math.max(0, P.hp) / R.leben * 100}%"></i></div><span class="d-hpn">❤ ${Math.max(0, P.hp)}</span></div>
-        <div class="d-sub">Deck ${P.deck.length} · Hand ${P.hand.length}</div></div>
+        <div class="d-sub">Deck ${P.deck.length} · ${Lx("Hand", "Hand")} ${P.hand.length}</div></div>
     </div><div class="d-en">${en.join("")}<b>${P.energie}</b></div>`;
   }
   function render() {
@@ -708,7 +709,7 @@
     const tg = targetSet();
     const mark = (ref, ally) => tg && tg.includes(ref) ? ` tgt${ally ? " ally" : ""}` : "";
     $("dTop").innerHTML = heroHTML(1).replace('class="d-hero enemy"', `class="d-hero enemy${mark("h1")}"`) +
-      `<div class="d-ehand">${ai.hand.map(() => "<i></i>").join("")}</div><div class="d-sp"></div>${pileHTML(1)}<button class="d-btn" id="dQuit">Aufgeben</button>`;
+      `<div class="d-ehand">${ai.hand.map(() => "<i></i>").join("")}</div><div class="d-sp"></div>${pileHTML(1)}<button class="d-btn" id="dQuit">${Lx("Aufgeben", "Give up")}</button>`;
     const slots = (P, pi) => {
       const h = P.feld.map(u => {
         let cls = mark("u" + u.uid, pi === 0 && sel && sel.kind === "hand");
@@ -721,15 +722,15 @@
     };
     $("dfE").innerHTML = slots(ai, 1);
     $("dfM").innerHTML = slots(me, 0);
-    $("dTurn").textContent = S.over != null ? "Ende" : `Runde ${Math.ceil(S.runde / 2)} · ${myTurn ? "Dein Zug" : ai.name + " ist dran"}`;
+    $("dTurn").textContent = S.over != null ? Lx("Ende", "End") : `${Lx("Runde", "Round")} ${Math.ceil(S.runde / 2)} · ${myTurn ? Lx("Dein Zug", "Your turn") : ai.name + Lx(" ist dran", "'s turn")}`;
     if (S.ort) {
       const c = card(S.ort.id), w = W[S.ort.id];
       $("dOrt").innerHTML = `<div class="d-ort" data-ort="1">${c.pic ? `<img src="img/${c.pic}.webp" alt="">` : artSVG(c.art)}<div><b>${esc(c.name)}</b><span>${esc(ORTE[w.ort])}</span></div></div>`;
-    } else $("dOrt").innerHTML = `<div class="d-ort none">Kein Ort · Orte verändern das Spielfeld</div>`;
+    } else $("dOrt").innerHTML = `<div class="d-ort none">${Lx("Kein Ort · Orte verändern das Spielfeld", "No place · places change the battlefield")}</div>`;
     $("dLog").innerHTML = S.log.slice(0, 8).map(l => `<div>${esc(l)}</div>`).join("");
     const anyMove = myTurn && (me.zieh || me.hand.some(id => !whyNotPlay(0, id)) || me.feld.some(u => canAct(u) && u.atk.some(a => atkCost(u, a) <= me.energie)));
     $("dBot").innerHTML = heroHTML(0).replace('class="d-hero me"', `class="d-hero me${mark("h0", true)}"`) +
-      `<div class="d-sp"></div>${pileHTML(0, myTurn && !busy && me.zieh > 0)}<button class="d-btn hot${!anyMove && myTurn ? " pulse" : ""}" id="dEndT" ${myTurn && !busy ? "" : "disabled"}>Zug beenden</button>`;
+      `<div class="d-sp"></div>${pileHTML(0, myTurn && !busy && me.zieh > 0)}<button class="d-btn hot${!anyMove && myTurn ? " pulse" : ""}" id="dEndT" ${myTurn && !busy ? "" : "disabled"}>${Lx("Zug beenden", "End turn")}</button>`;
     const newCount = Math.max(0, me.hand.length - lastHand);
     $("dHand").innerHTML = me.hand.map((id, hi) => {
       const ok = myTurn && !whyNotPlay(0, id);
@@ -743,7 +744,7 @@
   let quitArmed = 0;
   function confirmQuit() {
     if (Date.now() - quitArmed < 2500) return true;
-    quitArmed = Date.now(); $("dQuit").textContent = "Wirklich?"; return false;
+    quitArmed = Date.now(); $("dQuit").textContent = Lx("Wirklich?", "Sure?"); return false;
   }
   function targetSet() {
     if (!sel) return null;
@@ -806,16 +807,16 @@
     const id = S.p[0].hand[hi], w = W[id], why = whyNotPlay(0, id), c = card(id);
     const tgt = playTargets(0, id);
     openPanel(`<div class="pc">${cardHTML(c, false)}</div><div class="d-pbox"><h3>${esc(c.name)}</h3>
-      ${why ? `<div class="why">${esc(why)}</div>` : `<div class="hint">${w.t === "wesen" ? "Kostenlos rufen (1 Wesen pro Runde). Es kann ab nächster Runde angreifen." : `Kostet ${cardCost(0, id)} Energie.${tgt ? " Danach wählst du ein Ziel." : ""}`}</div>`}
-      <button class="d-btn hot" id="pPlay" ${why ? "disabled" : ""}>${w.t === "wesen" ? "Aufs Feld rufen" : "Ausspielen"}</button>
-      <button class="d-btn burn" id="pBurn" ${whyNotBurn(0) ? "disabled" : ""}>🔥 Verbrennen: +${BURN_ENERGIE} Energie</button>
-      <div class="hint">${whyNotBurn(0) || "1× pro Runde. Die Karte ist danach weg. Tipp: Karten kannst du auch aufs Feld ziehen."}</div>
+      ${why ? `<div class="why">${esc(why)}</div>` : `<div class="hint">${w.t === "wesen" ? Lx("Kostenlos rufen (1 Wesen pro Runde). Es kann ab nächster Runde angreifen.", "Summon for free (1 creature per turn). It can attack from next turn.") : Lx(`Kostet ${cardCost(0, id)} Energie.${tgt ? " Danach wählst du ein Ziel." : ""}`, `Costs ${cardCost(0, id)} energy.${tgt ? " Then you pick a target." : ""}`)}</div>`}
+      <button class="d-btn hot" id="pPlay" ${why ? "disabled" : ""}>${w.t === "wesen" ? Lx("Aufs Feld rufen", "Summon to field") : Lx("Ausspielen", "Play")}</button>
+      <button class="d-btn burn" id="pBurn" ${whyNotBurn(0) ? "disabled" : ""}>🔥 ${Lx("Verbrennen", "Burn")}: +${BURN_ENERGIE} ${Lx("Energie", "energy")}</button>
+      <div class="hint">${whyNotBurn(0) || Lx("1× pro Runde. Die Karte ist danach weg. Tipp: Karten kannst du auch aufs Feld ziehen.", "Once per turn. The card is gone afterwards. Tip: you can also drag cards onto the field.")}</div>
       <button class="d-btn" id="pX">Zurück</button></div>`);
     $("pX").onclick = cancelSel;
     $("pBurn").onclick = () => doBurn(hi);
     $("pPlay").onclick = () => {
       $("dPanel").classList.remove("open");
-      if (tgt) { sel = { kind: "hand", hi }; $("dTtxt").textContent = "Wähle ein Ziel"; $("dTbar").classList.add("on"); render(); return; }
+      if (tgt) { sel = { kind: "hand", hi }; $("dTtxt").textContent = Lx("Wähle ein Ziel", "Pick a target"); $("dTbar").classList.add("on"); render(); return; }
       doPlay(hi, null);
     };
   }
@@ -823,20 +824,20 @@
     const mine = u.owner === 0, P = S.p[0];
     const why = mine ? whyNotAct(u) : "";
     const c = u.tok ? null : card(u.id);
-    const info = `<div class="hint">❤ ${u.hp} / ${u.max}${u.plusSchaden ? ` · +${u.plusSchaden} Schaden` : ""}${u.billiger ? ` · Angriffe -${u.billiger}` : ""}${u.weniger ? ` · nimmt ${u.weniger} weniger` : ""}</div>${fxList(u).length ? `<div class="fxlist">${fxRows(u)}</div>` : ""}`;
+    const info = `<div class="hint">❤ ${u.hp} / ${u.max}${u.plusSchaden ? ` · +${u.plusSchaden} ${Lx("Schaden", "damage")}` : ""}${u.billiger ? ` · ${Lx("Angriffe", "attacks")} -${u.billiger}` : ""}${u.weniger ? Lx(` · nimmt ${u.weniger} weniger`, ` · takes ${u.weniger} less`) : ""}</div>${fxList(u).length ? `<div class="fxlist">${fxRows(u)}</div>` : ""}`;
     const btns = mine ? u.atk.map((a, i) => {
       const cost = atkCost(u, a), dis = why || P.energie < cost;
-      return `<button class="d-abtn" data-ai="${i}" ${dis ? "disabled" : ""}><span class="c">⚡${cost}</span><span class="n">${esc(a[0])}${a[3] ? `<i>${({ frost: "Frost", alle: "Alle", kette: "Kette", saugen: "Saugen", schild: "Schild" })[a[3]]}</i>` : ""}</span><span class="d">${atkDmg(u, a)}</span></button>`;
+      return `<button class="d-abtn" data-ai="${i}" ${dis ? "disabled" : ""}><span class="c">⚡${cost}</span><span class="n">${esc(a[0])}${a[3] ? `<i>${(window.EN ? { frost: "Frost", alle: "All", kette: "Chain", saugen: "Drain", schild: "Shield" } : { frost: "Frost", alle: "Alle", kette: "Kette", saugen: "Saugen", schild: "Schild" })[a[3]]}</i>` : ""}</span><span class="d">${atkDmg(u, a)}</span></button>`;
     }).join("") : "";
     openPanel(`<div class="pc">${c ? cardHTML(c, false) : unitHTML(u)}</div><div class="d-pbox"><h3>${esc(u.name)}</h3>${info}
-      ${mine ? (why ? `<div class="why">${esc(why)}</div>` : `<div class="hint">Wähle einen Angriff:</div>`) : `<div class="hint">Gegnerisches Wesen</div>`}
+      ${mine ? (why ? `<div class="why">${esc(why)}</div>` : `<div class="hint">${Lx("Wähle einen Angriff:", "Pick an attack:")}</div>`) : `<div class="hint">${Lx("Gegnerisches Wesen", "Enemy creature")}</div>`}
       ${btns}<button class="d-btn" id="pX">Zurück</button></div>`);
     $("pX").onclick = cancelSel;
     document.querySelectorAll("#dPanel [data-ai]").forEach(b => b.onclick = () => {
       const ai = +b.dataset.ai, a = u.atk[ai];
       $("dPanel").classList.remove("open");
       if (a[3] === "alle") { doAttack(u.uid, ai, null); return; }
-      sel = { kind: "atk", uid: u.uid, ai }; $("dTtxt").textContent = `${a[0]}: Wähle ein Ziel`; $("dTbar").classList.add("on"); render();
+      sel = { kind: "atk", uid: u.uid, ai }; $("dTtxt").textContent = `${a[0]}: ${Lx("Wähle ein Ziel", "pick a target")}`; $("dTbar").classList.add("on"); render();
     });
   }
   function doPlay(hi, target) {
@@ -885,7 +886,7 @@
       return;
     }
     if (e.target.closest('[data-pile="0"]')) { drawClick(); return; }
-    if (ortEl && S.ort) { openPanel(`<div class="pc">${cardHTML(card(S.ort.id), false)}</div><div class="d-pbox"><h3>${esc(card(S.ort.id).name)}</h3><div class="hint">Gelegt von: ${esc(S.p[S.ort.owner].name)}. Gilt für beide, bis ein neuer Ort kommt.</div><button class="d-btn" id="pX">Zurück</button></div>`); $("pX").onclick = cancelSel; return; }
+    if (ortEl && S.ort) { openPanel(`<div class="pc">${cardHTML(card(S.ort.id), false)}</div><div class="d-pbox"><h3>${esc(card(S.ort.id).name)}</h3><div class="hint">${Lx(`Gelegt von: ${esc(S.p[S.ort.owner].name)}. Gilt für beide, bis ein neuer Ort kommt.`, `Played by: ${esc(S.p[S.ort.owner].name)}. Applies to both until a new place comes.`)}</div><button class="d-btn" id="pX">${Lx("Zurück", "Back")}</button></div>`); $("pX").onclick = cancelSel; return; }
     if (hc) { showHandCard(+hc.dataset.hi); return; }
     if (uEl) { const u = findU(+uEl.dataset.u); if (u) showUnit(u); }
   });
@@ -1002,7 +1003,7 @@
     endTurn();
     const before = snapshot(); render(); flushFx(before);
     if (S.over != null) { setTimeout(() => finish(S.over), 600); return; }
-    banner("Dein Zug", "#ffb347");
+    banner(Lx("Dein Zug", "Your turn"), "#ffb347");
   }
   const wait = ms => new Promise(r => setTimeout(r, ms));
 
@@ -1017,13 +1018,13 @@
       if (n < R.siegeProTag) {
         store(k, String(n + 1));
         store("glutwerk-glut", String((parseInt(store("glutwerk-glut") || "0", 10) || 0) + R.siegGlut));
-        rw = `<div class="rw">+${R.siegGlut} Glut</div><p>Noch ${R.siegeProTag - n - 1}× heute gibt es Glut für einen Sieg.</p>`;
-      } else rw = `<p>Für heute gab es schon genug Glut für Siege. Morgen wieder!</p>`;
+        rw = `<div class="rw">+${R.siegGlut} Glut</div><p>${Lx(`Noch ${R.siegeProTag - n - 1}× heute gibt es Glut für einen Sieg.`, `${R.siegeProTag - n - 1} more wins with Glut today.`)}</p>`;
+      } else rw = `<p>${Lx("Für heute gab es schon genug Glut für Siege. Morgen wieder!", "You got all the win Glut for today. Come back tomorrow!")}</p>`;
       if (window.__sfx) window.__sfx("legendary");
     }
-    $("dEnd").innerHTML = `<h2 style="color:${winner === 0 ? "#ffb347" : winner === 1 ? "#ff4d5e" : "#c3c9d6"}">${winner === 0 ? "Sieg!" : winner === 1 ? "Niederlage" : "Unentschieden"}</h2>
-      ${winner === 1 ? "<p>Bau dein Deck um und versuch es nochmal.</p>" : ""}${rw}
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="d-btn" id="eBack">Zurück</button><button class="d-btn hot" id="eAgain">Nochmal</button></div>`;
+    $("dEnd").innerHTML = `<h2 style="color:${winner === 0 ? "#ffb347" : winner === 1 ? "#ff4d5e" : "#c3c9d6"}">${winner === 0 ? Lx("Sieg!", "Victory!") : winner === 1 ? Lx("Niederlage", "Defeat") : Lx("Unentschieden", "Draw")}</h2>
+      ${winner === 1 ? `<p>${Lx("Bau dein Deck um und versuch es nochmal.", "Rebuild your deck and try again.")}</p>` : ""}${rw}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="d-btn" id="eBack">${Lx("Zurück", "Back")}</button><button class="d-btn hot" id="eAgain">${Lx("Nochmal", "Again")}</button></div>`;
     $("dEnd").classList.add("open");
     $("eBack").onclick = closeDuel;
     $("eAgain").onclick = () => { $("dEnd").classList.remove("open"); startDuel(lastDeckId); };
@@ -1048,7 +1049,7 @@
     try { d = JSON.parse(store("glutwerk-decks") || "null"); } catch (e) { d = null; }
     if (!d || !Array.isArray(d.liste) || !d.liste.length) {
       let alt = []; try { alt = JSON.parse(store("glutwerk-deck") || "[]") || []; } catch (e) { alt = []; }
-      d = { aktiv: "d1", liste: [{ id: "d1", name: "Mein Deck", karten: alt, feld: "glut", ruecken: "glut" }] };
+      d = { aktiv: "d1", liste: [{ id: "d1", name: Lx("Mein Deck", "My deck"), karten: alt, feld: "glut", ruecken: "glut" }] };
     }
     d.liste.forEach(x => { x.karten = cleanDeck(x.karten); if (!FELDER[x.feld]) x.feld = "glut"; if (!RUECKEN[x.ruecken]) x.ruecken = "glut"; x.name = String(x.name || "Deck").slice(0, 24); });
     if (!d.liste.some(x => x.id === d.aktiv)) d.aktiv = d.liste[0].id;
@@ -1067,7 +1068,7 @@
     const look = mine || aktDeck(D);
     lastDeckId = mine ? mine.id : null;
     const g = rnd(GEGNER_DECKS);
-    start(mine ? mine.karten : STARTERDECK, g.deck, g.name);
+    start(mine ? mine.karten : STARTERDECK, g.deck, g.anzeige || g.name);
     S.look = { feld: look.feld, ruecken: [look.ruecken, GEGNER_RUECKEN[g.name] || "schatten"] };
     $("dBg").innerHTML = feldBG(look.feld);
     sel = null; busy = false; lastHand = 0;
@@ -1075,16 +1076,16 @@
     $("duel").classList.add("open"); document.body.style.overflow = "hidden";
     if (typeof audio === "function") audio();
     render();
-    banner(S.cur === 0 ? "Du beginnst!" : `${g.name} beginnt`, "#ffb347");
+    banner(S.cur === 0 ? Lx("Du beginnst!", "You go first!") : Lx(`${g.anzeige || g.name} beginnt`, `${g.anzeige || g.name} goes first`), "#ffb347");
     if (S.cur === 1) setTimeout(runAi, 900);
   }
   function openChooser(D) {
-    $("dChoose").innerHTML = `<div class="dc-box"><h3>Mit welchem Deck?</h3><p>Dein aktuelles Deck ist markiert. Unvollständige Decks (weniger als ${R.deckGroesse} Karten) kannst du noch nicht spielen.</p>
+    $("dChoose").innerHTML = `<div class="dc-box"><h3>${Lx("Mit welchem Deck?", "Which deck?")}</h3><p>${Lx(`Dein aktuelles Deck ist markiert. Unvollständige Decks (weniger als ${R.deckGroesse} Karten) kannst du noch nicht spielen.`, `Your current deck is marked. Incomplete decks (fewer than ${R.deckGroesse} cards) can't be played yet.`)}</p>
       <div class="dc-list">${D.liste.map(x => { const ok = deckReady(x.karten); return `<button class="dc-deck${x.id === D.aktiv ? " akt" : ""}" data-pick="${x.id}" ${ok ? "" : "disabled"}>
         ${feldBG(x.feld)}<div class="dc-back">${backHTML(x.ruecken)}</div>
-        <div><b>${esc(x.name)}</b><span>${x.karten.length} / ${R.deckGroesse} Karten · ${esc(FELDER[x.feld].name)}</span></div>
-        ${x.id === D.aktiv ? '<span class="star">★ Aktuell</span>' : ""}</button>`; }).join("")}</div>
-      <div class="dc-foot"><button class="d-btn" id="dcX">Abbrechen</button></div></div>`;
+        <div><b>${esc(x.name)}</b><span>${x.karten.length} / ${R.deckGroesse} ${Lx("Karten", "cards")} · ${esc(FELDER[x.feld].name)}</span></div>
+        ${x.id === D.aktiv ? '<span class="star">★ ' + Lx("Aktuell", "Current") + '</span>' : ""}</button>`; }).join("")}</div>
+      <div class="dc-foot"><button class="d-btn" id="dcX">${Lx("Abbrechen", "Cancel")}</button></div></div>`;
     $("dChoose").classList.add("open");
     $("dChoose").querySelectorAll("[data-pick]").forEach(b => b.onclick = () => startDuel(b.dataset.pick));
     $("dcX").onclick = () => $("dChoose").classList.remove("open");
@@ -1113,20 +1114,20 @@
     $("deckb").innerHTML = `
       <div class="db-side">
         <div class="db-decks">
-          <div class="db-tabs">${decks.liste.map(x => `<button class="db-tab${x.id === curId ? " on" : ""}" data-deck="${x.id}">${x.id === decks.aktiv ? "★ " : ""}${esc(x.name)}<em>${x.karten.length}/${R.deckGroesse}</em></button>`).join("")}${decks.liste.length < MAX_DECKS ? '<button class="db-tab add" id="dbNew">＋ Neues Deck</button>' : ""}</div>
-          <input class="db-name" id="dbName" value="${esc(D.name)}" maxlength="24" placeholder="Name des Decks">
-          <div class="db-r2"><button class="d-btn${isAkt ? " on" : ""}" id="dbAkt">${isAkt ? "★ Aktuelles Deck" : "☆ Als aktuell wählen"}</button>${decks.liste.length > 1 ? '<button class="d-btn" id="dbDel">Löschen</button>' : ""}</div>
-          <div class="db-look"><span>Spielfeld</span><div class="db-sw">${Object.entries(FELDER).map(([k, f]) => `<button class="sw-feld${D.feld === k ? " on" : ""}" data-feld="${k}" title="${esc(f.name)}">${feldBG(k)}</button>`).join("")}</div>
-            <span>Kartenrücken</span><div class="db-sw">${Object.entries(RUECKEN).map(([k, r]) => `<button class="sw-back${D.ruecken === k ? " on" : ""}" data-back="${k}" title="${esc(r.name)}">${backHTML(k)}</button>`).join("")}</div></div>
+          <div class="db-tabs">${decks.liste.map(x => `<button class="db-tab${x.id === curId ? " on" : ""}" data-deck="${x.id}">${x.id === decks.aktiv ? "★ " : ""}${esc(x.name)}<em>${x.karten.length}/${R.deckGroesse}</em></button>`).join("")}${decks.liste.length < MAX_DECKS ? '<button class="db-tab add" id="dbNew">＋ ' + Lx("Neues Deck", "New deck") + '</button>' : ""}</div>
+          <input class="db-name" id="dbName" value="${esc(D.name)}" maxlength="24" placeholder="${Lx("Name des Decks", "Deck name")}">
+          <div class="db-r2"><button class="d-btn${isAkt ? " on" : ""}" id="dbAkt">${isAkt ? Lx("★ Aktuelles Deck", "★ Current deck") : Lx("☆ Als aktuell wählen", "☆ Make current")}</button>${decks.liste.length > 1 ? '<button class="d-btn" id="dbDel">' + Lx("Löschen", "Delete") + '</button>' : ""}</div>
+          <div class="db-look"><span>${Lx("Spielfeld", "Battlefield")}</span><div class="db-sw">${Object.entries(FELDER).map(([k, f]) => `<button class="sw-feld${D.feld === k ? " on" : ""}" data-feld="${k}" title="${esc(f.name)}">${feldBG(k)}</button>`).join("")}</div>
+            <span>${Lx("Kartenrücken", "Card back")}</span><div class="db-sw">${Object.entries(RUECKEN).map(([k, r]) => `<button class="sw-back${D.ruecken === k ? " on" : ""}" data-back="${k}" title="${esc(r.name)}">${backHTML(k)}</button>`).join("")}</div></div>
         </div>
-        <div class="db-head"><div class="db-count ${ok ? "ok" : "no"}">${deckDraft.length} / ${R.deckGroesse} Karten${ok ? " ✓" : ""}</div>
-          <div class="db-mix">${typ.wesen} Wesen · ${typ.zauber} Zauber · ${typ.ausr} Ausrüstung · ${typ.ort} Orte</div></div>
-        <div class="db-list">${rows || `<div class="db-empty">Klick rechts auf Karten, um sie ins Deck zu legen.<br><br>Max. ${R.maxKopien}× pro Karte, legendäre und mythische nur 1×.</div>`}</div>
-        <div class="db-foot"><button class="d-btn" id="dbAuto">Auffüllen</button><button class="d-btn" id="dbClear">Leeren</button><button class="d-btn hot" id="dbDone">Fertig</button></div>
+        <div class="db-head"><div class="db-count ${ok ? "ok" : "no"}">${deckDraft.length} / ${R.deckGroesse} ${Lx("Karten", "cards")}${ok ? " ✓" : ""}</div>
+          <div class="db-mix">${Lx(`${typ.wesen} Wesen · ${typ.zauber} Zauber · ${typ.ausr} Ausrüstung · ${typ.ort} Orte`, `${typ.wesen} creatures · ${typ.zauber} spells · ${typ.ausr} equipment · ${typ.ort} places`)}</div></div>
+        <div class="db-list">${rows || `<div class="db-empty">${Lx(`Klick rechts auf Karten, um sie ins Deck zu legen.<br><br>Max. ${R.maxKopien}× pro Karte, legendäre und mythische nur 1×.`, `Click cards on the right to add them to the deck.<br><br>Max. ${R.maxKopien}× per card, legendary and mythic only 1×.`)}</div>`}</div>
+        <div class="db-foot"><button class="d-btn" id="dbAuto">${Lx("Auffüllen", "Fill up")}</button><button class="d-btn" id="dbClear">${Lx("Leeren", "Clear")}</button><button class="d-btn hot" id="dbDone">${Lx("Fertig", "Done")}</button></div>
       </div>
       <div class="db-main">
-        <div class="db-filters">${chip("alle", "Alle")}${chip("wesen", "Wesen")}${chip("zauber", "Zauber")}${chip("ausr", "Ausrüstung")}${chip("ort", "Orte")}</div>
-        <div class="db-grid">${pool.length ? pool.map(c => { const n = cnt[c.id] || 0, full = n >= maxCopies(c.id) || deckDraft.length >= R.deckGroesse; return `<div class="db-c${full ? " max" : ""}" data-add="${c.id}">${cardHTML(c, false)}${n ? `<span class="in">${n}</span>` : ""}${full ? "" : '<span class="plus">+</span>'}</div>`; }).join("") : `<div class="db-empty" style="grid-column:1/-1">Du hast noch keine Karten dieser Art. Öffne Packs!</div>`}</div>
+        <div class="db-filters">${chip("alle", Lx("Alle", "All"))}${chip("wesen", Lx("Wesen", "Creatures"))}${chip("zauber", Lx("Zauber", "Spells"))}${chip("ausr", Lx("Ausrüstung", "Equipment"))}${chip("ort", Lx("Orte", "Places"))}</div>
+        <div class="db-grid">${pool.length ? pool.map(c => { const n = cnt[c.id] || 0, full = n >= maxCopies(c.id) || deckDraft.length >= R.deckGroesse; return `<div class="db-c${full ? " max" : ""}" data-add="${c.id}">${cardHTML(c, false)}${n ? `<span class="in">${n}</span>` : ""}${full ? "" : '<span class="plus">+</span>'}</div>`; }).join("") : `<div class="db-empty" style="grid-column:1/-1">${Lx("Du hast noch keine Karten dieser Art. Öffne Packs!", "You don't have cards of this kind yet. Open packs!")}</div>`}</div>
       </div>`;
     const q = sel => $("deckb").querySelectorAll(sel);
     q("[data-deck]").forEach(b => b.onclick = () => switchDeck(b.dataset.deck));
@@ -1140,7 +1141,7 @@
       saveDecks(decks); switchDeck(id); setTimeout(() => { $("dbName").focus(); $("dbName").select(); }, 30);
     };
     if ($("dbDel")) $("dbDel").onclick = () => {
-      if (Date.now() - delArmed > 3000) { delArmed = Date.now(); $("dbDel").textContent = "Wirklich löschen?"; return; }
+      if (Date.now() - delArmed > 3000) { delArmed = Date.now(); $("dbDel").textContent = Lx("Wirklich löschen?", "Really delete?"); return; }
       delArmed = 0;
       decks.liste = decks.liste.filter(x => x.id !== curId);
       if (decks.aktiv === curId) decks.aktiv = decks.liste[0].id;
@@ -1176,10 +1177,10 @@
     const el = $("arena"); if (!el) return;
     const D = loadDecks(), d = aktDeck(D).karten, ok = deckReady(d), n = D.liste.length;
     const k = "glutwerk-duell-" + new Date().toISOString().slice(0, 10), wins = +store(k) || 0;
-    el.querySelector("#arDeck").innerHTML = (ok ? `Aktuelles Deck: <b style="color:#3ddc97">${esc(aktDeck(D).name)} ✓</b>` :
-      `Aktuelles Deck: <b style="color:#ffb347">${esc(aktDeck(D).name)} · ${d.length} / ${R.deckGroesse}</b> · bis es voll ist, spielst du mit dem <b>Starterdeck</b>`) +
+    el.querySelector("#arDeck").innerHTML = (ok ? `${Lx("Aktuelles Deck", "Current deck")}: <b style="color:#3ddc97">${esc(aktDeck(D).name)} ✓</b>` :
+      `${Lx("Aktuelles Deck", "Current deck")}: <b style="color:#ffb347">${esc(aktDeck(D).name)} · ${d.length} / ${R.deckGroesse}</b> · ${Lx("bis es voll ist, spielst du mit dem <b>Starterdeck</b>", "until it is full you play with the <b>starter deck</b>")}`) +
       (n > 1 ? ` <span style="color:var(--muted)">· ${n} Decks</span>` : "");
-    el.querySelector("#arWins").textContent = `Siege heute: ${Math.min(wins, R.siegeProTag)} / ${R.siegeProTag} (je +${R.siegGlut} Glut)`;
+    el.querySelector("#arWins").textContent = Lx(`Siege heute: ${Math.min(wins, R.siegeProTag)} / ${R.siegeProTag} (je +${R.siegGlut} Glut)`, `Wins today: ${Math.min(wins, R.siegeProTag)} / ${R.siegeProTag} (+${R.siegGlut} Glut each)`);
   }
   window.Duell = { startDuel, openBuilder, renderArena };
   document.addEventListener("click", e => {

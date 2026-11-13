@@ -214,6 +214,8 @@ html.calm .stage.electro{animation:none}
 @keyframes sparkf{0%{opacity:1}100%{opacity:0;transform:var(--r) scaleY(.3)}}
 .spark.fall{z-index:25!important;width:4px;height:4px;border-radius:50%;background:#ffd27a;box-shadow:0 0 8px 3px #ff9a3a;animation:sfall 1.3s cubic-bezier(.4,0,1,1) forwards}
 @keyframes sfall{to{transform:translate(var(--dx),340px);opacity:0}}
+.dust{position:fixed;top:-8px;width:3px;height:3px;border-radius:50%;background:#9a8c7c;z-index:31;pointer-events:none;opacity:.8;animation:dustfall linear forwards}
+@keyframes dustfall{to{transform:translate(12px,105vh);opacity:0}}
 .shotflash{position:fixed;inset:0;z-index:39;pointer-events:none;background:#fff;animation:shot .5s ease-out forwards}
 @keyframes shot{0%{opacity:1}30%{opacity:.6;background:#ffd9a0}100%{opacity:0}}
 .bleed{position:fixed;inset:0;z-index:38;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 15%,rgba(110,0,0,.85) 75%,#1a0000 100%);opacity:0;transition:opacity 3.5s ease-in}
@@ -830,7 +832,8 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = id => document.getElementById(id);
 let S, muted=false, AC, SCALE=1, MASTER=null;
 function newAC(){const c=new (window.AudioContext||window.webkitAudioContext)();if(muted){try{c.suspend()}catch(e){}}return c;}
-function OUT(){if(!MASTER){MASTER=AC.createGain();MASTER.gain.value=muted?0:1;MASTER.connect(AC.destination);}return MASTER;}
+let EARS=null;
+function OUT(){if(!MASTER){MASTER=AC.createGain();MASTER.gain.value=muted?0:1;EARS=AC.createBiquadFilter();EARS.type='lowpass';EARS.frequency.value=20000;MASTER.connect(EARS).connect(AC.destination);}return MASTER;}
 function setMuted(m){
   muted=m;
   try{if(AC){OUT();MASTER.gain.cancelScheduledValues(AC.currentTime);MASTER.gain.value=m?0:1;
@@ -907,7 +910,7 @@ function bindLook(id,dir){
 }
 
 /* ---------- bulb + darkness ---------- */
-let flickerUntil=0,darkBoost=0;
+let flickerUntil=0,darkBoost=0,darkMs=0;
 function roomLoop(t){
   const dt=Math.min(50,t-(lastT||t));lastT=t;
   if(!$('menu').hidden&&!reduce){cam=Math.sin(t/7000)*150;applyCam();}
@@ -938,7 +941,9 @@ function roomLoop(t){
   const off=bulbDead||(!SET.calm&&now<flickerUntil&&Math.random()<.6);
   bulb.classList.toggle('off',off);
   const a=bulbDead?.97:off?.93:.82+darkBoost;
-  if(bulbDead) $('dark').style.background='rgba(0,0,0,.95)';
+  if(bulbDead&&S&&S.started&&!dying){darkMs+=dt;}else darkMs=0;
+  const adapt=Math.min(1,darkMs/7000);
+  if(bulbDead) $('dark').style.background=adapt>0?`radial-gradient(circle at 50% 55%, rgba(0,0,0,${(.93-adapt*.38).toFixed(3)}) 0, rgba(0,0,0,${(.96-adapt*.22).toFixed(3)}) 900px)`:'rgba(0,0,0,.95)';
   else $('dark').style.background=`radial-gradient(circle at ${bx+1100}px ${by+260}px, rgba(255,190,110,.06) 0, rgba(0,0,0,${off?.6:.12}) ${mode==='L'?420:560}px, rgba(0,0,0,${Math.min(.96,a)}) ${mode==='L'?900:1250}px)`;
   requestAnimationFrame(roomLoop);
 }
@@ -1577,7 +1582,7 @@ function leverTriggered(){
   });
   knob.addEventListener('pointermove',e=>{
     if(!drag) return;
-    const t=Math.max(0,Math.min(1,drag.t+(e.clientY-drag.y)/(ROD_LEN*1.8*SCALE)));
+    const t=Math.max(0,Math.min(1,drag.t+(e.clientY-drag.y)/(ROD_LEN*1.8*SCALE*(1+handsCold()*1.4))));
     setLever(t);
     const tick=Math.floor(t*7);if(tick>lastTick){beep(500+tick*40,.02,'square',.025);lastTick=tick;}
     if(t>=.92&&!LEV.pulled){LEV.pulled=true;leverTriggered();}
@@ -1875,8 +1880,11 @@ function knock(){
   if(anger===6){setMsg('»HÖR AUF ZU KLOPFEN.«','bad');steps(2);return;}
   if(anger===8){
     setMsg('»LETZTE WARNUNG.«','bad');
-    shadow('come');d.classList.add('peek');scrape();
-    setTimeout(()=>{if(!d.classList.contains('aim')){d.classList.remove('peek');scrape();}},1600);
+    shadow('come');d.classList.add('aim');scrape();loanBusy=true;
+    setTimeout(()=>{
+      bang();warningShotFx();
+      setTimeout(()=>{d.classList.remove('aim');scrape();loanBusy=false;setMsg('»DIE NÄCHSTE GEHT NICHT IN DIE DECKE.«','bad');},2200);
+    },900);
     return;
   }
   if(anger>4) return;
@@ -2131,10 +2139,37 @@ function insertEye(done){
   }
 }
 
+/* ---------- rubbing hands to warm them: drag fast left/right on an empty spot ---------- */
+(function rubHands(){
+  let r=null;
+  addEventListener('pointerdown',e=>{
+    if(!S||!S.started||!lookFree()) return;
+    if(e.target.id==='desk'){if(deskHit(toDesk(e)))return;}
+    else if(e.target.closest('button,canvas,.cabinet,.door,.lever,.bookprop,[role=button],.mtag,.exbtn')) return;
+    r={last:e.clientX,dir:0,rev:0,t0:performance.now()};
+  },{passive:true});
+  addEventListener('pointermove',e=>{
+    if(!r) return;
+    const step=e.clientX-r.last;
+    if(Math.abs(step)>10){const dir=Math.sign(step);
+      if(r.dir&&dir!==r.dir){r.rev++;
+        if(r.rev===2){const c={x:innerWidth/2,y:innerHeight*.78};handOn('l',()=>({x:c.x-22*SCALE+Math.sin(performance.now()/70)*10*SCALE,y:c.y}));handOn('r',()=>({x:c.x+22*SCALE-Math.sin(performance.now()/70)*10*SCALE,y:c.y-6*SCALE}));}
+        if(r.rev>1&&!muted&&SET.sfx>0&&AC){try{const n=noiseNode(.12,x=>Math.sin(Math.PI*x)),f=AC.createBiquadFilter(),g=AC.createGain();f.type='bandpass';f.frequency.value=1600;g.gain.value=.05*SET.sfx;n.connect(f).connect(g).connect(OUT());n.start();}catch(e){}}
+        if(r.rev>=7){warmth=Math.min(1.2,coldLevel()+.6);r.rev=-99;setMsg('HÄNDE AUFGEWÄRMT','good');}}
+      r.dir=dir;r.last=e.clientX;}
+  },{passive:true});
+  const end=()=>{if(!r)return;if(r.rev>=2||r.rev<0){handOff('l');handOff('r');}r=null;};
+  addEventListener('pointerup',end);addEventListener('pointercancel',end);
+})();
+
 /* ---------- breath clouds: the cellar gets cold towards 06:00 ---------- */
-let nightFrac=0,nextBreath=0;
+let nightFrac=0,nextBreath=0,warmth=0,coldHint=false;
+function coldLevel(){return Math.max(0,Math.min(1,(nightFrac-.5)/.4)+(bulbDead&&S&&S.started?.25:0));}
+function handsCold(){return Math.max(0,coldLevel()-warmth);}
 function breathLoop(t){
-  const cold=Math.max(0,Math.min(1,(nightFrac-.5)/.4))+(bulbDead&&S&&S.started?.25:0);
+  const cold=coldLevel();
+  warmth=Math.max(0,warmth-16/42000);
+  if(!coldHint&&S&&S.started&&handsCold()>.45&&uiFree()){coldHint=true;setMsg('DEINE HÄNDE FRIEREN · REIBEN','bad');}
   if(!reduce&&S&&S.started&&!dying&&lookFree()&&cold>0&&t>nextBreath){
     const gap=(S.puls<=1?2300:3400)+Math.random()*700;nextBreath=t+gap;
     const b=document.createElement('div');b.className='breath';
@@ -2215,12 +2250,12 @@ function handLoop(t){
     el.style.display='block';
     const o={x:k==='r'?vw*.8:vw*.2,y:vh+120*sc};
     const ang=Math.atan2(p.y-o.y,p.x-o.x),rot=ang*180/Math.PI+90;
-    const d=(1-h.ext)*480*sc,tr=(!reduce&&!SET.calm)?lowPuls*1.3*sc+(dying?4*sc:0):0;
+    const hc=handsCold(),d=(1-h.ext)*480*sc,tr=(!reduce&&!SET.calm)?lowPuls*1.3*sc+hc*3.2*sc+(dying?4*sc:0):0;
     const x=p.x-Math.cos(ang)*d+(Math.random()-.5)*tr,y=p.y-Math.sin(ang)*d+(Math.random()-.5)*tr;
     const W=150*sc,H=625*sc,gx=75*sc,gy=56*sc;
     el.style.width=W+'px';el.style.height=H+'px';el.style.left=(x-gx)+'px';el.style.top=(y-gy)+'px';
     el.style.transformOrigin=`${gx}px ${gy}px`;el.style.transform=`rotate(${rot}deg)${k==='l'?' scaleX(-1)':''}`;
-    el.style.filter=`brightness(${bulbDead?.1:.56})`;
+    el.style.filter=`brightness(${bulbDead?.1:.56}) saturate(${(1-hc*.55).toFixed(2)}) hue-rotate(${(-hc*28).toFixed(1)}deg)`;
     el.style.setProperty('--burn',Math.min(1,((S&&S.shocks)||0)*.35));
   }
   requestAnimationFrame(handLoop);
@@ -2236,6 +2271,7 @@ function thunder(vol){
 const BOOT=['PWR FAIL','RESET...','BIOS v2.31 (C)1987','CHK RAM 0000-3FFF','RAM OK 16K','ROM CRC 9F2E OK','REEL 1 HOME','REEL 2 HOME','REEL 3 HOME','HOPPER OK','LOAD STATE','SYSTEM OK'];
 function powerCut(){
   booting=true;
+  const DARK=1500+Math.random()*7500;
   const disp=document.querySelector('.displays'),cab=$('cab'),msg=$('msg'),oldMsg=msg.textContent,oldCls=msg.className;
   thunder(.5);
   const g=$('doorgap');if(!SET.calm&&!reduce){g.animate([{background:'#fff',boxShadow:'0 0 40px 10px #cfe0ff'},{background:'#ffcf7a'}],{duration:500});}
@@ -2249,12 +2285,12 @@ function powerCut(){
       if(Math.random()<.5)beep(2000+Math.random()*2000,.008,'square',.012);},45);
     msg.className='msg good';
     lineIv=setInterval(()=>{msg.textContent=BOOT[Math.min(line,BOOT.length-1)];line++;beep(900,.02,'square',.02);if(line>=BOOT.length)clearInterval(lineIv);},150);
-  },1500);
+  },DARK);
   setTimeout(()=>{
     clearInterval(iv);clearInterval(lineIv);disp.classList.remove('boot');
     bulbDead=false;flickerUntil=performance.now()+500;beep(520,.08,'square',.03);setTimeout(()=>beep(780,.1,'square',.03),90);
     booting=false;render();msg.textContent=oldMsg||'MÜNZE EINWERFEN';msg.className=oldCls;
-  },1500+BOOT.length*150+400);
+  },DARK+BOOT.length*150+400);
 }
 setInterval(()=>{
   const now=performance.now();
@@ -2263,6 +2299,24 @@ setInterval(()=>{
   if(Math.random()<.35) powerCut(); else thunder(.18+Math.random()*.15);
 },1000);
 
+function ringingEars(sec){
+  if(!AC) return;
+  try{OUT();const t=AC.currentTime;
+    EARS.frequency.cancelScheduledValues(t);EARS.frequency.setValueAtTime(320,t);EARS.frequency.exponentialRampToValueAtTime(900,t+sec*.45);EARS.frequency.exponentialRampToValueAtTime(20000,t+sec);
+    if(drone){drone.gain.cancelScheduledValues(t);drone.gain.setValueAtTime(drone.gain.value*.3,t);drone.gain.linearRampToValueAtTime(muted?0:.05*SET.music,t+sec);}
+    if(!muted&&SET.sfx>0){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=3900+Math.random()*500;
+      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.05*SET.sfx,t+.05);g.gain.exponentialRampToValueAtTime(.0001,t+sec);
+      o.connect(g).connect(AC.destination);o.start(t);o.stop(t+sec+.1);}
+  }catch(e){}
+  if(!reduce&&!SET.calm){$('stage').animate([{filter:'blur(3px) brightness(1.6)'},{filter:'blur(1.5px)'},{filter:'none'}],{duration:sec*700,easing:'ease-out'});}
+}
+function warningShotFx(){
+  const f=document.createElement('div');f.className='shotflash';if(SET.calm)f.style.opacity='.4';document.body.appendChild(f);setTimeout(()=>f.remove(),600);
+  if(!reduce&&!SET.calm){let k=0;const tr=setInterval(()=>{$('stage').style.translate=`${(Math.random()-.5)*12}px ${(Math.random()-.5)*12}px`;if(++k>8){clearInterval(tr);$('stage').style.translate='';}},40);
+    for(let i=0;i<26;i++){const dd=document.createElement('div');dd.className='dust';dd.style.left=(35+Math.random()*30)+'vw';dd.style.animationDelay=(Math.random()*.6)+'s';dd.style.animationDuration=(1.2+Math.random()*1.4)+'s';document.body.appendChild(dd);setTimeout(()=>dd.remove(),3400);}}
+  flickerUntil=performance.now()+600;
+  ringingEars(7);
+}
 function closeSlit(){$('door').classList.remove('peek');scrape();setTimeout(()=>{stepSound(3);shadow('go');},900);}
 function bang(){
   if(muted||SET.sfx<=0) return;
@@ -2814,6 +2868,7 @@ function payday(interest){
   if(S.money>=S.debt){
     let left=S.money-S.debt;
     const cap=debtFor(S.level+1)*2,tax=left>cap?Math.floor((left-cap)*.7):0;left-=tax;
+    const baseNext=debtFor(S.level+1),richSur=left>baseNext*.5?Math.round((left-baseNext*.5)*.6/5)*5:0,nextDebt=baseNext+richSur;
     $('door').classList.add('open');shadow('come');
     openOv(`<h2>Zahltag</h2>
       <div class="ledger">
@@ -2824,11 +2879,12 @@ function payday(interest){
         <span class="t">Bleibt dir</span><span class="a" style="color:var(--gold)">${fmt(left)}</span>
       </div>
       ${tax?`<p class="voiceline">»So viel Glück hat keiner. Entweder du betrügst, oder du hast Glück. Beides gehört mir.«</p>`:''}
-      <p>Die Klappe in der Tür öffnet sich. Eine Hand nimmt das Geld. Nächstes Mal will er <b style="color:var(--red)">${fmt(debtFor(S.level+1))}</b>.</p>
+      <p>Die Klappe in der Tür öffnet sich. Eine Hand nimmt das Geld. Nächstes Mal will er <b style="color:var(--red)">${fmt(nextDebt)}</b>.</p>
+      ${richSur?`<p class="voiceline">»Du hast ja noch genug übrig. Dann will ich nächstes Mal ${fmt(richSur)} mehr.«</p>`:''}
       <button class="big" id="goOn" type="button">Weiterleben</button>`);
     melody([523,659,784,1046],120);
     $('goOn').onclick=()=>{
-      S.money=left;S.level++;S.debt=debtFor(S.level);S.day=1;S.puls=Math.min(Math.max(3,S.puls),S.puls+1);
+      S.money=left;S.level++;S.debt=nextDebt;S.day=1;S.puls=Math.min(Math.max(3,S.puls),S.puls+1);
       S.inShop=true;S.spinsLeft=0;saveBest();closeOv();render();
       cutscene(levelScene(S.level),()=>openShop(`Level ${S.level}`,'Neue Schuld. Durch die Klappe wird ein Tablett geschoben. '));
     };

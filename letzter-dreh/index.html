@@ -2,7 +2,7 @@
 <title>Letzter Dreh</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@400;600;700&family=VT323&family=Caveat:wght@600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@400;600;700&family=VT323&family=Caveat:wght@600&family=Special+Elite&display=swap">
 <style>
 /* Layout: first-person view into a concrete cellar, drawn on a fixed design stage (landscape 1280×800, portrait 700×1240) scaled to fit.
    Back wall + floor with parallax, swaying bulb lights the room, dirty slot cabinet in the middle with its own LED readouts. */
@@ -182,6 +182,42 @@ html.calm .fig .head,html.calm .fig .fingers{animation:none}
 .phand{position:fixed;left:0;top:0;z-index:28;pointer-events:none;display:none;will-change:transform,left,top;--burn:0}
 .phand svg{width:100%;height:100%;display:block;filter:drop-shadow(0 14px 18px rgba(0,0,0,.75)) sepia(.15);-webkit-mask:linear-gradient(#000 0,#000 45%,rgba(0,0,0,.65) 72%,transparent 100%);mask:linear-gradient(#000 0,#000 45%,rgba(0,0,0,.65) 72%,transparent 100%)}
 .phand .burns{opacity:var(--burn)}
+.blindcap{position:fixed;left:50%;bottom:calc(14% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;pointer-events:none;max-width:90vw;text-align:center;
+  font-family:var(--f-hand);font-size:clamp(20px,3.2vw,28px);color:#6e625a;opacity:0}
+.blindcap.in{animation:capin 2.2s ease-out forwards}
+@keyframes capin{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:.35}}
+.deathscr{position:fixed;inset:0;z-index:41;overflow-y:auto;display:flex;
+  background:radial-gradient(ellipse at 50% 40%,rgba(60,8,8,.5),#000 70%),#000;
+  padding:max(18px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.ds-wrap{margin:auto;display:flex;flex-direction:column;align-items:center;gap:22px;width:100%;max-width:520px}
+.tag{position:relative;width:100%;max-width:420px;padding:42px 26px 26px;background:linear-gradient(170deg,#ddcca6,#c7b083 70%,#b09868);
+  color:#2a1f14;border-radius:8px 8px 8px 8px;clip-path:polygon(14% 0,86% 0,100% 9%,100% 100%,0 100%,0 9%);transform:rotate(-2.5deg);
+  box-shadow:0 30px 60px rgba(0,0,0,.8);animation:tagin .9s cubic-bezier(.3,1.3,.5,1) both;font-family:"Special Elite","Courier New",monospace}
+@keyframes tagin{from{transform:translateY(-60vh) rotate(-14deg)}}
+.tag::before{content:"";position:absolute;inset:0;background:var(--noise);mix-blend-mode:multiply;opacity:.28;pointer-events:none}
+.tag::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 85% 90%,rgba(90,40,10,.28),transparent 35%),radial-gradient(ellipse at 10% 20%,rgba(80,30,10,.15),transparent 30%);pointer-events:none}
+.tag>*{position:relative;z-index:1}
+.tag-hole{position:absolute!important;left:50%;top:14px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#000;box-shadow:0 0 0 4px #a08a5c,0 0 0 5px #6a5a3a}
+.tag-string{position:absolute!important;left:50%;top:-40px;width:2px;height:58px;margin-left:-1px;background:#cfc6b4;transform:rotate(8deg);transform-origin:bottom}
+.tag-head{text-align:center;font-size:13px;letter-spacing:.3em;color:#5a4630;margin-bottom:14px;border-bottom:1px dashed #6a5638;padding-bottom:8px}
+.tag-rows{display:flex;flex-direction:column;gap:7px}
+.tag-row{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;font-size:16px}
+.tag-row .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#4a3a24;white-space:nowrap}
+.tag-row .v{text-align:right;min-height:1.2em;overflow-wrap:anywhere}
+.tag-quote{margin-top:62px;font-family:var(--f-hand);font-size:24px;color:#6a1308;text-align:center}
+.stamp{position:absolute!important;left:16px;bottom:62px;z-index:2!important;padding:4px 12px;border:4px solid rgba(160,20,10,.85);color:rgba(160,20,10,.85);font-family:var(--f-display);font-size:30px;letter-spacing:.06em;
+  transform:rotate(-14deg) scale(2.4);opacity:0;mix-blend-mode:multiply;border-radius:6px}
+.stamp.hit{animation:stamp .22s cubic-bezier(.5,0,.8,.5) forwards}
+@keyframes stamp{to{transform:rotate(-12deg) scale(1);opacity:.85}}
+.ds-found{width:100%;max-width:420px;text-align:center}
+.ds-ft{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8a7a6e;margin-bottom:8px}
+.ds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ds-d{padding:7px 4px;border:1px solid #3a2a26;border-radius:4px;color:#4a3a36;font-family:var(--f-led);font-size:20px;background:#0a0606}
+.ds-d.on{color:#c9b8a8;border-color:#5a3a32}
+.ds-d.now{color:var(--led-red);border-color:var(--led-red);box-shadow:0 0 12px rgba(255,74,58,.35);text-shadow:0 0 6px currentColor}
+.ds-btns{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;padding-top:34px;position:relative}
+@media (max-width:560px){.ds-btns{gap:10px;padding-top:30px}.ds-btns .mtag{width:calc(50% - 5px)}}
+.ds-btns::before{content:"";position:absolute;left:-10px;right:-10px;top:-2px;height:8px;border-radius:4px;background:linear-gradient(#7a736c,#3a3632 60%,#1d1a18);box-shadow:0 6px 10px rgba(0,0,0,.7)}
 .boot .seg{color:var(--led-grn)!important}
 .subt{position:fixed;left:50%;bottom:calc(16% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;max-width:min(90vw,700px);text-align:center;pointer-events:none;
   font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,32px);color:#ffdccf;text-shadow:0 0 12px #000,0 0 24px #000,0 2px 0 #000}
@@ -778,6 +814,7 @@ html.calm .neon span{animation:none}
 <filter id="hSoft"><feGaussianBlur stdDeviation="2.5"/></filter>
 </defs></svg>
 <canvas class="lens" id="lens" aria-hidden="true"></canvas>
+<div class="deathscr" id="deathscr" hidden></div>
 <div class="subt" id="subt" hidden></div>
 <div class="cine" id="cine" hidden><div class="cinetext" id="cineText"></div><div class="cinehint">Tippen ▸</div></div>
 <div class="ov" id="ov" hidden><div class="sheet" id="sheet"></div></div>
@@ -1029,8 +1066,8 @@ const maxBet = () => has('schlitz')?5:3;
 const mult = () => 1 + (S.charms.hebel||0);
 const fmt = n => n.toLocaleString('de-DE');
 let dying=false;
-const lookFree=()=>!dying&&$('ov').hidden&&$('cine').hidden&&$('bookOv').hidden&&$('menu').hidden&&$('peepview').hidden&&!(typeof PZ!=='undefined'&&PZ.open)&&!document.querySelector('.eyeins');
-const uiFree=()=>!dying&&!booting&&!(typeof PZ!=='undefined'&&PZ.open)&&$('peepview').hidden&&$('ov').hidden&&$('cine').hidden&&$('bookOv').hidden&&$('menu').hidden;
+const lookFree=()=>!dying&&$('deathscr').hidden&&$('ov').hidden&&$('cine').hidden&&$('bookOv').hidden&&$('menu').hidden&&$('peepview').hidden&&!(typeof PZ!=='undefined'&&PZ.open)&&!document.querySelector('.eyeins');
+const uiFree=()=>!dying&&$('deathscr').hidden&&!booting&&!(typeof PZ!=='undefined'&&PZ.open)&&$('peepview').hidden&&$('ov').hidden&&$('cine').hidden&&$('bookOv').hidden&&$('menu').hidden;
 function stopHiss(){if(typeof hiss!=='undefined'&&hiss){hiss.stop();hiss=null;}}
 const broke=()=>S.money<=0&&S.credits===0&&!S.pending;
 function price(c){
@@ -1942,7 +1979,7 @@ function peep(){
   const at=(t,f)=>peepState.timers.push(setTimeout(f,t));
   at(400,()=>{peepState.canLeave=true;});
   // what is behind the door this time?
-  const r=Math.random(),knifeChance=S.eyeLost?0:Math.min(.35,.06+S.peeks*.03),eyeChance=.3;
+  const r=Math.random(),knifeChance=Math.min(.35,.06+S.peeks*.03),eyeChance=.3;
   const bulb=$('pvBulb');const fl=setInterval(()=>bulb.setAttribute('opacity',Math.random()<.15?.2:1),120);peepState.timers.push({iv:fl});
   if(r<knifeChance){
     at(1500,()=>{peepState.canLeave=false;beep(70,.3,'sine',.08);breathClose(.25);});
@@ -1960,6 +1997,7 @@ function leavePeep(){
 }
 function stabEye(){
   leavePeep();
+  if(S.eyeLost){blindDeath();return;}
   const side=Math.random()<.5?'l':'r';
   scream();beep(60,.4,'square',.2);
   const f=document.createElement('div');f.className='bleed black';f.style.opacity='1';f.style.background='#3a0000';document.body.appendChild(f);
@@ -2313,6 +2351,29 @@ function warningShotFx(){
     for(let i=0;i<26;i++){const dd=document.createElement('div');dd.className='dust';dd.style.left=(35+Math.random()*30)+'vw';dd.style.animationDelay=(Math.random()*.6)+'s';dd.style.animationDuration=(1.2+Math.random()*1.4)+'s';document.body.appendChild(dd);setTimeout(()=>dd.remove(),3400);}}
   flickerUntil=performance.now()+600;
   ringingEars(7);
+}
+/* ---------- losing the second eye: a death you only hear ---------- */
+function blindDeath(){
+  dying=true;stopHiss();S.started=false;clearSave();loanBusy=true;
+  scream();beep(60,.4,'square',.2);
+  const bl=document.createElement('div');bl.className='bleed black';bl.style.opacity='1';bl.style.background='#3a0000';document.body.appendChild(bl);
+  if(!SET.calm&&!reduce){let k=0;const tr=setInterval(()=>{$('stage').style.translate=`${(Math.random()-.5)*16}px ${(Math.random()-.5)*16}px`;if(++k>18){clearInterval(tr);$('stage').style.translate='';}},45);}
+  setTimeout(()=>{bl.style.background='#000';},350);
+  if(drone){try{drone.gain.setTargetAtTime(.02*SET.music,AC.currentTime,.5);}catch(e){}}
+  // only sound from here on; quiet captions for players without sound
+  const cap=document.createElement('div');cap.className='blindcap';document.body.appendChild(cap);
+  const say_=(t)=>{cap.textContent=t;cap.classList.remove('in');void cap.offsetWidth;cap.classList.add('in');};
+  const T=(t,f)=>setTimeout(f,t);
+  T(1500,()=>{say_('[ dein Atem ]');[0,900,1800,2700].forEach(d=>setTimeout(()=>breathClose(.22),d));});
+  T(4200,()=>{say_('[ Schlüssel ]');keysJingle();});
+  T(5200,()=>{say_('[ das Schloss ]');thunk();setTimeout(thunk,260);});
+  T(6200,()=>{say_('[ die Tür ]');creak();});
+  T(7800,()=>{say_('[ Schritte. Näher. ]');stepSound(5);});
+  T(10200,()=>{say_('[ jemand atmet direkt neben dir ]');breathClose(.45);setTimeout(()=>breathClose(.5),1300);});
+  T(12900,()=>{const n=playerName();say_(n?`»Jetzt siehst du endlich, ${n}.«`:'»Jetzt siehst du endlich.«');whisperSound();});
+  T(15300,()=>{say_('»Gar nichts.«');whisperSound();});
+  T(17200,()=>{say_('');chainRattle();beep(45,.6,'square',.3);beep(90,.3,'square',.15);});
+  T(18600,()=>{cap.remove();die('blind',()=>{bl.remove();loanBusy=false;applySet();S.eyeLost=null;render();});});
 }
 function closeSlit(){$('door').classList.remove('peek');scrape();setTimeout(()=>{stepSound(3);shadow('go');},900);}
 function bang(){
@@ -2896,26 +2957,69 @@ function die(cause,onStart){
   const scenes={
     schuld:['Etwas schleift dich über den Beton.','Eine Tür. Eine Treppe. Noch eine Tür.','Am nächsten Morgen pendelt die Glühbirne wieder. Die Schüssel ist voll.','Jemand Neues wacht vor dem Automaten auf.'],
     strom:['Deine Hand klebt am Gehäuse. Du kannst nicht loslassen.','Der Automat singt. Ein hoher, heller Ton.','Dann platzt die Glühbirne.','Im Dunkeln knackt der Lautsprecher.','»Er gehört mir. Und jetzt du auch.«'],
-    schuss:['Ein Knall.','Du liegst auf dem Rücken. Über dir pendelt die Glühbirne.','Jeder Atemzug ist schwerer als der letzte.','Hinter der Tür: das Klicken, als er nachlädt.','»Ich hab gesagt, hör auf zu klopfen.«','Dann nur noch Stille.']
+    schuss:['Ein Knall.','Du liegst auf dem Rücken. Über dir pendelt die Glühbirne.','Jeder Atemzug ist schwerer als der letzte.','Hinter der Tür: das Klicken, als er nachlädt.','»Ich hab gesagt, hör auf zu klopfen.«','Dann nur noch Stille.'],
+    blind:['Du siehst nichts mehr. Du wirst nie wieder etwas sehen.','Eine Hand greift nach der Kette.','Irgendwo über dir klimpert der Automat weiter.','Für jemand anderen.']
   };
   cutscene(scenes[cause],()=>deathSheet(cause));
   if(onStart) setTimeout(onStart,50);
 }
+const DEATHS=[
+  {id:'schuld',name:'Zahltag',cause:'Schulden nicht bezahlt',quote:'»Der Kassierer verhandelt nicht.«'},
+  {id:'strom',name:'Strom',cause:'Stromschlag am Automaten',quote:'»Er gehört mir. Und jetzt du auch.«'},
+  {id:'schuss',name:'Schuss',cause:'Schuss durch die Tür',quote:'»Ich hab gesagt, hör auf zu klopfen.«'},
+  {id:'blind',name:'Blind',cause:'Beide Augen verloren',quote:'»Neugier kostet. Immer.«'}
+];
+function seenDeaths(add){
+  let a=[];try{a=JSON.parse(localStorage.getItem('ld_deaths_seen')||'[]')}catch(e){}
+  if(add&&!a.includes(add)){a.push(add);try{localStorage.setItem('ld_deaths_seen',JSON.stringify(a))}catch(e){}}
+  return a;
+}
+function typeClack(){beep(1800+Math.random()*600,.012,'square',.02);beep(140,.02,'square',.02);}
 function deathSheet(cause){
-  openOv(`<h2>Gestorben</h2>
-    <p>${cause==='schuss'?'Zu oft an die Tür geklopft. Er hat dich gewarnt.':cause==='strom'?'Zu oft am Gehäuse gerüttelt. Der Automat hat dich behalten.':`Dir fehlten <b style="color:var(--red)">${fmt(Math.max(0,S.debt-S.money))}</b> Münzen. Der Kassierer verhandelt nicht.`}</p>
-    <div class="ledger">
-      <span class="t">Erreicht</span><span class="a">Level ${S.level}</span>
-      <span class="t">Hebel gezogen</span><span class="a">${fmt(S.spinsTotal)}×</span>
-      <span class="t">Insgesamt gewonnen</span><span class="a">${fmt(S.won)}</span>
-      <span class="t">Geliehen</span><span class="a">${fmt(S.borrowed)}</span>
-      <span class="t">Bestes Level</span><span class="a">${loadBest()}</span>
-      ${myNumber?`<span class="t">Du warst Gefangener</span><span class="a">Nr. ${fmt(myNumber)}</span>`:''}
+  const info=DEATHS.find(d=>d.id===cause)||DEATHS[0];
+  const seen=seenDeaths(cause);
+  const owed=Math.max(0,S.debt-S.money);
+  const days=Math.max(1,(S.level-1)*DAYS+S.day);
+  const rows=[
+    ['Gefangener',myNumber?`Nr. ${fmt(myNumber)}`:(playerName()||'ohne Namen')],
+    ['Zelle','B-3 · Keller'],
+    ['Todesursache',info.cause],
+    ...(cause==='schuld'?[['Fehlbetrag',`${fmt(owed)} Münzen`]]:[]),
+    ['Überlebt',`${days} ${days===1?'Tag':'Tage'} · Level ${S.level}`],
+    ['Hebel gezogen',`${fmt(S.spinsTotal)}×`],
+    ['Gewonnen',`${fmt(S.won)} Münzen`],
+    ['Geliehen',`${fmt(S.borrowed)} Münzen`],
+    ['Bestes Level',String(loadBest())]
+  ];
+  const el=$('deathscr');
+  el.innerHTML=`<div class="ds-wrap">
+    <div class="tag" id="dsTag">
+      <span class="tag-hole"></span><span class="tag-string"></span>
+      <div class="tag-head">KELLER B-3 · AKTE</div>
+      <div class="tag-rows">${rows.map(([k,v])=>`<div class="tag-row"><span class="k">${k}</span><span class="v" data-v="${String(v).replace(/"/g,'&quot;')}"></span></div>`).join('')}</div>
+      <div class="tag-quote">${info.quote}</div>
+      <div class="stamp" id="dsStamp">VERSTORBEN</div>
     </div>
-    <div class="shopfoot"><button class="ghost" id="toMenu" type="button">Hauptmenü</button><button class="big" id="again" type="button">Neues Leben</button></div>`,'death');
-  $('toMenu').onclick=()=>{closeOv();showMenu();};
+    <div class="ds-found"><div class="ds-ft">Todesarten gefunden · ${seen.length}/${DEATHS.length}</div>
+      <div class="ds-grid">${DEATHS.map(d=>`<span class="ds-d ${seen.includes(d.id)?'on':''} ${d.id===cause?'now':''}">${seen.includes(d.id)?d.name:'???'}</span>`).join('')}</div></div>
+    <div class="ds-btns">${menuTag('again','Neu aufwachen','','red')}${menuTag('toMenu','Hauptmenü','')}</div>
+  </div>`;
+  el.querySelector('[data-act="again"]').id='again';el.querySelector('[data-act="toMenu"]').id='toMenu';
+  el.hidden=false;
   melody([392,330,262,196,131],220,'sawtooth');
-  $('again').onclick=()=>{newGame();cutscene(introLines().slice(3),()=>setMsg('MÜNZE EINWERFEN'));};
+  // typewriter fills the card line by line, then the stamp hits
+  const vs=[...el.querySelectorAll('.tag-row .v')];let i=0;
+  const next=()=>{
+    if(el.hidden) return;
+    if(i>=vs.length){setTimeout(()=>{$('dsStamp').classList.add('hit');beep(55,.3,'square',.22);beep(110,.12,'square',.1);},250);return;}
+    const v=vs[i++],txt=v.dataset.v;let k=0;
+    const iv=setInterval(()=>{v.textContent=txt.slice(0,++k);if(k%2)typeClack();if(k>=txt.length){clearInterval(iv);setTimeout(next,reduce?0:90);}},reduce?0:24);
+  };
+  setTimeout(next,reduce?0:500);
+  const close=()=>{el.hidden=true;el.innerHTML='';};
+  el.querySelectorAll('.mtag').forEach(t=>t.addEventListener('pointerenter',()=>{t.classList.remove('swing');void t.offsetWidth;t.classList.add('swing');chime();}));
+  $('toMenu').onclick=()=>{close();showMenu();};
+  $('again').onclick=()=>{close();newGame();cutscene(introLines().slice(3),()=>setMsg('MÜNZE EINWERFEN'));};
 }
 
 function makeOffers(){
@@ -2965,6 +3069,7 @@ function updateMenuFoot(){
   $('mfoot').textContent=a+b;
 }
 function showMenu(){
+  $('deathscr').hidden=true;$('deathscr').innerHTML='';
   stopHiss();
   closeOv();$('cine').hidden=true;$('bookOv').hidden=true;
   const sv=loadSave();
@@ -3067,6 +3172,7 @@ applySet();
 $('muteBtn').onclick=()=>{setMuted(!muted);if(muted)stopHiss();else if(!hs.on)liftSound();applySet();};
 try{if(localStorage.getItem('ld_muted')==='1')setMuted(true);}catch(e){}
 document.addEventListener('keydown',e=>{
+  if(!$('deathscr').hidden){if(e.key==='Enter'){e.preventDefault();$('again')&&$('again').click();}else if(e.key==='Escape')$('toMenu')&&$('toMenu').click();return;}
   if(typeof PZ!=='undefined'&&PZ.open){if(e.key==='Escape')closePhoneZoom();return;}
   if(!$('bookOv').hidden){
     if(e.key==='Escape'||e.key==='b'||e.key==='B')closeBook();

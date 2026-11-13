@@ -878,7 +878,12 @@ function shadow(state){
 function stepSound(n){for(let i=0;i<n;i++)setTimeout(()=>{beep(70,.09,'square',.06);beep(45,.12,'sine',.08);},i*420);}
 function steps(n=4){
   stepSound(n);shadow('come');
-  shadowTimer=setTimeout(()=>{stepSound(3);shadow('go');},n*420+1600);
+  const d=$('door'),arrive=n*420+500;
+  const busy=()=>d.classList.contains('peek')||d.classList.contains('aim')||d.classList.contains('open')||loanBusy;
+  let peeked=false;
+  setTimeout(()=>{if(busy())return;peeked=true;d.classList.add('peek');scrape();},arrive);
+  setTimeout(()=>{if(peeked&&!loanBusy&&!d.classList.contains('aim')){d.classList.remove('peek');scrape();}},arrive+2400);
+  shadowTimer=setTimeout(()=>{stepSound(3);shadow('go');},arrive+3300);
 }
 
 /* ---------- wall clock: a day runs 00:00 → 06:00 ---------- */
@@ -965,7 +970,10 @@ function evaluate(g,bet){
   const jackpot = base!=='skull' && g.every(s=>s===base||s==='joker');
   if(jackpot) total*=10;
   const curse = skulls>=3;
-  return {total:curse?0:total,wins,curse,jackpot};
+  // every full line of skulls costs extra
+  const skullLines=lines.filter(({l})=>l.every(i=>g[i]==='skull')).length;
+  const loss=curse?bet*3+skullLines*bet*5+(skulls===9?bet*20:0):0;
+  return {total:curse?0:total,wins,curse,jackpot,loss,skullLines};
 }
 
 /* ---------- reels ---------- */
@@ -1007,13 +1015,13 @@ function popMoney(n){
 }
 function render(){
   $('blind').className='blind'+(S&&S.eyeLost?' '+S.eyeLost+(has('klappe')?' patch':''):'');
-  $('dMoney').textContent=fmt(S.money);
+  $('dMoney').textContent=fmt(S.money);$('dMoney').classList.toggle('red',S.money<0);$('dMoney').classList.toggle('amb',S.money>=0);
   $('dDebt').textContent=fmt(S.debt);
   $('dDay').textContent=`${S.day}/${DAYS}`;
   $('dSpins').textContent=String(S.spinsLeft).padStart(2,'0');
   saveGame();
   $('dPuls').innerHTML='♥'.repeat(Math.max(0,S.puls))+'<i>'+'♥'.repeat(Math.max(0,3-S.puls))+'</i>';
-  const pct=Math.min(100,Math.round((S.money+S.pending+S.credits)/S.debt*100));
+  const pct=Math.max(0,Math.min(100,Math.round((S.money+S.pending+S.credits)/S.debt*100)));
   $('dBar').style.width=pct+'%';$('dPct').textContent=pct+'%';
   $('leds').innerHTML=Array.from({length:maxBet()},(_,i)=>`<i class="${i<S.credits?'on':''}"></i>`).join('');
   const canRisk=S.pending>0&&S.doubles<3&&!S.spinning;
@@ -1482,8 +1490,10 @@ function resolve(bet,fromShake){
   const r=evaluate(S.grid,bet);
   if(r.curse){
     S.grid.forEach((s,i)=>{if(s==='skull')symEl(i).classList.add('cursed');});
-    setMsg('FLUCH · 3 SCHÄDEL · NICHTS','bad');
+    const loss=fromShake?Math.ceil(r.loss/2):r.loss;
+    setMsg(`FLUCH −${fmt(loss)}${r.skullLines?` · ${r.skullLines}× LINIE`:''}`,'bad');
     melody([200,150,110],120,'sawtooth');
+    takeMoney(loss);
     if(!fromShake) trost(bet);
     S.lastBet=0;render();return;
   }
@@ -1504,6 +1514,19 @@ function resolve(bet,fromShake){
     if(!fromShake) trost(bet);
   }
   render();
+}
+function takeMoney(n){
+  if(n<=0) return;
+  S.money-=n;popMoney(-n);
+  // coins jump out of the bowl and get sucked into the slot
+  const k=Math.min(n,coins.length,12),slot=$('slot').getBoundingClientRect();
+  for(let i=0;i<k;i++){
+    let hi=0;coins.forEach((c,j)=>{if(c.y<coins[hi].y)hi=j;});const c=coins.splice(hi,1)[0];if(!c)break;
+    const r=$('desk').getBoundingClientRect();
+    const from={left:r.left+c.x/D.w*r.width-6,top:r.top+c.y/D.h*r.height-6,width:12,height:12};
+    flyCoin(from,slot,()=>{beep(300,.04,'square',.03);},i*70);
+  }
+  coinHeld=0;
 }
 function trost(bet){if(!has('trost')) return;S.money+=bet;popMoney(bet);}
 
@@ -1556,7 +1579,7 @@ function endDay(){
   if((S.spinsLeft>0&&!broke())||S.spinning||S.shaking||S.credits>0) return;
   if(S.pending) collect();
   let interest=0;
-  if(has('schwein')){interest=Math.floor(S.money*0.15);S.money+=interest;}
+  if(has('schwein')&&S.money>0){interest=Math.floor(S.money*0.15);S.money+=interest;}
   if(S.day>=DAYS){payday(interest);return;}
   S.day++;
   openShop(`Tag ${S.day-1} vorbei`, interest?`Sparschwein: +${fmt(interest)} Zinsen. `:'');
@@ -2194,7 +2217,7 @@ function openNote(){
   const owned=CHARMS.filter(c=>has(c.id)&&c.id!=='adrenalin');
   openOv(`<h2>Zettel an der Wand</h2>
     <p class="sub">Handschrift. Zittrig. Jemand vor dir.</p>
-    <p>8 Linien zählen: 3 quer, 3 runter, 2 über Kreuz.<br>Alle 9 gleich = alles ×10.<br>3 Schädel irgendwo = nichts.<br>Rütteln schiebt eine Walze. Aber er steht unter Strom.</p>
+    <p>8 Linien zählen: 3 quer, 3 runter, 2 über Kreuz.<br>Alle 9 gleich = alles ×10.<br>3 Schädel irgendwo = Fluch: Einsatz ×3 weg, jede volle Schädel-Linie kostet ×5 extra. Du kannst ins Minus rutschen.<br>Rütteln schiebt eine Walze. Aber er steht unter Strom.</p>
     <div class="paytable">${keys.map(k=>`<span class="e">${SYMS[k].e}</span><span>${SYMS[k].n}</span><span class="p">${fmt(symValue(k)*mult())} pro Münze</span>`).join('')}</div>
     ${owned.length?`<div class="charmlist"><b>Was ich habe:</b>${owned.map(c=>`<span>– ${c.n}${c.stack?' ×'+S.charms[c.id]:''}: ${c.d}</span>`).join('')}</div>`:''}
     <button class="big" id="closeNote" type="button">Zurückhängen</button>`,'paper');
@@ -2227,7 +2250,7 @@ function bookPages(){
     <label class="opt" for="tmN"><input type="radio" name="timer" id="tmN" value="normal" ${SET.timer==='normal'?'checked':''}> normal · 4 Minuten pro Tag</label>
     <label class="opt" for="tmH"><input type="radio" name="timer" id="tmH" value="hart" ${SET.timer==='hart'?'checked':''}> hart · 2½ Minuten</label>
     <p class="stuck">Um 06:00 ist der Tag vorbei. Egal wie viele Drehs noch übrig sind.</p>`);
-  P.push(`<h3>Regeln</h3><p>8 Linien: 3 quer, 3 runter, 2 über Kreuz. Alle 9 gleich = alles ×10. 3 Schädel = nichts.</p>
+  P.push(`<h3>Regeln</h3><p>8 Linien: 3 quer, 3 runter, 2 über Kreuz. Alle 9 gleich = alles ×10. 3 Schädel irgendwo = Fluch: Einsatz ×3 weg, jede volle Schädel-Linie ×5 extra. Geld kann ins Minus gehen.</p>
     <div class="pt">${keys.map(k=>`<span class="e">${SYMS[k].e}</span><span>${SYMS[k].n}</span><span>${fmt(symValue(k)*(S?mult():1))}</span>`).join('')}</div>
     <p style="margin-top:8px">pro Linie und Münze.</p>`);
   P.push(`<h3>Talismane</h3>${owned.length?'<ul>'+owned.map(c=>`<li>${c.n}${c.stack?' ×'+S.charms[c.id]:''}: ${c.d}</li>`).join('')+'</ul>':'<p class="stuck">Noch nichts. Das Tablett kommt zwischen den Tagen durch die Klappe.</p>'}`);

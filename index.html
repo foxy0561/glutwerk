@@ -406,6 +406,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 }
 @media (max-width:420px){header .logo{display:none}}
 </style>
+<script src="lang.js"></script>
 <script src="noselect.js"></script>
 </head>
 <body>
@@ -418,26 +419,27 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
     <div id="siteName"></div>
   </a>
   <nav class="nav">
-    <a href="./" class="active">Spiele</a>
+    <a href="./" class="active" data-en="Games">Spiele</a>
     <a href="minecraft/">Minecraft</a>
-    <a href="thyrvenna/">Foxys Welt</a>
-    <a href="karten/">Karten</a>
+    <a href="thyrvenna/" data-en="Foxy's World">Foxys Welt</a>
+    <a href="karten/" data-en="Cards">Karten</a>
   </nav>
   <label class="search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="search" type="text" placeholder="Spiel suchen…">
+    <input id="search" type="text" placeholder="Spiel suchen…" data-en-ph="Search games…">
   </label>
   <button class="launcher-btn soon" id="launcherBtn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>
     <span class="lb-text">Launcher</span>
-    <span class="soon-tag" id="launcherTag">BALD</span>
-    <span class="launcher-tip">Der Glutwerk-Launcher für Windows ist noch in Arbeit. Bis dahin kannst du alle Spiele direkt hier im Browser spielen.</span>
+    <span class="soon-tag" id="launcherTag" data-en="SOON">BALD</span>
+    <span class="launcher-tip" data-en="The Glutwerk launcher for Windows is still in the works. Until then you can play every game right here in your browser.">Der Glutwerk-Launcher für Windows ist noch in Arbeit. Bis dahin kannst du alle Spiele direkt hier im Browser spielen.</span>
   </button>
-  <a class="glut-chip" id="glutChip" href="karten/" title="Glut-Punkte: Damit öffnest du Kartenpacks">
+  <div id="langSlot" style="display:contents"></div>
+  <a class="glut-chip" id="glutChip" href="karten/" title="Glut-Punkte: Damit öffnest du Kartenpacks" data-en-title="Glut points: open card packs with them">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>
     <b id="glutVal">0</b>
   </a>
-  <button class="name-btn" id="nameBtn" title="Spielername">
+  <button class="name-btn" id="nameBtn" title="Spielername" data-en-title="Player name">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
     <span id="nameLabel">Name eingeben</span>
   </button>
@@ -449,15 +451,15 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   <div class="layout">
   <div class="main-col">
   <div class="toolbar">
-    <h2>Alle Spiele <small id="count"></small></h2>
+    <h2><span data-en="All games">Alle Spiele</span> <small id="count"></small></h2>
     <div class="toolbar-right">
       <div class="tabs">
-        <button class="tab active" data-filter="all">Alle</button>
-        <button class="tab" data-filter="browser">Im Browser</button>
+        <button class="tab active" data-filter="all" data-en="All">Alle</button>
+        <button class="tab" data-filter="browser" data-en="In browser">Im Browser</button>
         <button class="tab" data-filter="download">Download</button>
       </div>
-      <button class="chip-filter" data-only="mobile"><span class="ico-mobile"></span>Handy</button>
-      <button class="chip-filter" data-only="multi"><span class="ico-multi"></span>Mehrspieler</button>
+      <button class="chip-filter" data-only="mobile"><span class="ico-mobile"></span><span data-en="Phone">Handy</span></button>
+      <button class="chip-filter" data-only="multi"><span class="ico-multi"></span><span data-en="Multiplayer">Mehrspieler</span></button>
     </div>
   </div>
 
@@ -476,22 +478,22 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <div class="overlay" id="player">
   <div class="player-bar">
     <h3 id="playerTitle"></h3>
-    <span class="player-glut" id="playerGlut" title="Du sammelst gerade Glut-Punkte"></span>
+    <span class="player-glut" id="playerGlut" title="Du sammelst gerade Glut-Punkte" data-en-title="You are collecting Glut points"></span>
     <button class="icon-btn fb-btn" id="fbOpenBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/><path d="M12 8v4M12 14.5v.01"/></svg>
-      <span>Fehler melden</span>
+      <span data-en="Report a bug">Fehler melden</span>
     </button>
     <button class="icon-btn" id="fullscreenBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
-      Vollbild
+      <span data-en="Fullscreen">Vollbild</span>
     </button>
     <button class="icon-btn" id="newTabBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>
-      Neuer Tab
+      <span data-en="New tab">Neuer Tab</span>
     </button>
     <button class="icon-btn" id="closeBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
-      Schließen
+      <span data-en="Close">Schließen</span>
     </button>
   </div>
   <iframe class="player-frame" id="frame" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
@@ -501,21 +503,21 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <div class="modal-wrap" id="dlModal">
   <div class="modal">
     <h3 id="dlTitle">Download</h3>
-    <p>Das Spiel wird von GitHub heruntergeladen. Windows zeigt bei kleinen Hobby-Spielen eine Warnung an, das ist normal. So startest du es trotzdem:</p>
+    <p data-en="The game is downloaded from GitHub. Windows shows a warning for small hobby games, that is normal. Here is how to start it anyway:">Das Spiel wird von GitHub heruntergeladen. Windows zeigt bei kleinen Hobby-Spielen eine Warnung an, das ist normal. So startest du es trotzdem:</p>
     <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-text">Lade die Datei herunter und <b>entpacke</b> sie, falls es eine .zip ist.</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-text">Starte die <b>.exe</b>. Wenn ein blaues Fenster kommt, klicke auf <b>„Weitere Informationen“</b>.
-        <div class="fake-win">Der Computer wurde durch Windows geschützt<br><u>Weitere Informationen</u></div>
+      <div class="step"><div class="step-num">1</div><div class="step-text" data-en="Download the file and <b>unzip</b> it if it is a .zip.">Lade die Datei herunter und <b>entpacke</b> sie, falls es eine .zip ist.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><span data-en="Start the <b>.exe</b>. If a blue window appears, click <b>“More info”</b>.">Starte die <b>.exe</b>. Wenn ein blaues Fenster kommt, klicke auf <b>„Weitere Informationen“</b>.</span>
+        <div class="fake-win" data-en="Windows protected your PC<br><u>More info</u>">Der Computer wurde durch Windows geschützt<br><u>Weitere Informationen</u></div>
       </div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-text">Jetzt erscheint unten der Button <b>„Trotzdem ausführen“</b>. Klick drauf, fertig!
-        <div class="fake-win">App: Spiel.exe<div class="row"><span class="wbtn hl">Trotzdem ausführen</span><span class="wbtn">Nicht ausführen</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><span data-en="Now the button <b>“Run anyway”</b> appears at the bottom. Click it, done!">Jetzt erscheint unten der Button <b>„Trotzdem ausführen“</b>. Klick drauf, fertig!</span>
+        <div class="fake-win">App: Spiel.exe<div class="row"><span class="wbtn hl" data-en="Run anyway">Trotzdem ausführen</span><span class="wbtn" data-en="Don't run">Nicht ausführen</span></div></div>
       </div></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" id="dlCancel">Abbrechen</button>
+      <button class="btn btn-ghost" id="dlCancel" data-en="Cancel">Abbrechen</button>
       <a class="btn btn-dl" id="dlGo" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>
-        Jetzt downloaden
+        <span data-en="Download now">Jetzt downloaden</span>
       </a>
     </div>
   </div>
@@ -525,17 +527,17 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <div class="modal-wrap" id="fbModal">
   <div class="modal">
     <h3 id="fbTitle">Feedback</h3>
-    <p>Was ist dir aufgefallen? Deine Nachricht geht direkt an den Entwickler.</p>
+    <p data-en="What did you notice? Your message goes straight to the developer.">Was ist dir aufgefallen? Deine Nachricht geht direkt an den Entwickler.</p>
     <div class="fb-kinds" id="fbKinds">
-      <button class="fb-kind on" data-kind="Bug">🐞 Fehler</button>
-      <button class="fb-kind" data-kind="Idee">💡 Idee</button>
-      <button class="fb-kind" data-kind="Lob">❤️ Lob</button>
+      <button class="fb-kind on" data-kind="Bug" data-en="🐞 Bug">🐞 Fehler</button>
+      <button class="fb-kind" data-kind="Idee" data-en="💡 Idea">💡 Idee</button>
+      <button class="fb-kind" data-kind="Lob" data-en="❤️ Praise">❤️ Lob</button>
     </div>
-    <textarea class="fb-text" id="fbText" maxlength="1000" placeholder="z.B. In Level 3 falle ich durch den Boden, wenn ich …"></textarea>
+    <textarea class="fb-text" id="fbText" maxlength="1000" placeholder="z.B. In Level 3 falle ich durch den Boden, wenn ich …" data-en-ph="e.g. In level 3 I fall through the floor when I …"></textarea>
     <div class="name-hint" id="fbHint"></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" id="fbCancel">Abbrechen</button>
-      <button class="btn btn-play" id="fbSend">Senden</button>
+      <button class="btn btn-ghost" id="fbCancel" data-en="Cancel">Abbrechen</button>
+      <button class="btn btn-play" id="fbSend" data-en="Send">Senden</button>
     </div>
   </div>
 </div>
@@ -546,13 +548,13 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <!-- Spielername -->
 <div class="modal-wrap" id="nameModal">
   <div class="modal">
-    <h3>Dein Spielername</h3>
-    <p>Der Name wird automatisch in allen Glutwerk-Spielen übernommen, die einen Namen brauchen.</p>
-    <input class="name-input" id="nameInput" maxlength="12" autocomplete="off" spellcheck="false" placeholder="z.B. Foxy">
-    <div class="name-hint">Maximal 12 Zeichen · wird nur auf diesem Gerät gespeichert</div>
+    <h3 data-en="Your player name">Dein Spielername</h3>
+    <p data-en="The name is used automatically in every Glutwerk game that needs a name.">Der Name wird automatisch in allen Glutwerk-Spielen übernommen, die einen Namen brauchen.</p>
+    <input class="name-input" id="nameInput" maxlength="12" autocomplete="off" spellcheck="false" placeholder="z.B. Foxy" data-en-ph="e.g. Foxy">
+    <div class="name-hint" data-en="Up to 12 characters · only saved on this device">Maximal 12 Zeichen · wird nur auf diesem Gerät gespeichert</div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" id="nameCancel">Abbrechen</button>
-      <button class="btn btn-play" id="nameSave">Speichern</button>
+      <button class="btn btn-ghost" id="nameCancel" data-en="Cancel">Abbrechen</button>
+      <button class="btn btn-play" id="nameSave" data-en="Save">Speichern</button>
     </div>
   </div>
 </div>
@@ -636,11 +638,14 @@ const GAMES = [
     type: "browser",
     url: "https://foxy0561.github.io/Kiko-H-pft/",
     desc: "Retro-Jump'n'Run mit 3 Welten und 15 Leveln. Allein, zu viert an einem Gerät oder online mit Freunden.",
+    desc_en: "Retro jump'n'run with 3 worlds and 15 levels. Alone, four players on one device, or online with friends.",
+    tags_en: ["Jump'n'run", "Co-op", "Online"],
+    multi_en: "up to 4 local · online",
     tags: ["Jump'n'Run", "Koop", "Online"],
     colors: ["#ff5f6d", "#ffc371"],
     featured: true,
     added: "2026-11-08",
-    news: [{ date: "2026-11-08", text: "Jetzt auf Glutwerk spielbar! Dein Glutwerk-Name wird automatisch übernommen." }],
+    news: [{ date: "2026-11-08", text: "Jetzt auf Glutwerk spielbar! Dein Glutwerk-Name wird automatisch übernommen.", en: "Now playable on Glutwerk! Your Glutwerk name is used automatically." }],
   },
   {
     title: "Kammerwerk",
@@ -651,10 +656,12 @@ const GAMES = [
     url: "kammerwerk/",
     dev: "In Entwicklung",
     desc: "Physik-Rätsel mit nahtlosen Portalen, Würfeln, Gel und Wachposten in 10 Testkammern.",
+    desc_en: "Physics puzzles with seamless portals, cubes, gel and sentries in 10 test chambers.",
+    tags_en: ["Puzzle", "Physics"],
     tags: ["Puzzle", "Physik"],
     colors: ["#2193b0", "#6dd5ed"],
     added: "2026-11-08",
-    news: [{ date: "2026-11-08", text: "Neu auf Glutwerk: Portale, Würfel und Testkammern." }],
+    news: [{ date: "2026-11-08", text: "Neu auf Glutwerk: Portale, Würfel und Testkammern.", en: "New on Glutwerk: portals, cubes and test chambers." }],
   },
   {
     title: "Drako",
@@ -665,10 +672,13 @@ const GAMES = [
     url: "drako/",
     dev: "In Entwicklung",
     desc: "3D-Drachenabenteuer: Kristalle sammeln, Drachen befreien, Feuer speien und den Lavafürsten besiegen.",
+    desc_en: "3D dragon adventure: collect crystals, free dragons, breathe fire and defeat the Lava Lord.",
+    tags_en: ["3D", "Adventure", "Jump'n'run"],
+    multi_en: "planned",
     tags: ["3D", "Abenteuer", "Jump'n'Run"],
     colors: ["#7b2ff7", "#f107a3"],
     added: "2026-11-09",
-    news: [{ date: "2026-11-09", text: "Neu auf Glutwerk: Drako mit Spielstand-Speicher, flüssigerer Grafik und Rückweg aus der Hauptwelt." }],
+    news: [{ date: "2026-11-09", text: "Neu auf Glutwerk: Drako mit Spielstand-Speicher, flüssigerer Grafik und Rückweg aus der Hauptwelt.", en: "New on Glutwerk: Drako with save games, smoother graphics and a way back from the hub world." }],
   },
   {
     title: "Riftward Defense",
@@ -679,12 +689,16 @@ const GAMES = [
     type: "browser",
     url: "riftward/",
     desc: "Tower Defense mit Online-Bestenliste, Kristallen und Erfolgen. Halte die Risse auf!",
+    desc_en: "Tower defense with online leaderboard, crystals and achievements. Hold the rifts!",
+    tags_en: ["Tower defense", "Leaderboard"],
+    multi_en: "planned",
+    note_en: "No longer being developed. Its successor Shardfall is already playable!",
     ended: "Eingestellt",
     note: "Wird nicht mehr weiterentwickelt. Der Nachfolger Shardfall ist schon spielbar!",
     tags: ["Tower Defense", "Bestenliste"],
     colors: ["#6a3093", "#a044ff"],
     added: "2026-11-08",
-    news: [{ date: "2026-11-08", text: "Neu auf Glutwerk: Version 1.2.27 mit Online-Bestenliste." }],
+    news: [{ date: "2026-11-08", text: "Neu auf Glutwerk: Version 1.2.27 mit Online-Bestenliste.", en: "New on Glutwerk: version 1.2.27 with online leaderboard." }],
   },
   {
     title: "Shardfall",
@@ -695,10 +709,12 @@ const GAMES = [
     url: "shardfall/",
     dev: "In Entwicklung · v0.4.2",
     desc: "Der neue Nachfolger von Riftward: 7 Türme mit Spezialisierungen, 11 Gegner, 3 Karten, Sammelkarten und Kristall-Shop.",
+    desc_en: "The new successor to Riftward: 7 towers with specializations, 11 enemies, 3 maps, collectible cards and a crystal shop.",
+    tags_en: ["Tower defense", "Leaderboard", "Collectible cards"],
     tags: ["Tower Defense", "Bestenliste", "Sammelkarten"],
     colors: ["#3b1d8f", "#b26bff"],
     added: "2026-11-08",
-    news: [{ date: "2026-11-08", text: "Shardfall ist da! Der Nachfolger von Riftward, noch in Entwicklung, aber schon spielbar." }],
+    news: [{ date: "2026-11-08", text: "Shardfall ist da! Der Nachfolger von Riftward, noch in Entwicklung, aber schon spielbar.", en: "Shardfall is here! The successor to Riftward, still in development but already playable." }],
   },
   {
     title: "Ameisenbau",
@@ -709,20 +725,22 @@ const GAMES = [
     url: "ameisenbau/",
     dev: "In Entwicklung · v2.1",
     desc: "Wähle eine von 5 Ameisenarten und grab deine Kolonie durch eine eigene Welt: Wasser, Jahreszeiten, Räuber und eine rivalisierende Kolonie. Auf PC und Handy.",
+    desc_en: "Pick one of 5 ant species and dig your colony through your own world: water, seasons, predators and a rival colony. On PC and phone.",
+    tags_en: ["Simulation", "Building", "Pixel art"],
     tags: ["Simulation", "Aufbau", "Pixel-Art"],
     colors: ["#8e5a2b", "#d4a056"],
     added: "2026-11-08",
     updated: "2026-11-11",
     news: [
-      { date: "2026-11-11", text: "Version 2.3.5: Angriffsbefehl verbessert. Die ganze rote Königin und ihre Kriegerinnen lassen sich antippen, ein roter Rahmen zeigt das Ziel, und das Spiel sagt dir, wie lange der Weg dauert oder ob es gar keinen Weg gibt. Das rote Nest läuft bei Regen nicht mehr voll." },
-      { date: "2026-11-11", text: "Version 2.3.3: Regen flutet deutlich stärker. Schauer dauern länger, Wasser läuft tiefer in die Eingänge, und manchmal kommt ein Wolkenbruch mit noch viel mehr Wasser." },
-      { date: "2026-11-11", text: "Version 2.3.2: Angreifen per Befehl. Wähle Ameisen aus und tippe auf einen Gegner, die rote Königin oder ein Nest, dann verfolgen und bekämpfen sie das Ziel. Die roten Kriegerinnen neben der Königin laufen jetzt als echte Gegner heraus." },
-      { date: "2026-11-11", text: "Version 2.3.1: Graben in der Tiefe repariert. Die nächste Ameise übernimmt den nächsten Block, statt dass alle nach oben laufen, und Wasser im Weg wird abgeschöpft." },
-      { date: "2026-11-10", text: "Version 2.3: Käfer und Skorpione kommen aus Nestern in Höhlen, die du zerstören kannst. Steine lassen sich jetzt abbauen, der Maulwurf ist schwächer und flieht, und die Nacht hat keine harte Kante mehr." },
-      { date: "2026-11-10", text: "Version 2.2: Wochen-Welt mit Bestenliste (jede Woche dieselbe Welt für alle), neue Tutorial-Welt mit großem Finale, und runde, natürlich wirkende Gänge." },
-      { date: "2026-11-09", text: "Version 2.1: Riesige Bäume und hohes Gras im Ameisenmaßstab, große Blätter und Beute zum Zerlegen, Ameisen per Klick an einen Ort schicken, und neue Räume graben ihren Gang automatisch." },
-      { date: "2026-11-08", text: "Version 2.0: Hauptmenü, Welt-Einstellungen (Größe, Schwierigkeit, Wetter, Rivalen) und 5 Ameisenarten, darunter Blattschneider, die Pilze züchten." },
-      { date: "2026-11-08", text: "Neu auf Glutwerk: Grab deine eigene Kolonie, auch auf dem Handy." },
+      { date: "2026-11-11", text: "Version 2.3.5: Angriffsbefehl verbessert. Die ganze rote Königin und ihre Kriegerinnen lassen sich antippen, ein roter Rahmen zeigt das Ziel, und das Spiel sagt dir, wie lange der Weg dauert oder ob es gar keinen Weg gibt. Das rote Nest läuft bei Regen nicht mehr voll.", en: "Version 2.3.5: Better attack orders. The whole red queen and her warriors can be tapped, a red frame shows the target, and the game tells you how long the path is or if there is no path at all. The red nest no longer floods in rain." },
+      { date: "2026-11-11", text: "Version 2.3.3: Regen flutet deutlich stärker. Schauer dauern länger, Wasser läuft tiefer in die Eingänge, und manchmal kommt ein Wolkenbruch mit noch viel mehr Wasser.", en: "Version 2.3.3: Rain floods much harder. Showers last longer, water runs deeper into the entrances, and sometimes a cloudburst brings even more water." },
+      { date: "2026-11-11", text: "Version 2.3.2: Angreifen per Befehl. Wähle Ameisen aus und tippe auf einen Gegner, die rote Königin oder ein Nest, dann verfolgen und bekämpfen sie das Ziel. Die roten Kriegerinnen neben der Königin laufen jetzt als echte Gegner heraus.", en: "Version 2.3.2: Attack on command. Select ants and tap an enemy, the red queen or a nest, and they chase and fight the target. The red warriors next to the queen now come out as real enemies." },
+      { date: "2026-11-11", text: "Version 2.3.1: Graben in der Tiefe repariert. Die nächste Ameise übernimmt den nächsten Block, statt dass alle nach oben laufen, und Wasser im Weg wird abgeschöpft.", en: "Version 2.3.1: Digging deep fixed. The next ant takes the next block instead of everyone walking up, and water in the way gets scooped out." },
+      { date: "2026-11-10", text: "Version 2.3: Käfer und Skorpione kommen aus Nestern in Höhlen, die du zerstören kannst. Steine lassen sich jetzt abbauen, der Maulwurf ist schwächer und flieht, und die Nacht hat keine harte Kante mehr.", en: "Version 2.3: Beetles and scorpions come out of nests in caves that you can destroy. Stones can now be mined, the mole is weaker and runs away, and night no longer has a hard edge." },
+      { date: "2026-11-10", text: "Version 2.2: Wochen-Welt mit Bestenliste (jede Woche dieselbe Welt für alle), neue Tutorial-Welt mit großem Finale, und runde, natürlich wirkende Gänge.", en: "Version 2.2: Weekly world with leaderboard (the same world for everyone each week), a new tutorial world with a big finale, and round, natural-looking tunnels." },
+      { date: "2026-11-09", text: "Version 2.1: Riesige Bäume und hohes Gras im Ameisenmaßstab, große Blätter und Beute zum Zerlegen, Ameisen per Klick an einen Ort schicken, und neue Räume graben ihren Gang automatisch.", en: "Version 2.1: Giant trees and tall grass at ant scale, big leaves and prey to cut up, send ants to a spot with a click, and new rooms dig their tunnel automatically." },
+      { date: "2026-11-08", text: "Version 2.0: Hauptmenü, Welt-Einstellungen (Größe, Schwierigkeit, Wetter, Rivalen) und 5 Ameisenarten, darunter Blattschneider, die Pilze züchten.", en: "Version 2.0: Main menu, world settings (size, difficulty, weather, rivals) and 5 ant species, including leafcutters that grow fungus." },
+      { date: "2026-11-08", text: "Neu auf Glutwerk: Grab deine eigene Kolonie, auch auf dem Handy.", en: "New on Glutwerk: dig your own colony, on your phone too." },
     ],
   },
   {
@@ -734,10 +752,12 @@ const GAMES = [
     url: "klarwasser/",
     dev: "In Entwicklung · v1.1",
     desc: "Aquarium-Simulation: Wasserwerte im Griff behalten, Deko aus echten Materialien, 16 Fischarten, Krankheiten, Schnecken und bis zu 4 Becken.",
+    desc_en: "Aquarium simulation: keep the water values in check, decor made from real materials, 16 fish species, diseases, snails and up to 4 tanks.",
+    tags_en: ["Simulation", "Aquarium", "Building"],
     tags: ["Simulation", "Aquarium", "Aufbau"],
     colors: ["#0f6e7a", "#f0b357"],
     added: "2026-11-11",
-    news: [{ date: "2026-11-11", text: "Neu auf Glutwerk: Klarwasser! Bau dein Aquarium, gewöhn Fische im Beutel ein und überleb Stromausfälle, Hitzewellen und Weißpünktchen. 13 Ziele mit Belohnungen." }],
+    news: [{ date: "2026-11-11", text: "Neu auf Glutwerk: Klarwasser! Bau dein Aquarium, gewöhn Fische im Beutel ein und überleb Stromausfälle, Hitzewellen und Weißpünktchen. 13 Ziele mit Belohnungen.", en: "New on Glutwerk: Klarwasser (Clear Water)! Build your aquarium, acclimate fish in the bag and survive power cuts, heat waves and white spot. 13 goals with rewards." }],
   },
   {
     title: "Letzter Dreh",
@@ -748,10 +768,12 @@ const GAMES = [
     url: "letzter-dreh/",
     dev: "In Entwicklung",
     desc: "Horror-Glücksspiel: Du wachst angekettet an einem alten Spielautomaten auf. Münzen einwerfen, Hebel ziehen, Schulden abbezahlen, bevor der Kassierer runterkommt. Rütteln, leihen, überleben.",
+    desc_en: "Horror gambling game: you wake up chained to an old slot machine. Insert coins, pull the lever, pay off your debt before the cashier comes down. Shake, borrow, survive.",
+    tags_en: ["Horror", "Gambling", "Roguelike"],
     tags: ["Horror", "Glücksspiel", "Roguelike"],
     colors: ["#5a0f12", "#e3443a"],
     added: "2026-11-12",
-    news: [{ date: "2026-11-12", text: "Neu auf Glutwerk: Letzter Dreh! Ein Horror-Glücksspiel im Keller. Mit Kopfhörern spielen." }],
+    news: [{ date: "2026-11-12", text: "Neu auf Glutwerk: Letzter Dreh! Ein Horror-Glücksspiel im Keller. Mit Kopfhörern spielen.", en: "New on Glutwerk: Letzter Dreh (Last Spin)! A horror gambling game in the basement. Play with headphones." }],
   },
 
 ];
@@ -761,7 +783,10 @@ const GAMES = [
    ========================================================= */
 const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>';
 const ICON_DL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>';
-const LABELS = { browser: "Im Browser", download: "Download", soon: "Bald" };
+const LABELS = { browser: L("Im Browser", "In browser"), download: "Download", soon: L("Bald", "Soon") };
+/* Englische Texte eines Spiels: desc_en, tags_en, note_en, multi_en, bei news: en */
+const T = (g, k) => (EN && g[k + "_en"]) || g[k];
+const devText = t => !EN ? t : String(t).replace("In Entwicklung", "In development").replace("Eingestellt", "Discontinued");
 
 let filter = "all";
 let query = "";
@@ -792,7 +817,7 @@ function setName(n) {
 }
 function renderName() {
   const n = getName();
-  $("nameLabel").textContent = n || "Name eingeben";
+  $("nameLabel").textContent = n || L("Name eingeben", "Enter name");
   $("nameBtn").classList.toggle("empty", !n);
 }
 
@@ -807,7 +832,7 @@ function status(g) {
   if (g.updated && g.updated !== g.added && daysAgo(g.updated) <= NEW_DAYS && (!seen || g.updated > seen)) return "upd";
   return "";
 }
-const fmtDate = d => { const [y, m, t] = d.split("-"); return `${t}.${m}.${y}`; };
+const fmtDate = d => { const [y, m, t] = d.split("-"); return EN ? `${m}/${t}/${y}` : `${t}.${m}.${y}`; };
 
 /* ---- Updates: kommen automatisch aus updates.json (wird bei jedem Push neu erzeugt) ---- */
 let UPD = {};
@@ -825,7 +850,7 @@ function updScore(g) {
 }
 function relDay(d) {
   const t = Math.round((new Date(today() + "T12:00:00") - new Date(d + "T12:00:00")) / 864e5);
-  return t <= 0 ? "Heute" : t === 1 ? "Gestern" : t < 7 ? `Vor ${t} Tagen` : fmtDate(d);
+  return t <= 0 ? L("Heute", "Today") : t === 1 ? L("Gestern", "Yesterday") : t < 7 ? L(`Vor ${t} Tagen`, `${t} days ago`) : fmtDate(d);
 }
 function renderNews() {
   const items = [], seen = new Set();
@@ -833,10 +858,10 @@ function renderNews() {
   GAMES.forEach(g => {
     const u = UPD[gKey(g)];
     if (u) u.items.forEach(i => add(g, i.d, i.t));
-    (g.news || []).forEach(n => add(g, n.date, n.text));
+    (g.news || []).forEach(n => add(g, n.date, (EN && n.en) || n.text));
   });
   const K = UPD["karten/"];
-  if (K) K.items.forEach(i => add({ title: "Karten", karten: true, colors: ["#b26bff", "#ff6ad5"] }, i.d, i.t));
+  if (K) K.items.forEach(i => add({ title: L("Karten", "Cards"), karten: true, colors: ["#b26bff", "#ff6ad5"] }, i.d, i.t));
   items.sort((a, b) => b.d.localeCompare(a.d));
   // Alles vom selben Spiel am selben Tag zu einem Eintrag zusammenfassen
   const grp = [];
@@ -853,14 +878,14 @@ function renderNews() {
     const c = i.g.colors || ["#ff6a2b", "#ffb347"];
     const vm = i.ts.map(t => (t.match(/^v([\d.]+) · /) || [])[1]).filter(Boolean)[0];
     const txt = i.ts.map(t => t.replace(/^v[\d.]+ · /, ""));
-    return head + `<button class="upd-it" style="--c1:${c[0]};--c2:${c[1]}" ${i.g.karten ? 'data-karten="1"' : `data-upd="${esc(i.g.title)}"`} title="${i.g.karten ? "Zum Karten-Tab" : "Spiel öffnen"}">
-      <i></i><span><span class="upd-g">${esc(i.g.title)}${vm ? `<small>v${esc(vm)}</small>` : ""}${i.ts.length > 1 ? `<small>${i.ts.length} Änderungen</small>` : ""}</span>
+    return head + `<button class="upd-it" style="--c1:${c[0]};--c2:${c[1]}" ${i.g.karten ? 'data-karten="1"' : `data-upd="${esc(i.g.title)}"`} title="${i.g.karten ? L("Zum Karten-Tab", "Go to the cards tab") : L("Spiel öffnen", "Open game")}">
+      <i></i><span><span class="upd-g">${esc(i.g.title)}${vm ? `<small>v${esc(vm)}</small>` : ""}${i.ts.length > 1 ? `<small>${L(i.ts.length + " Änderungen", i.ts.length + " changes")}</small>` : ""}</span>
       <span class="upd-t">${txt.length > 1 ? txt.map(t => "• " + esc(t)).join("<br>") : esc(txt[0])}</span></span></button>`;
   }).join("");
   $("updates").className = "upd kurz";
   $("updates").innerHTML = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Updates</h2>
-    <div class="upd-sub">Was sich in den Spielen getan hat</div>
-    <div class="upd-list">${rows}</div><button class="upd-more" type="button">Alle Updates zeigen</button>`;
+    <div class="upd-sub">${L("Was sich in den Spielen getan hat", "What changed in the games · notes in German")}</div>
+    <div class="upd-list">${rows}</div><button class="upd-more" type="button">${L("Alle Updates zeigen", "Show all updates")}</button>`;
 }
 $("updates").addEventListener("click", e => {
   if (e.target.closest(".upd-more")) { $("updates").classList.remove("kurz"); return; }
@@ -889,9 +914,9 @@ function compatHTML(g) {
   const chip = (cls, on, label) => `<span class="cp ${cls}${on ? "" : " off"}">${ICONS[cls]}${label}</span>`;
   return `<div class="compat">
     ${chip("pc", pl.includes("pc"), "PC")}
-    ${chip("mobile", pl.includes("mobile"), "Handy")}
-    ${md.includes("single") ? chip("single", true, "Einzelspieler") : ""}
-    ${md.includes("multi") ? chip("multi", true, "Mehrspieler" + (g.multi ? " · " + esc(g.multi) : "")) : ""}
+    ${chip("mobile", pl.includes("mobile"), L("Handy", "Phone"))}
+    ${md.includes("single") ? chip("single", true, L("Einzelspieler", "Single player")) : ""}
+    ${md.includes("multi") ? chip("multi", true, L("Mehrspieler", "Multiplayer") + (g.multi ? " · " + esc(T(g, "multi")) : "")) : ""}
   </div>`;
 }
 const only = { mobile: false, multi: false };
@@ -913,11 +938,11 @@ function coverStyle(g) {
 }
 function actionHTML(g, big) {
   const cls = big ? "" : "";
-  if (g.type === "soon") return `<button class="btn btn-ghost" disabled>Bald verfügbar</button>`;
+  if (g.type === "soon") return `<button class="btn btn-ghost" disabled>${L("Bald verfügbar", "Coming soon")}</button>`;
   const dis = g.url ? "" : "disabled";
   if (g.type === "download")
     return `<button class="btn btn-dl ${cls}" data-dl="${esc(g.title)}" ${dis}>${ICON_DL} Download</button>`;
-  return `<button class="btn btn-play ${cls}" data-play="${esc(g.title)}" ${dis}>${ICON_PLAY} Spielen</button>`;
+  return `<button class="btn btn-play ${cls}" data-play="${esc(g.title)}" ${dis}>${ICON_PLAY} ${L("Spielen", "Play")}</button>`;
 }
 
 function renderHero() {
@@ -926,10 +951,10 @@ function renderHero() {
   $("hero").innerHTML = `
     <div class="hero-bg" style="${coverStyle(g)}">${g.shots && g.shots[0] ? `<img src="${esc(g.shots[g.shots.length > 1 ? 1 : 0])}" alt="">` : g.cover ? coverHTML(g) : ""}</div>
     <div class="hero-content">
-      <div class="hero-label">★ Empfohlen</div>
+      <div class="hero-label">★ ${L("Empfohlen", "Featured")}</div>
       <h1>${esc(g.title)}</h1>
       ${onlineCounts[gameId(g)] ? `<div class="hero-live"><span class="live-dot"></span>${liveText(onlineCounts[gameId(g)])}</div>` : ""}
-      <p>${esc(g.desc)}</p>
+      <p>${esc(T(g, "desc"))}</p>
       ${actionHTML(g, true)}
     </div>`;
 }
@@ -939,11 +964,11 @@ function renderGrid() {
     (filter === "all" || g.type === filter) &&
     (!only.mobile || (g.platforms || []).includes("mobile")) &&
     (!only.multi || (g.modes || []).includes("multi")) &&
-    (g.title + " " + (g.tags || []).join(" ")).toLowerCase().includes(query)
+    (g.title + " " + (g.tags || []).join(" ") + " " + (g.tags_en || []).join(" ")).toLowerCase().includes(query)
   );
   $("count").textContent = `(${list.length})`;
   if (!list.length) {
-    $("grid").innerHTML = `<div class="empty">Keine Spiele gefunden.</div>`;
+    $("grid").innerHTML = `<div class="empty">${L("Keine Spiele gefunden.", "No games found.")}</div>`;
     return;
   }
   $("grid").innerHTML = list.map(g => `
@@ -951,19 +976,19 @@ function renderGrid() {
       <div class="cover">
         <div class="cover-art" style="${coverStyle(g)}">${coverHTML(g)}</div>
         <div class="badge ${g.type}">${LABELS[g.type]}</div>
-        ${g.dev ? `<div class="dev-badge">${esc(g.dev)}</div>` : ""}
-        ${g.ended ? `<div class="dev-badge ended">${esc(g.ended)}</div>` : ""}
+        ${g.dev ? `<div class="dev-badge">${esc(devText(g.dev))}</div>` : ""}
+        ${g.ended ? `<div class="dev-badge ended">${esc(devText(g.ended))}</div>` : ""}
         ${liveBadge(g)}
-        ${status(g) === "new" ? `<div class="badge-new">NEU</div>` : status(g) === "upd" ? `<div class="badge-new upd">UPDATE</div>` : ""}
+        ${status(g) === "new" ? `<div class="badge-new">${L("NEU", "NEW")}</div>` : status(g) === "upd" ? `<div class="badge-new upd">UPDATE</div>` : ""}
       </div>
       <div class="card-body">
         <h3>${esc(g.title)}</h3>
-        <p>${esc(g.desc)}</p>
-        ${g.note ? `<div class="card-note">${esc(g.note)}</div>` : ""}
-        ${status(g) && g.news && g.news[0] ? `<div class="card-news">${esc(g.news[0].text)}</div>` : ""}
+        <p>${esc(T(g, "desc"))}</p>
+        ${g.note ? `<div class="card-note">${esc(T(g, "note"))}</div>` : ""}
+        ${status(g) && g.news && g.news[0] ? `<div class="card-news">${esc((EN && g.news[0].en) || g.news[0].text)}</div>` : ""}
         ${compatHTML(g)}
-        <div class="tags">${(g.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
-        ${!g.url && g.type !== "soon" ? `<div class="missing">⚠ Link fehlt noch</div>` : ""}
+        <div class="tags">${(T(g, "tags") || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+        ${!g.url && g.type !== "soon" ? `<div class="missing">⚠ ${L("Link fehlt noch", "Link missing")}</div>` : ""}
         <div class="card-actions">${actionHTML(g)}</div>
       </div>
     </article>`).join("");
@@ -1006,13 +1031,13 @@ const ICON_FIRE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1
 let lastTopRows = null;
 function renderTop(rows) {
   if (rows) lastTopRows = rows;
-  const head = `<h2>${ICON_FIRE} Beliebt</h2><div class="top-sub">Die meisten Spieler der letzten 7 Tage</div>`;
+  const head = `<h2>${ICON_FIRE} ${L("Beliebt", "Popular")}</h2><div class="top-sub">${L("Die meisten Spieler der letzten 7 Tage", "Most players in the last 7 days")}</div>`;
   const list = (rows || [])
     .map(r => ({ g: GAMES.find(x => gameId(x) === r.game), n: Number(r.players) }))
     .filter(x => x.g && x.g.type !== "soon")
     .slice(0, TOP_COUNT);
   if (!list.length) {
-    $("top").innerHTML = head + `<div class="top-empty">${rows ? "Diese Woche wurde noch nichts gespielt. Starte ein Spiel und bring es nach oben!" : "Lädt…"}</div>`;
+    $("top").innerHTML = head + `<div class="top-empty">${rows ? L("Diese Woche wurde noch nichts gespielt. Starte ein Spiel und bring es nach oben!", "Nothing played yet this week. Start a game and push it to the top!") : L("Lädt…", "Loading…")}</div>`;
     return;
   }
   $("top").innerHTML = head + `<div class="top-list">` + list.map((x, i) => `
@@ -1021,7 +1046,7 @@ function renderTop(rows) {
       <span class="top-thumb" style="${coverStyle(x.g)}">${x.g.shots && x.g.shots[0] ? `<img src="${esc(x.g.shots[0])}" alt="" loading="lazy">` : ""}</span>
       <span class="top-info">
         <span class="top-title">${esc(x.g.title)}</span>
-        <span class="top-count">${x.n} Spieler${onlineCounts[gameId(x.g)] ? ` · <span class="top-live">● ${onlineCounts[gameId(x.g)]} online</span>` : ""}</span>
+        <span class="top-count">${x.n} ${L("Spieler", x.n === 1 ? "player" : "players")}${onlineCounts[gameId(x.g)] ? ` · <span class="top-live">● ${onlineCounts[gameId(x.g)]} online</span>` : ""}</span>
       </span>
     </button>`).join("") + `</div>`;
 }
@@ -1036,7 +1061,7 @@ function loadTop() {
 /* ---- Gerade online ---- */
 let onlineCounts = {};
 let pingTimer = null;
-const liveText = n => n === 1 ? "1 spielt gerade" : `${n} spielen gerade`;
+const liveText = n => n === 1 ? L("1 spielt gerade", "1 playing now") : L(`${n} spielen gerade`, `${n} playing now`);
 function liveBadge(g) {
   const n = onlineCounts[gameId(g)];
   return n ? `<div class="live-badge"><span class="live-dot"></span>${liveText(n)}</div>` : "";
@@ -1085,7 +1110,7 @@ const glutGet = () => Math.max(0, parseInt(store("glutwerk-glut") || "0", 10) ||
 function glutState() { try { return JSON.parse(store("glutwerk-glut-state") || "{}") || {}; } catch (e) { return {}; } }
 function glutSave(s) { store("glutwerk-glut-state", JSON.stringify(s)); }
 function renderGlut(bump) {
-  $("glutVal").textContent = glutGet().toLocaleString("de-DE");
+  $("glutVal").textContent = glutGet().toLocaleString(EN ? "en-US" : "de-DE");
   if (bump) { const c = $("glutChip"); c.classList.remove("bump"); void c.offsetWidth; c.classList.add("bump"); }
 }
 function glutAdd(n, title, text) {
@@ -1102,28 +1127,28 @@ function toast(n, title, text) {
   $("toasts").appendChild(t);
   setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 400); }, 4200);
 }
-const PACK_LINK = ` <a href="karten/">Packs öffnen →</a>`;
+const PACK_LINK = ` <a href="karten/">${L("Packs öffnen →", "Open packs →")}</a>`;
 function glutWelcome() {
   const s = glutState();
   if (s.welcomed) return;
   s.welcomed = true; glutSave(s);
-  setTimeout(() => glutAdd(GLUT.welcome, "Willkommen auf Glutwerk!", "Ein Geschenk für deine ersten Kartenpacks." + PACK_LINK), 900);
+  setTimeout(() => glutAdd(GLUT.welcome, L("Willkommen auf Glutwerk!", "Welcome to Glutwerk!"), L("Ein Geschenk für deine ersten Kartenpacks.", "A gift for your first card packs.") + PACK_LINK), 900);
 }
 function glutOnStart(g) {
   const s = glutState(), id = gameId(g);
   s.played = s.played || {};
   if (!s.played[id]) {
     s.played[id] = today(); glutSave(s);
-    glutAdd(GLUT.newGame, "Neues Spiel entdeckt", esc(g.title) + " zum ersten Mal gestartet.");
+    glutAdd(GLUT.newGame, L("Neues Spiel entdeckt", "New game discovered"), esc(g.title) + L(" zum ersten Mal gestartet.", " started for the first time."));
     const playable = GAMES.filter(x => x.url && x.type !== "soon").map(gameId);
     if (!s.allBonus && playable.every(p => s.played[p])) {
       s.allBonus = true; glutSave(s);
-      setTimeout(() => glutAdd(GLUT.allGames, "Alle Spiele gespielt!", "Du hast jedes Glutwerk-Spiel ausprobiert." + PACK_LINK), 1200);
+      setTimeout(() => glutAdd(GLUT.allGames, L("Alle Spiele gespielt!", "Played every game!"), L("Du hast jedes Glutwerk-Spiel ausprobiert.", "You tried every Glutwerk game.") + PACK_LINK), 1200);
     }
   }
   if (s.daily !== today()) {
     s.daily = today(); glutSave(s);
-    setTimeout(() => glutAdd(GLUT.daily, "Tagesbonus", "Danke, dass du heute spielst!"), s.played[id] === today() ? 900 : 0);
+    setTimeout(() => glutAdd(GLUT.daily, L("Tagesbonus", "Daily bonus"), L("Danke, dass du heute spielst!", "Thanks for playing today!")), s.played[id] === today() ? 900 : 0);
   }
 }
 /* Spielzeit: jede volle Minute mit offenem, sichtbarem Spiel */
@@ -1131,7 +1156,7 @@ let playTimer = null, playSecs = 0;
 function renderPlayerGlut() {
   const s = glutState(), used = s.minDay === today() ? (s.minGlut || 0) : 0;
   $("playerGlut").innerHTML = used >= GLUT.minuteCap ? "" :
-    `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>${glutGet().toLocaleString("de-DE")}`;
+    `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>${glutGet().toLocaleString(EN ? "en-US" : "de-DE")}`;
 }
 function startPlayTimer() {
   clearInterval(playTimer); playSecs = 0; renderPlayerGlut();
@@ -1158,7 +1183,7 @@ function openFeedback(g) {
   $("fbText").value = "";
   $("fbModal").querySelector(".modal").classList.remove("sent");
   resetFbModal();
-  $("fbHint").textContent = "Gesendet als: " + (getName() || "Anonym") + " · ohne Anmeldung";
+  $("fbHint").textContent = L("Gesendet als: ", "Sent as: ") + (getName() || L("Anonym", "Anonymous")) + L(" · ohne Anmeldung", " · no login needed");
   $("fbModal").classList.add("open");
   setTimeout(() => $("fbText").focus(), 50);
 }
@@ -1172,8 +1197,8 @@ function bindFbModal() {
   document.querySelectorAll(".fb-kind").forEach(b => b.onclick = () => {
     document.querySelectorAll(".fb-kind").forEach(x => x.classList.remove("on"));
     b.classList.add("on"); fbKind = b.dataset.kind;
-    $("fbText").placeholder = fbKind === "Bug" ? "z.B. In Level 3 falle ich durch den Boden, wenn ich …" :
-      fbKind === "Idee" ? "z.B. Es wäre cool, wenn man …" : "Was gefällt dir besonders?";
+    $("fbText").placeholder = fbKind === "Bug" ? L("z.B. In Level 3 falle ich durch den Boden, wenn ich …", "e.g. In level 3 I fall through the floor when I …") :
+      fbKind === "Idee" ? L("z.B. Es wäre cool, wenn man …", "e.g. It would be cool if you could …") : L("Was gefällt dir besonders?", "What do you like most?");
   });
   fbKind = "Bug";
   $("fbCancel").onclick = closeFeedback;
@@ -1181,10 +1206,10 @@ function bindFbModal() {
 }
 function sendFeedback() {
   const text = $("fbText").value.trim();
-  if (text.length < 3) { $("fbText").focus(); $("fbHint").textContent = "Schreib bitte kurz, was los ist."; return; }
+  if (text.length < 3) { $("fbText").focus(); $("fbHint").textContent = L("Schreib bitte kurz, was los ist.", "Please write a few words about what happened."); return; }
   const last = +store("glutwerk-fb-last") || 0;
-  if (Date.now() - last < 30000) { $("fbHint").textContent = "Kurz warten, du hast gerade schon etwas gesendet."; return; }
-  const btn = $("fbSend"); btn.disabled = true; btn.textContent = "Sendet…";
+  if (Date.now() - last < 30000) { $("fbHint").textContent = L("Kurz warten, du hast gerade schon etwas gesendet.", "Wait a moment, you just sent something."); return; }
+  const btn = $("fbSend"); btn.disabled = true; btn.textContent = L("Sendet…", "Sending…");
   const mobile = window.matchMedia("(pointer: coarse)").matches;
   fetch(`${TOP_DB_URL}/rest/v1/bug_reports`, {
     method: "POST",
@@ -1198,12 +1223,12 @@ function sendFeedback() {
     if (!r.ok) throw 0;
     store("glutwerk-fb-last", String(Date.now()));
     $("fbModal").querySelector(".modal").innerHTML =
-      `<div class="fb-done"><div class="big">${fbKind === "Lob" ? "❤️" : fbKind === "Idee" ? "💡" : "🛠️"}</div><h3>Danke!</h3>
-       <p style="color:var(--muted);margin:6px 0 20px">Deine Nachricht ist angekommen.</p>
-       <button class="btn btn-play" onclick="closeFeedback()">Weiterspielen</button></div>`;
+      `<div class="fb-done"><div class="big">${fbKind === "Lob" ? "❤️" : fbKind === "Idee" ? "💡" : "🛠️"}</div><h3>${L("Danke!", "Thank you!")}</h3>
+       <p style="color:var(--muted);margin:6px 0 20px">${L("Deine Nachricht ist angekommen.", "Your message arrived.")}</p>
+       <button class="btn btn-play" onclick="closeFeedback()">${L("Weiterspielen", "Keep playing")}</button></div>`;
   }).catch(() => {
-    btn.disabled = false; btn.textContent = "Senden";
-    $("fbHint").textContent = "Senden hat nicht geklappt. Bist du online? Versuch es gleich nochmal.";
+    btn.disabled = false; btn.textContent = L("Senden", "Send");
+    $("fbHint").textContent = L("Senden hat nicht geklappt. Bist du online? Versuch es gleich nochmal.", "Sending failed. Are you online? Try again in a moment.");
   });
 }
 $("fbOpenBtn").onclick = () => openFeedback(currentGame);
@@ -1233,7 +1258,7 @@ function openDownload(g) {
   trackPlay(g);
   if (findGame(g.title)) glutOnStart(g);
   markSeen(g); renderGrid();
-  $("dlTitle").textContent = g.title + " herunterladen";
+  $("dlTitle").textContent = L(g.title + " herunterladen", "Download " + g.title);
   $("dlGo").href = g.url;
   $("dlModal").classList.add("open");
 }
@@ -1272,10 +1297,10 @@ $("search").oninput = e => { query = e.target.value.toLowerCase().trim(); render
 // Name einsetzen
 const half = Math.ceil(SITE_NAME.length / 2);
 $("siteName").innerHTML = esc(SITE_NAME.slice(0, half)) + "<span>" + esc(SITE_NAME.slice(half)) + "</span>";
-document.title = SITE_NAME + " – Spiele";
-$("footer").innerHTML = `© ${new Date().getFullYear()} ${esc(SITE_NAME)} · ${esc(SITE_TAGLINE)}` +
+document.title = SITE_NAME + L(" – Spiele", " – Games");
+$("footer").innerHTML = `© ${new Date().getFullYear()} ${esc(SITE_NAME)} · ${esc(L(SITE_TAGLINE, "All my games in one place."))}` +
   (GITHUB_PROFILE ? ` · <a href="${esc(GITHUB_PROFILE)}" target="_blank" rel="noopener" style="color:var(--accent)">GitHub</a>` : "") +
-  ` · <a href="#" class="footer-fb" id="footerFb">Feedback geben</a>` +
+  ` · <a href="#" class="footer-fb" id="footerFb">${L("Feedback geben", "Give feedback")}</a>` +
   ` · <a href="admin/" style="color:var(--muted);opacity:.6">Admin</a>`;
 $("footerFb").onclick = e => { e.preventDefault(); openFeedback(null); };
 

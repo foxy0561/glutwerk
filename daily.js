@@ -8,6 +8,7 @@
 (function () {
   const BONUS = [30, 40, 50, 60, 80, 100, 200];   // Glut für Tag 1 bis 7
 
+  const L = window.L || ((de) => de);
   const KARTEN = (document.currentScript && document.currentScript.dataset.karten) || "karten/";
   function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
   const day = d => d.toLocaleDateString("sv");   // JJJJ-MM-TT, Ortszeit
@@ -53,17 +54,17 @@
   function zeigen() {
     const s = document.createElement("style"); s.textContent = css; document.head.appendChild(s);
     const imKarten = KARTEN === "./";
-    const tage = BONUS.map((n, i) => `<div class="dl-d${i + 1 < tag ? " done" : ""}${i + 1 === tag ? " now" : ""}${i === 6 ? " big" : ""}">Tag ${i + 1}<b>${n}</b></div>`).join("");
+    const tage = BONUS.map((n, i) => `<div class="dl-d${i + 1 < tag ? " done" : ""}${i + 1 === tag ? " now" : ""}${i === 6 ? " big" : ""}">${L("Tag", "Day")} ${i + 1}<b>${n}</b></div>`).join("");
     const w = document.createElement("div");
     w.className = "dl-wrap";
     w.innerHTML = `<div class="dl">
-      <h2>${st.streak > 1 ? `${st.streak} Tage in Folge!` : "Willkommen zurück!"}</h2>
-      <div class="sub">${tag === 7 ? "Tag 7 erreicht: der große Bonus!" : st.streak > 1 ? "Komm morgen wieder, dann gibt es mehr." : "Komm jeden Tag vorbei, dann wird der Bonus größer."}</div>
+      <h2>${st.streak > 1 ? L(`${st.streak} Tage in Folge!`, `${st.streak} days in a row!`) : L("Willkommen zurück!", "Welcome back!")}</h2>
+      <div class="sub">${tag === 7 ? L("Tag 7 erreicht: der große Bonus!", "Day 7 reached: the big bonus!") : st.streak > 1 ? L("Komm morgen wieder, dann gibt es mehr.", "Come back tomorrow for more.") : L("Komm jeden Tag vorbei, dann wird der Bonus größer.", "Visit every day and the bonus grows.")}</div>
       <div class="dl-days">${tage}</div>
       <div class="dl-amt">+${menge} <small>Glut</small></div>
       <div class="dl-btns">
-        ${freiOffen ? (imKarten ? `<button class="dl-btn free" data-x>🎁 Gratis-Pack wartet!</button>` : `<a class="dl-btn free" href="${KARTEN}">🎁 Gratis-Pack abholen</a>`) : ""}
-        <button class="dl-btn ${freiOffen ? "ghost" : "hot"}" data-x>Einsammeln</button>
+        ${freiOffen ? (imKarten ? `<button class="dl-btn free" data-x>${L("🎁 Gratis-Pack wartet!", "🎁 Free pack waiting!")}</button>` : `<a class="dl-btn free" href="${KARTEN}">${L("🎁 Gratis-Pack abholen", "🎁 Get free pack")}</a>`) : ""}
+        <button class="dl-btn ${freiOffen ? "ghost" : "hot"}" data-x>${L("Einsammeln", "Collect")}</button>
       </div></div>`;
     document.body.appendChild(w);
     const zu = () => { w.remove(); if (typeof renderGlut === "function") renderGlut("bump"); };

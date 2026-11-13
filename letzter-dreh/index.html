@@ -101,8 +101,8 @@ button:disabled{cursor:not-allowed}
 .opening.on{opacity:1}
 .opening .fig{position:absolute;left:10%;width:80%;bottom:0;height:92%;transform:translateY(100%);transition:transform 1.4s cubic-bezier(.3,.7,.3,1)}
 .opening.on .fig{transform:translateY(0)}
-.fig .head{transform-box:fill-box;transform-origin:50% 100%;animation:ftilt 5s ease-in-out infinite alternate}
-@keyframes ftilt{0%{transform:rotate(-4deg)}60%{transform:rotate(14deg)}100%{transform:rotate(18deg)}}
+.fig .head{transform-box:view-box;transform-origin:63px 40px;animation:ftilt 5s ease-in-out infinite alternate}
+@keyframes ftilt{0%{transform:rotate(-4deg)}60%{transform:rotate(11deg)}100%{transform:rotate(14deg)}}
 .fig .fingers{animation:ftwitch 1.3s steps(2) infinite}
 @keyframes ftwitch{50%{transform:translateY(1.5px)}}
 html.calm .fig .head,html.calm .fig .fingers{animation:none}
@@ -640,11 +640,11 @@ html.calm .neon span{animation:none}
           <path d="M148 12 l2 58 M162 10 l1 40"/></g></svg>
         <div class="opening" id="opening"><svg class="fig" viewBox="0 0 120 300" preserveAspectRatio="xMidYMax meet"><defs><filter id="fglow" x="-2" y="-2" width="5" height="5"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
 <g fill="#030202" stroke="#030202" stroke-linecap="round" stroke-linejoin="round">
-<path stroke="none" d="M46 58 Q61 50 77 59 Q88 68 90 108 L95 228 Q97 262 101 298 L92 288 L86 299 L77 287 L69 299 L60 288 L52 299 L44 287 L36 299 L29 289 L22 297 Q25 262 28 228 L33 108 Q35 68 46 58Z"/>
+<path stroke="none" d="M46 58 Q53 55 56 51 L57 33 L69 34 L69 51 Q72 55 77 59 Q88 68 90 108 L95 228 Q97 262 101 298 L92 288 L86 299 L77 287 L69 299 L60 288 L52 299 L44 287 L36 299 L29 289 L22 297 Q25 262 28 228 L33 108 Q35 68 46 58Z"/>
 <path fill="none" stroke-width="7" d="M44 64 Q27 92 24 142 Q21 196 18 242"/><path fill="none" stroke-width="7" d="M79 64 Q95 94 98 144 Q101 198 104 244"/>
 <g class="fingers" fill="none" stroke-width="2.4"><path d="M18 242 L10 268 L7 284"/><path d="M18 242 L14 272 L13 290"/><path d="M19 242 L20 273 L21 291"/><path d="M20 242 L26 270 L29 283"/>
 <path d="M104 244 L112 270 L115 286"/><path d="M104 244 L108 274 L109 292"/><path d="M103 244 L102 275 L101 293"/><path d="M102 244 L96 272 L93 285"/></g>
-<g class="head"><path stroke="none" d="M54 52 L57 40 Q48 34 49 20 Q51 4 63 3 Q76 3 77 19 Q78 34 68 41 L70 53Z"/>
+<g class="head"><path stroke="none" d="M55 42 Q48 34 49 20 Q51 4 63 3 Q76 3 77 19 Q78 34 70 42 Q63 46 55 42Z"/>
 <ellipse cx="57" cy="22" rx="3.2" ry="2" fill="#ffd36a" stroke="none" filter="url(#fglow)"/><ellipse cx="70" cy="23" rx="2.8" ry="1.8" fill="#ffd36a" stroke="none" filter="url(#fglow)"/>
 <ellipse cx="57" cy="22" rx="1.6" ry="1.1" fill="#fff6d8" stroke="none"/><ellipse cx="70" cy="23" rx="1.4" ry="1" fill="#fff6d8" stroke="none"/>
 <path fill="none" stroke="#4a1a14" stroke-width=".9" d="M55 31 Q63 36 72 31"/></g></g></svg></div>

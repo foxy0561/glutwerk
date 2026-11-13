@@ -28,14 +28,14 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 button:disabled{cursor:not-allowed}
 
 .viewport{position:fixed;inset:0;overflow:hidden;background:var(--black)}
-.stage{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:#0b0907}
+.stage{position:absolute;left:0;top:0;transform-origin:0 0;background:#0b0907}
 .L{width:1280px;height:800px} .P{width:700px;height:1240px}
 .abs{position:absolute}
 
 /* ---------- room ---------- */
 .world{position:absolute;left:0;top:0;width:100%;height:100%;will-change:transform}
-.backdrop{position:absolute;top:-80px;bottom:-80px;left:-400px}
-.L .backdrop{width:2080px} .P .backdrop{width:1500px}
+.backdrop{position:absolute;top:-260px;bottom:-260px;left:-1100px}
+.L .backdrop{width:3480px} .P .backdrop{width:2900px}
 .bd-wall{position:absolute;left:0;right:0;top:0;background-image:var(--noise),radial-gradient(ellipse at 22% 70%,rgba(60,40,20,.35),transparent 25%),radial-gradient(ellipse at 70% 20%,rgba(0,0,0,.4),transparent 30%),linear-gradient(#3b3631,#2b2723 60%,#221e1b);background-blend-mode:multiply,normal,normal,normal}
 .bd-wall::before{content:"";position:absolute;inset:0;opacity:.18;background-image:linear-gradient(#000 2px,transparent 2px),linear-gradient(90deg,#000 2px,transparent 2px);background-size:160px 80px;mix-blend-mode:multiply}
 .bd-wall::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(transparent,rgba(0,0,0,.6))}
@@ -53,7 +53,7 @@ button:disabled{cursor:not-allowed}
 .L .floor{top:600px} .P .floor{top:1000px}
 .puddle{position:absolute;border-radius:50%;background:radial-gradient(ellipse,rgba(120,140,150,.22),transparent 70%)}
 .pipe{position:absolute;background:linear-gradient(#5a524c,#2a2420 60%,#15110f);border-radius:12px;box-shadow:0 6px 10px rgba(0,0,0,.6)}
-.pipe.h{left:-400px;right:-400px;top:40px;height:26px}
+.pipe.h{left:-1100px;right:-1100px;top:40px;height:26px}
 .pipe.v{width:26px;top:40px;bottom:0;background:linear-gradient(90deg,#5a524c,#2a2420 60%,#15110f)}
 .L .pipe.v{left:1235px} .P .pipe.v{left:20px}
 .drip{position:absolute;width:4px;height:8px;border-radius:2px;background:rgba(160,180,190,.6);animation:drip 3.4s infinite ease-in}
@@ -192,7 +192,7 @@ html.calm .fig .head,html.calm .fig .fingers{animation:none}
 .door .barrel{position:absolute;left:50%;top:50%;width:46px;height:22px;margin:-11px 0 0 -23px;opacity:0;transition:opacity .2s .5s;
   background:radial-gradient(circle at 25% 50%,#000 0 6px,#8a8580 7px 9px,#3a3632 10px,transparent 11px),radial-gradient(circle at 75% 50%,#000 0 6px,#8a8580 7px 9px,#3a3632 10px,transparent 11px)}
 .door.aim .barrel{opacity:1} .door.aim .slit i{opacity:0!important;transition-delay:0s}
-.ceiling{position:absolute;inset:-60px;z-index:30;pointer-events:none;transform:translateY(-110%);overflow:hidden;
+.ceiling{position:absolute;inset:-600px -1100px;z-index:30;pointer-events:none;transform:translateY(-110%);overflow:hidden;
   background-image:var(--noise),radial-gradient(circle at 50% 46%,rgba(255,200,120,.35),transparent 30%),linear-gradient(#26221e,#1a1714);background-blend-mode:multiply,normal,normal;transition:filter 5s}
 .ceiling .cpipe{position:absolute;left:-10%;right:-10%;height:34px;background:linear-gradient(#5a524c,#2a2420 60%,#15110f);border-radius:17px;box-shadow:0 10px 20px rgba(0,0,0,.6)}
 .ceiling .rose{position:absolute;left:50%;top:46%;width:46px;height:46px;margin:-23px;border-radius:50%;background:#2e2a26;box-shadow:0 0 0 6px #1d1a17}
@@ -228,8 +228,8 @@ html.calm .stage.electro{animation:none}
 .bulbwrap .bulb::before{content:"";position:absolute;left:8px;top:-10px;width:14px;height:12px;background:#3a332c;border-radius:2px}
 .bulbwrap.off .bulb{background:#4a3f2e;box-shadow:none}
 
-.dark{position:absolute;top:-80px;bottom:-80px;left:-400px;pointer-events:none;z-index:20}
-.L .dark{width:2080px} .P .dark{width:1500px}
+.dark{position:absolute;top:-260px;bottom:-260px;left:-1100px;pointer-events:none;z-index:20}
+.L .dark{width:3480px} .P .dark{width:2900px}
 .chain{position:absolute;inset:0;pointer-events:none;z-index:4}
 
 /* ---------- props around the room ---------- */
@@ -836,9 +836,7 @@ const LAYOUT={L:{W:1280,H:800,chain:'M 360 800 Q 420 760 500 778 T 470 770'},P:{
 let mode='L';
 function fit(){
   const vw=innerWidth, vh=innerHeight;
-  const cs=getComputedStyle(document.body);
-  const pl=parseFloat(cs.paddingLeft)||0, pr=parseFloat(cs.paddingRight)||0;
-  const aw=vw-pl-pr, ah=vh;
+  const pl=0, aw=vw, ah=vh;
   mode = ah>aw*1.15 ? 'P':'L';
   const st=$('stage');st.className='stage '+mode;
   const {W,H}=LAYOUT[mode];
@@ -927,7 +925,7 @@ function roomLoop(t){
   bulb.classList.toggle('off',off);
   const a=bulbDead?.97:off?.93:.82+darkBoost;
   if(bulbDead) $('dark').style.background='rgba(0,0,0,.95)';
-  else $('dark').style.background=`radial-gradient(circle at ${bx+400}px ${by+80}px, rgba(255,190,110,.06) 0, rgba(0,0,0,${off?.6:.12}) ${mode==='L'?420:560}px, rgba(0,0,0,${Math.min(.96,a)}) ${mode==='L'?900:1250}px)`;
+  else $('dark').style.background=`radial-gradient(circle at ${bx+1100}px ${by+260}px, rgba(255,190,110,.06) 0, rgba(0,0,0,${off?.6:.12}) ${mode==='L'?420:560}px, rgba(0,0,0,${Math.min(.96,a)}) ${mode==='L'?900:1250}px)`;
   requestAnimationFrame(roomLoop);
 }
 

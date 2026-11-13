@@ -149,6 +149,26 @@ html.calm .fig .head,html.calm .fig .fingers{animation:none}
 .blind.patch::after{display:none}
 .blind.l.patch{background:linear-gradient(90deg,#000 0,#000 34%,rgba(0,0,0,.8) 42%,rgba(0,0,0,.4) 50%,transparent 60%)}
 .blind.r.patch{background:linear-gradient(270deg,#000 0,#000 34%,rgba(0,0,0,.8) 42%,rgba(0,0,0,.4) 50%,transparent 60%)}
+.eyeins{position:fixed;inset:0;z-index:46;background:radial-gradient(ellipse at 50% 60%,rgba(30,10,8,.985),#000);display:grid;grid-template-rows:1fr auto auto;justify-items:center;align-items:center;gap:14px;
+  padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));touch-action:none}
+.ei-socket{position:absolute;top:22%;width:min(34vmin,220px);aspect-ratio:1.4;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(ellipse,#050101 30%,#2a0806 62%,transparent 72%);color:#7a5a52;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.eyeins.l .ei-socket{left:12%} .eyeins.r .ei-socket{right:12%}
+.ei-socket span{position:absolute;bottom:-26px;white-space:nowrap}
+.ei-socket.hot{box-shadow:0 0 0 3px rgba(255,190,120,.4),0 0 30px rgba(255,120,80,.3)}
+.ei-ring{position:absolute;inset:-8%;pointer-events:none}
+.ei-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ei-prog{fill:none;stroke:#e3443a;stroke-width:3;stroke-dasharray:100;stroke-dashoffset:100}
+.ei-jar{grid-row:2;width:150px;height:170px;border-radius:24px 24px 18px 18px;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(170,200,160,.25) 40%,rgba(90,110,80,.35));border:2px solid rgba(255,255,255,.18);
+  display:grid;place-items:center;position:relative;box-shadow:inset 0 -30px 40px rgba(120,150,90,.25)}
+.ei-jar::before{content:"";position:absolute;left:-6px;right:-6px;top:-14px;height:16px;border-radius:4px;background:#4a3a2a}
+.ei-eye{width:84px;height:84px;cursor:grab;z-index:2;touch-action:none;transition:transform .15s}
+.ei-eye svg{width:100%;height:100%;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
+.ei-eye.held{cursor:grabbing;transform:translate(-50%,-50%) scale(1.1)!important}
+.ei-eye.seated{transform:translate(-50%,-50%);cursor:pointer}
+.ei-eye[style*="fixed"]{transform:translate(-50%,-50%)}
+.ei-help{grid-row:3;font-family:var(--f-hand);font-size:24px;color:#e8dcc0;text-align:center;max-width:30ch}
+.eyeins.ok .ei-eye{opacity:0;transition:opacity .4s}
 .boot .seg{color:var(--led-grn)!important}
 .subt{position:fixed;left:50%;bottom:calc(16% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;max-width:min(90vw,700px);text-align:center;pointer-events:none;
   font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,32px);color:#ffdccf;text-shadow:0 0 12px #000,0 0 24px #000,0 2px 0 #000}
@@ -756,7 +776,8 @@ const CHARMS = [
   {id:'zocker', n:'Zockerherz',         d:'Riskieren klappt zu 60 % statt 50 %.', base:11},
   {id:'handschuh',n:'Gummihandschuhe',  d:'Beim Rütteln halb so oft ein Stromschlag.', base:13},
   {id:'adrenalin',n:'Adrenalinspritze', d:'Sofort +1 Puls (max. 5). Stapelbar.', base:10, stack:true},
-  {id:'klappe',  n:'Augenklappe',       d:'Die blinde Seite pocht nicht mehr. Halluzinationen kommen nur halb so oft.', base:9}
+  {id:'klappe',  n:'Augenklappe',       d:'Die blinde Seite pocht nicht mehr. Halluzinationen kommen nur halb so oft.', base:9},
+  {id:'auge',    n:'Ersatzauge',        d:'Ein Auge im Glas. Gebraucht. Du musst es selbst einsetzen.', base:70, stack:true}
 ];
 const ROWS=[[0,1,2],[3,4,5],[6,7,8]], DIAG=[[0,4,8],[6,4,2]], COLS=[[0,3,6],[1,4,7],[2,5,8]];
 const DAYS=3;
@@ -1830,6 +1851,58 @@ function stabEye(){
   },1600);
 }
 
+/* ---------- putting a new eye in: drag it to the empty socket, then press it in ---------- */
+function squelch(v){
+  if(muted||SET.sfx<=0||!AC) return;
+  try{const n=noiseNode(.18+Math.random()*.12,x=>Math.pow(Math.sin(Math.PI*x),2)),f=AC.createBiquadFilter(),g=AC.createGain();
+    f.type='bandpass';f.frequency.value=260+Math.random()*260;f.Q.value=6;g.gain.value=v*SET.sfx;n.connect(f).connect(g).connect(AC.destination);n.start();
+    const o=AC.createOscillator(),og=AC.createGain();o.frequency.setValueAtTime(180+Math.random()*80,AC.currentTime);o.frequency.exponentialRampToValueAtTime(70,AC.currentTime+.12);
+    og.gain.setValueAtTime(v*.4*SET.sfx,AC.currentTime);og.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.14);o.connect(og).connect(AC.destination);o.start();o.stop(AC.currentTime+.15);}catch(e){}
+}
+function insertEye(done){
+  const side=S.eyeLost||'l';
+  const w=document.createElement('div');w.className='eyeins '+side;
+  w.innerHTML=`<div class="ei-socket"><div class="ei-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" pathLength="100" class="ei-prog"/></svg></div><span>${side==='l'?'linke':'rechte'} Augenhöhle</span></div>
+    <div class="ei-jar"><div class="ei-eye" id="eiEye"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#ece2d2"/><g stroke="#b2402a" stroke-width="1" fill="none" opacity=".7"><path d="M6 46 C20 40 26 52 34 48"/><path d="M94 56 C80 62 74 50 66 54"/><path d="M30 88 C38 76 44 82 46 72"/></g><circle cx="50" cy="50" r="20" fill="#3a6a5a"/><circle cx="50" cy="50" r="9" fill="#060404"/><circle cx="44" cy="44" r="4" fill="#fff" opacity=".8"/></svg></div></div>
+    <div class="ei-help" id="eiHelp">Nimm das Auge aus dem Glas und zieh es in die leere Höhle.</div>`;
+  document.body.appendChild(w);
+  const eye=$('eiEye'),sock=w.querySelector('.ei-socket'),prog=w.querySelector('.ei-prog'),help=$('eiHelp');
+  let drag=null,inSocket=false,press=0,pressing=false,raf=0,last=0,doneFlag=false;
+  squelch(.15);
+  const over=e=>{const r=sock.getBoundingClientRect();return e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom;};
+  eye.addEventListener('pointerdown',e=>{e.preventDefault();eye.setPointerCapture(e.pointerId);
+    if(inSocket){pressing=true;last=performance.now();if(!raf)raf=requestAnimationFrame(tick);return;}
+    const r=eye.getBoundingClientRect();drag={dx:e.clientX-r.left-r.width/2,dy:e.clientY-r.top-r.height/2};eye.classList.add('held');squelch(.12);});
+  eye.addEventListener('pointermove',e=>{if(!drag)return;eye.style.position='fixed';eye.style.left=e.clientX+'px';eye.style.top=e.clientY+'px';sock.classList.toggle('hot',over(e));});
+  const up=e=>{
+    if(pressing){pressing=false;return;}
+    if(!drag)return;drag=null;eye.classList.remove('held');sock.classList.remove('hot');
+    if(over(e)){inSocket=true;const r=sock.getBoundingClientRect();eye.style.left=(r.left+r.width/2)+'px';eye.style.top=(r.top+r.height/2-14)+'px';eye.classList.add('seated');squelch(.25);
+      help.textContent='Jetzt draufdrücken und gedrückt halten, bis es drin ist.';}
+    else{eye.style.position='';eye.style.left='';eye.style.top='';beep(2600,.03,'triangle',.02);}
+  };
+  eye.addEventListener('pointerup',up);eye.addEventListener('pointercancel',up);
+  function tick(t){
+    raf=0;if(doneFlag)return;
+    const dt=t-last;last=t;
+    if(pressing){press=Math.min(100,press+dt*.045);if(Math.random()<.12)squelch(.12+press/400);
+      if(!reduce&&!SET.calm)$('stage').style.translate=`${(Math.random()-.5)*press/18}px ${(Math.random()-.5)*press/18}px`;
+      eye.style.transform=`translate(-50%,-50%) scale(${1-press/260})`;}
+    else press=Math.max(0,press-dt*.03);
+    prog.style.strokeDashoffset=100-press;
+    if(press>=100){finish();return;}
+    if(pressing||press>0)raf=requestAnimationFrame(tick);
+  }
+  function finish(){
+    doneFlag=true;$('stage').style.translate='';squelch(.5);beep(70,.3,'sine',.25);
+    S.eyeLost=null;render();
+    w.classList.add('ok');help.textContent='';
+    const f=document.createElement('div');f.className='bleed black';f.style.opacity='1';document.body.appendChild(f);
+    setTimeout(()=>{w.remove();f.style.transition='opacity 2.2s';f.style.opacity='0';setTimeout(()=>f.remove(),2300);
+      setMsg('DU SIEHST WIEDER. FAST.','good');done&&done();},900);
+  }
+}
+
 /* ---------- thunderstorm outside: power cuts, the machine reboots ---------- */
 let booting=false,nextThunder=performance.now()+45000+Math.random()*40000;
 function thunder(vol){
@@ -2242,7 +2315,7 @@ function openNote(){
   if(!uiFree()) return;
   beep(900,.04,'triangle',.02);
   const keys=['cherry','lemon','bell','clover','gem','seven'].concat(has('joker')?['joker']:[]);
-  const owned=CHARMS.filter(c=>has(c.id)&&c.id!=='adrenalin');
+  const owned=CHARMS.filter(c=>has(c.id)&&c.id!=='adrenalin'&&c.id!=='auge');
   openOv(`<h2>Zettel an der Wand</h2>
     <p class="sub">Handschrift. Zittrig. Jemand vor dir.</p>
     <p>8 Linien zählen: 3 quer, 3 runter, 2 über Kreuz.<br>Alle 9 gleich = alles ×10.<br>3 Schädel irgendwo = Fluch: Einsatz ×3 weg, jede volle Schädel-Linie kostet ×5 extra. Du kannst ins Minus rutschen.<br>Rütteln schiebt eine Walze. Aber er steht unter Strom.</p>
@@ -2264,7 +2337,7 @@ const DIARY=[
 ];
 function bookPages(){
   const keys=['cherry','lemon','bell','clover','gem','seven'].concat(S&&has('joker')?['joker']:[]);
-  const owned=S?CHARMS.filter(c=>has(c.id)&&c.id!=='adrenalin'):[];
+  const owned=S?CHARMS.filter(c=>has(c.id)&&c.id!=='adrenalin'&&c.id!=='auge'):[];
   const P=[];
   P.push(`<h3>Tagebuch</h3><p>Eigentum von <span class="crossed">M. K.</span> <span class="blood">dir</span>.</p><p>Inhalt:</p><ul><li>Ton</li><li>Bild &amp; Uhr</li><li>Regeln</li><li>Talismane</li><li>Tagebuch</li><li>Statistik</li></ul><p class="stuck">Blätter, indem du die Seite wischst oder die Pfeile unten nimmst.</p>`);
   P.push(`<h3>Ton</h3>
@@ -2470,10 +2543,11 @@ function deathSheet(cause){
 }
 
 function makeOffers(){
-  const pool=CHARMS.filter(c=>(c.stack||!has(c.id))&&!(c.id==='adrenalin'&&S.puls>=5)&&!(c.id==='klappe'&&!S.eyeLost));
+  const pool=CHARMS.filter(c=>(c.stack||!has(c.id))&&!(c.id==='adrenalin'&&S.puls>=5)&&!(c.id==='klappe'&&!S.eyeLost)&&!(c.id==='auge'&&!S.eyeLost));
   if(S.eyeLost&&!has('klappe')){const k=pool.findIndex(c=>c.id==='klappe');if(k>0){const [x]=pool.splice(k,1);pool.unshift(x);}}
   const first=S.eyeLost&&!has('klappe')?pool.shift():null;
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  if(S.eyeLost){const k=pool.findIndex(c=>c.id==='auge');if(k>=0){const [x]=pool.splice(k,1);pool.splice(first?0:0,0,x);}}
   if(first)pool.unshift(first);
   S.offers=pool.slice(0,3).map(c=>({c,sold:false}));
 }
@@ -2495,7 +2569,9 @@ function drawShop(){
   $('sheet').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{
     const o=S.offers[+b.dataset.buy];const p=price(o.c);
     if(o.sold||S.money<p) return;
-    S.money-=p;popMoney(-p);S.charms[o.c.id]=(S.charms[o.c.id]||0)+1;o.sold=true;
+    S.money-=p;popMoney(-p);o.sold=true;
+    if(o.c.id==='auge'){render();insertEye(()=>drawShop());return;}
+    S.charms[o.c.id]=(S.charms[o.c.id]||0)+1;
     if(o.c.id==='adrenalin') S.puls=Math.min(5,S.puls+1);
     melody([880,1175],70);render();drawShop();
   });

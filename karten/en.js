@@ -39,6 +39,17 @@ window.CARDS_EN = {
   "moerser": ["Mortar", "What goes up comes down. Hard."],
   "leuchtfeuer": ["Beacon", "Makes all nearby towers stronger."],
   "schildtraeger": ["Shield Bearer", "First the shield. Then the rest."],
+  "sf-laeufer": ["Runner", "One is harmless. There's never just one."],
+  "sf-flitzer": ["Dasher", "Gone before the tower turns."],
+  "sf-splitterling": ["Shardling", "A fragment. Still bites."],
+  "sf-schwebling": ["Floater", "Simply flies over the path."],
+  "sf-heiler": ["Healer", "Him first. Always him first."],
+  "sf-panzerkoloss": ["Armored Brute", "Slow. But it gets there."],
+  "sf-teiler": ["Splitter", "Defeated? Now there are two."],
+  "gw-tagesbonus": ["Daily Bonus", "A little more Glut every day."],
+  "gw-gratispack": ["Free Pack", "What might be inside?"],
+  "gw-glutstaub": ["Glut Dust", "Duplicates become something new."],
+  "gw-pokal": ["Achievement Unlocked", "Done. And everyone should see it."],
   "riss": ["The Rift", "Hold it. Whatever it takes."],
   "kristallkern": ["Crystal Core", "The thing you defend."],
   "rissbestie": ["Rift Beast", "Whatever crawls through the rift is hungry."],
@@ -182,7 +193,7 @@ window.ATK_EN = {
   "Zombiebiss": "Zombie Bite", "Pfeil": "Arrow", "Pfeilhagel": "Arrow Rain", "Klauen": "Claws", "Feuersturm": "Firestorm",
   "Nebelschritt": "Mist Step", "Wasserzauber": "Water Spell", "Mondquelle": "Moon Spring", "Flut": "Flood",
   "Eishauch": "Ice Breath", "Kristallsturm": "Crystal Storm", "Siegelkreis": "Seal Circle", "Fuchsfeuer": "Fox Fire",
-  "Erster Zauber": "First Spell",
+  "Erster Zauber": "First Spell", "Vorbeihuschen": "Dash By", "Splitterbiss": "Shard Bite", "Stupser": "Nudge", "Walze": "Steamroll", "Splitterstoß": "Shard Thrust",
 };
 
 window.PASSIV_EN = {
@@ -195,6 +206,7 @@ window.PASSIV_EN = {
   nachwuchs: "Start of turn: if there is room, a baby guppy (1 HP) joins.",
   schuld: "Start of turn: the opponent loses 1 HP.",
   wachstum: "Start of turn: gains +1 max HP and heals 1.",
+  teiler: "When defeated, it leaves 2 shardlings (1 HP) behind.",
   untot: "When defeated, it gets back up once with 2 HP.",
   stillerZauber: "Your spells cost 1 less energy.",
 };
@@ -224,11 +236,11 @@ window.ORTE_EN = {
   ruinen: "When a creature is defeated, its owner draws 1 card.",
 };
 
-window.MARKER_EN = { ameise: "Ant", babyguppy: "Baby Guppy", freund: "Kiko Friend" };
+window.MARKER_EN = { splitterling: "Shardling", ameise: "Ant", babyguppy: "Baby Guppy", freund: "Kiko Friend" };
 
 window.NAMES_EN = {
   // Computer-Gegner
-  "Ameisenvolk": "Ant Colony", "Turmwacht": "Tower Watch", "Nebelwald": "Fog Forest", "Letzter Dreh": "Last Spin",
+  "Ameisenvolk": "Ant Colony", "Turmwacht": "Tower Watch", "Nebelwald": "Fog Forest", "Letzter Dreh": "Last Spin", "Rissbrut": "Rift Brood",
   "Kiko Hüpft": "Kiko Hüpft", "Klarwasser": "Clear Water", "Wildnis": "Wilderness", "Drachenfeuer": "Dragonfire",
   // Kartenrücken und Spielfelder
   "Kristall": "Crystal", "Schatten": "Shadow", "Glutschmiede": "Ember Forge", "Dschungel": "Jungle",

@@ -59,6 +59,7 @@
     { id: "gw-mythisch", spiel: "glutwerk", stufe: "schwer", geheim: true, name: "Ein Blick in den Nebel", desc: "Zieh eine mythische Karte.", name_en: "A Glimpse into the Fog", desc_en: "Pull a mythic card." },
     { id: "gw-duell1", spiel: "glutwerk", stufe: "leicht", name: "Erster Sieg", desc: "Gewinne ein Kartenduell.", name_en: "First Victory", desc_en: "Win a card duel.", check: () => num("glutwerk-duell-siege") >= 1 },
     { id: "gw-duell25", spiel: "glutwerk", stufe: "schwer", name: "Duellmeister", desc: "Gewinne 25 Kartenduelle.", name_en: "Duel Master", desc_en: "Win 25 card duels.", check: () => num("glutwerk-duell-siege") >= 25 },
+    { id: "gw-alle-gegner", spiel: "glutwerk", stufe: "schwer", name: "Alle bezwungen", desc: "Besiege jeden Gegner im Kartenduell mindestens einmal.", name_en: "All Defeated", desc_en: "Beat every card duel opponent at least once." },
     { id: "gw-feedback", spiel: "glutwerk", stufe: "leicht", geheim: true, name: "Danke!", desc: "Schick dem Entwickler Feedback.", name_en: "Thank You!", desc_en: "Send the developer feedback." },
 
     // ---------- Letzter Dreh ----------

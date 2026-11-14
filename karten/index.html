@@ -139,6 +139,21 @@ h2.sec small{font-size:15px;color:var(--muted);letter-spacing:0}
 .dust-fly{position:fixed;z-index:200;pointer-events:none;font-family:Rajdhani,sans-serif;font-weight:700;font-size:30px;color:#bff3ff;text-shadow:0 0 14px #7df9ff;animation:dFly 1.2s ease-out forwards}
 @keyframes dFly{0%{opacity:0;transform:translateY(10px) scale(.7)}20%{opacity:1;transform:translateY(-10px) scale(1.15)}100%{opacity:0;transform:translateY(-60px)}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:20px}
+/* Sammlung nach Sets */
+.sets{display:flex;flex-direction:column;gap:12px}
+.setsec{border:1px solid var(--line);border-radius:14px;background:rgba(22,26,36,.6);overflow:hidden}
+.setsec.done{border-color:color-mix(in srgb,var(--c2) 50%,var(--line))}
+.sethead{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;text-align:left;color:var(--text)}
+.sethead:hover{background:rgba(255,255,255,.03)}
+.sethead i{width:6px;height:26px;border-radius:4px;background:linear-gradient(var(--c1),var(--c2));flex:none}
+.sethead b{font-family:Rajdhani,sans-serif;font-size:22px;text-transform:uppercase;letter-spacing:1px}
+.setnum{color:var(--muted);font-size:13px;font-weight:600;white-space:nowrap}
+.setsec.done .setnum{color:#3ddc97}
+.setbar{margin-left:auto;width:min(200px,28vw);height:6px;border-radius:4px;background:#232838;overflow:hidden;flex:none}
+.setbar u{display:block;height:100%;background:linear-gradient(90deg,var(--c1),var(--c2))}
+.setchev{width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .2s;flex:none;margin:0 4px}
+.setsec.open .setchev{transform:rotate(45deg)}
+.setsec .grid{padding:6px 16px 18px}
 .grid .slotc{position:relative;cursor:pointer;container-type:inline-size}
 .count{position:absolute;top:-8px;right:-8px;z-index:5;min-width:26px;height:26px;padding:0 7px;border-radius:13px;display:grid;place-items:center;
   font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;background:var(--accent);color:#140800;box-shadow:0 2px 10px rgba(0,0,0,.5)}
@@ -628,6 +643,10 @@ const ART = {
   golem: `<defs>${BLUR}</defs>` + sky("#2a2a34", "#0e0e14") + glowC(60, 40, 24, "#7df9ff", .25) + `<path d="M30 84l6-22-8-14 10-16h44l10 16-8 14 6 22z" fill="#5b5b68"/><path d="M38 32l6-14h32l6 14z" fill="#6b6b78"/><path d="M50 62l10-6 10 6M44 44l8 6" stroke="#3a3a44" stroke-width="2" fill="none"/><rect x="48" y="22" width="24" height="12" rx="2" fill="#3a3a44"/><rect x="51" y="26" width="6" height="4" fill="#7df9ff"/><rect x="63" y="26" width="6" height="4" fill="#7df9ff"/><circle cx="60" cy="52" r="5" fill="#7df9ff" opacity=".8"/>`,
   sheep: sky("#9fd8ff", "#e6f6ff") + ground("#6fcf5a", 70) + `<ellipse cx="60" cy="72" rx="24" ry="3" fill="#0002"/><g fill="#fff">${[[46, 48], [56, 42], [68, 44], [76, 52], [70, 60], [54, 60], [44, 56], [60, 52]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="10"/>`).join("")}</g><g fill="#e3e8f0">${[[50, 58], [66, 58]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7"/>`).join("")}</g><rect x="48" y="62" width="4" height="10" fill="#3a3a44"/><rect x="66" y="62" width="4" height="10" fill="#3a3a44"/><ellipse cx="84" cy="48" rx="8" ry="9" fill="#3a3a44"/><circle cx="87" cy="46" r="2" fill="#fff"/><circle cx="87.5" cy="46.3" r="1" fill="#111"/><ellipse cx="78" cy="42" rx="5" ry="2.5" fill="#3a3a44" transform="rotate(-30 78 42)"/>`,
   volcano: `<defs>${BLUR}</defs>` + sky("#2a0800", "#ff6a2b") + `<path d="M0 74q60-10 120 0v16H0z" fill="#1f4a8a"/>` + glowC(60, 24, 22, "#ff3d00", .8) + `<path d="M20 78l30-50h20l30 50z" fill="#2a1410"/><path d="M50 28l6 12 4-8 4 10 6-14z" fill="#ff5a1a"/><path d="M56 30l-4 18M66 30l6 20" stroke="#ff7a1a" stroke-width="3"/><g fill="#ffb347"><circle cx="50" cy="12" r="3"/><circle cx="70" cy="8" r="2.5"/><circle cx="60" cy="16" r="3.5"/></g><path d="M0 78q20-4 40 0t40 0 40 0v12H0z" fill="#2a6bc0" opacity=".8"/>`,
+  gw_bonus: `<defs>${BLUR}</defs>` + sky("#24120a", "#0a0503") + glowC(60, 46, 30, "#ff6a2b", .55) + `<rect x="34" y="20" width="52" height="52" rx="7" fill="#1c1410" stroke="#ffb347" stroke-width="2"/><rect x="34" y="20" width="52" height="13" rx="7" fill="#ff6a2b"/><g fill="#1c1410"><rect x="45" y="15" width="4" height="10" rx="2"/><rect x="71" y="15" width="4" height="10" rx="2"/></g><g fill="#3a2a1e">${[0,1,2,3,4,5,6].map(i => `<rect x="${39 + (i % 4) * 11.5}" y="${38 + Math.floor(i / 4) * 12}" width="8" height="8" rx="2" ${i === 6 ? 'fill="#ffb347"' : ""}/>`).join("")}</g><path d="${FLAME}" fill="#ffd27a" transform="translate(41 34) scale(.34)"/>`,
+  gw_pack: `<defs>${BLUR}<linearGradient id="gpk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b26bff"/><stop offset="1" stop-color="#ff6ad5"/></linearGradient></defs>` + sky("#1a0b2e", "#07030f") + glowC(60, 48, 30, "#ff6ad5", .5) + `<g transform="rotate(-8 60 46)"><rect x="42" y="16" width="36" height="58" rx="4" fill="url(#gpk)" stroke="#fff" stroke-opacity=".5"/><path d="M42 24h36M42 66h36" stroke="#1a0b2e" stroke-opacity=".55" stroke-width="1.5" stroke-dasharray="2 2"/><circle cx="60" cy="45" r="9" fill="#1a0b2e" fill-opacity=".45"/><path d="${FLAME}" fill="#fff3b0" transform="translate(43.5 30) scale(.3)"/></g><g fill="#fff"><path d="M92 20l1.6 4.4L98 26l-4.4 1.6L92 32l-1.6-4.4L86 26l4.4-1.6z"/><path d="M26 54l1.2 3.3 3.3 1.2-3.3 1.2L26 63l-1.2-3.3-3.3-1.2 3.3-1.2z" opacity=".8"/></g>`,
+  gw_staub: `<defs>${BLUR}</defs>` + sky("#0a1a24", "#03080c") + glowC(60, 48, 28, "#7df9ff", .45) + `<g fill="#bff3ff">${Array.from({ length: 26 }, (_, i) => { const a = i * 2.4, r = 6 + (i * 37 % 30), x = 60 + Math.cos(a) * r, y = 48 + Math.sin(a) * r * .7, z = .8 + (i % 4) * .5; return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${z}" opacity="${(.4 + (i % 3) * .3).toFixed(1)}"/>`; }).join("")}</g><path d="M60 26l4.5 14.5L79 45l-14.5 4.5L60 64l-4.5-14.5L41 45l14.5-4.5z" fill="#eafcff"/><path d="M60 34l2.4 8.6L71 45l-8.6 2.4L60 56l-2.4-8.6L49 45l8.6-2.4z" fill="#7df9ff"/>`,
+  gw_pokal: `<defs>${BLUR}<linearGradient id="gpo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset="1" stop-color="#ffb347"/></linearGradient></defs>` + sky("#2a1c06", "#0a0602") + glowC(60, 44, 32, "#ffc443", .6) + `<path d="M46 20h28v16a14 14 0 0 1-28 0z" fill="url(#gpo)"/><path d="M46 24h-9a9 9 0 0 0 10 12M74 24h9a9 9 0 0 1-10 12" fill="none" stroke="#ffc443" stroke-width="3.2"/><rect x="57" y="49" width="6" height="11" fill="#e0a030"/><rect x="47" y="60" width="26" height="7" rx="2" fill="#ffb347"/><rect x="43" y="67" width="34" height="5" rx="2" fill="#8a5a14"/><path d="${FLAME}" fill="#ff6a2b" transform="translate(49 20) scale(.22)"/><g fill="#fff3b0"><circle cx="30" cy="26" r="1.6"/><circle cx="92" cy="34" r="1.3"/><circle cx="88" cy="16" r="1.1"/><circle cx="26" cy="46" r="1.2"/></g>`,
   spark: `<defs>${BLUR}</defs>` + sky("#1a0a04", "#050201") + glowC(60, 46, 18, "#ffb347", .8) + `<g stroke="#ffd27a" stroke-width="1.6" stroke-linecap="round">${Array.from({ length: 12 }, (_, i) => { const a = i / 12 * 6.283, r1 = 8, r2 = 16 + (i % 3) * 6; return `<path d="M${(60 + Math.cos(a) * r1).toFixed(1)} ${(46 + Math.sin(a) * r1).toFixed(1)}L${(60 + Math.cos(a) * r2).toFixed(1)} ${(46 + Math.sin(a) * r2).toFixed(1)}"/>`; }).join("")}</g><circle cx="60" cy="46" r="5" fill="#fff3b0"/>`,
   kw_strom: `<defs>${BLUR}</defs>` + sky("#0a1a20", "#03080a") + `<rect x="14" y="14" width="92" height="62" rx="4" fill="#0e2a30" stroke="#2a4a52" stroke-width="2"/><path d="M14 30h92" stroke="#2a4a52"/><rect x="40" y="8" width="40" height="7" rx="2" fill="#1a2a2e"/>` + glowC(60, 46, 16, "#ffd34d", .55) + `<path d="M64 26L50 50h10l-6 20 18-28H62l6-16z" fill="#ffd34d"/><g fill="#5a7a80" opacity=".6"><circle cx="26" cy="64" r="2"/><circle cx="92" cy="58" r="1.6"/><circle cx="84" cy="68" r="1.4"/></g>`,
   kw_becken: `<defs>${BLUR}<linearGradient id="kb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f7f88"/><stop offset="1" stop-color="#133f48"/></linearGradient></defs><rect width="120" height="90" fill="url(#kb)"/>` + glowC(60, 4, 30, "#e8fff8", .45) + `<path d="M0 76q30-5 60 0t60 0v14H0z" fill="#b7a98a"/><g fill="#8a7d64">${Array.from({ length: 30 }, (_, i) => `<rect x="${(i * 37) % 120}" y="${78 + (i * 7) % 10}" width="2" height="2"/>`).join("")}</g><g stroke-linecap="round" fill="none">${Array.from({ length: 9 }, (_, i) => `<path d="M${10 + i * 3} 78q${i % 2 ? 4 : -4} -26 ${i % 2 ? 2 : -3} -${40 + (i * 13) % 26}" stroke="${i % 3 ? "#5c9a45" : "#7bb35b"}" stroke-width="2"/>`).join("")}</g><g fill="#3b7d47"><path d="M92 78q-14-14-18-30 10 8 18 30zM96 78q4-20 14-30-2 16-14 30zM94 78q-2-18 2-34 4 16-2 34z"/></g><g><ellipse cx="62" cy="44" rx="9" ry="4" fill="#2fb0ea"/><path d="M53 44l-5-3v6z" fill="#e5463c"/><ellipse cx="74" cy="34" rx="7" ry="3" fill="#2fb0ea"/><path d="M67 34l-4-2v4z" fill="#e5463c"/><ellipse cx="50" cy="30" rx="7" ry="3" fill="#2fb0ea"/><path d="M43 30l-4-2v4z" fill="#e5463c"/></g><g fill="#e8fff8" opacity=".6"><circle cx="30" cy="40" r="1.4"/><circle cx="32" cy="30" r="1"/><circle cx="29" cy="20" r="1.2"/></g>`,
@@ -677,17 +696,24 @@ const CARDS = [
   { id: "bodenknopf",  set: "kammerwerk", r: "common",    pow: 1,  name: "Bodenknopf",         art: "button",     text: "Leg was drauf. Irgendwas." },
   { id: "glaskaefig",  set: "kammerwerk", r: "rare",      pow: 4,  name: "Glaskäfig",          art: "glasscage",  text: "Man sieht den Ausgang. Man erreicht ihn nicht." },
   { id: "katapult",    set: "kammerwerk", r: "epic",      pow: 6,  name: "Katapult",           art: "catapult",   text: "Kurz stehen bleiben. Dann fliegen." },
-  { id: "bolzenturm",  set: "shardfall",  r: "common",    pow: 2,  name: "Bolzenturm",         art: "bolt",       text: "Der erste Turm, der letzte Freund." },
-  { id: "frostkristall", set: "shardfall", r: "common",   pow: 3,  name: "Frostkristall",      art: "frost",      text: "Langsam. Langsamer. Stillstand." },
-  { id: "blitzspule",  set: "shardfall",  r: "rare",      pow: 4,  name: "Blitzspule",         art: "tesla",      text: "Springt von Gegner zu Gegner." },
-  { id: "phantom",     set: "shardfall",  r: "epic",      pow: 5,  name: "Phantom",            art: "phantom",    text: "Nur Scharfschützen sehen es kommen." },
-  { id: "prisma",      set: "shardfall",  r: "epic",      pow: 7,  name: "Prisma",             art: "prism",      text: "Licht wird zur Waffe." },
-  { id: "risslaeufer", set: "shardfall",  r: "legendary", pow: 8,  name: "Rissläufer",         art: "riftwalker", text: "Er kommt durch den Riss. Und er ist nicht allein." },
-  { id: "riftkoloss",  set: "shardfall",  r: "legendary", pow: 9,  name: "Riftkoloss",         art: "boss",       text: "Wenn der Boden bebt, ist es zu spät." },
-  { id: "kanone-sf",   set: "shardfall",  r: "common",    pow: 3,  name: "Kanone",             art: "cannon",     text: "Laut, langsam, wirkungsvoll." },
-  { id: "moerser",     set: "shardfall",  r: "rare",      pow: 4,  name: "Mörser",             art: "mortar",     text: "Was hochfliegt, kommt runter. Hart." },
-  { id: "leuchtfeuer", set: "shardfall",  r: "rare",      pow: 3,  name: "Leuchtfeuer",        art: "beacon",     text: "Macht alle Türme in der Nähe stärker." },
-  { id: "schildtraeger", set: "shardfall", r: "epic",     pow: 6,  name: "Schildträger",       art: "shieldbearer", text: "Erst das Schild. Dann der Rest." },
+  { id: "bolzenturm",  set: "shardfall",  r: "common",    pow: 2,  name: "Bolzenturm",         pic: "sf-bolt", text: "Der erste Turm, der letzte Freund." },
+  { id: "frostkristall", set: "shardfall", r: "common",   pow: 3,  name: "Frostkristall",      pic: "sf-frost", text: "Langsam. Langsamer. Stillstand." },
+  { id: "blitzspule",  set: "shardfall",  r: "rare",      pow: 4,  name: "Blitzspule",         pic: "sf-tesla", text: "Springt von Gegner zu Gegner." },
+  { id: "phantom",     set: "shardfall",  r: "epic",      pow: 5,  name: "Phantom",            pic: "sf-phantom", text: "Nur Scharfschützen sehen es kommen." },
+  { id: "prisma",      set: "shardfall",  r: "epic",      pow: 7,  name: "Prisma",             pic: "sf-prism", text: "Licht wird zur Waffe." },
+  { id: "risslaeufer", set: "shardfall",  r: "legendary", pow: 8,  name: "Rissläufer",         pic: "sf-riftwalker", text: "Er kommt durch den Riss. Und er ist nicht allein." },
+  { id: "riftkoloss",  set: "shardfall",  r: "legendary", pow: 9,  name: "Riftkoloss",         pic: "sf-boss", text: "Wenn der Boden bebt, ist es zu spät." },
+  { id: "kanone-sf",   set: "shardfall",  r: "common",    pow: 3,  name: "Kanone",             pic: "sf-cannon", text: "Laut, langsam, wirkungsvoll." },
+  { id: "moerser",     set: "shardfall",  r: "rare",      pow: 4,  name: "Mörser",             pic: "sf-mortar", text: "Was hochfliegt, kommt runter. Hart." },
+  { id: "leuchtfeuer", set: "shardfall",  r: "rare",      pow: 3,  name: "Leuchtfeuer",        pic: "sf-beacon", text: "Macht alle Türme in der Nähe stärker." },
+  { id: "schildtraeger", set: "shardfall", r: "epic",     pow: 6,  name: "Schildträger",       pic: "sf-shield", text: "Erst das Schild. Dann der Rest." },
+  { id: "sf-laeufer",  set: "shardfall",  r: "common",    pow: 1,  name: "Läufer",             pic: "sf-grunt",    text: "Einer ist harmlos. Es kommt nie nur einer." },
+  { id: "sf-flitzer",  set: "shardfall",  r: "common",    pow: 2,  name: "Flitzer",            pic: "sf-runner",   text: "Schon vorbei, bevor der Turm sich dreht." },
+  { id: "sf-splitterling", set: "shardfall", r: "common", pow: 1,  name: "Splitterling",       pic: "sf-shard",    text: "Ein Bruchstück. Immer noch bissig." },
+  { id: "sf-schwebling", set: "shardfall", r: "rare",     pow: 3,  name: "Schwebling",         pic: "sf-flyer",    text: "Fliegt einfach über den Weg hinweg." },
+  { id: "sf-heiler",   set: "shardfall",  r: "rare",      pow: 3,  name: "Heiler",             pic: "sf-healer",   text: "Zuerst ihn. Immer zuerst ihn." },
+  { id: "sf-panzerkoloss", set: "shardfall", r: "rare",   pow: 4,  name: "Panzerkoloss",       pic: "sf-brute",    text: "Langsam. Aber er kommt an." },
+  { id: "sf-teiler",   set: "shardfall",  r: "epic",      pow: 5,  name: "Teiler",             pic: "sf-splitter", text: "Besiegt? Jetzt sind es zwei." },
   { id: "riss",        set: "riftward",   r: "rare",      pow: 5,  name: "Der Riss",           art: "rift",       text: "Halte ihn auf. Um jeden Preis." },
   { id: "kristallkern", set: "riftward",  r: "common",    pow: 3,  name: "Kristallkern",       art: "core",       text: "Das, was du verteidigst." },
   { id: "rissbestie",  set: "riftward",   r: "common",    pow: 2,  name: "Rissbestie",         art: "riftbeast",  text: "Was durch den Riss kriecht, hat Hunger." },
@@ -714,6 +740,10 @@ const CARDS = [
   { id: "glut",        set: "glutwerk",   r: "epic",      pow: 6,  name: "Die Glut",           art: "ember",      text: "Aus einem Funken wird ein Feuer." },
   { id: "glutwerk",    set: "glutwerk",   r: "legendary", pow: 9,  name: "Glutwerk",           art: "forge",      text: "Hier werden Spiele geschmiedet." },
   { id: "funke",       set: "glutwerk",   r: "common",    pow: 1,  name: "Der Funke",          art: "spark",      text: "Jedes Spiel fängt so an." },
+  { id: "gw-tagesbonus", set: "glutwerk", r: "common",    pow: 1,  name: "Tagesbonus",         art: "gw_bonus",   text: "Jeden Tag ein bisschen mehr Glut." },
+  { id: "gw-gratispack", set: "glutwerk", r: "rare",      pow: 3,  name: "Gratis-Pack",        art: "gw_pack",    text: "Was ist wohl drin?" },
+  { id: "gw-glutstaub", set: "glutwerk",  r: "rare",      pow: 3,  name: "Glutstaub",          art: "gw_staub",   text: "Aus doppelten Karten wird etwas Neues." },
+  { id: "gw-pokal",    set: "glutwerk",   r: "epic",      pow: 5,  name: "Erfolg freigeschaltet", art: "gw_pokal", text: "Geschafft. Und alle sollen es sehen." },
   { id: "heiltrank",   set: "thyrvenna",  r: "common",    pow: 1,  name: "Heiltrank",          pic: "heiltrank",  text: "Schmeckt nach Kirschen und Sternenlicht." },
   { id: "kraeuter",    set: "thyrvenna",  r: "common",    pow: 1,  name: "Kräuterbündel",      pic: "kraeuter",   text: "Frisch aus den Wäldern von Fennwyrd." },
   { id: "dolch",       set: "thyrvenna",  r: "common",    pow: 2,  name: "Dolch",              pic: "dolch",      text: "Klein, scharf, immer griffbereit." },
@@ -955,8 +985,8 @@ function cardHTML(c, foil) {
   return `<div class="tcard r-${c.r}${foil ? " foil" : ""}" data-tilt>
     <div class="frame"><div class="inner">
       ${mythic ? `<div class="tc-art"><img src="${FOXY_IMG(c.img)}" alt="" draggable="false"></div>` : ""}
-      <div class="tc-head"><span class="tc-name" style="font-size:${Math.min(9.6, 100 / c.name.length).toFixed(2)}cqw">${esc(c.name)}</span>${badgeHTML(w)}</div>
-      ${mythic ? `<div class="tc-spacer"></div>` : c.pic ? `<div class="tc-art pic${c.ort ? " ortpic" : ""}${c.scene ? " scene" + (c.scene === "px" ? " px" : "") : ""}" style="background:${c.set === "klarwasser" ? "radial-gradient(ellipse at 50% 0%,#bff3ea55,transparent 60%),linear-gradient(180deg,#2f7f88,#133f48)" : `radial-gradient(circle at 50% 55%,${set.c[1]}55,transparent 70%),linear-gradient(160deg,#20302a,#0f1512)`}"><img src="img/${c.pic}.webp" alt="" draggable="false" loading="lazy"></div>` : `<div class="tc-art" style="background:linear-gradient(135deg,${set.c[0]},${set.c[1]})">${artSVG(c.art)}</div>`}
+      <div class="tc-head"><span class="tc-name" style="font-size:${Math.min(9.6, 84 / c.name.length).toFixed(2)}cqw">${esc(c.name)}</span>${badgeHTML(w)}</div>
+      ${mythic ? `<div class="tc-spacer"></div>` : c.pic ? `<div class="tc-art pic${c.ort ? " ortpic" : ""}${c.scene ? " scene" + (c.scene === "px" ? " px" : "") : ""}" style="background:${c.set === "klarwasser" ? "radial-gradient(ellipse at 50% 0%,#bff3ea55,transparent 60%),linear-gradient(180deg,#2f7f88,#133f48)" : c.set === "shardfall" ? "radial-gradient(circle at 50% 55%,#b26bff66,transparent 62%),repeating-linear-gradient(0deg,#ffffff0a 0 1px,transparent 1px 12.5%),repeating-linear-gradient(90deg,#ffffff0a 0 1px,transparent 1px 12.5%),linear-gradient(160deg,#241a48,#0d0a1e)" : `radial-gradient(circle at 50% 55%,${set.c[1]}55,transparent 70%),linear-gradient(160deg,#20302a,#0f1512)`}"><img src="img/${c.pic}.webp" alt="" draggable="false" loading="lazy"></div>` : `<div class="tc-art" style="background:linear-gradient(135deg,${set.c[0]},${set.c[1]})">${artSVG(c.art)}</div>`}
       <div class="tc-type"><span>${TYP[w.t]} · ${esc(set.name)}</span><b>${RARITY[c.r].name}</b></div>
       ${rulesHTML(c, w)}
       <div class="tc-foot"><span>${String(c.no).padStart(2, "0")} / ${CARDS.length}</span><span class="tc-gem"></span></div>
@@ -1048,16 +1078,39 @@ function renderFilters() {
     return `<button class="chip${setFilter === k ? " on" : ""}${have === list.length ? " done" : ""}" data-set="${k}">${dot ? `<span class="dot" style="background:linear-gradient(135deg,${dot[0]},${dot[1]})"></span>` : ""}${esc(label)} <em>${have}/${list.length}</em></button>`;
   };
   $("filters").innerHTML = chip("all", L("Alle", "All")) + Object.entries(SETS).map(([k, s]) => chip(k, s.name, s.c)).join("") +
-    `<button class="chip chip-right${onlyOwned ? " on" : ""}" id="onlyOwned">${L("Nur gesammelte", "Owned only")}</button>`;
+    `<button class="chip chip-right${onlyOwned ? " on" : ""}" id="onlyOwned">${L("Nur gesammelte", "Owned only")}</button>` +
+    `<button class="chip${sortRar ? " on" : ""}" id="sortRar">${L("Seltenste zuerst", "Rarest first")}</button>`;
+}
+const setOpen = {};   // welche Sets in der Übersicht aufgeklappt sind
+let sortRar = false;  // Seltenste zuerst
+function slotHTML(c) {
+  const o = own(c.id);
+  if (!owned(c.id)) return `<div class="slotc" data-card="${c.id}">${lockedHTML(c)}</div>`;
+  return `<div class="slotc" data-card="${c.id}">${cardHTML(c, o.n === 0 && o.f > 0)}
+    ${o.n > 1 ? `<span class="count">${o.n}×</span>` : ""}${o.f ? `<span class="count foilc" title="${L("Glanzkarten", "Shiny cards")}">✦${o.f > 1 ? o.f : ""}</span>` : ""}</div>`;
 }
 function renderGrid() {
-  const list = CARDS.filter(c => (setFilter === "all" || c.set === setFilter) && (!onlyOwned || owned(c.id)));
-  $("grid").innerHTML = list.length ? list.map(c => {
-    const o = own(c.id);
-    if (!owned(c.id)) return `<div class="slotc" data-card="${c.id}">${lockedHTML(c)}</div>`;
-    return `<div class="slotc" data-card="${c.id}">${cardHTML(c, o.n === 0 && o.f > 0)}
-      ${o.n > 1 ? `<span class="count">${o.n}×</span>` : ""}${o.f ? `<span class="count foilc" title="${L("Glanzkarten", "Shiny cards")}">✦${o.f > 1 ? o.f : ""}</span>` : ""}</div>`;
-  }).join("") : `<div style="grid-column:1/-1;color:var(--muted);text-align:center;padding:40px">${L("Hier hast du noch keine Karten. Öffne ein Pack!", "No cards here yet. Open a pack!")}</div>`;
+  const leer = `<div style="grid-column:1/-1;color:var(--muted);text-align:center;padding:40px">${L("Hier hast du noch keine Karten. Öffne ein Pack!", "No cards here yet. Open a pack!")}</div>`;
+  const ord = l => sortRar ? l.slice().sort((a, b) => RORDER.indexOf(b.r) - RORDER.indexOf(a.r) || b.pow - a.pow) : l;
+  if (setFilter !== "all") {
+    const list = ord(CARDS.filter(c => c.set === setFilter && (!onlyOwned || owned(c.id))));
+    $("grid").className = "grid";
+    $("grid").innerHTML = list.length ? list.map(slotHTML).join("") : leer;
+    return;
+  }
+  // Alle: nach Sets gruppiert. Sets ohne eigene Karte sind eingeklappt, damit neue Spieler keine Wand aus Fragezeichen sehen.
+  $("grid").className = "sets";
+  const html = Object.entries(SETS).map(([k, st]) => {
+    const all = CARDS.filter(c => c.set === k), have = all.filter(c => owned(c.id)).length;
+    if (!all.length || (onlyOwned && !have)) return "";
+    const open = k in setOpen ? setOpen[k] : have > 0;
+    const list = ord(all.filter(c => !onlyOwned || owned(c.id)));
+    return `<section class="setsec${open ? " open" : ""}${have === all.length ? " done" : ""}" style="--c1:${st.c[0]};--c2:${st.c[1]}">
+      <button class="sethead" data-toggle="${k}"><i></i><b>${esc(st.name)}</b><span class="setnum">${have} / ${all.length}${have === all.length ? " ✓" : ""}</span>
+        <span class="setbar"><u style="width:${have / all.length * 100}%"></u></span><span class="setchev"></span></button>
+      ${open ? `<div class="grid">${list.map(slotHTML).join("")}</div>` : ""}</section>`;
+  }).join("");
+  $("grid").innerHTML = html || leer;
 }
 function renderProgress() {
   const have = CARDS.filter(c => owned(c.id)).length;
@@ -1113,6 +1166,9 @@ document.addEventListener("click", e => {
   const s = e.target.closest("[data-set]");
   if (s) { setFilter = s.dataset.set; renderFilters(); renderGrid(); return; }
   if (e.target.closest("#onlyOwned")) { onlyOwned = !onlyOwned; renderFilters(); renderGrid(); return; }
+  if (e.target.closest("#sortRar")) { sortRar = !sortRar; renderFilters(); renderGrid(); return; }
+  const tg = e.target.closest("[data-toggle]");
+  if (tg) { const sec = tg.parentElement; setOpen[tg.dataset.toggle] = !sec.classList.contains("open"); renderGrid(); return; }
   const b = e.target.closest("[data-buy]");
   if (b && !b.disabled) { buyPack(b.dataset.buy); return; }
   const sb = e.target.closest("[data-staub]");

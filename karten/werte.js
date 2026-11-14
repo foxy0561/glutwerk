@@ -31,7 +31,7 @@ window.REGELN = {
   feldPlaetze: 4,       // Wesen pro Seite
   startHand: 4,         // Karten am Anfang (der zweite Spieler bekommt 1 mehr)
   maxEnergie: 8,        // Energie wächst jede Runde um 1 bis hierhin
-  siegGlut: 25,         // Glut für einen Sieg gegen den Computer
+  siegGlut: 25, erstSiegGlut: 50,         // Glut für einen Sieg gegen den Computer
   siegeProTag: 4,       // so oft am Tag gibt es Glut für Siege
 };
 
@@ -96,6 +96,13 @@ window.WERTE = {
   "kanone-sf":     { t: "wesen", hp: 5, atk: [["Kanonenkugel", 2, 4]] },
   "moerser":       { t: "wesen", hp: 4, atk: [["Granate", 3, 2, "alle"]] },
   "leuchtfeuer":   { t: "wesen", hp: 5, pas: "leuchtfeuer", atk: [["Blenden", 1, 1]] },
+  "sf-laeufer":    { t: "wesen", hp: 3, atk: [["Rempler", 1, 2]] },
+  "sf-flitzer":    { t: "wesen", hp: 2, flink: true, atk: [["Vorbeihuschen", 1, 2]] },
+  "sf-splitterling": { t: "wesen", hp: 1, atk: [["Splitterbiss", 0, 1]] },
+  "sf-schwebling": { t: "wesen", hp: 4, flink: true, atk: [["Sturzflug", 2, 3]] },
+  "sf-heiler":     { t: "wesen", hp: 4, pas: "kuh", atk: [["Stupser", 1, 1]] },
+  "sf-panzerkoloss": { t: "wesen", hp: 8, waechter: true, atk: [["Walze", 3, 3]] },
+  "sf-teiler":     { t: "wesen", hp: 5, pas: "teiler", atk: [["Splitterstoß", 2, 3]] },
   "schildtraeger": { t: "wesen", hp: 6, waechter: true, schild: true, atk: [["Schildstoß", 2, 2]] },
 
   /* ---------------- Riftward ---------------- */
@@ -131,6 +138,10 @@ window.WERTE = {
   "glut":          { t: "zauber", kosten: 3, schadenAlleFeinde: 2 },
   "glutwerk":      { t: "ort", kosten: 4, ort: "schmiede" },
   "funke":         { t: "zauber", kosten: 0, ziel: "feind", schaden: 1 },
+  "gw-tagesbonus": { t: "zauber", kosten: 0, energie: 2 },
+  "gw-gratispack": { t: "zauber", kosten: 1, ziehe: 2 },
+  "gw-glutstaub":  { t: "zauber", kosten: 2, schadenAlleFeinde: 1, ziehe: 1 },
+  "gw-pokal":      { t: "ausr", kosten: 2, plusSchaden: 1, plusLeben: 3 },
 
   /* ---------------- Thyrvenna ---------------- */
   "heiltrank":     { t: "zauber", kosten: 1, ziel: "eigen", heile: 5 },
@@ -224,6 +235,7 @@ window.PASSIV = {
   schwarm:       "Macht +1 Schaden für jeden anderen Neonsalmler auf deinem Feld.",
   nachwuchs:     "Rundenbeginn: Ist Platz, kommt ein Baby-Guppy (1 Leben) dazu.",
   schuld:        "Rundenbeginn: Der Gegner verliert 1 Leben.",
+  teiler:        "Wird es besiegt, bleiben 2 Splitterlinge (1 Leben) zurück.",
   wachstum:      "Rundenbeginn: bekommt +1 maximales Leben und heilt 1.",
   untot:         "Wird er besiegt, steht er einmal mit 2 Leben wieder auf.",
   stillerZauber: "Deine Zauber kosten 1 Energie weniger.",
@@ -258,6 +270,7 @@ window.ORTE = {
 /* Kleine Wesen, die von Karten erschaffen werden */
 window.MARKER = {
   ameise: { name: "Ameise", hp: 2, atk: [["Biss", 1, 1]], art: "antWood", set: "ameisenbau" },
+  splitterling: { name: "Splitterling", hp: 1, atk: [["Splitterbiss", 0, 1]], pic: "sf-shard", set: "shardfall" },
   babyguppy: { name: "Baby-Guppy", hp: 1, atk: [["Zupfen", 1, 1]], pic: "kw-guppy", set: "klarwasser" },
   freund: { name: "Kiko-Freund", hp: 2, atk: [["Hüpfer", 1, 2]], art: "four", pic: "kiko-freund", scene: 1, set: "kiko" },
 };
@@ -275,6 +288,7 @@ window.GEGNER_DECKS = [
   { name: "Turmwacht", deck: ["bolzenturm", "bolzenturm", "kanone-sf", "kanone-sf", "frostkristall", "frostkristall", "blitzspule", "moerser", "leuchtfeuer", "schildtraeger", "wuerfel", "wuerfel", "kristallkern", "kristallkern", "sternblock", "feueratem", "funke", "muenze", "laterne", "burg"] },
   { name: "Nebelwald", deck: ["spinne", "blattschneider", "golem", "drako", "rissbestie", "rissbestie", "kiko", "ernteameise", "waldameise", "phantom", "verband", "gifttrank", "gifttrank", "bombe", "pfotentrank", "grimoire", "fuchsschild", "umhang", "uralter-baum", "heiltrank"] },
   { name: "Letzter Dreh", deck: ["ld-automat", "ld-glaeubiger", "ld-augen", "ld-augen", "ld-schatten", "ld-schatten", "ld-kassierer", "ld-777", "ld-schaedel", "ld-joker", "ld-risiko", "ld-risiko", "ld-strom", "ld-licht", "ld-telefon", "ld-messer", "ld-gewitter", "ld-zahltag", "ld-hebel", "ld-zelle"] },
+  { name: "Rissbrut", deck: ["sf-laeufer", "sf-laeufer", "sf-laeufer", "sf-flitzer", "sf-flitzer", "sf-splitterling", "sf-schwebling", "sf-schwebling", "sf-heiler", "sf-panzerkoloss", "sf-panzerkoloss", "sf-teiler", "sf-teiler", "schildtraeger", "phantom", "risslaeufer", "riftkoloss", "riss", "rissbestie", "kristallkern"] },
   { name: "Kiko Hüpft", deck: ["kiko", "gruenling", "gruenling", "panzerkaefer", "panzerkaefer", "stachler", "stachler", "flatterling", "flatterling", "kiko-dino", "feuerkoenig", "sternblock", "sternblock", "muenze", "muenze", "roehre", "extraleben", "vier-freunde", "wiesenland", "heiltrank"] },
   { name: "Klarwasser", deck: ["kw-neon", "kw-neon", "kw-guppy", "kw-guppy", "kw-cory", "kw-shrimp", "kw-gourami", "kw-loach", "kw-pleco", "kw-betta", "kw-malawi", "kw-angel", "kw-root", "kw-holey", "kw-cave", "kw-castle", "kw-leaves", "kw-fern", "kw-wreck", "kw-becken"] },
   { name: "Wildnis", deck: ["w-schwein", "w-schwein", "w-huhn", "w-kuh", "w-wolf", "w-wolf", "w-zombie", "w-zombie", "w-skelett", "w-hoehlenspinne", "w-drache", "w-spitzhacke", "w-spitzhacke", "w-fackel", "w-eisen", "w-gold", "w-werkbank", "w-diamant", "w-dschungel", "heiltrank"] },

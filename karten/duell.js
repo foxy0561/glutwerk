@@ -102,15 +102,22 @@
   function hurtHero(pi, n) { S.p[pi].hp -= n; ev("h" + pi, "-" + n, "dmg"); }
   function cleanup() {
     S.p.forEach((P, pi) => {
+      let teile = 0;
       P.feld = P.feld.filter(u => {
         if (u.hp > 0) return true;
         if (u.pas === "untot" && !u.auferstanden) { u.auferstanden = true; u.hp = 2; ev("u" + u.uid, Lx("Steht auf!", "Rises!"), "heal"); log(Lx(`${u.name} steht wieder auf!`, `${u.name} gets back up!`)); return true; }
         log(Lx(`${u.name} wurde besiegt.`, `${u.name} was defeated.`));
         if (!u.tok) P.grab.push(u.id);
         if (u.pas === "schaf") draw(pi);
+        if (u.pas === "teiler") teile += 2;
         if (ortIs("ruinen") && !u.tok) draw(pi);
         return false;
       });
+      // Teiler: zerfällt in zwei Splitterlinge, wenn Platz ist
+      for (; teile > 0 && P.feld.length < R.feldPlaetze; teile--) {
+        const n = mkUnit("#splitterling", pi); P.feld.push(n);
+        if (teile % 2 === 0) log(Lx("Der Teiler zerfällt in Splitterlinge.", "The Splitter breaks into shardlings."));
+      }
     });
     /* Wer gar keine Karten mehr hat (Deck, Hand und Feld leer), kann nichts mehr tun:
        hat der andere noch Wesen auf dem Feld, gewinnt er sofort. */
@@ -526,6 +533,11 @@
 .dc-deck b{display:block;font-family:Rajdhani,sans-serif;font-size:19px;text-transform:uppercase;line-height:1.1}
 .dc-deck span{font-size:12px;color:#c3c9d6}
 .dc-deck .star{position:absolute;top:8px;right:10px;font-size:11px;font-weight:800;color:#ffb347;letter-spacing:.5px;text-transform:uppercase}
+.dc-deck>div:not(.dc-back){min-width:0}
+.dc-deck b{overflow-wrap:anywhere}
+.dc-deck.won{border-color:#2f6b4f}
+.dc-deck .star.ok{color:#3ddc97;font-size:16px}
+.dc-deck.dc-rnd{border-style:dashed}
 .dc-foot{display:flex;justify-content:flex-end;margin-top:16px}
 .db-decks{padding:12px 14px;border-bottom:1px solid #252b3a;display:flex;flex-direction:column;gap:10px}
 .db-tabs{display:flex;gap:6px;flex-wrap:wrap}
@@ -1013,7 +1025,19 @@
     S.done = true; S.over = winner; busy = false; cancelSel();
     let rw = "";
     if (winner === 0) {
-      store("glutwerk-duell-siege", String((+store("glutwerk-duell-siege") || 0) + 1)); if (window.Erfolge) Erfolge.pruefen();
+      store("glutwerk-duell-siege", String((+store("glutwerk-duell-siege") || 0) + 1));
+      let erst = "";
+      if (curGegner) {
+        const B = besiegt(); const neu = !B[curGegner]; B[curGegner] = (B[curGegner] || 0) + 1;
+        store("glutwerk-duell-besiegt", JSON.stringify(B));
+        if (neu) {
+          store("glutwerk-glut", String((parseInt(store("glutwerk-glut") || "0", 10) || 0) + R.erstSiegGlut));
+          const gd = GEGNER_DECKS.find(x => x.name === curGegner);
+          erst = `<div class="rw">+${R.erstSiegGlut} Glut</div><p>${Lx(`Erster Sieg gegen ${esc(gd && gd.anzeige || curGegner)}!`, `First win against ${esc(gd && gd.anzeige || curGegner)}!`)}</p>`;
+        }
+        if (GEGNER_DECKS.every(x => B[x.name]) && window.glutwerkErfolg) glutwerkErfolg("gw-alle-gegner");
+      }
+      if (window.Erfolge) Erfolge.pruefen();
       const k = "glutwerk-duell-" + new Date().toISOString().slice(0, 10);
       const n = +store(k) || 0;
       if (n < R.siegeProTag) {
@@ -1021,14 +1045,16 @@
         store("glutwerk-glut", String((parseInt(store("glutwerk-glut") || "0", 10) || 0) + R.siegGlut));
         rw = `<div class="rw">+${R.siegGlut} Glut</div><p>${Lx(`Noch ${R.siegeProTag - n - 1}× heute gibt es Glut für einen Sieg.`, `${R.siegeProTag - n - 1} more wins with Glut today.`)}</p>`;
       } else rw = `<p>${Lx("Für heute gab es schon genug Glut für Siege. Morgen wieder!", "You got all the win Glut for today. Come back tomorrow!")}</p>`;
+      rw = erst + rw;
       if (window.__sfx) window.__sfx("legendary");
     }
     $("dEnd").innerHTML = `<h2 style="color:${winner === 0 ? "#ffb347" : winner === 1 ? "#ff4d5e" : "#c3c9d6"}">${winner === 0 ? Lx("Sieg!", "Victory!") : winner === 1 ? Lx("Niederlage", "Defeat") : Lx("Unentschieden", "Draw")}</h2>
       ${winner === 1 ? `<p>${Lx("Bau dein Deck um und versuch es nochmal.", "Rebuild your deck and try again.")}</p>` : ""}${rw}
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="d-btn" id="eBack">${Lx("Zurück", "Back")}</button><button class="d-btn hot" id="eAgain">${Lx("Nochmal", "Again")}</button></div>`;
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="d-btn" id="eBack">${Lx("Zurück", "Back")}</button><button class="d-btn" id="eOther">${Lx("Anderer Gegner", "Other opponent")}</button><button class="d-btn hot" id="eAgain">${Lx("Nochmal", "Again")}</button></div>`;
     $("dEnd").classList.add("open");
     $("eBack").onclick = closeDuel;
-    $("eAgain").onclick = () => { $("dEnd").classList.remove("open"); startDuel(lastDeckId); };
+    $("eAgain").onclick = () => { $("dEnd").classList.remove("open"); startDuel(lastDeckId, lastGegner || ""); };
+    const eo = $("eOther"); if (eo) eo.onclick = () => { $("dEnd").classList.remove("open"); startDuel(lastDeckId); };
     if (typeof renderGlut === "function") renderGlut("bump");
   }
   function closeDuel() {
@@ -1058,17 +1084,21 @@
   }
   const saveDecks = d => store("glutwerk-decks", JSON.stringify(d));
   const aktDeck = d => d.liste.find(x => x.id === d.aktiv);
-  const GEGNER_RUECKEN = { "Letzter Dreh": "schatten", "Kiko Hüpft": "glut", Klarwasser: "kristall", Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
+  const GEGNER_RUECKEN = { Rissbrut: "kristall", "Letzter Dreh": "schatten", "Kiko Hüpft": "glut", Klarwasser: "kristall", Ameisenvolk: "wildnis", Turmwacht: "kristall", Drachenfeuer: "glut", Nebelwald: "thyrvenna", Wildnis: "wildnis" };
 
   /* ---- Duell starten (mit Deck-Auswahl) ---- */
   let lastDeckId = null;
-  function startDuel(deckId) {
+  /* Welche Gegner schon besiegt wurden: { Name: Anzahl Siege } */
+  function besiegt() { try { return JSON.parse(store("glutwerk-duell-besiegt") || "{}") || {}; } catch (e) { return {}; } }
+  let lastGegner = null, curGegner = null;
+  function startDuel(deckId, gegner) {
     const D = loadDecks(), ready = D.liste.filter(x => deckReady(x.karten));
-    if (deckId === undefined && ready.length >= 2) { openChooser(D); return; }
+    if (gegner === undefined) { openChooser(D, deckId); return; }
     const mine = D.liste.find(x => x.id === deckId) || (deckReady(aktDeck(D).karten) ? aktDeck(D) : ready[0]);
     const look = mine || aktDeck(D);
     lastDeckId = mine ? mine.id : null;
-    const g = rnd(GEGNER_DECKS);
+    const g = GEGNER_DECKS.find(x => x.name === gegner) || rnd(GEGNER_DECKS);
+    lastGegner = gegner; curGegner = g.name;
     start(mine ? mine.karten : STARTERDECK, g.deck, g.anzeige || g.name);
     S.look = { feld: look.feld, ruecken: [look.ruecken, GEGNER_RUECKEN[g.name] || "schatten"] };
     $("dBg").innerHTML = feldBG(look.feld);
@@ -1080,16 +1110,32 @@
     banner(S.cur === 0 ? Lx("Du beginnst!", "You go first!") : Lx(`${g.anzeige || g.name} beginnt`, `${g.anzeige || g.name} goes first`), "#ffb347");
     if (S.cur === 1) setTimeout(runAi, 900);
   }
-  function openChooser(D) {
-    $("dChoose").innerHTML = `<div class="dc-box"><h3>${Lx("Mit welchem Deck?", "Which deck?")}</h3><p>${Lx(`Dein aktuelles Deck ist markiert. Unvollständige Decks (weniger als ${R.deckGroesse} Karten) kannst du noch nicht spielen.`, `Your current deck is marked. Incomplete decks (fewer than ${R.deckGroesse} cards) can't be played yet.`)}</p>
-      <div class="dc-list">${D.liste.map(x => { const ok = deckReady(x.karten); return `<button class="dc-deck${x.id === D.aktiv ? " akt" : ""}" data-pick="${x.id}" ${ok ? "" : "disabled"}>
+  function openChooser(D, deckId) {
+    const ready = D.liste.filter(x => deckReady(x.karten)), B = besiegt();
+    let pick = (D.liste.find(x => x.id === deckId && deckReady(x.karten)) || (deckReady(aktDeck(D).karten) ? aktDeck(D) : ready[0]) || {}).id || null;
+    const alle = GEGNER_DECKS.filter(g => B[g.name]).length;
+    const draw = () => {
+      $("dChoose").innerHTML = `<div class="dc-box">
+      ${ready.length >= 2 ? `<h3>${Lx("Dein Deck", "Your deck")}</h3>
+      <div class="dc-list">${D.liste.map(x => { const ok = deckReady(x.karten); return `<button class="dc-deck${x.id === pick ? " akt" : ""}" data-pick="${x.id}" ${ok ? "" : "disabled"}>
         ${feldBG(x.feld)}<div class="dc-back">${backHTML(x.ruecken)}</div>
         <div><b>${esc(x.name)}</b><span>${x.karten.length} / ${R.deckGroesse} ${Lx("Karten", "cards")} · ${esc(FELDER[x.feld].name)}</span></div>
-        ${x.id === D.aktiv ? '<span class="star">★ ' + Lx("Aktuell", "Current") + '</span>' : ""}</button>`; }).join("")}</div>
+        ${x.id === pick ? '<span class="star">★</span>' : ""}</button>`; }).join("")}</div>` : ""}
+      <h3 ${ready.length >= 2 ? 'style="margin-top:20px"' : ""}>${Lx("Wähle deinen Gegner", "Pick your opponent")}</h3>
+      <p>${Lx(`Besiegt: ${alle} von ${GEGNER_DECKS.length}. Der erste Sieg gegen jeden Gegner bringt +${R.erstSiegGlut} Glut extra.`, `Beaten: ${alle} of ${GEGNER_DECKS.length}. The first win against each opponent gives +${R.erstSiegGlut} extra Glut.`)}${pick ? "" : " " + Lx("Du spielst mit dem Starterdeck.", "You play with the starter deck.")}</p>
+      <div class="dc-list">
+        <button class="dc-deck dc-rnd" data-geg=""><div class="dc-back">${backHTML("glut")}</div><div><b>${Lx("Zufall", "Random")}</b><span>${Lx("Irgendein Gegner", "Any opponent")}</span></div><span class="star">?</span></button>
+        ${GEGNER_DECKS.map(g => `<button class="dc-deck${B[g.name] ? " won" : ""}" data-geg="${esc(g.name)}"><div class="dc-back">${backHTML(GEGNER_RUECKEN[g.name] || "schatten")}</div>
+          <div><b>${esc(g.anzeige || g.name)}</b><span>${B[g.name] ? Lx(`${B[g.name]}× besiegt`, `beaten ${B[g.name]}×`) : Lx(`+${R.erstSiegGlut} Glut beim ersten Sieg`, `+${R.erstSiegGlut} Glut for the first win`)}</span></div>
+          ${B[g.name] ? '<span class="star ok">✓</span>' : ""}</button>`).join("")}
+      </div>
       <div class="dc-foot"><button class="d-btn" id="dcX">${Lx("Abbrechen", "Cancel")}</button></div></div>`;
+      $("dChoose").querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { pick = b.dataset.pick; draw(); });
+      $("dChoose").querySelectorAll("[data-geg]").forEach(b => b.onclick = () => startDuel(pick, b.dataset.geg));
+      $("dcX").onclick = () => $("dChoose").classList.remove("open");
+    };
+    draw();
     $("dChoose").classList.add("open");
-    $("dChoose").querySelectorAll("[data-pick]").forEach(b => b.onclick = () => startDuel(b.dataset.pick));
-    $("dcX").onclick = () => $("dChoose").classList.remove("open");
   }
   $("dChoose").addEventListener("click", e => { if (e.target === $("dChoose")) $("dChoose").classList.remove("open"); });
 

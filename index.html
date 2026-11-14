@@ -302,7 +302,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 .card-note{font-size:13px;color:#d9ccff;background:rgba(167,139,250,.1);border-left:3px solid var(--soon);padding:6px 10px;border-radius:4px}
 .badge-new.upd{background:var(--browser);box-shadow:0 0 14px rgba(61,220,151,.55)}
 @keyframes pulse{50%{transform:scale(1.07)}}
-.card-news{font-size:13px;color:var(--text);background:rgba(255,106,43,.08);border-left:3px solid var(--accent);padding:6px 10px;border-radius:4px}
+.card-news{font-size:13px;line-height:1.4;color:var(--text);background:rgba(255,106,43,.08);border-left:3px solid var(--accent);padding:6px 10px;border-radius:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-news b{color:var(--accent2);font-weight:600}
 
 /* Seitenaufbau: Spiele links, Seitenleiste (Beliebt + Updates) rechts */
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start}
@@ -328,6 +329,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 .top{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
 .top h2{font-family:Rajdhani,sans-serif;font-size:22px;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px}
 .top h2 svg{width:20px;height:20px;color:var(--accent)}
+.side h2 small{display:none;font:500 12px Inter,sans-serif;color:var(--muted);text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .top-sub{font-size:12px;color:var(--muted);margin:2px 0 14px}
 .top-list{display:flex;flex-direction:column;gap:8px}
 .top-item{display:flex;align-items:center;gap:12px;padding:8px;border-radius:10px;background:var(--bg2);border:1px solid transparent;text-align:left;width:100%;transition:border-color .15s,background .15s}
@@ -344,7 +346,14 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 .top-empty{font-size:13px;color:var(--muted);line-height:1.5;padding:6px 2px}
 @media (max-width:900px){
   .layout{grid-template-columns:1fr}
-  .side{position:static;max-height:none;order:-1;margin-bottom:28px}
+  .side{position:static;max-height:none;order:-1;margin-bottom:24px;gap:10px}
+  /* Am Handy sind Beliebt und Updates eingeklappt, Antippen klappt sie auf */
+  .side h2{cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .side h2::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .2s;flex:none;margin-right:6px}
+  .side section:not(.zu) h2::after{transform:rotate(45deg)}
+  .side h2 small{display:block}
+  .side section.zu{padding-top:13px;padding-bottom:13px}
+  .side section.zu > :not(h2){display:none!important}
   .upd-list{max-height:none}
   .upd.kurz .upd-list > :nth-child(n+5){display:none}
   .upd.kurz .upd-more{display:block}
@@ -417,10 +426,14 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   .fb-btn span,#newTabBtn{display:none}
   .player-bar{gap:8px;padding:8px 10px}
   .player-bar h3{font-size:16px}
+  .player-bar h3{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .player-bar .icon-btn span{display:none}
+  .player-bar .icon-btn{padding:8px 10px;flex:none}
+  .player-glut{flex:none}
   .toasts{left:12px;right:12px;bottom:12px;align-items:stretch}
   .toast{max-width:none}
 }
-@media (max-width:420px){header .logo{display:none}}
+@media (max-width:640px){.launcher-wrap,.launcher-btn{display:none!important}}
 </style>
 <script src="lang.js"></script>
 <script src="noselect.js"></script>
@@ -617,7 +630,8 @@ const GITHUB_PROFILE = "https://github.com/foxy0561";
 */
 
 /* Wie lange "NEU" / "UPDATE" höchstens angezeigt wird (in Tagen) */
-const NEW_DAYS = 30;
+const NEW_DAYS = 14;        // so viele Tage gilt ein Spiel als NEU (bis man es gespielt hat)
+const UPDATE_DAYS = 4;      // so viele Tage nach einem Update steht UPDATE am Spiel
 
 /*
   Spielername: Alle Spiele unter foxy0561.github.io teilen sich denselben Speicher.
@@ -853,10 +867,31 @@ const daysAgo = d => (Date.now() - new Date(d + "T12:00:00").getTime()) / 864e5;
 function seenMap() { try { return JSON.parse(store("glutwerk-seen") || "{}"); } catch (e) { return {}; } }
 function markSeen(g) { const m = seenMap(); m[g.title] = today(); store("glutwerk-seen", JSON.stringify(m)); }
 function status(g) {
+  if (g.ended) return "";
   const seen = seenMap()[g.title];
   if (g.added && !seen && daysAgo(g.added) <= NEW_DAYS) return "new";
-  if (g.updated && g.updated !== g.added && daysAgo(g.updated) <= NEW_DAYS && (!seen || g.updated > seen)) return "upd";
+  // UPDATE: das Spiel wurde vor Kurzem geändert und seitdem noch nicht wieder gestartet
+  const u = UPD[gKey(g)], upd = u && u.last ? u.last.slice(0, 10) : g.updated;
+  if (upd && upd !== g.added && daysAgo(upd) <= UPDATE_DAYS && (!seen || upd > seen)) return "upd";
   return "";
+}
+/* Neueste Änderung und Versionsnummer eines Spiels aus updates.json */
+function latestUpd(g) { const u = UPD[gKey(g)]; return u && u.items && u.items[0] ? u.items[0] : null; }
+function latestVer(g) {
+  const u = UPD[gKey(g)]; if (!u) return "";
+  for (const i of u.items || []) { const m = i.t.match(/^v([\d.]+) · /); if (m) return m[1]; }
+  return "";
+}
+function devLabel(g) {
+  const t = devText(g.dev), v = latestVer(g);
+  return v ? t.replace(/\s*·\s*v[\d.]+$/i, "") + " · v" + v : t;
+}
+function cardNews(g) {
+  const st = status(g); if (!st) return "";
+  const u = latestUpd(g);
+  if (st === "upd" && u) return `<div class="card-news"><b>${relDay(u.d)}:</b> ${esc(u.t.replace(/^v[\d.]+ · /, ""))}</div>`;
+  const n = g.news && g.news[g.news.length - 1];
+  return n ? `<div class="card-news">${esc((EN && n.en) || n.text)}</div>` : "";
 }
 const fmtDate = d => { const [y, m, t] = d.split("-"); return EN ? `${m}/${t}/${y}` : `${t}.${m}.${y}`; };
 
@@ -888,6 +923,8 @@ function renderNews() {
   });
   const K = UPD["karten/"];
   if (K) K.items.forEach(i => add({ title: L("Karten", "Cards"), karten: true, colors: ["#b26bff", "#ff6ad5"] }, i.d, i.t));
+  const GW = UPD["glutwerk/"];
+  if (GW) GW.items.forEach(i => add({ title: "Glutwerk", seite: true, colors: ["#ff6a2b", "#ffb347"] }, i.d, i.t));
   items.sort((a, b) => b.d.localeCompare(a.d));
   // Alles vom selben Spiel am selben Tag zu einem Eintrag zusammenfassen
   const grp = [];
@@ -904,14 +941,16 @@ function renderNews() {
     const c = i.g.colors || ["#ff6a2b", "#ffb347"];
     const vm = i.ts.map(t => (t.match(/^v([\d.]+) · /) || [])[1]).filter(Boolean)[0];
     const txt = i.ts.map(t => t.replace(/^v[\d.]+ · /, ""));
-    return head + `<button class="upd-it" style="--c1:${c[0]};--c2:${c[1]}" ${i.g.karten ? 'data-karten="1"' : `data-upd="${esc(i.g.title)}"`} title="${i.g.karten ? L("Zum Karten-Tab", "Go to the cards tab") : L("Spiel öffnen", "Open game")}">
+    return head + `<button class="upd-it" style="--c1:${c[0]};--c2:${c[1]}" ${i.g.karten ? 'data-karten="1"' : i.g.seite ? "" : `data-upd="${esc(i.g.title)}"`} title="${i.g.karten ? L("Zum Karten-Tab", "Go to the cards tab") : i.g.seite ? "" : L("Spiel öffnen", "Open game")}">
       <i></i><span><span class="upd-g">${esc(i.g.title)}${vm ? `<small>v${esc(vm)}</small>` : ""}${i.ts.length > 1 ? `<small>${L(i.ts.length + " Änderungen", i.ts.length + " changes")}</small>` : ""}</span>
       <span class="upd-t">${txt.length > 1 ? txt.map(t => "• " + esc(t)).join("<br>") : esc(txt[0])}</span></span></button>`;
   }).join("");
   $("updates").className = "upd kurz";
-  $("updates").innerHTML = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Updates</h2>
+  updKurz = list[0] ? `${list[0].g.title} · ${relDay(list[0].d)}` : "";
+  $("updates").innerHTML = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Updates <small>${esc(updKurz)}</small></h2>
     <div class="upd-sub">${L("Was sich in den Spielen getan hat", "What changed in the games · notes in German")}</div>
     <div class="upd-list">${rows}</div><button class="upd-more" type="button">${L("Alle Updates zeigen", "Show all updates")}</button>`;
+  applySide();
 }
 $("updates").addEventListener("click", e => {
   if (e.target.closest(".upd-more")) { $("updates").classList.remove("kurz"); return; }
@@ -925,7 +964,7 @@ $("updates").addEventListener("click", e => {
 });
 fetch("updates.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : {}).then(d => {
   UPD = (d && d.games) || {};
-  renderNews(); renderGrid();
+  renderNews(); renderGrid(); renderHero();
 }).catch(() => {});
 
 /* ---- Geräte & Spielmodus ---- */
@@ -972,12 +1011,14 @@ function actionHTML(g, big) {
 }
 
 function renderHero() {
-  const g = GAMES.find(x => x.featured) || GAMES[0];
+  // Oben groß: das zuletzt aktualisierte Spiel mit Bild (ohne Update-Daten das mit featured: true)
+  const frisch = Object.keys(UPD).length ? GAMES.filter(x => !x.ended && x.type !== "soon" && x.shots && x.shots.length).sort((a, b) => updScore(b) - updScore(a))[0] : null;
+  const g = frisch || GAMES.find(x => x.featured) || GAMES[0];
   if (!g) { $("hero").style.display = "none"; return; }
   $("hero").innerHTML = `
     <div class="hero-bg" style="${coverStyle(g)}">${g.shots && g.shots[0] ? `<img src="${esc(g.shots[g.shots.length > 1 ? 1 : 0])}" alt="">` : g.cover ? coverHTML(g) : ""}</div>
     <div class="hero-content">
-      <div class="hero-label">★ ${L("Empfohlen", "Featured")}</div>
+      <div class="hero-label">★ ${frisch ? L("Frisch aktualisiert", "Freshly updated") : L("Empfohlen", "Featured")}</div>
       <h1>${esc(g.title)}</h1>
       ${onlineCounts[gameId(g)] ? `<div class="hero-live"><span class="live-dot"></span>${liveText(onlineCounts[gameId(g)])}</div>` : ""}
       <p>${esc(T(g, "desc"))}</p>
@@ -1002,7 +1043,7 @@ function renderGrid() {
       <div class="cover">
         <div class="cover-art" style="${coverStyle(g)}">${coverHTML(g)}</div>
         <div class="badge ${g.type}">${LABELS[g.type]}</div>
-        ${g.dev ? `<div class="dev-badge">${esc(devText(g.dev))}</div>` : ""}
+        ${g.dev ? `<div class="dev-badge">${esc(devLabel(g))}</div>` : ""}
         ${g.ended ? `<div class="dev-badge ended">${esc(devText(g.ended))}</div>` : ""}
         ${liveBadge(g)}
         ${status(g) === "new" ? `<div class="badge-new">${L("NEU", "NEW")}</div>` : status(g) === "upd" ? `<div class="badge-new upd">UPDATE</div>` : ""}
@@ -1011,7 +1052,7 @@ function renderGrid() {
         <h3>${esc(g.title)}</h3>
         <p>${esc(T(g, "desc"))}</p>
         ${g.note ? `<div class="card-note">${esc(T(g, "note"))}</div>` : ""}
-        ${status(g) && g.news && g.news[0] ? `<div class="card-news">${esc((EN && g.news[0].en) || g.news[0].text)}</div>` : ""}
+        ${cardNews(g)}
         ${compatHTML(g)}
         <div class="tags">${(T(g, "tags") || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
         ${!g.url && g.type !== "soon" ? `<div class="missing">⚠ ${L("Link fehlt noch", "Link missing")}</div>` : ""}
@@ -1054,7 +1095,14 @@ function trackPlay(g) {
     .catch(() => {});
 }
 const ICON_FIRE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>';
-let lastTopRows = null;
+let lastTopRows = null, updKurz = "";
+/* Seitenleiste am Handy: eingeklappt merken */
+const sideZu = { top: true, updates: true };
+function applySide() { ["top", "updates"].forEach(id => $(id).classList.toggle("zu", sideZu[id])); }
+document.querySelector(".side").addEventListener("click", e => {
+  const h = e.target.closest("h2"); if (!h || !matchMedia("(max-width:900px)").matches) return;
+  const sec = h.parentElement; sideZu[sec.id] = !sideZu[sec.id]; applySide();
+});
 function renderTop(rows) {
   if (rows) lastTopRows = rows;
   const head = `<h2>${ICON_FIRE} ${L("Beliebt", "Popular")}</h2><div class="top-sub">${L("Die meisten Spieler der letzten 7 Tage", "Most players in the last 7 days")}</div>`;
@@ -1064,7 +1112,7 @@ function renderTop(rows) {
     .slice(0, TOP_COUNT);
   if (!list.length) {
     $("top").innerHTML = head + `<div class="top-empty">${rows ? L("Diese Woche wurde noch nichts gespielt. Starte ein Spiel und bring es nach oben!", "Nothing played yet this week. Start a game and push it to the top!") : L("Lädt…", "Loading…")}</div>`;
-    return;
+    applySide(); return;
   }
   $("top").innerHTML = head + `<div class="top-list">` + list.map((x, i) => `
     <button class="top-item r${i + 1}" ${x.g.type === "download" ? "data-dl" : "data-play"}="${esc(x.g.title)}">
@@ -1075,6 +1123,7 @@ function renderTop(rows) {
         <span class="top-count">${x.n} ${L("Spieler", x.n === 1 ? "player" : "players")}${onlineCounts[gameId(x.g)] ? ` · <span class="top-live">● ${onlineCounts[gameId(x.g)]} online</span>` : ""}</span>
       </span>
     </button>`).join("") + `</div>`;
+  applySide();
 }
 function loadTop() {
   if (!TOP_DB_URL) { $("top").style.display = "none"; return; }

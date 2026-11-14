@@ -65,13 +65,22 @@ def lokal(ordner):
     out = subprocess.run(["git", "log", "--format=@@%cI%x09%s", "--name-only"],
                          cwd=ROOT, capture_output=True, text=True).stdout
     res = {o: [] for o in ordner}
+    res["glutwerk"] = []
     for block in out.split("@@")[1:]:
         kopf, *dateien = block.strip().split("\n")
         if "\t" not in kopf:
             continue
         d, msg = kopf.split("\t", 1)
         drin = {f.split("/")[0] for f in dateien if "/" in f} & set(ordner)
-        if len(drin) > 1:
+        # Steht vorne "Spielname:", gehört der Commit genau dorthin. "Glutwerk:" ist die Seite selbst.
+        kopf_name = norm(msg.split(":", 1)[0]) if ":" in msg[:40] else ""
+        nach_name = [o for o in ordner if kopf_name and (kopf_name.startswith(norm(ordner[o])) or kopf_name.startswith(norm(o)))]
+        if kopf_name.startswith("glutwerk"):
+            res["glutwerk"].append((d, msg))
+            continue
+        if nach_name:
+            drin = set(nach_name) & (drin or set(nach_name))
+        elif len(drin) > 1:
             n = norm(msg)
             drin = {o for o in drin if norm(ordner[o]) in n or norm(o) in n}
         for o in drin:

@@ -1,36 +1,12 @@
 {
  "games": {
   "karten/": {
-   "last": "2026-11-13T10:16:13+01:00",
-   "n14": 24,
+   "last": "2026-11-13T01:48:53+01:00",
+   "n14": 16,
    "items": [
     {
      "d": "2026-11-13",
-     "t": "Seiten laden sich selbst neu, wenn online eine neuere Version liegt"
-    },
-    {
-     "d": "2026-11-13",
-     "t": "Jeder Reiter oben hat eine eigene weiche Farbe"
-    },
-    {
-     "d": "2026-11-13",
-     "t": "Reiter Erfolge oben entfernt, Karten direkt neben Spiele"
-    },
-    {
-     "d": "2026-11-13",
-     "t": "Erfolge als Fenster auf der Startseite, Knopf neben Spiele und bei Alle Spiele"
-    },
-    {
-     "d": "2026-11-13",
-     "t": "Karten-Tab (alle Karten, Duell, Deck-Baukasten) und Minecraft-Seite"
-    },
-    {
-     "d": "2026-11-13",
      "t": "Letzter Dreh aktualisiert (Kassierer, Zahltag, Türspion, Messer, Gewitter, neue Bilder)"
-    },
-    {
-     "d": "2026-11-13",
-     "t": "Schrift und Bilder lassen sich nicht mehr markieren (wie in Letzter Dreh)"
     },
     {
      "d": "2026-11-12",
@@ -51,16 +27,30 @@
     {
      "d": "2026-11-11",
      "t": "Klarwasser-Set mit Original-Sprites aus dem Spiel"
-    }
-   ]
-  },
-  "kammerwerk/": {
-   "last": "2026-11-08T19:00:10+01:00",
-   "n14": 1,
-   "items": [
+    },
     {
-     "d": "2026-11-08",
-     "t": "Ameisenbau und Kammerwerk hinzugefügt"
+     "d": "2026-11-11",
+     "t": "Glutstaub, mehrere Decks mit Namen, Spielfeld und Kartenrücken, Deckauswahl, sichtbarer Deckstapel zum Ziehen"
+    },
+    {
+     "d": "2026-11-11",
+     "t": "Karten ziehen, Verbrennen für Energie, Effekt-Symbole mit Tooltip, Ameisen greifen sofort an"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "Wildnis-Bilder sauberer freigestellt (Grün-Hintergrund)"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "15 Wildnis-Karten mit neuen Bildern von foxy0561"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "Neues Set Wildnis (19 Karten: Tiere, Monster, Gegenstände, Biome) und Computer-Deck Wildnis"
+    },
+    {
+     "d": "2026-11-09",
+     "t": "14 neue Thyrvenna-Karten (Tränke, Ausrüstung, Orte, Bannkreis) und Computer-Deck Nebelwald"
     }
    ]
   },
@@ -110,29 +100,9 @@
     }
    ]
   },
-  "riftward/": {
-   "last": "2026-11-08T22:18:19+01:00",
-   "n14": 1,
-   "items": [
-    {
-     "d": "2026-11-08",
-     "t": "Riftward hinzugefügt, Screenshots mit Überblenden, Supabase-Wachhalte-Action"
-    }
-   ]
-  },
-  "shardfall/": {
-   "last": "2026-11-08T22:42:05+01:00",
-   "n14": 1,
-   "items": [
-    {
-     "d": "2026-11-08",
-     "t": "Shardfall (in Entwicklung) hinzugefügt, Hinweis bei Riftward, Name auch für Shardfall"
-    }
-   ]
-  },
   "ameisenbau/": {
    "last": "2026-11-11T03:33:39+01:00",
-   "n14": 9,
+   "n14": 8,
    "items": [
     {
      "d": "2026-11-11",
@@ -165,10 +135,6 @@
     {
      "d": "2026-11-08",
      "t": "v2.0 · Hauptmenü, Welt-Einstellungen und 5 Ameisenarten"
-    },
-    {
-     "d": "2026-11-08",
-     "t": "Ameisenbau und Kammerwerk hinzugefügt"
     }
    ]
   },
@@ -236,6 +202,60 @@
     }
    ]
   },
+  "glutwerk/": {
+   "last": "2026-11-13T10:16:13+01:00",
+   "n14": 16,
+   "items": [
+    {
+     "d": "2026-11-13",
+     "t": "Seiten laden sich selbst neu, wenn online eine neuere Version liegt"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Jeder Reiter oben hat eine eigene weiche Farbe"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Karten auch bei Foxys Welt direkt neben Spiele"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Reiter Erfolge oben entfernt, Karten direkt neben Spiele"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Erfolge als Fenster auf der Startseite, Knopf neben Spiele und bei Alle Spiele"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Hinweise zu Erfolgen und Sprache für die Arbeit an den Spielen"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "83 Erfolge mit Glut-Belohnung, geheime Erfolge, neue Seite Erfolge"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Karten-Tab (alle Karten, Duell, Deck-Baukasten) und Minecraft-Seite"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Spracherkennung und DE/EN-Schalter (Startseite und Tagesbonus)"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Spiele nach letzten Updates sortiert, Update-Fenster an der Seite statt Was-ist-neu-Liste"
+    },
+    {
+     "d": "2026-11-13",
+     "t": "Schrift und Bilder lassen sich nicht mehr markieren (wie in Letzter Dreh)"
+    },
+    {
+     "d": "2026-11-10",
+     "t": "Täglicher Login-Bonus mit 7-Tage-Serie und tägliches Gratis-Pack"
+    }
+   ]
+  },
   "https://foxy0561.github.io/Kiko-H-pft/": {
    "last": "2026-11-08T15:56:01+00:00",
    "n14": 5,
@@ -291,5 +311,5 @@
    ]
   }
  },
- "stand": "2026-11-13T23:51+00:00"
+ "stand": "2026-11-14T19:50+00:00"
 }

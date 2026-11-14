@@ -54,6 +54,16 @@
     }
    ]
   },
+  "kammerwerk/": {
+   "last": "2026-11-08T19:00:10+01:00",
+   "n14": 1,
+   "items": [
+    {
+     "d": "2026-11-08",
+     "t": "Ameisenbau und Kammerwerk hinzugefügt"
+    }
+   ]
+  },
   "drako/": {
    "last": "2026-11-09T05:40:40+01:00",
    "n14": 10,
@@ -100,9 +110,29 @@
     }
    ]
   },
+  "riftward/": {
+   "last": "2026-11-08T22:18:19+01:00",
+   "n14": 1,
+   "items": [
+    {
+     "d": "2026-11-08",
+     "t": "Riftward hinzugefügt, Screenshots mit Überblenden, Supabase-Wachhalte-Action"
+    }
+   ]
+  },
+  "shardfall/": {
+   "last": "2026-11-08T22:42:05+01:00",
+   "n14": 1,
+   "items": [
+    {
+     "d": "2026-11-08",
+     "t": "Shardfall (in Entwicklung) hinzugefügt, Hinweis bei Riftward, Name auch für Shardfall"
+    }
+   ]
+  },
   "ameisenbau/": {
    "last": "2026-11-11T03:33:39+01:00",
-   "n14": 8,
+   "n14": 9,
    "items": [
     {
      "d": "2026-11-11",
@@ -135,6 +165,10 @@
     {
      "d": "2026-11-08",
      "t": "v2.0 · Hauptmenü, Welt-Einstellungen und 5 Ameisenarten"
+    },
+    {
+     "d": "2026-11-08",
+     "t": "Ameisenbau und Kammerwerk hinzugefügt"
     }
    ]
   },
@@ -203,9 +237,13 @@
    ]
   },
   "glutwerk/": {
-   "last": "2026-11-13T10:16:13+01:00",
-   "n14": 16,
+   "last": "2026-11-14T20:55:07+01:00",
+   "n14": 17,
    "items": [
+    {
+     "d": "2026-11-14",
+     "t": "Durchsicht – Handy-Leisten repariert, Updates am Handy einklappbar, UPDATE-Schild und Versionen automatisch"
+    },
     {
      "d": "2026-11-13",
      "t": "Seiten laden sich selbst neu, wenn online eine neuere Version liegt"
@@ -249,10 +287,6 @@
     {
      "d": "2026-11-13",
      "t": "Schrift und Bilder lassen sich nicht mehr markieren (wie in Letzter Dreh)"
-    },
-    {
-     "d": "2026-11-10",
-     "t": "Täglicher Login-Bonus mit 7-Tage-Serie und tägliches Gratis-Pack"
     }
    ]
   },
@@ -311,5 +345,5 @@
    ]
   }
  },
- "stand": "2026-11-14T19:50+00:00"
+ "stand": "2026-11-14T19:55+00:00"
 }

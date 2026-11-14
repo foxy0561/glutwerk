@@ -1,9 +1,13 @@
 {
  "games": {
   "karten/": {
-   "last": "2026-11-13T01:48:53+01:00",
-   "n14": 16,
+   "last": "2026-11-14T21:06:55+01:00",
+   "n14": 17,
    "items": [
+    {
+     "d": "2026-11-14",
+     "t": "Shardfall mit Original-Grafik und 7 neuen Gegnern, 4 Glutwerk-Karten, Gegnerwahl im Duell, Sammlung nach Sets"
+    },
     {
      "d": "2026-11-13",
      "t": "Letzter Dreh aktualisiert (Kassierer, Zahltag, Türspion, Messer, Gewitter, neue Bilder)"
@@ -47,10 +51,6 @@
     {
      "d": "2026-11-10",
      "t": "Neues Set Wildnis (19 Karten: Tiere, Monster, Gegenstände, Biome) und Computer-Deck Wildnis"
-    },
-    {
-     "d": "2026-11-09",
-     "t": "14 neue Thyrvenna-Karten (Tränke, Ausrüstung, Orte, Bannkreis) und Computer-Deck Nebelwald"
     }
    ]
   },
@@ -345,5 +345,5 @@
    ]
   }
  },
- "stand": "2026-11-14T19:55+00:00"
+ "stand": "2026-11-14T20:07+00:00"
 }

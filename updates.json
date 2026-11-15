@@ -241,9 +241,13 @@
    ]
   },
   "chronicles/": {
-   "last": "2026-11-15T21:12:22+01:00",
-   "n14": 2,
+   "last": "2026-11-15T21:29:53+01:00",
+   "n14": 3,
    "items": [
+    {
+     "d": "2026-11-15",
+     "t": "Verborgene Ruinen mit Gruft und Teleportzirkel"
+    },
     {
      "d": "2026-11-15",
      "t": "Ganz Thyrvenna als Oberwelt, Foxys stiller Zauber"
@@ -363,5 +367,5 @@
    ]
   }
  },
- "stand": "2026-11-15T20:12+00:00"
+ "stand": "2026-11-15T20:30+00:00"
 }

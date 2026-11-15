@@ -218,6 +218,39 @@ html.calm .fig .head,html.calm .fig .fingers{animation:none}
 .ds-btns{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;padding-top:34px;position:relative}
 @media (max-width:560px){.ds-btns{gap:10px;padding-top:30px}.ds-btns .mtag{width:calc(50% - 5px)}}
 .ds-btns::before{content:"";position:absolute;left:-10px;right:-10px;top:-2px;height:8px;border-radius:4px;background:linear-gradient(#7a736c,#3a3632 60%,#1d1a18);box-shadow:0 6px 10px rgba(0,0,0,.7)}
+.eyeop{position:fixed;inset:0;z-index:46;display:block;padding:0;touch-action:none;overflow:hidden;--pain:0;
+  background:radial-gradient(ellipse at 50% 55%,#1c0907 0,#070202 60%,#000 100%)}
+.eyeop::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(120,0,0,calc(var(--pain)*.75)) 100%)}
+.eyeop.black{background:#000}
+.eyeop.black>*:not(.ev-flash){opacity:0;transition:opacity .2s}
+.ev-socket{position:absolute;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#000 0 20%,#1a0403 30%,#3a0a07 40%,rgba(58,10,7,.5) 52%,transparent 68%);animation:evpulse 1.7s ease-in-out infinite}
+@keyframes evpulse{50%{filter:brightness(1.35)}}
+.ev-socket.hot{filter:brightness(1.7) drop-shadow(0 0 30px rgba(255,90,60,.35));animation:none}
+.ev-hole{position:absolute;inset:34%;border-radius:50%;background:radial-gradient(circle,#000 55%,#2a0605);box-shadow:inset 0 0 30px #000}
+.ev-veins{position:absolute;inset:0;width:100%;height:100%}
+.ev-veins path{fill:none;stroke:#b3261a;stroke-width:1.6;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;filter:drop-shadow(0 0 3px rgba(255,60,40,.6))}
+.ev-rim{position:absolute;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;opacity:0;--p:0;z-index:3;
+  background:radial-gradient(circle,transparent calc(52% - var(--p)*.3%),rgba(40,6,4,.9) calc(64% - var(--p)*.3%),#120302 calc(72% - var(--p)*.2%),transparent 74%)}
+.ev-jar{position:absolute;left:50%;bottom:9%;width:min(40vw,190px);aspect-ratio:.82;transform:translateX(-50%);border-radius:22px 22px 18px 18px;overflow:hidden;
+  border:2px solid rgba(255,255,255,.2);background:rgba(160,190,150,.06);box-shadow:0 20px 40px rgba(0,0,0,.7)}
+.ev-fluid{position:absolute;left:0;right:0;bottom:0;top:16%;background:linear-gradient(rgba(150,180,110,.28),rgba(70,95,50,.5));box-shadow:inset 0 6px 10px rgba(255,255,255,.12)}
+.ev-glass{position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,.22) 0 8%,transparent 16% 78%,rgba(255,255,255,.08) 88%)}
+.ev-lid{position:fixed;height:26px;border-radius:5px;background:repeating-linear-gradient(90deg,#6a5236 0 6px,#4a3824 6px 10px);box-shadow:0 4px 8px rgba(0,0,0,.6),inset 0 2px 0 rgba(255,255,255,.2);cursor:grab;z-index:4}
+.ev-eye{position:fixed;width:92px;height:92px;z-index:2;cursor:grab;will-change:transform,left,top}
+.ev-eye svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 8px 10px rgba(0,0,0,.65))}
+.ev-nerve{opacity:0;transition:opacity .4s}
+.eyeop.carry .ev-nerve{opacity:1}
+.eyeop.push .ev-nerve{opacity:0}
+.ev-flash{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:6}
+.ev-drip{position:fixed;width:5px;height:9px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:rgba(170,200,130,.75);pointer-events:none;z-index:1;animation:evdrip .85s ease-in forwards}
+@keyframes evdrip{to{transform:translateY(46vh);opacity:0}}
+.ev-bub{position:fixed;width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(220,240,200,.6);pointer-events:none;z-index:3;animation:evbub .85s ease-out forwards}
+@keyframes evbub{to{transform:translateY(-70px) scale(.4);opacity:0}}
+.ev-help{position:absolute;left:50%;top:max(18px,env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(92vw,560px);text-align:center;font-family:var(--f-hand);font-size:clamp(22px,3.4vw,30px);color:#e8dcc0;text-shadow:0 2px 10px #000;pointer-events:none;z-index:7}
+.ev-help.evpop{animation:evpopk .35s ease-out}
+@media (max-width:560px){.ev-help{top:calc(56px + env(safe-area-inset-top,0px))}}
+@keyframes evpopk{from{transform:translateX(-50%) scale(1.15);color:#ff8a7a}}
 .boot .seg{color:var(--led-grn)!important}
 .subt{position:fixed;left:50%;bottom:calc(16% + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:39;max-width:min(90vw,700px);text-align:center;pointer-events:none;
   font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,32px);color:#ffdccf;text-shadow:0 0 12px #000,0 0 24px #000,0 2px 0 #000}
@@ -2140,47 +2173,140 @@ function squelch(v){
     const o=AC.createOscillator(),og=AC.createGain();o.frequency.setValueAtTime(180+Math.random()*80,AC.currentTime);o.frequency.exponentialRampToValueAtTime(70,AC.currentTime+.12);
     og.gain.setValueAtTime(v*.4*SET.sfx,AC.currentTime);og.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.14);o.connect(og).connect(OUT());o.start();o.stop(AC.currentTime+.15);}catch(e){}
 }
+function groan(v){
+  if(muted||SET.sfx<=0||!AC) return;
+  try{const t=AC.currentTime,o=AC.createOscillator(),vb=AC.createOscillator(),vg=AC.createGain(),f=AC.createBiquadFilter(),g=AC.createGain();
+    o.type='sawtooth';o.frequency.setValueAtTime(150,t);o.frequency.linearRampToValueAtTime(95,t+.8);
+    vb.frequency.value=11;vg.gain.value=9;vb.connect(vg).connect(o.frequency);
+    f.type='bandpass';f.frequency.setValueAtTime(900,t);f.frequency.linearRampToValueAtTime(500,t+.8);f.Q.value=2.5;
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v*SET.sfx,t+.06);g.gain.exponentialRampToValueAtTime(.0001,t+.9);
+    o.connect(f).connect(g).connect(OUT());o.start(t);vb.start(t);o.stop(t+.95);vb.stop(t+.95);
+    const n=noiseNode(.7,x=>Math.pow(1-x,1.5)),nf=AC.createBiquadFilter(),ng=AC.createGain();nf.type='bandpass';nf.frequency.value=1500;nf.Q.value=1;ng.gain.value=v*.5*SET.sfx;n.connect(nf).connect(ng).connect(OUT());n.start(t);
+  }catch(e){}
+}
 function insertEye(done){
-  const side=S.eyeLost||'l';
-  const w=document.createElement('div');w.className='eyeins '+side;
-  w.innerHTML=`<div class="ei-socket"><div class="ei-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" pathLength="100" class="ei-prog"/></svg></div><span>${side==='l'?'linke':'rechte'} Augenhöhle</span></div>
-    <div class="ei-jar"><div class="ei-eye" id="eiEye"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#ece2d2"/><g stroke="#b2402a" stroke-width="1" fill="none" opacity=".7"><path d="M6 46 C20 40 26 52 34 48"/><path d="M94 56 C80 62 74 50 66 54"/><path d="M30 88 C38 76 44 82 46 72"/></g><circle cx="50" cy="50" r="20" fill="#3a6a5a"/><circle cx="50" cy="50" r="9" fill="#060404"/><circle cx="44" cy="44" r="4" fill="#fff" opacity=".8"/></svg></div></div>
-    <div class="ei-help" id="eiHelp">Nimm das Auge aus dem Glas und zieh es in die leere Höhle.</div>`;
+  const side=S.eyeLost||'l',calm=reduce||SET.calm;
+  const EYE=`<svg viewBox="0 0 100 100"><defs><radialGradient id="evw" cx=".4" cy=".35"><stop offset="0" stop-color="#f6efe2"/><stop offset=".75" stop-color="#d9cdb8"/><stop offset="1" stop-color="#a8957c"/></radialGradient><radialGradient id="evi"><stop offset="0" stop-color="#7fb39a"/><stop offset=".6" stop-color="#3a6a5a"/><stop offset="1" stop-color="#1c3a30"/></radialGradient></defs>
+    <path d="M50 92 C44 108 56 118 47 132 C42 142 52 150 48 160" stroke="#7a2418" stroke-width="5" fill="none" stroke-linecap="round" class="ev-nerve"/>
+    <circle cx="50" cy="50" r="46" fill="url(#evw)"/>
+    <g stroke="#b2402a" stroke-width="1" fill="none" opacity=".75"><path d="M6 46 C20 40 26 52 34 48"/><path d="M94 56 C80 62 74 50 66 54"/><path d="M30 88 C38 76 44 82 46 72"/><path d="M70 12 C66 22 72 26 64 32"/><path d="M14 70 C24 68 26 60 34 62"/></g>
+    <g class="ev-iris"><circle cx="50" cy="50" r="21" fill="url(#evi)"/><circle cx="50" cy="50" r="21" fill="none" stroke="#12261f" stroke-width="2"/><circle cx="50" cy="50" r="9.5" fill="#050303"/></g>
+    <ellipse cx="38" cy="34" rx="9" ry="6" fill="#fff" opacity=".7" transform="rotate(-30 38 34)"/></svg>`;
+  const w=document.createElement('div');w.className='eyeins eyeop '+side;
+  w.innerHTML=`<div class="ev-socket" id="evSocket"><svg class="ev-veins" viewBox="-100 -100 200 200">${Array.from({length:11},(_,i)=>{const a=i/11*6.283+.3,r1=34,r2=70+((i*37)%25),mx=Math.cos(a+.25)*(r1+r2)/2,my=Math.sin(a+.25)*(r1+r2)/2;
+      return `<path pathLength="100" d="M${Math.cos(a)*r1} ${Math.sin(a)*r1} Q${mx} ${my} ${Math.cos(a-.1)*r2} ${Math.sin(a-.1)*r2}"/>`;}).join('')}</svg><div class="ev-hole"></div></div>
+    <div class="ev-jar" id="evJar"><div class="ev-fluid"></div><div class="ev-glass"></div></div>
+    <div class="ev-lid" id="evLid"></div>
+    <div class="ev-eye" id="evEye">${EYE}</div>
+    <div class="ev-rim" id="evRim"></div>
+    <div class="ev-flash" id="evFlash"></div>
+    <div class="ev-help" id="evHelp">Zieh den Deckel vom Glas.</div>`;
   document.body.appendChild(w);
-  const eye=$('eiEye'),sock=w.querySelector('.ei-socket'),prog=w.querySelector('.ei-prog'),help=$('eiHelp');
-  let drag=null,inSocket=false,press=0,pressing=false,raf=0,last=0,doneFlag=false;
-  squelch(.15);
-  const over=e=>{const r=sock.getBoundingClientRect();return e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom;};
-  eye.addEventListener('pointerdown',e=>{e.preventDefault();eye.setPointerCapture(e.pointerId);
-    if(inSocket){pressing=true;last=performance.now();if(!raf)raf=requestAnimationFrame(tick);return;}
-    const r=eye.getBoundingClientRect();drag={dx:e.clientX-r.left-r.width/2,dy:e.clientY-r.top-r.height/2};eye.classList.add('held');squelch(.12);});
-  eye.addEventListener('pointermove',e=>{if(!drag)return;eye.style.position='fixed';eye.style.left=e.clientX+'px';eye.style.top=e.clientY+'px';sock.classList.toggle('hot',over(e));});
+  const eye=$('evEye'),jar=$('evJar'),lid=$('evLid'),sock=$('evSocket'),rim=$('evRim'),flash=$('evFlash'),help=$('evHelp');
+  const st={phase:'lid',slips:0,held:false,x:0,y:0,tx:0,ty:0,s:1,p:0,floor:0,pressing:false,blocked:false,ended:false,lidDrag:null,ptr:null,lastDrip:0};
+  w._st=st;
+  const geo=()=>{const W=innerWidth,H=innerHeight,R=Math.min(W,H)*.2;return {W,H,R,sx:W*(side==='l'?.3:.7),sy:H*.4,jr:jar.getBoundingClientRect()};};
+  let G=geo();
+  const place=()=>{G=geo();sock.style.left=G.sx+'px';sock.style.top=G.sy+'px';sock.style.width=sock.style.height=(G.R*3)+'px';rim.style.left=G.sx+'px';rim.style.top=G.sy+'px';rim.style.width=rim.style.height=(G.R*2.3)+'px';
+    lid.style.left=(G.jr.left-8)+'px';lid.style.top=(G.jr.top-18)+'px';lid.style.width=(G.jr.width+16)+'px';};
+  place();
+  st.x=st.tx=G.jr.left+G.jr.width/2;st.y=st.ty=G.jr.top+G.jr.height*.6;
+  const say=t=>{help.textContent=t;help.classList.remove('evpop');void help.offsetWidth;help.classList.add('evpop');};
+  const flashNow=(col,ms)=>{flash.style.background=col;flash.animate([{opacity:calm?.35:.9},{opacity:0}],{duration:ms,easing:'ease-out'});};
+  const drip=()=>{const d=document.createElement('div');d.className='ev-drip';d.style.left=(st.x+(Math.random()-.5)*20)+'px';d.style.top=(st.y+30*st.s)+'px';w.appendChild(d);setTimeout(()=>d.remove(),900);};
+  squelch(.12);
+  // heartbeat follows the progress
+  const hb=()=>{if(st.ended)return;if(st.phase==='push'){beep(55,.12,'sine',.1+st.p/500);setTimeout(()=>beep(46,.1,'sine',.08+st.p/700),130);}setTimeout(hb,st.phase==='push'?Math.max(240,800-st.p*5.4):700);};hb();
+
+  const near=(e,r)=>Math.hypot(e.clientX-st.x,e.clientY-st.y)<r;
+  w.addEventListener('pointerdown',e=>{
+    if(st.ended) return;e.preventDefault();try{w.setPointerCapture(e.pointerId)}catch(_){}
+    st.ptr={x:e.clientX,y:e.clientY};
+    if(st.phase==='lid'){const r=lid.getBoundingClientRect();if(e.clientX>r.left-20&&e.clientX<r.right+20&&e.clientY>r.top-30&&e.clientY<r.bottom+30){st.lidDrag={x:e.clientX,y:e.clientY};beep(700,.03,'square',.03);}return;}
+    if(st.phase==='grab'){
+      if(!near(e,60)) return;
+      if(st.slips<2){st.slips++;squelch(.22);
+        st.tx=G.jr.left+G.jr.width*(.25+Math.random()*.5);st.ty=G.jr.top+G.jr.height*(.45+Math.random()*.35);
+        say(st.slips===1?'Es flutscht dir aus den Fingern.':'Glitschig. Nochmal. Fester.');
+        for(let i=0;i<4;i++){const b=document.createElement('div');b.className='ev-bub';b.style.left=(st.x+(Math.random()-.5)*40)+'px';b.style.top=st.y+'px';w.appendChild(b);setTimeout(()=>b.remove(),900);}
+        return;}
+      st.held=true;st.phase='carry';squelch(.3);say('Führ es zu deiner leeren Augenhöhle.');w.classList.add('carry');return;
+    }
+    if(st.phase==='carry'){if(near(e,70*st.s)){st.held=true;squelch(.12);}return;}
+    if(st.phase==='push'){if(near(e,G.R*1.2)&&!st.blocked){st.pressing=true;}return;}
+  });
+  w.addEventListener('pointermove',e=>{
+    st.ptr={x:e.clientX,y:e.clientY};
+    if(st.lidDrag){lid.style.transform=`translate(${e.clientX-st.lidDrag.x}px,${e.clientY-st.lidDrag.y}px) rotate(${(e.clientX-st.lidDrag.x)*.15}deg)`;}
+    if(st.phase==='carry'&&st.held){st.tx=e.clientX;st.ty=e.clientY;}
+  });
   const up=e=>{
-    if(pressing){pressing=false;return;}
-    if(!drag)return;drag=null;eye.classList.remove('held');sock.classList.remove('hot');
-    if(over(e)){inSocket=true;const r=sock.getBoundingClientRect();eye.style.left=(r.left+r.width/2)+'px';eye.style.top=(r.top+r.height/2-14)+'px';eye.classList.add('seated');squelch(.25);
-      help.textContent='Jetzt draufdrücken und gedrückt halten, bis es drin ist.';}
-    else{eye.style.position='';eye.style.left='';eye.style.top='';beep(2600,.03,'triangle',.02);}
+    if(st.lidDrag){const d=Math.hypot(e.clientX-st.lidDrag.x,e.clientY-st.lidDrag.y);st.lidDrag=null;
+      if(d>70){lid.animate([{transform:lid.style.transform},{transform:`translate(${(e.clientX>G.W/2?1:-1)*160}px,${G.H*.5}px) rotate(120deg)`,opacity:0}],{duration:500,easing:'ease-in',fill:'forwards'});
+        setTimeout(()=>{lid.remove();beep(2200,.05,'triangle',.05);beep(300,.1,'square',.05);},480);
+        st.phase='grab';say('Greif das Auge.');beep(900,.05,'triangle',.04);squelch(.1);}
+      else lid.style.transform='';
+      return;}
+    if(st.phase==='carry'&&st.held){st.held=false;
+      if(Math.hypot(st.x-G.sx,st.y-G.sy)<G.R*1.1){st.phase='push';st.tx=G.sx;st.ty=G.sy;squelch(.4);groan(.12);w.classList.add('push');flashNow('#5a0a06',500);say('Drück es hinein. Gedrückt halten.');}
+      else{st.ty=Math.min(G.H*.82,st.y+G.H*.25);beep(120,.1,'square',.05);say('Heb es wieder auf. Zur Augenhöhle damit.');}
+      return;}
+    if(st.phase==='push'){st.pressing=false;st.blocked=false;}
   };
-  eye.addEventListener('pointerup',up);eye.addEventListener('pointercancel',up);
-  function tick(t){
-    raf=0;if(doneFlag)return;
-    const dt=t-last;last=t;
-    if(pressing){press=Math.min(100,press+dt*.045);if(Math.random()<.12)squelch(.12+press/400);
-      if(!reduce&&!SET.calm)$('stage').style.translate=`${(Math.random()-.5)*press/18}px ${(Math.random()-.5)*press/18}px`;
-      eye.style.transform=`translate(-50%,-50%) scale(${1-press/260})`;}
-    else press=Math.max(0,press-dt*.03);
-    prog.style.strokeDashoffset=100-press;
-    if(press>=100){finish();return;}
-    if(pressing||press>0)raf=requestAnimationFrame(tick);
+  w.addEventListener('pointerup',up);w.addEventListener('pointercancel',up);
+  const onResize=()=>place();addEventListener('resize',onResize);
+
+  let last=performance.now();
+  function loop(t){
+    if(st.ended) return;
+    const dt=Math.min(50,t-last);last=t;
+    // floating in the jar
+    if(st.phase==='lid'||st.phase==='grab'){st.x+=(st.tx-st.x)*.12;st.y+=(st.ty+Math.sin(t/600)*8-st.y)*.12;st.s=1;}
+    else if(st.phase==='carry'){
+      st.x+=(st.tx-st.x)*(st.held?.3:.1);st.y+=(st.ty-st.y)*(st.held?.3:.1);
+      const prox=Math.max(0,1-Math.hypot(st.x-G.sx,st.y-G.sy)/(Math.max(G.W,G.H)*.55));
+      st.s+=((1+prox*prox*1.9)-st.s)*.15;
+      sock.classList.toggle('hot',prox>.72);
+      if(st.held&&t-st.lastDrip>260){st.lastDrip=t;drip();if(Math.random()<.3)squelch(.05);}
+    }else if(st.phase==='push'){
+      if(st.pressing&&!st.blocked){
+        st.p=Math.min(100,st.p+dt*.028);
+        if(Math.random()<.14)squelch(.12+st.p/350);
+        const notch=st.p>=67&&st.floor<67?67:st.p>=34&&st.floor<34?34:0;
+        if(notch){st.floor=notch;st.blocked=true;st.pressing=false;groan(.22+notch/400);scream&&notch===67&&!calm&&beep(3200,.5,'sine',.03);
+          flashNow(notch===34?'#8a1208':'#f3d6cf',notch===34?700:900);
+          if(!calm)$('stage').animate([{filter:'blur(6px) brightness(1.5)'},{filter:'none'}],{duration:900});
+          say(notch===34?'Es knirscht. Lass kurz los. Dann weiter.':'Der Nerv. Nicht aufhören. Nochmal drücken.');}
+      }else if(!st.pressing){st.p=Math.max(st.floor,st.p-dt*.02);}
+      st.x+=(G.sx-st.x)*.3;st.y+=(G.sy-st.y)*.3;
+      st.s+=((2.9*(1-st.p/100*.4))-st.s)*.2;
+      const sh=calm?0:(st.pressing?st.p/9:st.p/40);
+      w.style.transform=`translate(${(Math.random()-.5)*sh}px,${(Math.random()-.5)*sh}px)`;
+      rim.style.setProperty('--p',st.p.toFixed(1));rim.style.opacity=Math.min(1,st.p/30);
+      sock.querySelectorAll('.ev-veins path').forEach(pa=>pa.style.strokeDashoffset=100-st.p);
+      w.style.setProperty('--pain',(st.p/100).toFixed(2));
+      if(st.p>=100){finish();return;}
+    }
+    eye.style.left=st.x+'px';eye.style.top=st.y+'px';
+    // the pupil looks at you; it shivers while being pushed
+    const jx=st.phase==='push'&&st.pressing?(Math.random()-.5)*3:0;
+    eye.style.transform=`translate(-50%,-50%) scale(${st.s.toFixed(3)}) rotate(${(st.phase==='carry'?(st.tx-st.x)*.25:0).toFixed(1)}deg)`;
+    const ir=eye.querySelector('.ev-iris');if(ir&&st.ptr){const dx=st.ptr.x-st.x,dy=st.ptr.y-st.y,d=Math.hypot(dx,dy)||1,m=st.phase==='push'?0:Math.min(9,d/14);ir.setAttribute('transform',`translate(${(dx/d*m+jx).toFixed(1)} ${(dy/d*m).toFixed(1)})`);}
+    requestAnimationFrame(loop);
   }
+  requestAnimationFrame(loop);
+
   function finish(){
-    doneFlag=true;$('stage').style.translate='';squelch(.5);beep(70,.3,'sine',.25);
+    st.ended=true;removeEventListener('resize',onResize);
+    w.style.transform='';$('stage').style.translate='';
+    squelch(.6);beep(60,.4,'sine',.3);groan(.3);
     S.eyeLost=null;S.eyeAdjust=60000;render();(window.glutwerkErfolg||function(){})('ld-ersatzauge');
-    w.classList.add('ok');help.textContent='';
-    const f=document.createElement('div');f.className='bleed black';f.style.opacity='1';document.body.appendChild(f);
-    setTimeout(()=>{w.remove();f.style.transition='opacity 2.2s';f.style.opacity='0';setTimeout(()=>f.remove(),2300);
-      setMsg('DAS AUGE GEWÖHNT SICH EIN …','good');done&&done();},900);
+    help.textContent='';
+    w.classList.add('black');flashNow('#fff',260);
+    // the nerve connects: sight comes back in stutters
+    const seq=calm?[[900,0]]:[[700,.2],[120,1],[260,.5],[90,1],[420,0],[80,1],[160,.1],[60,1],[500,0]];
+    let tt=0;seq.forEach(([d,o])=>{tt+=d;setTimeout(()=>{w.style.opacity=o;if(o<1)crackle();},tt);});
+    setTimeout(()=>{w.remove();setMsg('DAS AUGE GEWÖHNT SICH EIN …','good');done&&done();},tt+350);
   }
 }
 

@@ -3,6 +3,7 @@
 
 export const FARNLAGER = {
   id: 'farnlager',
+  exit: { x0: 37.5, x1: 43.5, y: 57.2 }, // Weg nach Süden → offene Welt
   name: { de: 'Fennwyrd · Farnlager', en: 'Fennwyrd · Fern Camp' },
   w: 80, h: 60, seed: 1359,
   spawn: [40, 36],

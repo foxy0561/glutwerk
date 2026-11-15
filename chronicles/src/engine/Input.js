@@ -2,7 +2,7 @@
 export const DEFAULT_BINDINGS = {
   up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD',
   sprint: 'ShiftLeft', dodge: 'Space', interact: 'KeyE',
-  inventory: 'KeyI', character: 'KeyC', skills: 'KeyK', quests: 'KeyJ', map: 'KeyM', pause: 'Escape',
+  spell: 'KeyQ', inventory: 'KeyI', character: 'KeyC', skills: 'KeyK', quests: 'KeyJ', map: 'KeyM', pause: 'Escape',
 };
 const ALT = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', sprint: 'ShiftRight' };
 

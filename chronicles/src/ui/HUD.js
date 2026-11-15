@@ -100,20 +100,22 @@ export class HUD {
   }
   questTargets() {
     // Weltpositionen (Pixel) der aktuellen Questziele
-    const g = this.g, Q = g.quests, out = [];
+    const g = this.g, Q = g.quests, out = [], W = g.world;
     for (const id of Q.active()) {
       const st = QUESTS[id].stages[Q.q[id].stage]; if (!st || !st.target) continue;
       const tr = st.target, main = id === Q.tracked;
-      if (tr.npc) { const n = g.npcs.find(n => n.id === tr.npc); if (n) out.push({ x: n.x, y: n.y, main }); }
+      if (W.id !== 'farnlager') { if (W.entrance && !out.length) out.push({ x: W.entrance.x, y: W.entrance.y, main: true }); continue; }
+      if (tr.npc) { const n = W.npcs.find(n => n.id === tr.npc); if (n) out.push({ x: n.x, y: n.y, main }); }
       if (tr.pos) out.push({ x: tr.pos[0] * TS, y: tr.pos[1] * TS, main });
-      if (tr.item) for (const it of g.world.interactables) if (it.kind === 'pickup' && it.item === tr.item) out.push({ x: it.x, y: it.y, main, small: true });
-      if (tr.lanterns) for (const it of g.world.interactables) if (it.kind === 'lantern' && !(g.state.world.memLit || {})[it.id]) out.push({ x: it.x, y: it.y, main });
+      if (tr.item) for (const it of W.interactables) if (it.kind === 'pickup' && it.item === tr.item) out.push({ x: it.x, y: it.y, main, small: true });
+      if (tr.lanterns) for (const it of W.interactables) if (it.kind === 'lantern' && !(g.state.world.memLit || {})[it.id]) out.push({ x: it.x, y: it.y, main });
     }
     return out;
   }
   drawMinimap() {
     const g = this.g, W = g.world, cv = this.mmCv, x = cv.getContext('2d');
-    const S = W.minimapScale, zoom = 2.2; // Bildschirmpixel pro Minimap-Pixel
+    const S = W.minimapScale, zoom = W.minimapZoom || 2.2;
+    const fd = g.fogDims(W.id), fc = fd.c * S;
     x.imageSmoothingEnabled = false;
     x.fillStyle = '#0b120c'; x.fillRect(0, 0, 150, 150);
     const px = g.player.x / TS * S, py = g.player.y / TS * S;
@@ -121,17 +123,19 @@ export class HUD {
     x.drawImage(W.minimap, 0, 0);
     // Nebel des Unerforschten
     x.fillStyle = 'rgba(6,8,10,0.82)';
-    const w = W.w;
-    for (let ty = Math.max(0, (py / S | 0) - 20); ty < Math.min(W.h, (py / S | 0) + 20); ty++) for (let tx = Math.max(0, (px / S | 0) - 20); tx < Math.min(w, (px / S | 0) + 20); tx++)
-      if (!g.discovered[ty * w + tx]) x.fillRect(tx * S, ty * S, S, S);
+    const span = Math.ceil(80 / zoom / fc) + 1, fx = Math.floor(px / fc), fy = Math.floor(py / fc);
+    for (let ty = Math.max(0, fy - span); ty < Math.min(fd.h, fy + span); ty++) for (let tx = Math.max(0, fx - span); tx < Math.min(fd.w, fx + span); tx++)
+      if (!g.discovered[ty * fd.w + tx]) x.fillRect(tx * fc, ty * fc, fc, fc);
+    // Orte
+    for (const m of W.mapMarkers()) { const mx = m.x / TS * S, my = m.y / TS * S; x.fillStyle = m.type === 'tele' ? '#c49af5' : m.type === 'dungeon' ? '#c8504a' : '#efe3c8'; x.fillRect(mx - 1.5, my - 1.5, 3, 3); x.fillStyle = '#1a1020'; x.fillRect(mx - 0.5, my - 0.5, 1, 1); }
     // NPCs
-    if (!g.state.world.memoryMode) for (const n of g.npcs) { x.fillStyle = '#f0d27a'; x.fillRect(n.x / TS * S - 1, n.y / TS * S - 1, 2, 2); }
+    if (!(g.state.world.memoryMode && W.id === 'farnlager')) for (const n of W.npcs) { x.fillStyle = '#f0d27a'; x.fillRect(n.x / TS * S - 1, n.y / TS * S - 1, 2, 2); }
     // Questziele
     const tt = performance.now() / 300;
     for (const q of this.questTargets()) {
       const qx = q.x / TS * S, qy = q.y / TS * S;
       x.fillStyle = q.main ? '#ffd24a' : '#c49af5';
-      const r = q.small ? 1.4 : 2.2 + Math.sin(tt) * 0.4;
+      const r = (q.small ? 1.4 : 2.2 + Math.sin(tt) * 0.4) * (W.id === 'farnlager' ? 1 : 1.4);
       x.beginPath(); x.moveTo(qx, qy - r); x.lineTo(qx + r, qy); x.lineTo(qx, qy + r); x.lineTo(qx - r, qy); x.fill();
     }
     x.restore();
@@ -141,7 +145,6 @@ export class HUD {
     x.fillStyle = '#fff'; x.strokeStyle = '#1a1020'; x.lineWidth = 1.5;
     x.beginPath(); x.moveTo(6, 0); x.lineTo(-4, -4); x.lineTo(-2, 0); x.lineTo(-4, 4); x.closePath(); x.stroke(); x.fill();
     x.restore();
-    // Rand-Schatten
     const gr = x.createRadialGradient(75, 75, 50, 75, 75, 76); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,0.6)');
     x.fillStyle = gr; x.fillRect(0, 0, 150, 150);
   }

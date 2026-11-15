@@ -16,46 +16,26 @@ export class WorldRenderer {
   render(ctx, dt) {
     const g = this.g, W = g.world, cam = g.cam;
     this.t += dt;
-    const cx = cam.ix, cy = cam.iy, vw = cam.w, vh = cam.h;
-    const mem = g.state.world.memoryMode;
+    const vw = cam.w, vh = cam.h;
+    const mem = g.state.world.memoryMode && W.id === 'farnlager';
     ctx.fillStyle = '#10180f'; ctx.fillRect(0, 0, vw, vh);
-    // Boden
-    ctx.drawImage(W.ground, cx, cy, vw, vh, 0, 0, vw, vh);
-    // Wasser-Animation
-    const wb = W.waterBox;
-    if (cy + vh > wb.y0 && cy < wb.y1) {
-      const fr = W.waterFrames[Math.floor(this.t * 5) % W.waterFrames.length];
-      const sy = Math.max(0, cy - wb.y0), dy = Math.max(0, wb.y0 - cy);
-      const h = Math.min(fr.height - sy, vh - dy);
-      if (h > 0) ctx.drawImage(fr, cx, sy, vw, h, 0, dy, vw, h);
-    }
-    // Brücke
-    const B = W.bridge; ctx.drawImage(B.cv, B.x - cx, B.y - cy);
+    W.drawGround(ctx, cam, this.t);
+    const cx = cam.ix, cy = cam.iy;
     // flache Deko mit Wiegen im Wind
     const sw = this.t * 1.6;
-    for (const f of W.flats) {
-      const x = f.x - cx, y = f.y - cy;
-      if (x < -16 || y < -4 || x > vw + 16 || y > vh + 16) continue;
+    for (const f of W.visibleFlats(cam)) {
       const fr = f.sway ? (Math.sin(sw + f.x * 0.05 + (f.ph || 0)) > 0.3 ? 1 : 0) : 0;
-      ctx.drawImage(f.sprite(fr), Math.round(x - f.ox), Math.round(y - f.oy));
+      ctx.drawImage(f.sprite(fr), Math.round(f.x - f.ox - cx), Math.round(f.y - f.oy - cy));
     }
+    g.drawGroundEffects && g.drawGroundEffects(ctx, cam);
+    const objs = W.visibleObjects(cam);
     // Baumschatten
     const shadow = P.treeShadow();
-    for (const o of W.objects) {
-      if (!o.shadow) continue;
-      const x = o.x - cx, y = o.y - cy;
-      if (x < -40 || y < -20 || x > vw + 40 || y > vh + 20) continue;
-      ctx.drawImage(shadow, Math.round(x - 26), Math.round(y - 14));
-    }
+    for (const o of objs) if (o.shadow) ctx.drawImage(shadow, Math.round(o.x - 26 - cx), Math.round(o.y - 14 - cy));
     // y-Sortierung
     const list = [];
-    for (const o of W.objects) {
-      if (o.hidden && o.hidden()) continue;
-      const x = o.x - cx, y = o.y - cy;
-      if (x < -70 || x > vw + 70 || y < -20 || y > vh + 120) continue;
-      list.push(o);
-    }
-    if (!mem) for (const n of g.npcs) list.push(n);
+    for (const o of objs) { if (o.hidden && o.hidden()) continue; list.push(o); }
+    if (!mem) for (const n of W.npcs) if (n.x > cam.x - 30 && n.x < cam.x + vw + 30 && n.y > cam.y - 10 && n.y < cam.y + vh + 40) list.push(n);
     list.push(g.player);
     list.sort((a, b) => (a.sy ?? a.y) - (b.sy ?? b.y));
     const p = g.player;
@@ -64,17 +44,18 @@ export class WorldRenderer {
       if (o.draw) { o.draw(ctx, cam); continue; }
       let a = 1;
       if (o.tree && o.canopy && p.y < o.y && p.y > o.canopy.y && Math.abs(p.x - o.x) < 26) a = 0.55;
+      if (o.type === 'building' && p.y < o.y && p.y > o.col[1] - 20 && Math.abs(p.x - o.x) < o.col[2] / 2) a = 0.6;
       const spr = o.sprite(o.anim ? Math.floor(this.t * o.anim) : frameAnim);
       if (a < 1) ctx.globalAlpha = a;
       ctx.drawImage(spr, Math.round(o.x - o.ox - cx), Math.round(o.y - o.oy - cy));
       if (a < 1) ctx.globalAlpha = 1;
     }
+    g.drawEffects && g.drawEffects(ctx, cam);
     g.particles.draw(ctx, cam);
     // Licht
     const dark = mem ? 0.62 : g.day.darkness;
-    const extra = [{ x: p.x, y: p.y - 12, r: 34, color: [255, 220, 170], a: 0.35, flicker: 0.02 }];
+    const extra = [{ x: p.x, y: p.y - 12, r: 34, color: [255, 220, 170], a: 0.35, flicker: 0.02 }].concat(g.extraLights ? g.extraLights() : []);
     g.lighting.render(ctx, cam, W.lights, dark, extra, mem ? null : g.day.tint, mem ? [40, 20, 70] : [18, 12, 42]);
-    // Erinnerungsfilter
     if (mem) {
       ctx.globalCompositeOperation = 'color';
       ctx.fillStyle = 'rgba(120,80,170,0.45)'; ctx.fillRect(0, 0, vw, vh);
@@ -82,7 +63,6 @@ export class WorldRenderer {
       ctx.fillStyle = `rgba(230,210,255,${0.05 + Math.sin(this.t * 1.5) * 0.02})`; ctx.fillRect(0, 0, vw, vh);
     }
     if (this.vignette) ctx.drawImage(this.vignette, 0, 0);
-    // Namensschilder + Interaktionshinweis
     this.drawLabels(ctx, cam);
   }
   drawLabels(_ctx, cam) {
@@ -93,7 +73,7 @@ export class WorldRenderer {
     o.setTransform(k, 0, 0, k, 0, 0);
     o.textAlign = 'center'; o.textBaseline = 'alphabetic';
     const fs = 13 / g.scale;
-    if (!g.state.world.memoryMode) for (const n of g.npcs) {
+    if (!(g.state.world.memoryMode && g.world.id === 'farnlager')) for (const n of g.world.npcs) {
       const d = Math.hypot(n.x - p.x, n.y - p.y);
       if (d > 70) continue;
       const x = n.x - cam.ix, y = n.y - cam.iy - 33;

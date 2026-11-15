@@ -8,7 +8,7 @@ import { audio } from '../engine/Audio.js';
 
 export class ShopWindow {
   constructor(ui, npcId) {
-    this.ui = ui; this.g = ui.g; this.def = NPCS[npcId];
+    this.ui = ui; this.g = ui.g; this.def = typeof npcId === 'string' ? NPCS[npcId] : npcId;
     this.body = h('div', { class: 'gm-body', style: { padding: '0' } });
     const win = frame(h('div', { class: 'window shop' }, h('div', { class: 'wtitle ribbon' }, `${L(this.def.name)} – ${t('trade')}`), this.body));
     win.append(h('button', { class: 'iconbtn wclose pe', onclick: () => this.ui.pop(this) }, '✕'));
@@ -45,6 +45,6 @@ export class ShopWindow {
       sell.append(r);
     });
     this.body.append(h('div', { class: 'shop-grid' }, buy, sell),
-      h('div', { class: 'inv-foot' }, h('span', {}, L({ de: 'Verkauf zu 40 % des Werts', en: 'Sells at 40% of value' })), h('span', { class: 'gold' }, inv.gold, img(iconURL('coin', 1)))));
+      h('div', { class: 'inv-foot' }, h('span', {}, L({ de: `Verkauf zu ${Math.round(this.def.shop.sellRate * 100)} % des Werts`, en: `Sells at ${Math.round(this.def.shop.sellRate * 100)}% of value` })), h('span', { class: 'gold' }, inv.gold, img(iconURL('coin', 1)))));
   }
 }

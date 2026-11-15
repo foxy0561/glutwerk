@@ -52,3 +52,11 @@ src/
 
 ## Warum keine Phaser-Engine?
 Für v0.1 reicht ein eigener, schlanker Canvas-Renderer: keine Abhängigkeit, volle Kontrolle über den Pixel-Look, 60 FPS auch mit Software-Rendering. Ein Wechsel auf Phaser 3 bleibt möglich, weil Welt, Daten und UI getrennt sind.
+
+## Oberwelt (v0.1.5)
+- `src/data/thyrvenna.js` – Kartendaten (Küsten, Wälder, Gebirge, Flüsse, Straßen, Orte, Reiche) in Karteneinheiten (1 = 1 Kachel).
+- `src/world/WorldGen.js` – rastert die Daten in Masken (1000×700), bestimmt Material je Pixel (`M`), erzeugt Boden-Pixel je Chunk (32×32 Kacheln) und die Übersichtskarte.
+- `src/world/chunkWorker.js` – erzeugt Chunk-Böden im Web Worker (Fallback: synchron).
+- `src/world/Settlements.js` – baut Städte/Dörfer/Ruinen/Teleportkreise/Häfen einmalig und verteilt sie auf Chunks.
+- `src/world/Overworld.js` – lädt Chunks um den Spieler (3×3 Logik, LRU für Böden), Kollision, NPCs, Pickups, Karte.
+- Kartenwechsel Farnlager ↔ Oberwelt über `exit`/Eingang an der Laternenbrücke (`Game.travel`), Nebel des Krieges je Karte.

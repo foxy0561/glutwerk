@@ -43,7 +43,8 @@ export class Player {
         const dx = wantMove ? ix : this.face.x, dy = wantMove ? iy : this.face.y;
         this.vx = dx * 230; this.vy = dy * 230;
         audio.sfx('dodge');
-        this.game.particles.burst(this.x, this.y - 2, 8, { color: ['#a8875a', '#836242'], speed: 30, life: 0.4 });
+        if (S.foxy) { this.mist = 0.6; this.game.particles.burst(this.x, this.y - 10, 26, { color: ['#e8e4f0', '#c8c4d8', '#ffffff'], speed: 26, life: 0.9, size: 2, drag: 1.5 }); }
+        else this.game.particles.burst(this.x, this.y - 2, 8, { color: ['#a8875a', '#836242'], speed: 30, life: 0.4 });
       } else this.game.ui.hud.flashBar('st');
     }
 
@@ -123,10 +124,21 @@ export class Player {
     ctx.fillStyle = 'rgba(12,8,20,0.35)';
     ctx.beginPath(); ctx.ellipse(x, y, 6, 2.5, 0, 0, Math.PI * 2); ctx.fill();
     const spr = this.sprite();
-    if (this.dodgeT > 0) {
+    this.mist = Math.max(0, (this.mist || 0) - 1 / 60);
+    if (this.mist > 0) ctx.globalAlpha = 0.35 + (0.6 - this.mist);
+    if (this.dodgeT > 0 && !this.mist) {
       ctx.globalAlpha = 0.35; ctx.drawImage(spr, x - 12 - Math.round(this.vx * 0.04), y - 30 - Math.round(this.vy * 0.04)); ctx.globalAlpha = 1;
     }
     ctx.drawImage(spr, x - 12, y - 30 + (this.dodgeT > 0 ? -2 : 0));
+    ctx.globalAlpha = 1;
+    // Stiller Zauber: Foxys Augen leuchten kurz auf – sonst keine Geste
+    if (this.game.castGlow > 0 && this.game.state.player.foxy && !this.game.state.world.memoryMode) {
+      ctx.fillStyle = `rgba(232,200,255,${Math.min(1, this.game.castGlow * 2)})`;
+      const ey = y - 30 + 13;
+      if (this.dir === 'down') { ctx.fillRect(x - 12 + 8, ey, 2, 2); ctx.fillRect(x - 12 + 14, ey, 2, 2); }
+      else if (this.dir !== 'up') { const ex = this.dir === 'right' ? x - 12 + 15 : x - 12 + 7; ctx.fillRect(ex, ey, 2, 2); }
+      ctx.fillStyle = `rgba(190,140,255,${0.3 * this.game.castGlow})`; ctx.fillRect(x - 8, ey - 2, 16, 5);
+    }
     // Schlag-Effekt (Bogen)
     if (this.atkT > 0) {
       const t = 1 - this.atkT / 0.22;

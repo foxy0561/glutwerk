@@ -113,6 +113,15 @@ export class UIManager {
     win.el = h('div', { class: 'overlay' }, box);
     this.push(win);
   }
+  choice(title, text, options) {
+    const win = {};
+    const box = frame(h('div', { class: 'window confirm', style: { width: '420px' } }, h('div', { class: 'h-title' }, title), text ? h('p', {}, text) : null,
+      h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } },
+        ...options.map(o => button(o.label, () => { this.pop(win); o.action(); }, 'primary')),
+        button(t('cancel'), () => this.pop(win)))));
+    win.el = h('div', { class: 'overlay', style: { zIndex: 40 } }, box);
+    this.push(win);
+  }
   confirm(text, yes, no) {
     const win = {};
     const box = frame(h('div', { class: 'window confirm' }, h('p', {}, text),

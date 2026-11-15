@@ -31,8 +31,9 @@ function pick(pal, t, x, y) {
 
 export class WorldMap {
   constructor(def, state = {}) {
-    this.def = def;
+    this.def = def; this.id = def.id;
     this.w = def.w; this.h = def.h;
+    this.fogCell = 1; this.minimapZoom = 2.2; this.npcs = [];
     this.pw = def.w * TS; this.ph = def.h * TS;
     this.state = state; // Weltzustände (eingesammelt, geöffnet, ...)
     this.solid = new Uint8Array(this.w * this.h);
@@ -447,6 +448,26 @@ export class WorldMap {
     ctx.drawImage(this.bridge.cv, this.bridge.x / TS * s, this.bridge.y / TS * s, this.bridge.cv.width / TS * s, this.bridge.cv.height / TS * s);
     this.minimap = cv; this.minimapScale = s;
   }
+
+  // ---------- Gemeinsame Schnittstelle mit der Weltkarte ----------
+  update() {}
+  drawGround(ctx, cam, t) {
+    const cx = cam.ix, cy = cam.iy, vw = cam.w, vh = cam.h;
+    ctx.drawImage(this.ground, cx, cy, vw, vh, 0, 0, vw, vh);
+    const wb = this.waterBox;
+    if (cy + vh > wb.y0 && cy < wb.y1) {
+      const fr = this.waterFrames[Math.floor(t * 5) % this.waterFrames.length];
+      const sy = Math.max(0, cy - wb.y0), dy = Math.max(0, wb.y0 - cy);
+      const h = Math.min(fr.height - sy, vh - dy);
+      if (h > 0) ctx.drawImage(fr, cx, sy, vw, h, 0, dy, vw, h);
+    }
+    const B = this.bridge; ctx.drawImage(B.cv, B.x - cx, B.y - cy);
+  }
+  visibleFlats(cam) { return this.flats.filter(f => f.x > cam.x - 16 && f.x < cam.x + cam.w + 16 && f.y > cam.y - 4 && f.y < cam.y + cam.h + 16); }
+  visibleObjects(cam) { return this.objects.filter(o => o.x > cam.x - 70 && o.x < cam.x + cam.w + 70 && o.y > cam.y - 20 && o.y < cam.y + cam.h + 120); }
+  objectsNear(x, y, r) { return this.objects.filter(o => Math.hypot(o.x - x, o.y - y) < r); }
+  mapMarkers() { return []; }
+  matAt() { return 0; }
 
   regionAt(x, y) {
     const tx = x / TS, ty = y / TS;

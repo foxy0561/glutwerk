@@ -65,9 +65,13 @@
    ]
   },
   "drako/": {
-   "last": "2026-11-09T05:40:40+01:00",
-   "n14": 10,
+   "last": "2026-11-15T11:19:39+01:00",
+   "n14": 11,
    "items": [
+    {
+     "d": "2026-11-15",
+     "t": "Neues Hauptmenue und schoeneres Aussehen"
+    },
     {
      "d": "2026-11-09",
      "t": "Hochschleudern ohne Mitspringen und ohne Vorab-Schlag"
@@ -355,5 +359,5 @@
    ]
   }
  },
- "stand": "2026-11-15T09:39+00:00"
+ "stand": "2026-11-15T10:19+00:00"
 }

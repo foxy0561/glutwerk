@@ -815,8 +815,32 @@ const GAMES = [
     added: "2026-11-12",
     news: [{ date: "2026-11-12", text: "Neu auf Glutwerk: Letzter Dreh! Ein Horror-Glücksspiel im Keller. Mit Kopfhörern spielen.", en: "New on Glutwerk: Letzter Dreh (Last Spin)! A horror gambling game in the basement. Play with headphones." }],
   },
+  {
+    title: "Chronicles of the Forgotten",
+    owner: true, // nur sichtbar mit Spielername foxy0561 (noch in Entwicklung)
+    shots: ["shots/chronicles-1.jpg", "shots/chronicles-2.jpg", "shots/chronicles-3.jpg"],
+    platforms: ["pc"],
+    modes: ["single"],
+    type: "browser",
+    url: "chronicles/",
+    dev: "In Entwicklung · v0.1",
+    desc: "Pixel-Art-Action-RPG in Thyrvenna: eigener Charakter, Klassen, das Farnlager an der Laternenbrücke, ein leuchtendes Mondtor und eine Erinnerung an Foxy.",
+    desc_en: "Pixel-art action RPG in Thyrvenna: your own character, classes, the Fern Camp by the Lantern Bridge, a glowing Moon Gate and a memory of Foxy.",
+    tags_en: ["RPG", "Adventure", "Pixel art"],
+    tags: ["RPG", "Abenteuer", "Pixel-Art"],
+    colors: ["#33185a", "#d4a548"],
+    added: "2026-11-15",
+    news: [{ date: "2026-11-15", text: "v0.1 The Awakening: Charaktererstellung, Startgebiet, 4 NPCs, Hauptquest mit spielbarer Erinnerung, Inventar und Speichern. Nur für den Entwickler freigegeben.", en: "v0.1 The Awakening: character creation, starting area, 4 NPCs, main quest with a playable memory, inventory and saving. Developer only." }],
+  },
 
 ];
+
+/* Spiele mit owner: true sind nur mit dem Spielernamen foxy0561 sichtbar (noch nicht öffentlich) */
+(function () {
+  let n = "";
+  try { n = (localStorage.getItem("glutwerk-name") || "").trim().toLowerCase(); } catch (e) {}
+  for (let i = GAMES.length - 1; i >= 0; i--) if (GAMES[i].owner && n !== "foxy0561") GAMES.splice(i, 1);
+})();
 
 /* =========================================================
    Ab hier musst du nichts ändern

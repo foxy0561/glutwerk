@@ -54,6 +54,8 @@ export const ITEMS = {
     desc: { de: 'Von Maren mit Silberfaden gebunden. Es summt leise, wenn du dich dem Tor näherst.', en: 'Bound by Maren with silver thread. It hums softly near the gate.' } },
   tamsis_kiste: { name: { de: 'Tamsis Gewürzkiste', en: 'Tamsi\'s Spice Box' }, cat: 'quest', rarity: 'uncommon', weight: 2.0, value: 0, stack: 1, icon: 'box', noSell: true,
     desc: { de: 'Riecht nach Zimt und Sand. Gehört Tamsi.', en: 'Smells of cinnamon and sand. Belongs to Tamsi.' } },
+  schleierrolle: { name: { de: 'Schriftrolle: Schleierbruch', en: 'Scroll: Veilbreak' }, cat: 'artifact', rarity: 'rare', weight: 0.1, value: 70, stack: 1, icon: 'ui_scroll', use: { special: 'learnVeil' },
+    desc: { de: 'Ein alter Zauber, der Trugbilder zerreißt. Manche Orte verbergen sich vor gewöhnlichen Augen.', en: 'An old spell that tears illusions apart. Some places hide from ordinary eyes.' } },
   mondsplitter: { name: { de: 'Mondsplitter', en: 'Moon Shard' }, cat: 'artifact', rarity: 'legendary', weight: 0.1, value: 0, stack: 1, icon: 'shard', noSell: true, use: { special: 'memory' },
     desc: { de: 'Ein Splitter aus violettem Licht. Wenn du ihn hältst, flüstern Stimmen, die längst verstummt sein sollten.', en: 'A shard of violet light. When you hold it, voices whisper that should have fallen silent long ago.' } },
 };

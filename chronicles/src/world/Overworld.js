@@ -14,7 +14,7 @@ const CPX = CH * T;
 let SHARED = null;
 const WATER = new Set([M.SEA, M.SHALLOW, M.WATER]);
 
-function runeCircle(lit) {
+export function runeCircle(lit) {
   const key = 'rune' + lit;
   runeCircle.c = runeCircle.c || {};
   if (runeCircle.c[key]) return runeCircle.c[key];
@@ -126,7 +126,7 @@ export class Overworld {
         continue;
       }
       if (m === M.ROAD || m === M.PAVE || m === M.BRIDGE) continue;
-      const town = h < 0.5 && near(tx, ty, 1);
+      const town = (h < 0.5 && near(tx, ty, 1)) || this.teleNear(tx, ty);
       if (town) continue;
       const v = Math.floor(h2 * 4);
       if (m === M.FOREST) {
@@ -162,9 +162,9 @@ export class Overworld {
     // Siedlungsobjekte
     for (const o of this.settleByChunk.get(k) || []) {
       if (o.flat) { c.flats.push({ x: o.x, y: o.y, ox: 36, oy: 26, sprite: () => runeCircle(!!(S.tele && S.tele[o.it.place.id])) }); }
-      else { c.objects.push(o); if (o.col) c.colliders.push({ x: o.col[0], y: o.col[1], w: o.col[2], h: o.col[3], obj: o }); }
-      if (o.light) c.lights.push(o.light);
-      if (o.it) c.its.push({ id: (o.it.place && o.it.place.id) || o.it.port || ('it_' + o.x + '_' + o.y), x: o.x, y: o.y - (o.flat ? 0 : 6), r: o.it.r || 24, obj: o, kind: o.it.kind, ...o.it });
+      else { c.objects.push(o); if (o.col) c.colliders.push({ x: o.col[0], y: o.col[1], w: o.col[2], h: o.col[3], obj: o, veil: o.veil }); }
+      if (o.light) { if (o.veil) { const id = o.veil; o.light.on = () => this.game.veilAlpha(id) > 0.25; } c.lights.push(o.light); }
+      if (o.it) { const e = { id: (o.it.place && o.it.place.id) || o.it.port || ('it_' + o.x + '_' + o.y), x: o.x, y: o.y - (o.flat ? 0 : 6), r: o.it.r || 24, obj: o, kind: o.it.kind, ...o.it }; if (o.veil) { const id = o.veil; e.when = () => this.game.veilOpen(id); e.x = o.x; e.y = o.y - 14; } c.its.push(e); }
       if (o.anim && o.spriteF) o.sprite = o.spriteF;
     }
     this.chunks.set(k, c);
@@ -206,6 +206,8 @@ export class Overworld {
     if (this._npcT <= 0) { this._npcT = 0.5; this._npcs = this.allNpcs.filter(n => Math.abs(n.x - p.x) < 900 && Math.abs(n.y - p.y) < 700); }
   }
   get npcs() { return this._npcs; }
+  teleNear(tx, ty) { for (const t of this.settle.teles) if (Math.abs(t.place.x - tx) < 8 && Math.abs(t.place.y - ty) < 8) return true; return false; }
+  veilColliders(id) { const out = []; for (const c of this.chunks.values()) for (const k of c.colliders) if (k.veil === id) out.push(k); return out; }
 
   // ---------- Kollision ----------
   blocked(x, y, w, h) {
@@ -218,7 +220,7 @@ export class Overworld {
     const cx0 = Math.floor(x / CPX), cx1 = Math.floor((x + w) / CPX), cy0 = Math.floor(y / CPX), cy1 = Math.floor((y + h) / CPX);
     for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
       const c = this.getChunk(cx, cy);
-      for (const k of c.colliders) if (!k.off && x < k.x + k.w && x + w > k.x && y < k.y + k.h && y + h > k.y) return true;
+      for (const k of c.colliders) if (!k.off && !(k.veil && this.game.veilPass(k)) && x < k.x + k.w && x + w > k.x && y < k.y + k.h && y + h > k.y) return true;
     }
     return false;
   }
@@ -278,7 +280,7 @@ export class Overworld {
   }
   mapMarkers() {
     const F = this.game.state.flags;
-    return this.places.filter(p => F['reg_' + p.id] && p.type !== 'spot').map(p => ({ x: p.x * T, y: p.y * T, type: p.type, name: { de: p.n, en: (p.en && p.en.n) || p.n }, id: p.id }));
+    return this.places.filter(p => (p.type === 'tele' ? (F['ruin_' + p.id] || this.state.tele[p.id]) : F['reg_' + p.id]) && p.type !== 'spot').map(p => ({ x: p.x * T, y: p.y * T, type: p.type, name: { de: p.n, en: (p.en && p.en.n) || p.n }, id: p.id }));
   }
   routes(port) { return (ROUTES[port] || []).filter(d => this.settle.ports[d]); }
 }

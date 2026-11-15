@@ -10,6 +10,7 @@ import { WorldMap, TS } from '../world/WorldMap.js';
 import { FARNLAGER } from '../world/maps/farnlager.js';
 import { WorldRenderer } from '../world/WorldRenderer.js';
 import { Overworld } from '../world/Overworld.js';
+import { Crypt, CW, CHH } from '../world/Crypt.js';
 import { M as MAT } from '../world/WorldGen.js';
 import { Player } from '../entities/Player.js';
 import { NPC } from '../entities/NPC.js';
@@ -144,7 +145,7 @@ export class Game {
     this.cam.follow(this.player.x, this.player.y, this.world.pw, this.world.ph, 1, true);
     this.mode = 'play'; this.paused = false;
     this.autosaveT = 150; this.discoverT = 0; this.region = null; this.interactTarget = null; this.mapCooldown = 1;
-    this.spells = []; this.orb = null;
+    this.spells = []; this.orb = null; this.gt = 0; this.veils = {}; this.veilWaves = []; this._ghosts = [];
     this.ui.showHUD();
     audio.setMusic(true, 'forest');
     this.events.emit('inventory'); this.events.emit('quests');
@@ -154,13 +155,14 @@ export class Game {
   getMap(id) {
     if (!this.maps[id]) {
       if (id === 'farnlager') { const w = new WorldMap(FARNLAGER, this.state.world); w.npcs = FARNLAGER.npcs.map(n => new NPC(this, n.id, NPCS[n.id], n.x, n.y)); this.maps[id] = w; }
+      else if (id.startsWith('crypt:')) this.maps[id] = new Crypt(this, id.slice(6));
       else this.maps[id] = new Overworld(this, this.state.ow);
     }
     return this.maps[id];
   }
-  setMap(id) { this.world = this.getMap(id); this.state.player.map = id; }
+  setMap(id) { this.world = this.getMap(id); this.state.player.map = id; if (!this.fog[id]) this.loadFog(id); audio.setMusic(true, this.world.indoor ? 'memory' : 'forest'); }
   get discovered() { return this.fog[this.world.id]; }
-  fogDims(id) { return id === 'farnlager' ? { w: 80, h: 60, c: 1 } : { w: 250, h: 175, c: 4 }; }
+  fogDims(id) { if (id.startsWith('crypt:')) return { w: CW, h: CHH, c: 1 }; return id === 'farnlager' ? { w: 80, h: 60, c: 1 } : { w: 250, h: 175, c: 4 }; }
   loadFog(id, b64) {
     const d = this.fogDims(id), a = new Uint8Array(d.w * d.h);
     if (b64) try { const b = atob(b64); for (let i = 0; i < b.length && i < a.length; i++) a[i] = b.charCodeAt(i); } catch (e) { /* ignorieren */ }
@@ -274,6 +276,7 @@ export class Game {
     this.mapCooldown = Math.max(0, (this.mapCooldown || 0) - dt);
     this.checkMapExits();
     this.updateSpells(dt, inp, blocked);
+    this.updateVeils(dt);
     this.particles.update(dt);
     this.spawnAmbientParticles(dt);
     this.cam.follow(this.player.x, this.player.y - 10, this.world.pw, this.world.ph, dt);
@@ -285,6 +288,7 @@ export class Game {
       if (inp.mouse.leftPressed && !this.ui.pointerOverUI) this.doAttack();
       if (inp.mouse.rightPressed && !this.ui.pointerOverUI && !mem) { if (this.state.player.foxy) this.castMoonspring(); else if (!this._rmbT || performance.now() - this._rmbT > 3000) { this.ui.toast(t('rmbSoon'), 'info', 2); this._rmbT = performance.now(); } }
       if (inp.wasPressed('spell') && !mem && this.state.player.foxy) this.castMoonlight();
+      if (inp.wasPressed('veil') && !mem) this.castVeil();
       for (let i = 0; i < 10; i++) if (inp.codePressed('Digit' + ((i + 1) % 10))) this.api.useHotbar(i);
     }
     // Menütasten funktionieren auch bei offenem Spielmenü (Tabs wechseln / schließen)
@@ -326,6 +330,11 @@ export class Game {
 
   spawnAmbientParticles(dt) {
     if (!this.settings.particles) return;
+    if (this.world.indoor) {
+      const cam = this.cam; if (Math.random() < dt * 5) this.particles.spawn({ x: cam.x + Math.random() * cam.w, y: cam.y + Math.random() * cam.h, vx: (Math.random() - 0.5) * 3, vy: 2, life: 4, max: 4, color: '#8a7f96', drag: 0 });
+      const W = this.world; if (W.circle && Math.random() < dt * 10) this.particles.spawn({ x: W.circle.x + (Math.random() - 0.5) * 50, y: W.circle.y + (Math.random() - 0.5) * 30, vx: 0, vy: -12, life: 1.6, max: 1.6, color: Math.random() < 0.5 ? '#c49af5' : '#ead9ff', glow: true, drag: 0.3 });
+      return;
+    }
     const cam = this.cam, P = this.particles;
     const dk = this.state.world.memoryMode ? 0.6 : this.day.darkness;
     // Glühwürmchen nachts
@@ -357,7 +366,7 @@ export class Game {
       if (this.state.world.memoryMode && (it.kind !== 'lantern' || this.state.world.memLit[it.id])) continue;
       const d = Math.hypot(it.x - fx, it.y - fy); if (d < it.r && d < bd) {
         bd = d;
-        const lbl = { pickup: t('take'), chest: t('open'), sign: t('read'), gate: t('examine'), altar: t('examine'), lantern: this.state.world.memoryMode ? t('light') : t('examine'), shrine: t('examine'), crate: t('examine'), dungeon: t('examine'), tele: t('examine'), ship: L({ de: 'Überfahrt', en: 'Passage' }) }[it.kind] || t('interact');
+        const lbl = { pickup: t('take'), chest: t('open'), sign: t('read'), gate: t('examine'), altar: t('examine'), lantern: this.state.world.memoryMode ? t('light') : t('examine'), shrine: t('examine'), crate: t('examine'), dungeon: t('examine'), tele: t('examine'), ship: L({ de: 'Überfahrt', en: 'Passage' }), crypt: L({ de: 'Hinabsteigen', en: 'Descend' }), cryptchest: t('open') }[it.kind] || (it.label && L(it.label)) || t('interact');
         best = { kind: it.kind, it, x: it.x, y: it.obj.y - (it.obj.oy || 16) - 4, label: lbl };
       }
     }
@@ -393,6 +402,16 @@ export class Game {
         break;
       }
       case 'tele': this.useTele(it.place); break;
+      case 'crypt': this.enterCrypt(it.place); break;
+      case 'stairs': audio.sfx('click'); it.go(); break;
+      case 'cryptchest': {
+        if (S.opened[it.id]) { this.ui.toast(L({ de: 'Die Truhe ist leer.', en: 'The chest is empty.' }), 'info'); return; }
+        S.opened[it.id] = true; audio.sfx('chest');
+        const r = Math.random();
+        G.gold(25 + (Math.random() * 40 | 0)); G.give(r < 0.5 ? 'manatrank' : 'heiltrank', 1 + (r * 2 | 0)); if (r > 0.6) G.give('glimmerbeere', 3);
+        this.particles.burst(it.x, it.y - 6, 16, { color: ['#f6dc8c', '#ffffff'], speed: 40, life: 0.8, up: -20, glow: true });
+        break;
+      }
       case 'ship': this.useShip(it.port); break;
       case 'gate': {
         const q = this.quests.get('main_erwachen');
@@ -442,6 +461,65 @@ export class Game {
   }
 
   // ---------- Steinkreise & Schiffe ----------
+  // ---------- Verborgene Ruinen & Schleierbruch ----------
+  veilOpen(id) { const v = this.veils[id]; return !!v && v.until > this.gt; }
+  veilAlpha(id) { const v = this.veils[id]; return v ? v.a : 0; }
+  knowsVeil() { const P = this.state.player; return !!(P.foxy || (P.spells && P.spells.veil)); }
+  castVeil() {
+    if (!this.knowsVeil()) { if (!this._veilMsgT || performance.now() - this._veilMsgT > 3000) { this.ui.toast(L({ de: 'Du kennst diesen Zauber noch nicht.', en: "You don't know this spell yet." }), 'info', 2); this._veilMsgT = performance.now(); } return; }
+    if ((this._veilCd || 0) > 0) return;
+    const P = this.state.player;
+    if (P.mp < 12) { this.ui.hud.flashBar('mp'); return; }
+    P.mp -= 12; this._veilCd = 2; this.castGlow = 0.8; this.events.emit('player');
+    audio.sfx('magic');
+    const px = this.player.x, py = this.player.y;
+    this.veilWaves.push({ x: px, y: py - 6, t: 0 });
+    if (!P.foxy) this.particles.burst(px, py - 20, 14, { color: ['#c49af5', '#ead9ff'], speed: 30, life: 0.8, up: -20, glow: true });
+    if (this.world.id !== 'world') return;
+    const W = this.world; let best = null, bd = 1e9;
+    for (const tp of W.settle.teles) {
+      const p = tp.place, d = Math.hypot(p.x * TS - px, p.y * TS - py);
+      if (d < 11 * TS) {
+        this.veils[p.id] = { until: this.gt + 24, a: this.veilAlpha(p.id) };
+        for (const k of W.veilColliders(p.id)) { const b = this.playerBox(); if (b[0] < k.x + k.w && b[0] + b[2] > k.x && b[1] < k.y + k.h && b[1] + b[3] > k.y) { k.ghost = true; this._ghosts.push(k); } }
+        if (!this.state.flags['ruin_' + p.id]) {
+          this.state.flags['ruin_' + p.id] = 1;
+          setTimeout(() => { audio.sfx('memory'); this.ui.toast(L({ de: 'Der Schleier zerreißt – eine verborgene Ruine!', en: 'The veil tears – a hidden ruin!' }), 'secret', 4); }, 500);
+        }
+        return;
+      }
+      if (d < bd && d < 110 * TS) { bd = d; best = p; }
+    }
+    // nichts in der Nähe: der Zauber zieht leicht in Richtung der nächsten Ruine
+    if (best) {
+      const a = Math.atan2(best.y * TS - py, best.x * TS - px);
+      for (let i = 0; i < 18; i++) setTimeout(() => this.particles.spawn({ x: px + (Math.random() - 0.5) * 8, y: py - 14 + (Math.random() - 0.5) * 8, vx: Math.cos(a) * (50 + Math.random() * 30), vy: Math.sin(a) * (50 + Math.random() * 30), life: 1.4, max: 1.4, color: Math.random() < 0.5 ? '#c49af5' : '#ead9ff', glow: true, drag: 0.6 }), i * 40);
+    }
+  }
+  // Ruinenmauern blockieren nur, solange der Schleier offen ist – und nie, wenn man gerade darin steht
+  veilPass(k) { if (!this.veilOpen(k.veil) || k.ghost) return true; const b = this.playerBox(); return b[0] < k.x + k.w && b[0] + b[2] > k.x && b[1] < k.y + k.h && b[1] + b[3] > k.y; }
+  playerBox() { const p = this.player; return [p.x - p.w / 2, p.y - p.h, p.w, p.h]; }
+  updateVeils(dt) {
+    this.gt += dt; this._veilCd = Math.max(0, (this._veilCd || 0) - dt);
+    for (const id in this.veils) {
+      const v = this.veils[id], open = v.until > this.gt;
+      v.a = open ? Math.min(1, v.a + dt * 1.4) : Math.max(0, v.a - dt * 0.5);
+      if (open && v.a > 0.2 && v.until - this.gt < 4 && Math.random() < dt * 6 && this.world.id === 'world') { const p = this.world.places.find(q => q.id === id); if (p) this.particles.spawn({ x: p.x * TS + (Math.random() - 0.5) * 140, y: p.y * TS + (Math.random() - 0.5) * 100, vx: 0, vy: -8, life: 1, max: 1, color: '#c49af5', glow: true }); }
+      if (!open && v.a <= 0) delete this.veils[id];
+    }
+    if (this._ghosts.length) { const b = this.playerBox(); this._ghosts = this._ghosts.filter(k => { const o = b[0] < k.x + k.w && b[0] + b[2] > k.x && b[1] < k.y + k.h && b[1] + b[3] > k.y; if (!o) k.ghost = false; return o; }); }
+    for (const w of this.veilWaves) w.t += dt;
+    this.veilWaves = this.veilWaves.filter(w => w.t < 1.1);
+  }
+  enterCrypt(place) {
+    this.state.flags['ruin_' + place.id] = 1;
+    audio.sfx('click');
+    this.travel('crypt:' + place.id, w => w.spots.top, null);
+  }
+  leaveCrypt(place) {
+    this.travel('world', w => { this.veils[place.id] = { until: this.gt + 3, a: 1 }; return w.findWalkable(place.x, place.y + 3); }, null);
+  }
+
   useTele(place) {
     const S = this.world.state, W = this.world;
     if (!S.tele[place.id]) {
@@ -453,7 +531,7 @@ export class Game {
     if (!links.length) { this.ui.toast(L({ de: 'Die Runen bleiben kalt.', en: 'The runes stay cold.' }), 'info'); return; }
     this.ui.choice(L({ de: place.n, en: (place.en && place.en.n) || place.n }), L({ de: 'Die Runen flüstern einen Ort.', en: 'The runes whisper a place.' }), links.map(l => ({
       label: L({ de: 'Reisen: ', en: 'Travel: ' }) + L({ de: l.n, en: (l.en && l.en.n) || l.n }),
-      action: () => { S.tele[l.id] = true; audio.sfx('memory'); this.travel('world', w => w.findWalkable(l.x, l.y + 2.8), [L({ de: 'Teleportzirkel', en: 'Teleport circle' }), L({ de: l.n, en: (l.en && l.en.n) || l.n })]); },
+      action: () => { S.tele[l.id] = true; audio.sfx('memory'); this.travel('crypt:' + l.id, w => w.spots.tele, [L({ de: 'Teleportzirkel', en: 'Teleport circle' }), L({ de: l.n, en: (l.en && l.en.n) || l.n })]); },
     })));
   }
   useShip(port) {
@@ -524,6 +602,13 @@ export class Game {
     }
   }
   drawEffects(ctx, cam) {
+    for (const w of this.veilWaves) {
+      const k = w.t / 1.1, r = 10 + k * 170;
+      ctx.strokeStyle = `rgba(196,154,245,${0.7 * (1 - k)})`; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(Math.round(w.x - cam.ix), Math.round(w.y - cam.iy), r, r * 0.6, 0, 0, 7); ctx.stroke();
+      ctx.strokeStyle = `rgba(234,217,255,${0.4 * (1 - k)})`; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(Math.round(w.x - cam.ix), Math.round(w.y - cam.iy), r * 0.8, r * 0.48, 0, 0, 7); ctx.stroke();
+    }
     if (this.orb) {
       const x = Math.round(this.orb.x - cam.ix), y = Math.round(this.orb.y - cam.iy);
       ctx.fillStyle = 'rgba(220,235,255,0.35)'; ctx.fillRect(x - 3, y - 3, 6, 6);
@@ -547,7 +632,8 @@ export class Game {
         if (o.id && this.world.id === 'farnlager') this.state.world.cut[o.id] = true;
         audio.sfx('cut');
         this.particles.burst(o.x, o.y - 8, 18, { color: ['#45873e', '#5c9f45', '#7cb852', '#357036'], speed: 50, life: 0.7, g: 60, drag: 2 });
-        if (Math.random() < 0.3) { this.api.give('ast', 1); }
+        if (o.loot) { audio.sfx('cut'); if (Math.random() < 0.6) this.api.gold(2 + (Math.random() * 7 | 0)); this.particles.burst(o.x, o.y - 6, 14, { color: ['#7d7589', '#5c5468', '#b37c48'], speed: 50, life: 0.6, g: 80, drag: 2 }); }
+        else if (Math.random() < 0.3) { this.api.give('ast', 1); }
         if (this.settings.shake) this.cam.shake = 1.5;
         break;
       }

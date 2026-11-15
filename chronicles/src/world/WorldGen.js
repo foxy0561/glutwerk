@@ -13,7 +13,7 @@ export const M = { SEA: 1, SHALLOW: 2, BEACH: 3, WATER: 4, BRIDGE: 5, ROAD: 6, P
 export const SOLID = new Set([M.SEA, M.SHALLOW, M.WATER, M.ROCK, M.SNOWROCK, M.LAVA]);
 
 // Ortsgrößen in Kacheln
-export const PLACE_R = { capital: 20, city: 14, village: 9, fort: 8, ruin: 7, minor: 5, dungeon: 4, special: 9, tele: 3, spot: 0 };
+export const PLACE_R = { capital: 20, city: 14, village: 9, fort: 8, ruin: 7, minor: 5, dungeon: 4, special: 9, tele: 6, spot: 0 };
 
 // ---------- Rasterung (Hauptthread, braucht Canvas) ----------
 export function buildMasks(D) {

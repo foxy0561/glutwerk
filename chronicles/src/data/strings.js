@@ -123,6 +123,7 @@ export const STRINGS = {
   act_character: { de: 'Charakter', en: 'Character' }, act_skills: { de: 'Fähigkeiten', en: 'Skills' },
   act_quests: { de: 'Questlog', en: 'Quest log' }, act_map: { de: 'Weltkarte', en: 'World map' },
   act_pause: { de: 'Pause', en: 'Pause' },
+  act_veil: { de: 'Schleierbruch', en: 'Veilbreak' },
   act_spell: { de: 'Mondlicht (nur Foxy)', en: 'Moonlight (Foxy only)' },
   cancel: { de: 'Abbrechen', en: 'Cancel' },
   mouseAttack: { de: 'Linke Maustaste: Angriff · Rechte Maustaste: Fähigkeit', en: 'Left mouse: attack · Right mouse: ability' },

@@ -43,19 +43,21 @@ export class WorldRenderer {
     for (const o of list) {
       if (o.draw) { o.draw(ctx, cam); continue; }
       let a = 1;
+      if (o.veil) { a = g.veilAlpha(o.veil); if (a <= 0.01) continue; }
       if (o.tree && o.canopy && p.y < o.y && p.y > o.canopy.y && Math.abs(p.x - o.x) < 26) a = 0.55;
       if (o.type === 'building' && p.y < o.y && p.y > o.col[1] - 20 && Math.abs(p.x - o.x) < o.col[2] / 2) a = 0.6;
       const spr = o.sprite(o.anim ? Math.floor(this.t * o.anim) : frameAnim);
       if (a < 1) ctx.globalAlpha = a;
-      ctx.drawImage(spr, Math.round(o.x - o.ox - cx), Math.round(o.y - o.oy - cy));
+      if (o.veil && a < 1) { const k = (1 - a) * 3; ctx.drawImage(spr, Math.round(o.x - o.ox - cx + Math.sin(this.t * 9 + o.y) * k), Math.round(o.y - o.oy - cy)); }
+      else ctx.drawImage(spr, Math.round(o.x - o.ox - cx), Math.round(o.y - o.oy - cy));
       if (a < 1) ctx.globalAlpha = 1;
     }
     g.drawEffects && g.drawEffects(ctx, cam);
     g.particles.draw(ctx, cam);
     // Licht
-    const dark = mem ? 0.62 : g.day.darkness;
-    const extra = [{ x: p.x, y: p.y - 12, r: 34, color: [255, 220, 170], a: 0.35, flicker: 0.02 }].concat(g.extraLights ? g.extraLights() : []);
-    g.lighting.render(ctx, cam, W.lights, dark, extra, mem ? null : g.day.tint, mem ? [40, 20, 70] : [18, 12, 42]);
+    const dark = mem ? 0.62 : W.indoor ? W.darkness : g.day.darkness;
+    const extra = [{ x: p.x, y: p.y - 12, r: W.indoor ? 58 : 34, color: [255, 220, 170], a: 0.35, flicker: 0.02 }].concat(g.extraLights ? g.extraLights() : []);
+    g.lighting.render(ctx, cam, W.lights, dark, extra, mem || W.indoor ? null : g.day.tint, mem ? [40, 20, 70] : W.indoor ? [8, 5, 14] : [18, 12, 42]);
     if (mem) {
       ctx.globalCompositeOperation = 'color';
       ctx.fillStyle = 'rgba(120,80,170,0.45)'; ctx.fillRect(0, 0, vw, vh);

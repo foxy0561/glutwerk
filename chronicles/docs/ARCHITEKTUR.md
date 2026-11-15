@@ -60,3 +60,5 @@ Für v0.1 reicht ein eigener, schlanker Canvas-Renderer: keine Abhängigkeit, vo
 - `src/world/Settlements.js` – baut Städte/Dörfer/Ruinen/Teleportkreise/Häfen einmalig und verteilt sie auf Chunks.
 - `src/world/Overworld.js` – lädt Chunks um den Spieler (3×3 Logik, LRU für Böden), Kollision, NPCs, Pickups, Karte.
 - Kartenwechsel Farnlager ↔ Oberwelt über `exit`/Eingang an der Laternenbrücke (`Game.travel`), Nebel des Krieges je Karte.
+- `src/world/Crypt.js` – Gruft unter jedem Teleportzirkel (Ebene 1: zwei Räume + Gang, Ebene 2: Kammer mit Zirkel am Treppenfuß), beide Ebenen in einer Karte mit großem Abstand.
+- Verborgene Ruinen: Objekte mit `veil: <ortId>` sind unsichtbar und durchlässig, bis `Game.castVeil()` (Taste R) den Schleier für ~24 s öffnet (`Game.veils`).

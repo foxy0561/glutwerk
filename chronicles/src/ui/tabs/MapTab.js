@@ -17,7 +17,7 @@ export class MapTab {
       h('div', {}, h('i', { style: { background: '#1a1c1e', border: '1px solid #444' } }), t('unknownArea')),
       h('div', { class: 'sep' }),
       ...W.def.regions.filter(r => this.g.state.flags['reg_' + r.id]).map(r => h('div', { class: 'small' }, '◆ ' + L(r.name))),
-      ...(W.id === 'world' ? [h('div', { class: 'small muted', style: { lineHeight: 1.4 } }, L({ de: `${W.mapMarkers().length} von ${W.places.filter(p => p.type !== 'spot').length} Orten entdeckt. Steinkreise und Schiffe bringen dich weit herum.`, en: `${W.mapMarkers().length} of ${W.places.filter(p => p.type !== 'spot').length} places discovered. Stone circles and ships take you far.` }))] : [])), true);
+      ...(W.id === 'world' ? [h('div', { class: 'small muted', style: { lineHeight: 1.4 } }, L({ de: `${W.mapMarkers().length} von ${W.places.filter(p => p.type !== 'spot').length} Orten entdeckt. Schiffe und verborgene Zirkel bringen dich weit herum.`, en: `${W.mapMarkers().length} of ${W.places.filter(p => p.type !== 'spot').length} places discovered. Ships and hidden circles take you far.` }))] : [])), true);
     this.body.append(h('div', { class: 'mapwrap' }, h('div', { class: 'mapview' }, this.cv), legend));
     this.draw();
   }

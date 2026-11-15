@@ -3,6 +3,7 @@
 import { mulberry32 } from '../engine/PixelUtil.js';
 import * as B from '../art/buildingArt.js';
 import * as P from '../art/propArt.js';
+import * as RA from '../art/ruinArt.js';
 import { M, SOLID, PLACE_R, T } from './WorldGen.js';
 import { NAMES, LINES, SHOPS, randomApp } from '../data/worldPeople.js';
 
@@ -162,8 +163,14 @@ export function buildSettlements(D, gen, isNight) {
         break;
       }
       case 'tele': {
-        for (let i = 0; i < 7; i++) { const a = i / 7 * 6.283; const tx = p.x + Math.cos(a) * 2.4, ty = p.y + Math.sin(a) * 1.7; addProp(tx, ty, (v => () => B.standingStone(v, true))(i), 6, 21, [-4, -3, 8, 3]); }
-        const o = add({ type: 'tele', x: p.x * T, y: p.y * T, ox: 0, oy: 0, flat: true, sprite: null, it: { kind: 'tele', place: p, r: 26 }, light: light(p.x * T, p.y * T - 8, 44, [200, 140, 255], 0.55, 0.08, false) });
+        // Verborgene Ruine: nur sichtbar, solange der Schleierbruch wirkt
+        const V = { veil: p.id }, hr = mulberry32(p.x * 7 + p.y);
+        const o = add({ type: 'prop', veil: p.id, x: p.x * T, y: p.y * T + 14, ox: 22, oy: 32, sprite: () => RA.ruinStairs(), it: { kind: 'crypt', place: p, r: 24 }, light: { x: p.x * T, y: p.y * T, r: 60, color: [200, 140, 255], a: 0.6, flicker: 0.08 } });
+        occupied.push([p.x * T - 24, p.y * T - 20, 48, 40]);
+        const walls = [[-4.2, -2.6, 48], [3.6, -2.4, 32], [-4.6, 2.8, 32], [3.2, 3.2, 48]];
+        walls.forEach(([dx, dy, w], i) => { if (hr() < 0.85) addProp(p.x + dx, p.y + dy, (v => () => P.ruinWall(v, w, 22))(i + 3), w / 2, 25, [-w / 2, -8, w, 8], V); });
+        for (const [dx, dy] of [[-6, -0.2], [6.2, 0.4], [-1.2, -4.4], [1.6, 4.8]]) { const br = hr() < 0.6 ? 1 : 0; addProp(p.x + dx, p.y + dy, () => P.pillar(br), 9, (br ? 30 : 46) - 1, [-8, -6, 16, 6], V); }
+        addProp(p.x - 2.4, p.y + 5.6, () => RA.rubble(3), 13, 12, [-11, -5, 22, 5], V);
         out.teles.push({ place: p, obj: o });
         break;
       }

@@ -174,10 +174,9 @@ export class Crypt {
     this.interactables.push({ id: 'up2', kind: 'stairs', x: (this.upStair2.x + 1) * T, y: (this.upStair2.y + 1) * T + 6, r: 22, obj: { y: (this.upStair2.y + 1) * T, oy: 26 }, label: { de: 'Hinaufsteigen', en: 'Climb up' },
       go: go(() => g.travel(this.id, this.spots.fromBelow, null)) });
     // Teleportzirkel
-    const lit = () => !!(S.tele && S.tele[pl.id]);
+    const lit = () => g.teleLock !== pl.id;
     this.flats.push({ x: this.circle.x, y: this.circle.y, ox: 36, oy: 26, sprite: () => runeCircle(lit()) });
-    this.interactables.push({ id: 'tele_' + pl.id, kind: 'tele', place: pl, x: this.circle.x, y: this.circle.y, r: 30, obj: { y: this.circle.y, oy: 20 } });
-    this.lights.push({ x: this.circle.x, y: this.circle.y - 6, r: 80, color: [190, 130, 255], a: 0.75, flicker: 0.08, pulse: true });
+    this.lights.push({ x: this.circle.x, y: this.circle.y - 6, r: 80, color: [190, 130, 255], a: 0.75, flicker: 0.08, pulse: true, on: lit });
     // Feuerschalen neben dem Zirkel
     for (const dx of [-3.4, 3.4]) { const x = this.circle.x + dx * T, y = this.circle.y + 8; this.addObj({ type: 'brazier', x, y, ox: 9, oy: 29, anim: 8, sprite: f => R.brazier(f % 4) }, [x - 6, y - 4, 12, 4]); this.lights.push({ x, y: y - 26, r: 84, color: [255, 160, 80], a: 0.85, flicker: 0.15 }); }
     // Wandleuchter

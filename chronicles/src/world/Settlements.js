@@ -4,6 +4,7 @@ import { mulberry32 } from '../engine/PixelUtil.js';
 import * as B from '../art/buildingArt.js';
 import * as P from '../art/propArt.js';
 import * as RA from '../art/ruinArt.js';
+import { TEACHERS } from '../data/magic.js';
 import { M, SOLID, PLACE_R, T } from './WorldGen.js';
 import { NAMES, LINES, SHOPS, randomApp } from '../data/worldPeople.js';
 
@@ -44,11 +45,12 @@ export function buildSettlements(D, gen, isNight) {
       if (!okTile(tx, ty, true)) continue;
       const names = NAMES[region] || NAMES.draventhal;
       const lines = LINES[region] || LINES.draventhal;
-      const name = role === 'merchant' ? { de: 'Händler' + (r() < 0.5 ? '' : 'in'), en: 'Merchant' } : role === 'guard' ? { de: 'Wache', en: 'Guard' } : names[(i + Math.floor(r() * 99)) % names.length];
+      const name = role === 'teacher' ? TEACHERS[p.id].name : role === 'merchant' ? { de: 'Händler' + (r() < 0.5 ? '' : 'in'), en: 'Merchant' } : role === 'guard' ? { de: 'Wache', en: 'Guard' } : names[(i + Math.floor(r() * 99)) % names.length];
       const app = randomApp(region, r);
+      if (role === 'teacher') { app.outfit = 'robe'; app.cloth = ['#3e1d6c', '#173a6e', '#4a1e5a', '#2a5a4a'][i % 4]; }
       if (role === 'guard') { app.outfit = 'tunika'; app.cloth = region === 'valcrest' ? '#e8e4ee' : '#6e1d2e'; app.species = 'mensch'; }
       const line = lines[Math.floor(r() * lines.length)];
-      out.npcs.push({ id: `${p.id}_${i}`, place: p.id, region, x: tx, y: ty, name, role, app, line, shop: role === 'merchant' ? SHOPS[region] : null, weapon: role === 'guard' ? 'sword' : null });
+      out.npcs.push({ id: `${p.id}_${i}`, place: p.id, region, x: tx, y: ty, name, role, app, line, shop: role === 'merchant' ? SHOPS[region] : null, teach: role === 'teacher' ? TEACHERS[p.id] : null, weapon: role === 'guard' ? 'sword' : null });
       return;
     }
   }
@@ -92,6 +94,7 @@ export function buildSettlements(D, gen, isNight) {
         if (p.id === 'velcair') { addBuilding(p.x + 9, p.y - 8, { w: 72, wh: 30, rh: 30, region, v: 1, kind: 'temple', spire: 1 }); addProp(p.x - 10, p.y - 9, () => B.tower(region, 2, 68), 13, 86, [-11, -8, 22, 8]); }
         if (p.id === 'grauhorn') { addProp(p.x - 6, p.y - 6, () => B.tower('brennvald', 1, 52), 13, 70, [-11, -8, 22, 8]); }
         if (p.id === 'qalimra') { for (let i = 0; i < 10; i++) { const a = r() * 6.283, d = 8 + r() * 5; const tx = p.x + Math.cos(a) * d, ty = p.y + Math.sin(a) * d * 0.7; if (okTile(tx, ty)) addProp(tx, ty, (v => () => B.palm(v))(i), 22, 58, [-4, -4, 8, 4]); } }
+        if (TEACHERS[p.id]) addNPC(p, region, r, 90, 'teacher');
         for (let i = 0; i < (cap ? 9 : 5); i++) addNPC(p, region, r, i, i === 0 ? 'merchant' : i < (cap ? 3 : 2) ? 'guard' : 'villager');
         break;
       }

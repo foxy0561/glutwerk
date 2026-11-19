@@ -33,12 +33,10 @@ export class GameAPI {
       return;
     }
     if (!def.use) { g.ui.toast(t('nothingHappens'), 'info', 2); return; }
-    if (def.use.special === 'learnVeil') {
-      P.spells = P.spells || {};
-      if (P.spells.veil || P.foxy) { g.ui.toast(L({ de: 'Diesen Zauber kennst du schon.', en: 'You already know this spell.' }), 'info', 2); return; }
-      P.spells.veil = true; g.inventory.remove(id, 1); audio.sfx('magic');
-      const key = (g.input.bindings.veil || 'KeyR').replace('Key', '');
-      g.ui.toast(L({ de: `Zauber gelernt: Schleierbruch [${key}]`, en: `Spell learned: Veilbreak [${key}]` }), 'secret', 4);
+    if (def.use.special === 'book' || def.use.special === 'learnVeil') {
+      audio.sfx('click');
+      g.ui.toast(L({ de: 'Du schlägst das Buch auf … (Magie-Menü)', en: 'You open the book … (magic menu)' }), 'info', 2);
+      g.ui.openMenu('skills'); if (g.ui.magicFocusBook) g.ui.magicFocusBook(id); else g.ui.pendingBook = id;
       return;
     }
     if (def.use.special === 'memory') {

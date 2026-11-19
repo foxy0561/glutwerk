@@ -4,6 +4,7 @@
 |---|---|---|
 | v0.1 The Awakening | Engine, Charaktererstellung, Bewegung, Startgebiet, NPCs, Inventar, Quests, Speichern | ✅ fertig |
 | v0.1.5 Thyrvenna | Komplette Oberwelt (1000×700 Kacheln, 7 Reiche, 39 Orte, Städte mit Bewohnern & Händlern, 10 verborgene Ruinen mit Gruft und Teleportzirkel (nur mit Schleierbruch sichtbar), Schiffe zwischen 4 Häfen), Foxys stiller Zauber (Mondquelle, Mondlicht, Nebelschleier) | ✅ fertig |
+| v0.1.6 Magie | Magiesystem nach Mushoku-Tensei-Vorbild: 11 Schulen, 7 Ränge, Lehrer in 7 Städten, Magiebücher, Übung, stilles Zaubern, Mana wächst durch Verbrauch; verbotene Teleportzirkel zum Draufstellen | ✅ fertig |
 | v0.2 Combat & Creatures | Echtzeitkampf, Gegner-KI (Idle/Patrol/Detect/Chase/Attack/Hurt/Dead), Schleime & Wölfe, Trefferfeedback, Tod/Respawn, Quest „Die Unruhe im Wald“ | geplant |
 | v0.3 Character Progression | Fähigkeitenbaum (Krieger/Magier/Waldläufer kombinierbar), Rechtsklick-Fähigkeiten | geplant |
 | v0.4 Equipment & Crafting | Waffen- und Rüstungsvarianten, Werkbank, Kochen am Lagerfeuer | geplant |

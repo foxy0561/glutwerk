@@ -2,7 +2,7 @@
 export const DEFAULT_BINDINGS = {
   up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD',
   sprint: 'ShiftLeft', dodge: 'Space', interact: 'KeyE',
-  spell: 'KeyQ', veil: 'KeyR', inventory: 'KeyI', character: 'KeyC', skills: 'KeyK', quests: 'KeyJ', map: 'KeyM', pause: 'Escape',
+  spell: 'KeyQ', veil: 'KeyR', nextSpell: 'Tab', inventory: 'KeyI', character: 'KeyC', skills: 'KeyK', quests: 'KeyJ', map: 'KeyM', pause: 'Escape',
 };
 const ALT = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', sprint: 'ShiftRight' };
 
@@ -31,13 +31,14 @@ export class Input {
     });
     window.addEventListener('mouseup', e => { if (e.button === 0) this.mouse.left = false; if (e.button === 2) this.mouse.right = false; });
     target.addEventListener('contextmenu', e => e.preventDefault());
+    this.wheel = 0; target.addEventListener('wheel', e => { this.wheel += Math.sign(e.deltaY); e.preventDefault(); }, { passive: false });
   }
   setBindings(b) { this.bindings = { ...DEFAULT_BINDINGS, ...(b || {}) }; }
   codesFor(action) { const c = [this.bindings[action]]; if (ALT[action] && this.bindings[action] === DEFAULT_BINDINGS[action]) c.push(ALT[action]); return c; }
   isDown(action) { return this.enabled && this.codesFor(action).some(c => this.down.has(c)); }
   wasPressed(action) { return this.codesFor(action).some(c => this.pressed.has(c)); }
   codePressed(code) { return this.pressed.has(code); }
-  endFrame() { this.pressed.clear(); this.mouse.leftPressed = false; this.mouse.rightPressed = false; }
+  endFrame() { this.wheel = 0; this.pressed.clear(); this.mouse.leftPressed = false; this.mouse.rightPressed = false; }
   captureNext(cb) { this.captureCallback = cb; }
 }
 

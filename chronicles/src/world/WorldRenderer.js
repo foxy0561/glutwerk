@@ -37,6 +37,7 @@ export class WorldRenderer {
     for (const o of objs) { if (o.hidden && o.hidden()) continue; list.push(o); }
     if (!mem) for (const n of W.npcs) if (n.x > cam.x - 30 && n.x < cam.x + vw + 30 && n.y > cam.y - 10 && n.y < cam.y + vh + 40) list.push(n);
     list.push(g.player);
+    for (const s of g.magic.sortables()) list.push(s);
     list.sort((a, b) => (a.sy ?? a.y) - (b.sy ?? b.y));
     const p = g.player;
     const frameAnim = Math.floor(this.t * 8);

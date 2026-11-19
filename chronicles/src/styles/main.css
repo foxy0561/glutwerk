@@ -350,3 +350,57 @@ button { font-family: var(--f-body); }
 .gate-err { min-height: 20px; margin: 8px 0; color: #ff9a8a; font-size: 14px; }
 .gate-row { display: flex; gap: 10px; justify-content: center; }
 .gate-row a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* ---------- Magie-Menü ---------- */
+.mg { display: grid; grid-template-columns: 190px 1fr 270px; gap: 12px; flex: 1; min-height: 0; }
+.mg-schools { padding: 8px; display: flex; flex-direction: column; gap: 3px; min-height: 0; }
+.mg-grp { font-family: var(--f-title); color: var(--gold2); font-size: 14px; margin: 8px 2px 2px; }
+.mg-grp:first-child { margin-top: 0; }
+.mg-sch { display: grid; grid-template-columns: 34px 1fr; grid-template-rows: auto auto; align-items: center; column-gap: 6px; text-align: left; padding: 3px 6px; background: #140d12; color: var(--cream); border: 1px solid #3a2818; border-radius: 4px; cursor: pointer; font: 14px var(--f-body); }
+.mg-sch img { grid-row: span 2; width: 32px; height: 32px; }
+.mg-sch small { color: var(--muted); font-size: 11px; }
+.mg-sch:hover { border-color: var(--bronze); } .mg-sch.on { border-color: var(--gold); background: #2a1a2e; }
+.mg-sch.forb span { color: #c88; }
+.mg-tree { padding: 10px 14px; min-height: 0; border: 1px solid #3a2818; border-radius: 6px; background: rgba(10,6,10,.5); }
+.mg-head h3 { margin: 0 0 6px; font-family: var(--f-title); font-weight: 400; color: var(--gold2); font-size: 22px; }
+.mg-stat { display: grid; grid-template-columns: 120px 1fr 56px; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin: 3px 0; }
+.mg-stat b { color: var(--cream); font-weight: 400; text-align: right; }
+.mg-bar { height: 7px; background: #0c070a; border: 1px solid #3a2818; border-radius: 4px; overflow: hidden; }
+.mg-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8a6230, #f0d27a); }
+.mg-bar.v i { background: linear-gradient(90deg, #4a2a7a, #c49af5); }
+.mg-row { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid #2a1c14; position: relative; }
+.mg-rank { font-family: var(--f-title); color: var(--muted); font-size: 14px; }
+.mg-nodes { display: flex; flex-wrap: wrap; gap: 8px; }
+.mg-node { position: relative; width: 84px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border: 2px solid #3a2818; border-radius: 8px; background: #120a0e; color: var(--muted); font: 12px var(--f-body); cursor: pointer; }
+.mg-node img { width: 40px; height: 40px; }
+.mg-node span { line-height: 1.1; text-align: center; }
+.mg-node.locked img { filter: grayscale(1) brightness(.6); }
+.mg-node.near { border-color: #6a5030; } .mg-node.near img { filter: grayscale(.6); }
+.mg-node.ready { border-color: var(--gold); color: var(--cream); box-shadow: 0 0 10px rgba(240,210,122,.35); animation: mgpulse 1.6s infinite; }
+.mg-node.learned { border-color: var(--violet2); color: var(--cream); background: #1e1230; }
+.mg-node.sel { outline: 2px solid var(--cream); outline-offset: 1px; }
+.mg-node.far { cursor: default; opacity: .45; }
+.mg-node .q { width: 40px; height: 40px; display: grid; place-items: center; font: 24px var(--f-title); color: #6a5030; border: 1px dashed #4a3218; border-radius: 50%; }
+.mg-node em { position: absolute; top: 2px; right: 5px; font-style: normal; color: var(--gold2); }
+.mg-node .onbar { position: absolute; top: 4px; left: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold2); }
+@keyframes mgpulse { 50% { box-shadow: 0 0 18px rgba(240,210,122,.6); } }
+.mg-hint { margin-top: 8px; }
+.mg-forb { padding: 14px; line-height: 1.5; } .mg-forb .mg-count { color: var(--violet2); font-family: var(--f-title); font-size: 17px; }
+.mg-detail { padding: 12px; display: flex; flex-direction: column; min-height: 0; }
+.mg-src { color: var(--muted); display: flex; flex-direction: column; gap: 3px; } .mg-src b { color: var(--gold2); font-weight: 400; }
+.mg-dtop { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: center; }
+.mg-dtop img { width: 64px; height: 64px; }
+.mg-detail .nm { font-family: var(--f-title); font-size: 20px; } .mg-detail .ty { font-size: 13px; color: var(--muted); }
+.mg-detail .ds { font-size: 14px; line-height: 1.45; }
+.mg-reqs { margin: 8px 0; font-size: 13px; display: flex; flex-direction: column; gap: 3px; }
+.mg-reqs .ok { color: #8fd07a; } .mg-reqs .no { color: #d08a7a; }
+.mg-detail .acts { display: flex; flex-direction: column; gap: 6px; margin-top: auto; padding-top: 10px; }
+.mg-help p { margin: 0 0 8px; line-height: 1.45; }
+/* Zauberleiste im HUD */
+.spellbar { display: flex; gap: 3px; padding: 4px 6px; align-self: flex-end; }
+.sslot { position: relative; width: 34px; height: 34px; border: 1px solid #4a3218; border-radius: 50%; background: #120a12; display: grid; place-items: center; cursor: pointer; pointer-events: auto; }
+.sslot img { width: 26px; height: 26px; }
+.sslot.on { border-color: var(--violet2); box-shadow: 0 0 10px rgba(154,95,224,.55); }
+.sslot .cd { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,.6); }
+.sslot .nomp img { filter: grayscale(1); }
+.spellname { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 4px; white-space: nowrap; font: 13px var(--f-title); color: #ead9ff; text-shadow: 0 1px 3px #000; }

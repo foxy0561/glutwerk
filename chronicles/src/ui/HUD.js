@@ -1,4 +1,6 @@
 // Spiel-HUD: Porträt + Leisten, Minimap, Questverfolgung, Schnellleiste, Menütasten.
+import { SPELLS } from '../data/magic.js';
+import { spellIconURL } from '../art/spellArt.js';
 import { h, frame, img, clear, canvasEl } from './dom.js';
 import { t, L } from '../core/i18n.js';
 import { iconURL } from '../art/iconArt.js';
@@ -37,12 +39,13 @@ export class HUD {
     const B = g.input.bindings;
     const menus = [['inventory', 'ui_bag', B.inventory], ['character', 'ui_char', B.character], ['skills', 'ui_book', B.skills], ['quests', 'ui_scroll', B.quests], ['map', 'ui_map', B.map]];
     const mbox = h('div', { class: 'hud-menus' }, menus.map(([tab, ic, key]) => h('div', { class: 'hmenu pe', title: t(tab === 'quests' ? 'quests' : tab), onclick: () => { audio.init(); audio.sfx('click'); this.ui.openMenu(tab); } }, img(iconURL(ic, 2)), h('span', { class: 'k' }, keyLabel(key)))));
-    L0.append(h('div', { class: 'hud-bottom' }, this.hot, mbox));
+    this.sbar = frame(h('div', { class: 'spellbar' }), true);
+    L0.append(h('div', { class: 'hud-bottom' }, this.sbar, this.hot, mbox));
     this.fpsEl = h('div', { class: 'fps' }); L0.append(this.fpsEl);
     this.built = true;
     this.unsub && this.unsub.forEach(f => f());
-    this.unsub = [g.events.on('inventory', () => this.refreshHotbar()), g.events.on('quests', () => this.refreshTracker()), g.events.on('player', () => this.refreshPortrait())];
-    this.refreshHotbar(); this.refreshTracker(); this.refreshPortrait();
+    this.unsub = [g.events.on('inventory', () => this.refreshHotbar()), g.events.on('quests', () => this.refreshTracker()), g.events.on('player', () => this.refreshPortrait()), g.events.on('magic', () => this.refreshSpells())];
+    this.refreshHotbar(); this.refreshTracker(); this.refreshPortrait(); this.refreshSpells();
     this.setMemory(g.state && g.state.world.memoryMode);
   }
   setMemory(on) { this.ui.layerHUD.classList.toggle('memory', !!on); }
@@ -63,6 +66,18 @@ export class HUD {
         const n = inv.count(id); if (ITEMS[id].stack > 1) s.append(h('span', { class: 'n' }, n));
         s.title = L(ITEMS[id].name);
       } else s.title = '';
+    });
+  }
+  refreshSpells() {
+    const g = this.g, m = g.magic; if (!g.state || !this.sbar) return;
+    clear(this.sbar); this.sslots = [];
+    const M = m.M;
+    this.sbar.style.display = M.bar.length ? '' : 'none';
+    M.bar.forEach((id, i) => {
+      const cd = h('div', { class: 'cd' });
+      const s = h('div', { class: 'sslot' + (i === M.active ? ' on' : ''), title: L(SPELLS[id].name), onclick: () => { M.active = i; g.events.emit('magic'); } }, img(spellIconURL(id, 2)), cd);
+      if (i === M.active) s.append(h('div', { class: 'spellname' }, L(SPELLS[id].name)));
+      this.sslots.push([id, s, cd]); this.sbar.append(s);
     });
   }
   flashHotbar(i) { const s = this.hslots[i]; if (!s) return; s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash'); }
@@ -90,6 +105,7 @@ export class HUD {
     const set = (k, v, m) => { const b = this.bars[k]; b.firstChild.style.width = (100 * Math.max(0, v) / m).toFixed(1) + '%'; b.lastChild.textContent = `${Math.round(v)} / ${m}`; };
     set('hp', P.hp, d.maxHp); set('mp', P.mp, d.maxMp); set('st', P.st, d.maxSt);
     this.xp.firstChild.style.width = (100 * P.xp / xpForLevel(P.level)) + '%';
+    if (this.sslots) for (const [id, s, cd] of this.sslots) { const sp = SPELLS[id], c = g.magic.cd[id] || 0; cd.style.clipPath = c > 0 ? `inset(${100 - c / sp.cd * 100}% 0 0 0)` : 'inset(100% 0 0 0)'; s.style.opacity = P.mp < sp.mp ? 0.5 : 1; }
     this.fpsEl.textContent = g.settings.fps ? `${g.fps} ${t('fps')}` : '';
     this.mmT -= dt;
     if (this.mmT <= 0) { this.mmT = 0.08; this.drawMinimap(); }

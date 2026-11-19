@@ -11,6 +11,8 @@ import { FARNLAGER } from '../world/maps/farnlager.js';
 import { WorldRenderer } from '../world/WorldRenderer.js';
 import { Overworld } from '../world/Overworld.js';
 import { Crypt, CW, CHH } from '../world/Crypt.js';
+import { Magic } from '../systems/Magic.js';
+import { THYRVENNA } from '../data/thyrvenna.js';
 import { M as MAT } from '../world/WorldGen.js';
 import { Player } from '../entities/Player.js';
 import { NPC } from '../entities/NPC.js';
@@ -35,6 +37,7 @@ export class Game {
     this.particles = new Particles();
     this.day = new DayNight();
     this.lighting = new Lighting();
+    this.magic = new Magic(this);
     this.saves = new SaveManager();
     this.settings = { ...DEFAULT_SETTINGS };
     this.meta = { unlocks: {} };
@@ -105,6 +108,7 @@ export class Game {
     };
     const inv = { slots: [], equip: { weapon: cls.weapon, armor: cls.armor, trinket: null }, hotbar: [cls.weapon, null, 'heiltrank', 'apfel'], gold: 25 };
     inv.slots = [{ id: 'heiltrank', n: 2 }, { id: 'apfel', n: 3 }, { id: 'brot', n: 1 }];
+    if (c.cls === 'magier' && !c.foxy) { st.player.magic = { learned: { wasserkugel: 1 }, bar: ['wasserkugel'] }; inv.slots.push({ id: 'lehrbuch_magie', n: 1 }); }
     this.startWorld(st, inv, null);
     const d = this.stats(); st.player.hp = d.maxHp; st.player.mp = d.maxMp; st.player.st = d.maxSt;
     this.quests.start('main_erwachen', true);
@@ -146,6 +150,7 @@ export class Game {
     this.mode = 'play'; this.paused = false;
     this.autosaveT = 150; this.discoverT = 0; this.region = null; this.interactTarget = null; this.mapCooldown = 1;
     this.spells = []; this.orb = null; this.gt = 0; this.veils = {}; this.veilWaves = []; this._ghosts = [];
+    Magic.ensure(state.player); this.magic.reset(); this.teleLock = state.player.map.startsWith('crypt:') ? state.player.map.slice(6) : null; this.teleCharge = 0;
     this.ui.showHUD();
     audio.setMusic(true, 'forest');
     this.events.emit('inventory'); this.events.emit('quests');
@@ -160,7 +165,7 @@ export class Game {
     }
     return this.maps[id];
   }
-  setMap(id) { this.world = this.getMap(id); this.state.player.map = id; if (!this.fog[id]) this.loadFog(id); audio.setMusic(true, this.world.indoor ? 'memory' : 'forest'); }
+  setMap(id) { this.world = this.getMap(id); this.state.player.map = id; if (!this.fog[id]) this.loadFog(id); this.magic.bolts = []; this.magic.zones = []; this.magic.walls = []; audio.setMusic(true, this.world.indoor ? 'memory' : 'forest'); }
   get discovered() { return this.fog[this.world.id]; }
   fogDims(id) { if (id.startsWith('crypt:')) return { w: CW, h: CHH, c: 1 }; return id === 'farnlager' ? { w: 80, h: 60, c: 1 } : { w: 250, h: 175, c: 4 }; }
   loadFog(id, b64) {
@@ -197,6 +202,7 @@ export class Game {
   // Kollision inkl. NPCs (in Erinnerungen sind keine NPCs da)
   blockedAt(x, y, w, h) {
     if (this.world.blocked(x, y, w, h)) return true;
+    if (this.magic.blocked(x, y, w, h)) return true;
     if (!(this.state.world.memoryMode && this.world.id === 'farnlager')) for (const n of this.world.npcs) if (x < n.x + 5 && x + w > n.x - 5 && y < n.y && y + h > n.y - 5) return true;
     return false;
   }
@@ -205,7 +211,8 @@ export class Game {
     const P = this.state.player;
     const bonus = {};
     for (const k of ['weapon', 'armor', 'trinket']) { const e = this.inventory?.equipped(k); if (e && e.def.stats) for (const s in e.def.stats) bonus[s] = (bonus[s] || 0) + e.def.stats[s]; }
-    return { ...derived(P.attrs, P.level, bonus), armor: bonus.armor || 0, dmg: bonus.dmg || 0 };
+    const d = derived(P.attrs, P.level, bonus); d.maxMp += (P.magic && P.magic.bonus) || 0;
+    return { ...d, armor: bonus.armor || 0, dmg: bonus.dmg || 0 };
   }
 
   addXp(n) {
@@ -277,6 +284,7 @@ export class Game {
     this.checkMapExits();
     this.updateSpells(dt, inp, blocked);
     this.updateVeils(dt);
+    if (!mem) { this.magic.update(dt); this.updateTeleCircle(dt); }
     this.particles.update(dt);
     this.spawnAmbientParticles(dt);
     this.cam.follow(this.player.x, this.player.y - 10, this.world.pw, this.world.ph, dt);
@@ -286,8 +294,10 @@ export class Game {
     if (!blocked) {
       if (inp.wasPressed('interact') && this.interactTarget) this.interact(this.interactTarget);
       if (inp.mouse.leftPressed && !this.ui.pointerOverUI) this.doAttack();
-      if (inp.mouse.rightPressed && !this.ui.pointerOverUI && !mem) { if (this.state.player.foxy) this.castMoonspring(); else if (!this._rmbT || performance.now() - this._rmbT > 3000) { this.ui.toast(t('rmbSoon'), 'info', 2); this._rmbT = performance.now(); } }
-      if (inp.wasPressed('spell') && !mem && this.state.player.foxy) this.castMoonlight();
+      if (inp.mouse.rightPressed && !this.ui.pointerOverUI && !mem) this.magic.castActive();
+      if (inp.wheel && !mem && !this.ui.pointerOverUI) this.magic.cycle(inp.wheel > 0 ? 1 : -1);
+      if (inp.wasPressed('nextSpell') && !mem) this.magic.cycle(1);
+      if (inp.wasPressed('spell') && !mem && this.magic.learned('mondlicht')) this.castMoonlight();
       if (inp.wasPressed('veil') && !mem) this.castVeil();
       for (let i = 0; i < 10; i++) if (inp.codePressed('Digit' + ((i + 1) % 10))) this.api.useHotbar(i);
     }
@@ -401,7 +411,6 @@ export class Game {
         setTimeout(() => this.ui.toast(L({ de: 'Der Eingang ist verschüttet. (Dungeons folgen in v0.5)', en: 'The entrance is blocked. (Dungeons arrive in v0.5)' }), 'warn', 4), 600);
         break;
       }
-      case 'tele': this.useTele(it.place); break;
       case 'crypt': this.enterCrypt(it.place); break;
       case 'stairs': audio.sfx('click'); it.go(); break;
       case 'cryptchest': {
@@ -409,6 +418,8 @@ export class Game {
         S.opened[it.id] = true; audio.sfx('chest');
         const r = Math.random();
         G.gold(25 + (Math.random() * 40 | 0)); G.give(r < 0.5 ? 'manatrank' : 'heiltrank', 1 + (r * 2 | 0)); if (r > 0.6) G.give('glimmerbeere', 3);
+        const gr = ['grimoire_feuer', 'grimoire_wasser', 'grimoire_wind', 'grimoire_erde', 'buch_beschwoerung'].filter(b => !this.inventory.count(b))[Object.keys(S.opened).length % 5];
+        if (gr && Math.random() < 0.7) { G.give(gr, 1); this.ui.toast(L({ de: 'Ein altes Magiebuch liegt in der Truhe!', en: 'An old spellbook lies in the chest!' }), 'secret', 3); }
         this.particles.burst(it.x, it.y - 6, 16, { color: ['#f6dc8c', '#ffffff'], speed: 40, life: 0.8, up: -20, glow: true });
         break;
       }
@@ -464,7 +475,7 @@ export class Game {
   // ---------- Verborgene Ruinen & Schleierbruch ----------
   veilOpen(id) { const v = this.veils[id]; return !!v && v.until > this.gt; }
   veilAlpha(id) { const v = this.veils[id]; return v ? v.a : 0; }
-  knowsVeil() { const P = this.state.player; return !!(P.foxy || (P.spells && P.spells.veil)); }
+  knowsVeil() { return this.magic.learned('schleierbruch'); }
   castVeil() {
     if (!this.knowsVeil()) { if (!this._veilMsgT || performance.now() - this._veilMsgT > 3000) { this.ui.toast(L({ de: 'Du kennst diesen Zauber noch nicht.', en: "You don't know this spell yet." }), 'info', 2); this._veilMsgT = performance.now(); } return; }
     if ((this._veilCd || 0) > 0) return;
@@ -520,7 +531,31 @@ export class Game {
     this.travel('world', w => { this.veils[place.id] = { until: this.gt + 3, a: 1 }; return w.findWalkable(place.x, place.y + 3); }, null);
   }
 
+  // Verbotene Teleportzirkel: Draufstellen → Teleport. Der Ankunftszirkel bleibt dunkel, bis man ihn verlässt.
+  updateTeleCircle(dt) {
+    const W = this.world;
+    if (!W.circle) { this.teleLock = null; this.teleCharge = 0; return; }
+    const id = W.place.id, p = this.player, d = Math.hypot(p.x - W.circle.x, (p.y - W.circle.y) * 1.6);
+    if (this.teleLock === id) { if (d > 34) { this.teleLock = null; audio.sfx('magic'); this.particles.burst(W.circle.x, W.circle.y, 30, { color: ['#d6b8ff', '#ffffff', '#9a5fe0'], speed: 40, life: 1, up: -20, glow: true }); } return; }
+    if (this.ui.fading || this.mapCooldown > 0) return;
+    if (d < 18) {
+      this.teleCharge += dt;
+      if (Math.random() < dt * 40) { const a = Math.random() * 6.283; this.particles.spawn({ x: W.circle.x + Math.cos(a) * 26, y: W.circle.y + Math.sin(a) * 15, vx: -Math.cos(a) * 20, vy: -30, life: 0.7, max: 0.7, color: Math.random() < 0.5 ? '#c49af5' : '#ffffff', glow: true }); }
+      if (this.teleCharge > 0.9) { this.teleCharge = 0; this.useTele(W.place); }
+    } else this.teleCharge = Math.max(0, this.teleCharge - dt * 2);
+  }
+  teleTarget(place) { const id = (place.links || []).find(l => THYRVENNA.places.some(q => q.id === l)); return id ? THYRVENNA.places.find(q => q.id === id) : null; }
   useTele(place) {
+    const S = this.state.ow, l = this.teleTarget(place);
+    S.tele[place.id] = true;
+    if (!l) { this.ui.toast(L({ de: 'Der Zirkel flackert … aber er führt nirgendwohin.', en: 'The circle flickers … but leads nowhere.' }), 'info', 3); this.teleLock = place.id; return; }
+    S.tele[l.id] = true; audio.sfx('memory');
+    if (this.settings.shake) this.cam.shake = 3;
+    this.particles.burst(this.player.x, this.player.y - 10, 60, { color: ['#d6b8ff', '#ffffff', '#9a5fe0'], speed: 90, life: 1, glow: true });
+    this.teleLock = l.id;
+    this.travel('crypt:' + l.id, w => [w.circle.x, w.circle.y + 2], [L({ de: 'Teleportzirkel', en: 'Teleport circle' }), L({ de: l.n, en: (l.en && l.en.n) || l.n })]);
+  }
+  useTeleOld(place) {
     const S = this.world.state, W = this.world;
     if (!S.tele[place.id]) {
       S.tele[place.id] = true; audio.sfx('magic');
@@ -591,6 +626,7 @@ export class Game {
     }
   }
   drawGroundEffects(ctx, cam) {
+    this.magic.drawGround(ctx, cam);
     for (const sp of this.spells) {
       const x = Math.round(sp.x - cam.ix), y = Math.round(sp.y - cam.iy), k = Math.min(1, sp.t / 1.2, (sp.max - sp.t) / 0.4);
       ctx.globalAlpha = k;
@@ -602,6 +638,7 @@ export class Game {
     }
   }
   drawEffects(ctx, cam) {
+    this.magic.draw(ctx, cam);
     for (const w of this.veilWaves) {
       const k = w.t / 1.1, r = 10 + k * 170;
       ctx.strokeStyle = `rgba(196,154,245,${0.7 * (1 - k)})`; ctx.lineWidth = 2;
@@ -616,7 +653,7 @@ export class Game {
     }
   }
   extraLights() {
-    const out = [];
+    const out = this.magic.lights();
     for (const sp of this.spells) out.push({ x: sp.x, y: sp.y - 6, r: 46, color: [150, 210, 255], a: 0.7, flicker: 0.06 });
     if (this.orb) out.push({ x: this.orb.x, y: this.orb.y, r: 96, color: [215, 230, 255], a: 0.95, flicker: 0.03 });
     return out;
@@ -627,7 +664,12 @@ export class Game {
     const p = this.player, fx = p.x + p.face.x * 14, fy = p.y - 6 + p.face.y * 12;
     for (const o of this.world.objectsNear(fx, fy, 40)) {
       if (!o.cuttable) continue;
-      if (Math.hypot(o.x - fx, o.y - 6 - fy) < 16) {
+      if (Math.hypot(o.x - fx, o.y - 6 - fy) < 16) { this.breakObject(o); break; }
+    }
+  }
+  breakObject(o) {
+    {
+      {
         this.world.removeObject(o);
         if (o.id && this.world.id === 'farnlager') this.state.world.cut[o.id] = true;
         audio.sfx('cut');
@@ -635,7 +677,6 @@ export class Game {
         if (o.loot) { audio.sfx('cut'); if (Math.random() < 0.6) this.api.gold(2 + (Math.random() * 7 | 0)); this.particles.burst(o.x, o.y - 6, 14, { color: ['#7d7589', '#5c5468', '#b37c48'], speed: 50, life: 0.6, g: 80, drag: 2 }); }
         else if (Math.random() < 0.3) { this.api.give('ast', 1); }
         if (this.settings.shake) this.cam.shake = 1.5;
-        break;
       }
     }
   }

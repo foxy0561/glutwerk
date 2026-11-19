@@ -62,3 +62,9 @@ Für v0.1 reicht ein eigener, schlanker Canvas-Renderer: keine Abhängigkeit, vo
 - Kartenwechsel Farnlager ↔ Oberwelt über `exit`/Eingang an der Laternenbrücke (`Game.travel`), Nebel des Krieges je Karte.
 - `src/world/Crypt.js` – Gruft unter jedem Teleportzirkel (Ebene 1: zwei Räume + Gang, Ebene 2: Kammer mit Zirkel am Treppenfuß), beide Ebenen in einer Karte mit großem Abstand.
 - Verborgene Ruinen: Objekte mit `veil: <ortId>` sind unsichtbar und durchlässig, bis `Game.castVeil()` (Taste R) den Schleier für ~24 s öffnet (`Game.veils`).
+
+## Magie (v0.1.6)
+- `src/data/magic.js` – Schulen, Ränge, Zauber, Bücher, Lehrer.
+- `src/systems/Magic.js` – Lernen (Buch/Lehrer + Übung + Vorgänger), Wirken (Spruch-Zeit oder still), Geschosse, Zonen, Wände, Schilde, Beschwörungen. Zustand: `state.player.magic`.
+- `src/ui/tabs/SkillsTab.js` – Magie-Menü; `src/art/spellArt.js` – Zaubersymbole.
+- Teleportzirkel: `Game.updateTeleCircle` – Draufstellen lädt auf und teleportiert; `Game.teleLock` hält den Ankunftszirkel dunkel, bis man ihn verlässt.

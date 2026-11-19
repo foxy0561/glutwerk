@@ -9,7 +9,7 @@ export const RARITY = {
 export const CATEGORY = {
   weapon: { de: 'Waffe', en: 'Weapon' }, armor: { de: 'Rüstung', en: 'Armour' }, food: { de: 'Nahrung', en: 'Food' },
   potion: { de: 'Trank', en: 'Potion' }, resource: { de: 'Ressource', en: 'Resource' }, quest: { de: 'Questgegenstand', en: 'Quest item' },
-  material: { de: 'Material', en: 'Material' }, artifact: { de: 'Artefakt', en: 'Artefact' },
+  material: { de: 'Material', en: 'Material' }, artifact: { de: 'Artefakt', en: 'Artefact' }, book: { de: 'Magiebuch', en: 'Spellbook' },
 };
 const WT = { sword: { de: 'Schwert', en: 'Sword' }, staff: { de: 'Magischer Stab', en: 'Magic staff' }, bow: { de: 'Bogen', en: 'Bow' }, dagger: { de: 'Dolch', en: 'Dagger' } };
 export const WEAPON_TYPE = WT;
@@ -54,7 +54,21 @@ export const ITEMS = {
     desc: { de: 'Von Maren mit Silberfaden gebunden. Es summt leise, wenn du dich dem Tor näherst.', en: 'Bound by Maren with silver thread. It hums softly near the gate.' } },
   tamsis_kiste: { name: { de: 'Tamsis Gewürzkiste', en: 'Tamsi\'s Spice Box' }, cat: 'quest', rarity: 'uncommon', weight: 2.0, value: 0, stack: 1, icon: 'box', noSell: true,
     desc: { de: 'Riecht nach Zimt und Sand. Gehört Tamsi.', en: 'Smells of cinnamon and sand. Belongs to Tamsi.' } },
-  schleierrolle: { name: { de: 'Schriftrolle: Schleierbruch', en: 'Scroll: Veilbreak' }, cat: 'artifact', rarity: 'rare', weight: 0.1, value: 70, stack: 1, icon: 'ui_scroll', use: { special: 'learnVeil' },
+  lehrbuch_magie: { name: { de: 'Lehrbuch der Magie', en: 'Magic Textbook' }, cat: 'book', rarity: 'uncommon', weight: 0.8, value: 120, stack: 1, icon: 'ui_book', use: { special: 'book' },
+    desc: { de: 'Ein abgegriffenes Lehrbuch. Erklärt Feuer, Wasser, Wind und Erde bis zur Mittelstufe.', en: 'A well-thumbed textbook. Covers fire, water, wind and earth up to Intermediate.' } },
+  buch_heilig: { name: { de: 'Schriften der Heiligen Magie', en: 'Writings of Holy Magic' }, cat: 'book', rarity: 'uncommon', weight: 0.8, value: 140, stack: 1, icon: 'ui_book', use: { special: 'book' },
+    desc: { de: 'Gebete und Formeln für Heilung, Entgiftung und Barrieren bis zur Mittelstufe.', en: 'Prayers and formulas for healing, detoxification and barriers up to Intermediate.' } },
+  buch_beschwoerung: { name: { de: 'Beschwörungsfibel', en: 'Summoning Primer' }, cat: 'book', rarity: 'rare', weight: 0.8, value: 160, stack: 1, icon: 'ui_book', use: { special: 'book' },
+    desc: { de: 'Kreise, Namen, Bindungen. Beschwörung bis zur Mittelstufe.', en: 'Circles, names, bindings. Summoning up to Intermediate.' } },
+  grimoire_feuer: { name: { de: 'Grimoire des Feuers', en: 'Grimoire of Fire' }, cat: 'book', rarity: 'epic', weight: 0.8, value: 300, stack: 1, icon: 'ui_book', use: { special: 'book' },
+    desc: { de: 'Verkohlte Seiten. Lehrt Feuermagie der Oberstufe.', en: 'Charred pages. Teaches Advanced fire magic.' } },
+  grimoire_wasser: { name: { de: 'Grimoire des Wassers', en: 'Grimoire of Water' }, cat: 'book', rarity: 'epic', weight: 0.8, value: 300, stack: 1, icon: 'ui_book', use: { special: 'book' },
+    desc: { de: 'Die Tinte schimmert wie Regen. Lehrt Wassermagie der Oberstufe.', en: 'The ink shimmers like rain. Teaches Advanced water magic.' } },
+  grimoire_wind: { name: { de: 'Grimoire des Windes', en: 'Grimoire of Wind' }, cat: 'book', rarity: 'epic', weight: 0.8, value: 300, stack: 1, icon: 'ui_book', use: { special: 'book' },
+    desc: { de: 'Die Seiten blättern sich von selbst. Lehrt Windmagie der Oberstufe.', en: 'The pages turn by themselves. Teaches Advanced wind magic.' } },
+  grimoire_erde: { name: { de: 'Grimoire der Erde', en: 'Grimoire of Earth' }, cat: 'book', rarity: 'epic', weight: 0.8, value: 300, stack: 1, icon: 'ui_book', use: { special: 'book' },
+    desc: { de: 'Schwer wie ein Stein. Lehrt Erdmagie der Oberstufe.', en: 'Heavy as a stone. Teaches Advanced earth magic.' } },
+  schleierrolle: { name: { de: 'Schriftrolle: Schleierbruch', en: 'Scroll: Veilbreak' }, cat: 'artifact', rarity: 'rare', weight: 0.1, value: 70, stack: 1, icon: 'ui_scroll', use: { special: 'book' },
     desc: { de: 'Ein alter Zauber, der Trugbilder zerreißt. Manche Orte verbergen sich vor gewöhnlichen Augen.', en: 'An old spell that tears illusions apart. Some places hide from ordinary eyes.' } },
   mondsplitter: { name: { de: 'Mondsplitter', en: 'Moon Shard' }, cat: 'artifact', rarity: 'legendary', weight: 0.1, value: 0, stack: 1, icon: 'shard', noSell: true, use: { special: 'memory' },
     desc: { de: 'Ein Splitter aus violettem Licht. Wenn du ihn hältst, flüstern Stimmen, die längst verstummt sein sollten.', en: 'A shard of violet light. When you hold it, voices whisper that should have fallen silent long ago.' } },

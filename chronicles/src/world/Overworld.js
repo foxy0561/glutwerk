@@ -55,12 +55,13 @@ export class Overworld {
 
   npcDef(n) {
     const self = this;
-    const roleTitle = { merchant: { de: 'Händler', en: 'Merchant' }, guard: { de: 'Wache', en: 'Guard' }, villager: { de: '', en: '' } }[n.role] || { de: '', en: '' };
+    const roleTitle = { merchant: { de: 'Händler', en: 'Merchant' }, guard: { de: 'Wache', en: 'Guard' }, teacher: { de: 'Magielehrer', en: 'Magic Teacher' }, villager: { de: '', en: '' } }[n.role] || { de: '', en: '' };
     const def = {
       name: n.name, title: roleTitle, app: n.app, weapon: n.weapon, wander: n.role === 'guard' ? 1.5 : 3.5,
       schedule: [[0, [n.x, n.y]]], home: [n.x, n.y],
       shop: n.shop ? { stock: n.shop, sellRate: 0.4 } : null,
-      dialogue: G => ({ start: { text: n.line, options: [
+      dialogue: G => ({ start: { text: n.teach ? { de: 'Magie ist kein Geschenk, sondern Übung. Willst du lernen? Ich unterrichte gegen Gold.', en: 'Magic is not a gift, it is practice. Do you wish to learn? I teach for gold.' } : n.line, options: [
+        ...(n.teach ? [{ text: { de: 'Unterrichte mich.', en: 'Teach me.' }, action: () => { const g = self.game; g.ui.dialogue.close(); g.ui.teacher = { npc: self.allNpcs.find(x => x.def === def), name: n.name, teach: n.teach.teach }; g.ui.openMenu('skills'); return null; } }] : []),
         ...(n.shop ? [{ text: { de: 'Zeig mir deine Waren.', en: 'Show me your wares.' }, action: () => { G.openShop(def); return null; } }] : []),
         { text: { de: 'Leb wohl.', en: 'Farewell.' }, next: 'end' }] } }),
     };

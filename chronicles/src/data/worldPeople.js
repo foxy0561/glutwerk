@@ -50,11 +50,11 @@ export const LINES = {
 };
 
 export const SHOPS = {
-  draventhal: [['heiltrank', 25], ['apfel', 3], ['brot', 5], ['eisenschwert', 60], ['leinenhemd', 18], ['lederweste', 65]],
-  saltrivo: [['heiltrank', 28], ['manatrank', 28], ['brot', 6], ['apfel', 4], ['sandklinge', 110], ['mondanhaenger', 150]],
+  draventhal: [['heiltrank', 25], ['apfel', 3], ['brot', 5], ['eisenschwert', 60], ['leinenhemd', 18], ['lederweste', 65], ['lehrbuch_magie', 120]],
+  saltrivo: [['heiltrank', 28], ['manatrank', 28], ['brot', 6], ['apfel', 4], ['sandklinge', 110], ['mondanhaenger', 150], ['lehrbuch_magie', 130]],
   brennvald: [['eisenerz', 9], ['eisenschwert', 50], ['lederweste', 55], ['brot', 6], ['ausdauertrank', 32]],
-  valcrest: [['heiltrank', 22], ['manatrank', 22], ['ausdauertrank', 30], ['eichenstab', 55], ['mondanhaenger', 130], ['schleierrolle', 70]],
-  sarkhazim: [['ausdauertrank', 26], ['heiltrank', 26], ['apfel', 3], ['sandklinge', 90], ['jagdbogen', 55]],
+  valcrest: [['heiltrank', 22], ['manatrank', 22], ['ausdauertrank', 30], ['eichenstab', 55], ['mondanhaenger', 130], ['schleierrolle', 70], ['buch_heilig', 140]],
+  sarkhazim: [['ausdauertrank', 26], ['heiltrank', 26], ['apfel', 3], ['sandklinge', 90], ['jagdbogen', 55], ['buch_beschwoerung', 160], ['lehrbuch_magie', 125]],
   asche: [['manatrank', 20], ['eichenstab', 50], ['schleierrolle', 90]],
 };
 

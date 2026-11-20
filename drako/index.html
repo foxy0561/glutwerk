@@ -623,7 +623,7 @@ for(const w of WL){mw=w.id;const S=w.steps,span=S[S.length-1][0]-290,spd=w.id===
  for(let i=0;i<10;i++)meteor(300+R()*span,32+R()*30,w.oz-90,(R()-.5)*.6,-(.05+R()*.2),1,190,12+R()*8,1.4+R()*2,false);
  for(let i=0;i<6;i++)meteor(300+R()*span,-8-R()*20,w.oz+90,(R()-.5)*.6,.05,-1,190,10+R()*6,1.2+R()*1.8,false)}
 // ---- Drache
-const dr=new T.Group(),mP=mat(0x9d4edd),mL=mat(0xc77dff),mY=mat(0xffd166),mW=mat(0xff7eb6),mEye=mat(0xffffff),horns=[];
+const MODELS={};const dr=new T.Group(),mP=mat(0x9d4edd),mL=mat(0xc77dff),mY=mat(0xffd166),mW=mat(0xff7eb6),mEye=mat(0xffffff),horns=[];
 // A single animated torso pivot carries the belly, neck, head, wings, tail and back spikes.
 // This prevents the body from bobbing independently of the attached parts.
 const torso=new T.Group();dr.add(torso);
@@ -836,7 +836,7 @@ const brLv=k=>Math.max(1,BR.lv[k]||0),brEl=()=>TR.on?TR.el:BR.cur;
 let brDirty=false,brSaveT=0;
 // ---- Grosse Drachen + Pruefungs-Arena (Realm 6)
 const TX=760,TZ=-560,TTOP=10;
-const bigDragons=[];const MODELS={};
+const bigDragons=[];
 const _n2=sc.children.length;
 {const tp=plat(TX,TTOP,TZ,30,30,0x4a3f6b);tp.m.receiveShadow=true;
  add(new T.BoxGeometry(62,.4,62),new T.MeshBasicMaterial({color:0x2a2050}),TX,TTOP-1.2,TZ);

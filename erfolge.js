@@ -112,12 +112,13 @@
     { id: "kw-tod", spiel: "klarwasser", stufe: "leicht", geheim: true, name: "Bauch nach oben", desc: "Verlier einen Fisch.", name_en: "Belly Up", desc_en: "Lose a fish." },
 
     // ---------- Drako (liest den Spielstand) ----------
-    { id: "dr-drache", spiel: "drako", stufe: "leicht", name: "Befreier", desc: "Befreie deinen ersten Drachen.", name_en: "Liberator", desc_en: "Free your first dragon.", check: () => bits(dr().fr) >= 1 },
-    { id: "dr-drachen", spiel: "drako", stufe: "schwer", name: "Alle frei", desc: "Befreie alle Drachen.", name_en: "All Free", desc_en: "Free every dragon.", check: () => allBits(dr().fr) },
+    { id: "dr-drache", spiel: "drako", stufe: "leicht", name: "Befreier", desc: "Befreie deinen ersten gefangenen Lehrer-Drachen.", name_en: "Liberator", desc_en: "Free your first captured teacher dragon.", check: () => bits(dr().fr) >= 1 },
+    { id: "dr-drachen", spiel: "drako", stufe: "schwer", name: "Alle frei", desc: "Befreie alle drei Lehrer-Drachen.", name_en: "All Free", desc_en: "Free all three teacher dragons.", check: () => allBits(dr().fr) },
     { id: "dr-truhen", spiel: "drako", stufe: "mittel", name: "Truhenknacker", desc: "Öffne alle Truhen.", name_en: "Chest Cracker", desc_en: "Open every chest.", check: () => allBits(dr().ch) },
     { id: "dr-kristalle", spiel: "drako", stufe: "legendaer", name: "Kristallhort", desc: "Sammle alle Kristalle.", name_en: "Crystal Hoard", desc_en: "Collect every crystal.", check: () => allBits(dr().cry) },
     { id: "dr-gegner", spiel: "drako", stufe: "mittel", name: "Feuerspucker", desc: "Besiege 50 Gegner.", name_en: "Fire Spitter", desc_en: "Defeat 50 enemies.", check: () => (dr().kills || 0) >= 50 },
     { id: "dr-arena", spiel: "drako", stufe: "mittel", name: "Arena", desc: "Gewinne die Arena.", name_en: "Arena", desc_en: "Win the arena.", check: () => !!dr().arena },
+    { id: "dr-tempel", spiel: "drako", stufe: "mittel", name: "Meister der Elemente", desc: "Lerne im Drachentempel alle Atem-Kräfte.", name_en: "Master of Elements", desc_en: "Learn every breath power in the dragon temple.", check: () => { const b = json("drako-breath", {}) || {}; return !!(b.own && b.own.bolt && b.own.ice && b.own.poison); } },
     { id: "dr-boss", spiel: "drako", stufe: "schwer", name: "Lavafürst gestürzt", desc: "Besiege den Lavafürsten.", name_en: "Lava Lord Toppled", desc_en: "Defeat the Lava Lord.", check: () => !!dr().gb },
 
     // ---------- Kammerwerk (liest den Spielstand) ----------

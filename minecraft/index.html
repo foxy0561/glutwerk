@@ -108,6 +108,16 @@ h2::before{content:"";width:6px;height:24px;border-radius:3px;background:linear-
 .release details summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:8px}
 .loading{color:var(--muted);font-size:14px}
 
+/* ---------- Unter-Tabs ---------- */
+.subtabs{display:flex;gap:8px;margin-bottom:26px;padding:5px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;width:max-content;max-width:100%}
+.subtab{font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;letter-spacing:1px;text-transform:uppercase;padding:9px 26px;border-radius:8px;color:var(--muted);display:inline-flex;align-items:center;gap:8px;transition:color .15s,background .15s}
+.subtab:hover{color:var(--text)}
+.subtab.active{color:#16061f;background:linear-gradient(135deg,var(--purple),var(--purple2));box-shadow:0 2px 14px rgba(178,107,255,.4)}
+.subtab i{font-style:normal;font-size:12px;min-width:20px;padding:1px 6px;border-radius:10px;background:rgba(255,255,255,.12);display:none}
+.subtab.active i{background:rgba(0,0,0,.18)}
+[hidden]{display:none!important}
+@media (max-width:760px){.subtabs{width:100%}.subtab{flex:1;justify-content:center;padding:10px 8px}}
+
 /* ---------- Meine Mods ---------- */
 .mods-sub{color:var(--muted);font-size:14px;line-height:1.5;margin:-6px 0 18px;max-width:640px}
 .mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
@@ -214,6 +224,12 @@ footer a{color:var(--purple2)}
 </header>
 
 <main>
+  <div class="subtabs" role="tablist">
+    <button class="subtab active" id="tabLauncher" role="tab" data-pane="launcher" data-en="Launcher">Launcher</button>
+    <button class="subtab" id="tabMods" role="tab" data-pane="mods"><span data-en="Mods">Mods</span><i id="modCount"></i></button>
+  </div>
+
+  <div id="paneLauncher">
   <!-- ===== Kopf mit Download ===== -->
   <section class="hero">
     <div class="hero-icon"><img src="foxy-launcher.png" alt="Foxy Launcher"></div>
@@ -236,13 +252,6 @@ footer a{color:var(--purple2)}
         <span data-en="Automatic updates">Updates automatisch</span>
       </div>
     </div>
-  </section>
-
-  <!-- ===== Meine Mods (Daten in mods.js) ===== -->
-  <section id="mods">
-    <h2 data-en="My mods">Meine Mods</h2>
-    <p class="mods-sub" data-en="Mods I made myself. Click one to read more about it and download it.">Mods, die ich selbst gemacht habe. Klick einen an, um mehr darüber zu lesen und ihn herunterzuladen.</p>
-    <div class="mods" id="modList"></div>
   </section>
 
   <!-- ===== Funktionen ===== -->
@@ -287,6 +296,17 @@ footer a{color:var(--purple2)}
     <h2 data-en="What's new">Was ist neu</h2>
     <div class="releases" id="releases"><div class="loading" data-en="Loading news…">Neuigkeiten werden geladen…</div></div>
   </section>
+  </div>
+
+  <div id="paneMods" hidden>
+  <!-- ===== Meine Mods (Daten in mods.js) ===== -->
+  <section id="mods">
+    <h2 data-en="My mods">Meine Mods</h2>
+    <p class="mods-sub" data-en="Mods I made myself. Click one to read more about it and download it.">Mods, die ich selbst gemacht habe. Klick einen an, um mehr darüber zu lesen und ihn herunterzuladen.</p>
+    <div class="mods" id="modList"></div>
+  </section>
+
+  </div>
 </main>
 
 <footer>
@@ -450,7 +470,7 @@ function openMod(id, push) {
 }
 function closeMod(clearHash) {
   $("modModal").classList.remove("open");
-  if (clearHash && /^#mod-/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
+  if (clearHash && /^#mod-/.test(location.hash)) history.replaceState(null, "", "#mods");
 }
 
 $("modList").addEventListener("click", e => {
@@ -465,9 +485,33 @@ $("modModal").addEventListener("click", e => {
   else if (e.target.matches("[data-zoom]")) window.open(e.target.src, "_blank", "noopener");
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeMod(true); });
-window.addEventListener("hashchange", () => { const m = location.hash.match(/^#mod-(.+)$/); if (m) openMod(decodeURIComponent(m[1]), false); });
+window.addEventListener("hashchange", () => {
+  const m = location.hash.match(/^#mod-(.+)$/);
+  if (m) { showPane("mods", false); openMod(decodeURIComponent(m[1]), false); }
+  else if (location.hash === "#mods") showPane("mods", false);
+  else showPane("launcher", false);
+});
+/* ---------- Unter-Tabs: Launcher (Standard) / Mods ---------- */
+function showPane(name, push) {
+  const mods = name === "mods";
+  $("paneLauncher").hidden = mods;
+  $("paneMods").hidden = !mods;
+  $("tabLauncher").classList.toggle("active", !mods);
+  $("tabMods").classList.toggle("active", mods);
+  $("tabLauncher").setAttribute("aria-selected", !mods);
+  $("tabMods").setAttribute("aria-selected", mods);
+  if (!mods) closeMod(false);
+  if (push !== false) history.replaceState(null, "", mods ? "#mods" : location.pathname + location.search);
+  window.scrollTo(0, 0);
+}
+$("tabLauncher").onclick = () => showPane("launcher");
+$("tabMods").onclick = () => showPane("mods");
+if (MODS.length) { $("modCount").textContent = MODS.length; $("modCount").style.display = "inline-block"; }
+
 renderMods();
-{ const h = location.hash.match(/^#mod-(.+)$/); if (h) openMod(decodeURIComponent(h[1]), false); }
+{ const h = location.hash.match(/^#mod-(.+)$/);
+  if (h) { showPane("mods", false); openMod(decodeURIComponent(h[1]), false); }
+  else if (location.hash === "#mods") showPane("mods", false); }
 
 /* Download-Fenster */
 $("dlBtn").onclick = () => { $("dlGo").href = downloadUrl; $("dlModal").classList.add("open"); };

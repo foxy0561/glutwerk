@@ -27,6 +27,7 @@
      size: "1,2 MB",                  // optional
      requires: ["Fabric API"],        // optional, was man zusätzlich braucht
      soon: false                      // true = Karte zeigen, aber „Bald verfügbar“ statt Download
+     wip: true                        // optional: Kennzeichnung „In Arbeit“ (Vorabversion) mit Hinweis im Fenster
    }
    ========================================================= */
 const MODS = [

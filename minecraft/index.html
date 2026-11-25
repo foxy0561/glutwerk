@@ -137,6 +137,10 @@ h2::before{content:"";width:6px;height:24px;border-radius:3px;background:linear-
 .mod-act .btn{font-size:14px;padding:9px 10px;flex:1;justify-content:center;white-space:nowrap;letter-spacing:.5px}
 .mod-act .btn svg{width:17px;height:17px}
 .mod .tag{position:absolute;top:12px;right:12px;font-size:10.5px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:5px;background:var(--c);color:#16061f}
+.mod .tag.wip{background:var(--accent2)}
+.mod.hasnew .tag.wip{right:auto;left:12px}
+.wipnote{display:flex;gap:10px;align-items:flex-start;margin:0 0 16px;padding:12px 14px;border-radius:10px;background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.4);color:#ffd9a0;font-size:14px;line-height:1.5}
+.wipbadge{font-size:10.5px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:5px;background:var(--accent2);color:#2a1500;margin-left:8px;vertical-align:middle}
 .btn.off{opacity:.5;pointer-events:none;background:var(--bg2);color:var(--muted);box-shadow:none;border:1px solid var(--line)}
 .mods-empty{grid-column:1/-1;display:flex;gap:18px;align-items:center;border:1.5px dashed var(--line);border-radius:14px;padding:26px;background:rgba(22,26,36,.5)}
 .mods-empty .mod-ic{width:64px;height:64px;--c:var(--purple)}
@@ -434,7 +438,7 @@ function renderMods() {
   }
   box.innerHTML = sortedMods().map(m => `
     <article class="mod" tabindex="0" role="button" data-id="${esc(m.id)}" style="${m.color ? `--c:${esc(m.color)}` : ""}" aria-label="${esc(m.name)}">
-      ${isNew(m) ? `<span class="tag">${L("NEU", "NEW")}</span>` : ""}
+      ${m.wip ? `<span class="tag wip">${L("IN ARBEIT", "WORK IN PROGRESS")}</span>` : isNew(m) ? `<span class="tag">${L("NEU", "NEW")}</span>` : ""}
       <div class="mod-top">${iconHTML(m)}<div><div class="mod-name">${esc(pick(m, "name") || m.name)}</div><div class="mod-ver">${m.ver ? "v" + esc(String(m.ver).replace(/^v/i, "")) : ""}${m.date ? " · " + fmtDate(m.date) : ""}</div></div></div>
       <p>${esc(pick(m, "desc") || "")}</p>
       ${chipsHTML(m)}
@@ -453,6 +457,7 @@ function openMod(id, push) {
     <div class="mm-head">${iconHTML(m)}<div><h3>${esc(pick(m, "name") || m.name)}</h3>
       <div class="mod-ver" style="margin:6px 0">${m.ver ? "v" + esc(String(m.ver).replace(/^v/i, "")) : ""}${m.date ? " · " + fmtDate(m.date) : ""}</div>${chipsHTML(m)}</div></div>
     <div class="mm-body">
+      ${m.wip ? `<div class="wipnote"><span>⚠</span><span>${L("Vorabversion: Dieser Mod ist noch nicht fertig. Es können Fehler auftreten, und er ändert sich noch.", "Early version: this mod is not finished yet. Bugs may occur and it will still change.")}</span></div>` : ""}
       <div class="txt">${paras.map(p => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`).join("")}</div>
       ${feats.length ? `<h4>${L("Was er kann", "Features")}</h4><ul>${feats.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
       ${shots.length ? `<h4>${L("Bilder", "Screenshots")}</h4><div class="shots">${shots.map(s => `<img src="${esc(s)}" alt="" loading="lazy" data-zoom>`).join("")}</div>` : ""}

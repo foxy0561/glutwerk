@@ -137,6 +137,8 @@ h2::before{content:"";width:6px;height:24px;border-radius:3px;background:linear-
 .mod-act .btn{font-size:14px;padding:9px 10px;flex:1;justify-content:center;white-space:nowrap;letter-spacing:.5px}
 .mod-act .btn svg{width:17px;height:17px}
 .mod .tag{position:absolute;top:12px;right:12px;font-size:10.5px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:5px;background:var(--c);color:#16061f}
+.mod:has(.tag){padding-top:38px}
+.mod .tag{top:11px}
 .mod .tag.wip{background:var(--accent2)}
 .mod.hasnew .tag.wip{right:auto;left:12px}
 .wipnote{display:flex;gap:10px;align-items:flex-start;margin:0 0 16px;padding:12px 14px;border-radius:10px;background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.4);color:#ffd9a0;font-size:14px;line-height:1.5}
@@ -461,10 +463,14 @@ function openMod(id, push) {
       <div class="txt">${paras.map(p => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`).join("")}</div>
       ${feats.length ? `<h4>${L("Was er kann", "Features")}</h4><ul>${feats.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
       ${shots.length ? `<h4>${L("Bilder", "Screenshots")}</h4><div class="shots">${shots.map(s => `<img src="${esc(s)}" alt="" loading="lazy" data-zoom>`).join("")}</div>` : ""}
-      ${(m.requires || []).length ? `<h4>${L("Du brauchst dazu", "You also need")}</h4><ul>${m.requires.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+      ${(pick(m, "requires") || []).length ? `<h4>${L("Du brauchst dazu", "You also need")}</h4><ul>${pick(m, "requires").map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+      ${(m.limits_de || m.limits || []).length ? `<h4>${L("Bekannte Einschränkungen", "Known limitations")}</h4><ul>${(pick(m, "limits") || []).map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
       <h4>${L("So installierst du ihn", "How to install")}</h4>
-      <ul><li>${L("Datei herunterladen und in den Ordner <b>mods</b> deines Minecraft-Profils legen (im Foxy Launcher: Profil → Ordner öffnen).", "Download the file and put it into the <b>mods</b> folder of your Minecraft profile (in Foxy Launcher: profile → open folder).")}</li>
-      <li>${L("Passenden Loader und Minecraft-Version wählen, wie oben angegeben, dann starten.", "Pick the matching loader and Minecraft version shown above, then launch.")}</li></ul>
+      <ul>${(pick(m, "install") || [
+        L("Datei herunterladen und in den Ordner <b>mods</b> deines Minecraft-Profils legen (im Foxy Launcher: Profil → Ordner öffnen).", "Download the file and put it into the <b>mods</b> folder of your Minecraft profile (in Foxy Launcher: profile → open folder)."),
+        L("Passenden Loader und Minecraft-Version wählen, wie oben angegeben, dann starten.", "Pick the matching loader and Minecraft version shown above, then launch.")]).map(t => `<li>${t}</li>`).join("")}</ul>
+      ${m.license ? `<h4>${L("Lizenz", "License")}</h4><p style="font-size:14px;line-height:1.6;color:#c3c9d6">${esc(pick(m, "license"))}</p>` : ""}
+      ${m.sha ? `<p style="font-size:12px;color:var(--muted);margin-top:16px;word-break:break-all">SHA-256: <code>${esc(m.sha)}</code></p>` : ""}
     </div>
     <div class="mm-foot"><div class="meta">${m.size ? esc(m.size) : ""}${m.size && m.file ? " · " : ""}${m.file ? esc(m.file.split("/").pop()) : ""}</div>
       <div style="display:flex;gap:10px"><button class="btn btn-ghost" id="mmClose">${L("Schließen", "Close")}</button>${dlBtn(m)}</div></div>`;

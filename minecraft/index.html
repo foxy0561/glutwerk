@@ -108,6 +108,52 @@ h2::before{content:"";width:6px;height:24px;border-radius:3px;background:linear-
 .release details summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:8px}
 .loading{color:var(--muted);font-size:14px}
 
+/* ---------- Meine Mods ---------- */
+.mods-sub{color:var(--muted);font-size:14px;line-height:1.5;margin:-6px 0 18px;max-width:640px}
+.mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.mod{--c:var(--purple);position:relative;display:flex;flex-direction:column;gap:12px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
+.mod:hover,.mod:focus-visible{transform:translateY(-3px);border-color:var(--c);box-shadow:0 8px 30px rgba(0,0,0,.35);outline:none}
+.mod-top{display:flex;gap:14px;align-items:center}
+.mod-ic{flex-shrink:0;width:60px;height:60px;border-radius:12px;display:grid;place-items:center;overflow:hidden;background:color-mix(in srgb,var(--c) 18%,var(--bg2));color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,var(--line))}
+.mod-ic img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.mod-ic svg{width:30px;height:30px}
+.mod-name{font-family:Rajdhani,sans-serif;font-size:23px;font-weight:700;text-transform:uppercase;line-height:1.05;overflow-wrap:anywhere}
+.mod-ver{font-size:12px;color:var(--muted);margin-top:2px}
+.mod p{font-size:14px;color:#c3c9d6;line-height:1.5;flex:1}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips span{font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);color:var(--muted)}
+.chips span.ld{color:var(--c);border-color:color-mix(in srgb,var(--c) 40%,var(--line))}
+.mod-act{display:flex;gap:8px;align-items:center}
+.mod-act .btn{font-size:14px;padding:9px 10px;flex:1;justify-content:center;white-space:nowrap;letter-spacing:.5px}
+.mod-act .btn svg{width:17px;height:17px}
+.mod .tag{position:absolute;top:12px;right:12px;font-size:10.5px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:5px;background:var(--c);color:#16061f}
+.btn.off{opacity:.5;pointer-events:none;background:var(--bg2);color:var(--muted);box-shadow:none;border:1px solid var(--line)}
+.mods-empty{grid-column:1/-1;display:flex;gap:18px;align-items:center;border:1.5px dashed var(--line);border-radius:14px;padding:26px;background:rgba(22,26,36,.5)}
+.mods-empty .mod-ic{width:64px;height:64px;--c:var(--purple)}
+.mods-empty h3{font-family:Rajdhani,sans-serif;font-size:22px;text-transform:uppercase;margin-bottom:4px}
+.mods-empty p{font-size:14px;color:var(--muted);line-height:1.5}
+
+/* Lese-Fenster */
+.modal.wide{max-width:680px;padding:0;overflow:auto}
+.mm-head{--c:var(--purple);display:flex;gap:18px;align-items:center;padding:26px 28px 20px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 22%,transparent),transparent 70%);border-bottom:1px solid var(--line)}
+.mm-head .mod-ic{width:80px;height:80px}
+.mm-head .mod-ic svg{width:40px;height:40px}
+.mm-head h3{margin:0;font-size:32px;line-height:1}
+.mm-body{padding:22px 28px 26px;--c:var(--purple)}
+.mm-body .txt p{font-size:15px;line-height:1.65;color:#d3d8e4;margin-bottom:12px}
+.mm-body h4{font-family:Rajdhani,sans-serif;font-size:18px;text-transform:uppercase;letter-spacing:1px;color:var(--purple2);margin:18px 0 8px}
+.mm-body ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.mm-body li{font-size:14px;line-height:1.5;color:#c3c9d6;padding-left:18px;position:relative}
+.mm-body li::before{content:"";position:absolute;left:2px;top:8px;width:6px;height:6px;border-radius:2px;background:var(--purple2)}
+.shots{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+.shots img{height:150px;border-radius:10px;border:1px solid var(--line);scroll-snap-align:start;cursor:zoom-in}
+.mm-foot{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:16px 28px;border-top:1px solid var(--line);background:var(--bg2);position:sticky;bottom:0}
+.mm-foot .meta{font-size:13px;color:var(--muted);line-height:1.5}
+.mm-foot .btn{font-size:16px;padding:11px 18px}
+.mm-x{position:absolute;top:10px;right:12px;width:34px;height:34px;border-radius:8px;background:rgba(0,0,0,.4);color:var(--text);font-size:20px;line-height:1;z-index:2}
+.mm-x:hover{background:rgba(0,0,0,.65)}
+#modModal .modal{position:relative}
+
 /* ---------- Download-Hinweis ---------- */
 .modal-wrap{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.75);display:none;place-items:center;padding:16px}
 .modal-wrap.open{display:grid}
@@ -192,6 +238,13 @@ footer a{color:var(--purple2)}
     </div>
   </section>
 
+  <!-- ===== Meine Mods (Daten in mods.js) ===== -->
+  <section id="mods">
+    <h2 data-en="My mods">Meine Mods</h2>
+    <p class="mods-sub" data-en="Mods I made myself. Click one to read more about it and download it.">Mods, die ich selbst gemacht habe. Klick einen an, um mehr darüber zu lesen und ihn herunterzuladen.</p>
+    <div class="mods" id="modList"></div>
+  </section>
+
   <!-- ===== Funktionen ===== -->
   <section>
     <h2 data-en="What it does">Was er kann</h2>
@@ -265,6 +318,10 @@ footer a{color:var(--purple2)}
   </div>
 </div>
 
+<!-- Mod-Fenster -->
+<div class="modal-wrap" id="modModal"><div class="modal wide" id="modBox" role="dialog" aria-modal="true"></div></div>
+
+<script src="mods.js"></script>
 <script>
 /* =========================================================
    Hier liegen die Releases. Neue Version auf GitHub veröffentlichen,
@@ -331,6 +388,86 @@ async function loadReleases() {
     $("releases").innerHTML = `<div class="loading">${L("Neuigkeiten konnten gerade nicht geladen werden.", "News could not be loaded right now.")} <a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener" style="color:var(--purple2)">${L("Auf GitHub ansehen →", "View on GitHub →")}</a></div>`;
   }
 }
+
+/* ---------- Meine Mods ---------- */
+const PUZZLE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M10 4a2 2 0 1 1 4 0v1h4a1 1 0 0 1 1 1v4h-1a2 2 0 1 0 0 4h1v4a1 1 0 0 1-1 1h-4v-1a2 2 0 1 0-4 0v1H6a1 1 0 0 1-1-1v-4h1a2 2 0 1 0 0-4H5V6a1 1 0 0 1 1-1h4z"/></svg>`;
+const DL_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>`;
+const pick = (m, k) => (window.EN && m[k + "_en"] != null) ? m[k + "_en"] : m[k];
+const fileUrl = m => !m.file ? "" : /^https?:\/\//i.test(m.file) ? m.file : "mods/" + m.file.replace(/^mods\//, "");
+const isNew = m => m.date && (Date.now() - new Date(m.date)) < 14 * 864e5;
+const canDl = m => !!m.file && !m.soon;
+const modById = id => MODS.find(m => m.id === id);
+const sortedMods = () => MODS.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+const iconHTML = m => `<div class="mod-ic">${m.icon ? `<img src="${esc(m.icon)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:PUZZLE}))">` : PUZZLE}</div>`;
+const dlBtn = (m, cls) => canDl(m)
+  ? `<a class="btn btn-dl ${cls || ""}" href="${esc(fileUrl(m))}" ${/^https?:/i.test(m.file) ? 'target="_blank" rel="noopener"' : "download"} data-dl="${esc(m.id)}">${DL_ICON}Download</a>`
+  : `<span class="btn off ${cls || ""}">${L("Bald verfügbar", "Coming soon")}</span>`;
+const chipsHTML = m => `<div class="chips">${(m.loader || []).map(x => `<span class="ld">${esc(x)}</span>`).join("")}${(m.mc || []).map(x => `<span>MC ${esc(x)}</span>`).join("")}</div>`;
+
+function renderMods() {
+  const box = $("modList");
+  if (!MODS.length) {
+    box.innerHTML = `<div class="mods-empty">${iconHTML({})}<div>
+      <h3>${L("Bald gibt es hier Mods", "Mods are coming soon")}</h3>
+      <p>${L("Ich arbeite an eigenen Minecraft-Mods. Sobald der erste fertig ist, steht er hier zum Lesen und Herunterladen.", "I'm working on my own Minecraft mods. As soon as the first one is done, you can read about it and download it here.")}</p></div></div>`;
+    return;
+  }
+  box.innerHTML = sortedMods().map(m => `
+    <article class="mod" tabindex="0" role="button" data-id="${esc(m.id)}" style="${m.color ? `--c:${esc(m.color)}` : ""}" aria-label="${esc(m.name)}">
+      ${isNew(m) ? `<span class="tag">${L("NEU", "NEW")}</span>` : ""}
+      <div class="mod-top">${iconHTML(m)}<div><div class="mod-name">${esc(pick(m, "name") || m.name)}</div><div class="mod-ver">${m.ver ? "v" + esc(String(m.ver).replace(/^v/i, "")) : ""}${m.date ? " · " + fmtDate(m.date) : ""}</div></div></div>
+      <p>${esc(pick(m, "desc") || "")}</p>
+      ${chipsHTML(m)}
+      <div class="mod-act"><span class="btn btn-ghost">${L("Lesen", "Read")}</span>${dlBtn(m)}</div>
+    </article>`).join("");
+}
+
+function openMod(id, push) {
+  const m = modById(id); if (!m) return;
+  const paras = String(pick(m, "text") || pick(m, "desc") || "").split(/\n{2,}/).filter(Boolean);
+  const feats = pick(m, "features") || [];
+  const shots = m.shots || [];
+  $("modBox").style.cssText = m.color ? `--c:${m.color}` : "";
+  $("modBox").innerHTML = `
+    <button class="mm-x" id="mmX" aria-label="${L("Schließen", "Close")}">×</button>
+    <div class="mm-head">${iconHTML(m)}<div><h3>${esc(pick(m, "name") || m.name)}</h3>
+      <div class="mod-ver" style="margin:6px 0">${m.ver ? "v" + esc(String(m.ver).replace(/^v/i, "")) : ""}${m.date ? " · " + fmtDate(m.date) : ""}</div>${chipsHTML(m)}</div></div>
+    <div class="mm-body">
+      <div class="txt">${paras.map(p => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`).join("")}</div>
+      ${feats.length ? `<h4>${L("Was er kann", "Features")}</h4><ul>${feats.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+      ${shots.length ? `<h4>${L("Bilder", "Screenshots")}</h4><div class="shots">${shots.map(s => `<img src="${esc(s)}" alt="" loading="lazy" data-zoom>`).join("")}</div>` : ""}
+      ${(m.requires || []).length ? `<h4>${L("Du brauchst dazu", "You also need")}</h4><ul>${m.requires.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+      <h4>${L("So installierst du ihn", "How to install")}</h4>
+      <ul><li>${L("Datei herunterladen und in den Ordner <b>mods</b> deines Minecraft-Profils legen (im Foxy Launcher: Profil → Ordner öffnen).", "Download the file and put it into the <b>mods</b> folder of your Minecraft profile (in Foxy Launcher: profile → open folder).")}</li>
+      <li>${L("Passenden Loader und Minecraft-Version wählen, wie oben angegeben, dann starten.", "Pick the matching loader and Minecraft version shown above, then launch.")}</li></ul>
+    </div>
+    <div class="mm-foot"><div class="meta">${m.size ? esc(m.size) : ""}${m.size && m.file ? " · " : ""}${m.file ? esc(m.file.split("/").pop()) : ""}</div>
+      <div style="display:flex;gap:10px"><button class="btn btn-ghost" id="mmClose">${L("Schließen", "Close")}</button>${dlBtn(m)}</div></div>`;
+  $("modModal").classList.add("open");
+  $("modBox").scrollTop = 0;
+  $("mmX").onclick = $("mmClose").onclick = () => closeMod(true);
+  if (push !== false) history.replaceState(null, "", "#mod-" + id);
+}
+function closeMod(clearHash) {
+  $("modModal").classList.remove("open");
+  if (clearHash && /^#mod-/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
+}
+
+$("modList").addEventListener("click", e => {
+  if (e.target.closest("[data-dl]")) return;            // Download-Knopf lädt direkt
+  const c = e.target.closest(".mod"); if (c) openMod(c.dataset.id);
+});
+$("modList").addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("mod")) { e.preventDefault(); openMod(e.target.dataset.id); }
+});
+$("modModal").addEventListener("click", e => {
+  if (e.target === $("modModal")) closeMod(true);
+  else if (e.target.matches("[data-zoom]")) window.open(e.target.src, "_blank", "noopener");
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMod(true); });
+window.addEventListener("hashchange", () => { const m = location.hash.match(/^#mod-(.+)$/); if (m) openMod(decodeURIComponent(m[1]), false); });
+renderMods();
+{ const h = location.hash.match(/^#mod-(.+)$/); if (h) openMod(decodeURIComponent(h[1]), false); }
 
 /* Download-Fenster */
 $("dlBtn").onclick = () => { $("dlGo").href = downloadUrl; $("dlModal").classList.add("open"); };

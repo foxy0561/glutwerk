@@ -267,9 +267,13 @@
    ]
   },
   "glutwerk/": {
-   "last": "2026-11-14T20:55:07+01:00",
-   "n14": 1,
+   "last": "2026-11-28T11:08:20+01:00",
+   "n14": 2,
    "items": [
+    {
+     "d": "2026-11-28",
+     "t": "Willkommens-Fenster mit Namen und 5 Profilbildern beim ersten Besuch, Tagesbonus und Geschenk kommen erst danach"
+    },
     {
      "d": "2026-11-14",
      "t": "Durchsicht – Handy-Leisten repariert, Updates am Handy einklappbar, UPDATE-Schild und Versionen automatisch"
@@ -313,10 +317,6 @@
     {
      "d": "2026-11-13",
      "t": "Spiele nach letzten Updates sortiert, Update-Fenster an der Seite statt Was-ist-neu-Liste"
-    },
-    {
-     "d": "2026-11-13",
-     "t": "Schrift und Bilder lassen sich nicht mehr markieren (wie in Letzter Dreh)"
     }
    ]
   },
@@ -375,5 +375,5 @@
    ]
   }
  },
- "stand": "2026-11-27T21:37+00:00"
+ "stand": "2026-11-28T10:08+00:00"
 }

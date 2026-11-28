@@ -1,15 +1,18 @@
 /* =========================================================
    GLUTWERK · Täglicher Login-Bonus
    Wird auf der Spieleseite und im Karten-Tab geladen.
+   Kommt erst, wenn es einen Namen gibt (siehe profil.js), damit neue Besucher
+   zuerst das Willkommens-Fenster sehen und nicht zwei Fenster auf einmal.
    Jeden Tag beim ersten Besuch gibt es Glut. Wer jeden Tag kommt,
    baut eine Serie auf: Tag 7 gibt am meisten, danach beginnt die Woche neu.
    Wer einen Tag auslässt, startet wieder bei Tag 1.
    ========================================================= */
-(function () {
+const GW_DAILY_SCRIPT = document.currentScript;
+function glutwerkDaily() {
   const BONUS = [30, 40, 50, 60, 80, 100, 200];   // Glut für Tag 1 bis 7
 
   const L = window.L || ((de) => de);
-  const KARTEN = (document.currentScript && document.currentScript.dataset.karten) || "karten/";
+  const KARTEN = (GW_DAILY_SCRIPT && GW_DAILY_SCRIPT.dataset.karten) || "karten/";
   function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
   const day = d => d.toLocaleDateString("sv");   // JJJJ-MM-TT, Ortszeit
   const heute = day(new Date()), gestern = day(new Date(Date.now() - 864e5));
@@ -17,6 +20,7 @@
   let st = {};
   try { st = JSON.parse(store("glutwerk-glut-state") || "{}") || {}; } catch (e) { st = {}; }
   if (st.login === heute) return;
+  const erster = !st.login;
 
   st.streak = st.login === gestern ? (st.streak || 0) + 1 : 1;
   st.login = heute;
@@ -53,12 +57,16 @@
 
   function zeigen() {
     const s = document.createElement("style"); s.textContent = css; document.head.appendChild(s);
+    const P = window.GlutwerkProfil, name = P ? P.getName() : "";
+    if (P) P.addCss();
     const imKarten = KARTEN === "./";
     const tage = BONUS.map((n, i) => `<div class="dl-d${i + 1 < tag ? " done" : ""}${i + 1 === tag ? " now" : ""}${i === 6 ? " big" : ""}">${L("Tag", "Day")} ${i + 1}<b>${n}</b></div>`).join("");
     const w = document.createElement("div");
     w.className = "dl-wrap";
+    const hallo = erster ? L(`Willkommen, ${name || "Gast"}!`, `Welcome, ${name || "guest"}!`) : L(`Willkommen zurück${name ? ", " + name : ""}!`, `Welcome back${name ? ", " + name : ""}!`);
     w.innerHTML = `<div class="dl">
-      <h2>${st.streak > 1 ? L(`${st.streak} Tage in Folge!`, `${st.streak} days in a row!`) : L("Willkommen zurück!", "Welcome back!")}</h2>
+      ${P ? `<div style="margin-bottom:8px">${P.avatarHTML(null, 60)}</div>` : ""}
+      <h2>${st.streak > 1 ? L(`${st.streak} Tage in Folge!`, `${st.streak} days in a row!`) : hallo}</h2>
       <div class="sub">${tag === 7 ? L("Tag 7 erreicht: der große Bonus!", "Day 7 reached: the big bonus!") : st.streak > 1 ? L("Komm morgen wieder, dann gibt es mehr.", "Come back tomorrow for more.") : L("Komm jeden Tag vorbei, dann wird der Bonus größer.", "Visit every day and the bonus grows.")}</div>
       <div class="dl-days">${tage}</div>
       <div class="dl-amt">+${menge} <small>Glut</small></div>
@@ -73,4 +81,5 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => setTimeout(zeigen, 400));
   else setTimeout(zeigen, 400);
-})();
+}
+if (window.GlutwerkProfil) GlutwerkProfil.onReady(glutwerkDaily); else glutwerkDaily();

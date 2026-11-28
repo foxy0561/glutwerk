@@ -14,3 +14,4 @@ Launcher-Webseite für Foxys Browser-Spiele (GitHub Pages, ohne Login, alles im 
 
 - Englisch: `lang.js` (`L("deutsch", "english")`, im HTML `data-en="…"`). Kartentexte auf Englisch in `karten/en.js`.
 - Commit-Nachrichten beginnen mit dem Spielnamen (`Letzter Dreh: …`). Daraus baut eine GitHub Action `updates.json` für das Update-Fenster auf der Startseite.
+- Name und Profilbild liegen in `profil.js` (Willkommens-Fenster beim ersten Besuch, 5 Profilbilder in `AVATARS`). Hat ein neues Spiel ein Namensfeld, seinen Speicher-Schlüssel in `NAME_KEYS` dort eintragen. Tagesbonus (`daily.js`) und Willkommensgeschenk warten über `GlutwerkProfil.onReady`, bis es einen Namen gibt.

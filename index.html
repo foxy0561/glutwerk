@@ -279,7 +279,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   transition:border-color .15s;
 }
 .name-btn:hover{border-color:var(--accent)}
-.name-btn svg{width:16px;height:16px;color:var(--accent)}
+.name-btn #nameAv{display:inline-flex}
+.name-btn.empty{color:var(--accent)}
 .name-btn.empty{color:var(--accent)}
 .name-input{
   width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;
@@ -403,7 +404,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
   header{padding:12px 16px;gap:12px}
   .logo{font-size:20px}
   .search{width:auto;flex:1}
-  .name-btn span{display:none}
+  .name-btn #nameLabel{display:none}
   .launcher-btn .lb-text,.launcher-btn .soon-tag{display:none}
   .launcher-btn{padding:8px 9px}
   header{gap:8px;padding:10px 12px}
@@ -436,6 +437,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 @media (max-width:640px){.launcher-wrap,.launcher-btn{display:none!important}}
 </style>
 <script src="lang.js"></script>
+<script src="profil.js"></script>
 <script src="noselect.js"></script>
 <link rel="stylesheet" href="tabfarben.css">
 </head>
@@ -470,7 +472,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
     <b id="glutVal">0</b>
   </a>
   <button class="name-btn" id="nameBtn" title="Spielername" data-en-title="Player name">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    <span id="nameAv"></span>
     <span id="nameLabel">Name eingeben</span>
   </button>
 </header>
@@ -587,8 +589,9 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px;bor
 <!-- Spielername -->
 <div class="modal-wrap" id="nameModal">
   <div class="modal">
-    <h3 data-en="Your player name">Dein Spielername</h3>
+    <h3 data-en="Your profile">Dein Profil</h3>
     <p data-en="The name is used automatically in every Glutwerk game that needs a name.">Der Name wird automatisch in allen Glutwerk-Spielen übernommen, die einen Namen brauchen.</p>
+    <div id="avPicks"></div>
     <input class="name-input" id="nameInput" maxlength="12" autocomplete="off" spellcheck="false" placeholder="z.B. Foxy" data-en-ph="e.g. Foxy">
     <div class="name-hint" data-en="Up to 12 characters · only saved on this device">Maximal 12 Zeichen · wird nur auf diesem Gerät gespeichert</div>
     <div class="modal-actions">
@@ -638,7 +641,7 @@ const UPDATE_DAYS = 4;      // so viele Tage nach einem Update steht UPDATE am S
   Glutwerk schreibt den Namen in jeden dieser Schlüssel. Hat ein neues Spiel ein Namensfeld,
   einfach seinen Speicher-Schlüssel hier eintragen (oder im Spiel "glutwerk-name" auslesen).
 */
-const NAME_KEYS = ["glutwerk-name", "kiko-name", "td_playerName"];
+const NAME_KEYS = GlutwerkProfil.NAME_KEYS;   // Liste liegt in profil.js
 
 /*
   Desktop-Launcher: Solange hier nichts steht, zeigt der Button "BALD".
@@ -867,7 +870,7 @@ function getName() {
   return "";
 }
 /* Spiele, die den Namen in einem JSON-Spielstand speichern: [Schlüssel, Feld, max. Länge] */
-const NAME_JSON_KEYS = [["shardfall.save.v1", "playerName", 16]];
+const NAME_JSON_KEYS = GlutwerkProfil.NAME_JSON_KEYS;   // Liste liegt in profil.js
 function setName(n) {
   n = cleanName(n);
   NAME_KEYS.forEach(k => store(k, n));
@@ -882,6 +885,8 @@ function setName(n) {
 function renderName() {
   const n = getName();
   $("nameLabel").textContent = n || L("Name eingeben", "Enter name");
+  GlutwerkProfil.addCss();
+  $("nameAv").innerHTML = GlutwerkProfil.avatarHTML(null, 26);
   $("nameBtn").classList.toggle("empty", !n);
 }
 
@@ -1430,11 +1435,12 @@ $("footer").innerHTML = `© ${new Date().getFullYear()} ${esc(SITE_NAME)} · ${e
 $("footerFb").onclick = e => { e.preventDefault(); openFeedback(null); };
 
 /* ---- Namens-Fenster ---- */
-function openName() { $("nameInput").value = getName(); $("nameModal").classList.add("open"); setTimeout(() => $("nameInput").focus(), 50); }
+let avPick = null;
+function openName() { GlutwerkProfil.addCss(); avPick = GlutwerkProfil.picker($("avPicks"), GlutwerkProfil.getAvatar()); $("nameInput").value = getName(); $("nameModal").classList.add("open"); setTimeout(() => $("nameInput").focus(), 50); }
 function closeName() { $("nameModal").classList.remove("open"); }
 $("nameBtn").onclick = openName;
 $("nameCancel").onclick = closeName;
-$("nameSave").onclick = () => { setName($("nameInput").value); closeName(); };
+$("nameSave").onclick = () => { if (avPick) GlutwerkProfil.setAvatar(avPick.get()); setName($("nameInput").value); closeName(); };
 $("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") $("nameSave").click(); });
 $("nameModal").addEventListener("click", e => { if (e.target === $("nameModal")) closeName(); });
 
@@ -1512,7 +1518,8 @@ renderNews();
 renderTop(null);
 loadTop();
 renderGlut();
-glutWelcome();
+window.addEventListener("glutwerk-profil", renderName);   // Namens-Knopf oben nach dem Willkommens-Fenster aktualisieren
+GlutwerkProfil.onReady(glutWelcome);   // Geschenk erst, wenn es einen Namen gibt
 loadOnline();
 setInterval(() => { if (document.visibilityState === "visible") loadOnline(); }, 30000);
 renderGrid();
